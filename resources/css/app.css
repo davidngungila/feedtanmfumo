@@ -1,0 +1,167 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+@theme {
+    --font-sans: 'Quicksand', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+    
+    /* FEEDTAN DIGITAL Primary Colors */
+    --emaoni-primary: #015425;
+    --emaoni-primary-light: #027a3a;
+    --emaoni-primary-dark: #013019;
+    --emaoni-gradient-start: #015425;
+    --emaoni-gradient-end: #027a3a;
+}
+
+/* Loader Animation */
+.emaoni-loader {
+    width: 50px;
+    aspect-ratio: 1;
+    display: grid;
+}
+
+.emaoni-loader::before,
+.emaoni-loader::after {
+    content: "";
+    grid-area: 1/1;
+    --c: no-repeat radial-gradient(farthest-side, var(--emaoni-primary) 92%, transparent);
+    background: var(--c) 50% 0,
+        var(--c) 50% 100%,
+        var(--c) 100% 50%,
+        var(--c) 0 50%;
+    background-size: 12px 12px;
+    animation: emaoni-spin 1s infinite;
+}
+
+.emaoni-loader::before {
+    margin: 4px;
+    filter: hue-rotate(45deg);
+    background-size: 8px 8px;
+    animation-timing-function: linear;
+}
+
+@keyframes emaoni-spin {
+    100% {
+        transform: rotate(.5turn);
+    }
+}
+
+/* Text Gradient */
+.text-gradient-emaoni {
+    background: linear-gradient(295deg, var(--emaoni-gradient-start), var(--emaoni-gradient-end)) !important;
+    background-clip: text !important;
+    -webkit-background-clip: text !important;
+    color: transparent;
+}
+
+/* Custom styles */
+html {
+    overflow-y: auto;
+}
+
+body {
+    margin: 0;
+    font-family: 'Quicksand', sans-serif !important;
+}
+
+*:not(mat-icon) {
+    font-family: 'Quicksand', sans-serif !important;
+}
+
+/* Admin Layout Styles */
+.dropdown-arrow {
+    transition: transform 0.2s ease-in-out;
+}
+
+.dropdown-arrow.rotate-180 {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Smooth scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* User Profile Dropdown */
+.user-profile-dropdown {
+    position: relative;
+}
+
+#user-menu-dropdown {
+    animation: slideDown 0.2s ease-out;
+}
+
+.user-menu-arrow.rotate-180 {
+    transform: rotate(180deg);
+}
+
+/* Navigation Dropdowns */
+.nav-dropdown {
+    position: relative;
+}
+
+.nav-dropdown-toggle {
+    cursor: pointer;
+}
+
+.nav-dropdown-menu {
+    animation: slideDown 0.2s ease-out;
+    min-width: 200px;
+}
+
+.nav-dropdown-arrow {
+    transition: transform 0.2s ease-in-out;
+}
+
+.nav-dropdown-arrow.rotate-180 {
+    transform: rotate(180deg);
+}
+
+/* Hover support for desktop dropdowns */
+@media (min-width: 768px) {
+    .nav-dropdown:hover .nav-dropdown-menu {
+        display: block !important;
+    }
+    
+    .nav-dropdown:hover .nav-dropdown-arrow {
+        transform: rotate(180deg);
+    }
+}
+
+/* Mobile Menu */
+#mobile-menu {
+    animation: slideDown 0.2s ease-out;
+}
