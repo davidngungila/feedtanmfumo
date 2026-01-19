@@ -48,13 +48,9 @@ All API responses follow this structure:
 
 ## API Authentication
 
-### 1. Install Laravel Sanctum (Required)
+### 1. Laravel Sanctum (Installed & Configured)
 
-```bash
-composer require laravel/sanctum
-php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
-php artisan migrate
-```
+Laravel Sanctum is already installed and configured for token-based authentication. The User model includes the `HasApiTokens` trait, and all authentication endpoints use Sanctum tokens.
 
 ### 2. Login Flow
 

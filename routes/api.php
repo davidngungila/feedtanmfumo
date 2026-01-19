@@ -24,9 +24,7 @@ Route::prefix('mobile/v1')->group(function () {
 });
 
 // Protected API routes (require authentication)
-// Note: Install Laravel Sanctum for token-based auth: composer require laravel/sanctum
-// For now using web auth, but Sanctum is recommended for mobile apps
-Route::middleware('auth')->prefix('mobile/v1')->group(function () {
+Route::middleware('auth:sanctum')->prefix('mobile/v1')->group(function () {
     // Auth
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/auth/user', [AuthController::class, 'user']);

@@ -22,6 +22,8 @@ Authorization: Bearer {token}
 | POST | `/auth/logout` | Logout current session |
 | GET | `/auth/user` | Get current user info |
 
+**📖 For detailed login API documentation with code examples, see:** `LOGIN_API_DOCUMENTATION.md`
+
 ---
 
 ## Dashboard
@@ -272,5 +274,6 @@ https://test.feedtan.com/api/mobile/v1
 
 ---
 
-**For complete documentation, see:** `MOBILE_APP_DOCUMENTATION.md`
+**For complete documentation, see:** `MOBILE_APP_DOCUMENTATION.md`  
+**For detailed login API documentation, see:** `LOGIN_API_DOCUMENTATION.md`
 

@@ -3,16 +3,16 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Traits\HasUlidRouteKey;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\MembershipType;
-use App\Traits\HasUlidRouteKey;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasUlidRouteKey;
+    use HasApiTokens, HasFactory, HasUlidRouteKey, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -203,6 +203,7 @@ class User extends Authenticatable
     public function hasAllRoles(array $roleSlugs): bool
     {
         $userRoles = $this->roles()->whereIn('slug', $roleSlugs)->pluck('slug')->toArray();
+
         return count($userRoles) === count($roleSlugs);
     }
 
@@ -212,7 +213,7 @@ class User extends Authenticatable
     public function assignRole(string $roleSlug): void
     {
         $role = Role::where('slug', $roleSlug)->first();
-        if ($role && !$this->hasRole($roleSlug)) {
+        if ($role && ! $this->hasRole($roleSlug)) {
             $this->roles()->attach($role->id);
         }
     }
@@ -281,7 +282,7 @@ class User extends Authenticatable
      */
     public function hasMembershipAccessTo(string $service): bool
     {
-        if (!$this->membershipType) {
+        if (! $this->membershipType) {
             return false;
         }
 
@@ -297,8 +298,8 @@ class User extends Authenticatable
      */
     public function isMember(): bool
     {
-        return $this->membershipType !== null && 
-               !$this->isAdmin() && 
-               !$this->hasAnyRole(['loan_officer', 'deposit_officer', 'investment_officer', 'chairperson', 'secretary', 'accountant']);
+        return $this->membershipType !== null &&
+               ! $this->isAdmin() &&
+               ! $this->hasAnyRole(['loan_officer', 'deposit_officer', 'investment_officer', 'chairperson', 'secretary', 'accountant']);
     }
 }
