@@ -78,6 +78,8 @@ class User extends Authenticatable
         'wants_ordinary_membership',
         'membership_approved_at',
         'membership_approved_by',
+        'membership_application_current_step',
+        'membership_application_completed_steps',
     ];
 
     /**
@@ -114,6 +116,7 @@ class User extends Authenticatable
             'membership_approved_at' => 'datetime',
             'is_group_registered' => 'boolean',
             'wants_ordinary_membership' => 'boolean',
+            'membership_application_completed_steps' => 'array',
         ];
     }
 

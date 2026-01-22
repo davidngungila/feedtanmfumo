@@ -25,10 +25,13 @@ use App\Http\Controllers\Member\ProfileController as MemberProfileController;
 use App\Http\Controllers\Member\SavingsController as MemberSavingsController;
 use App\Http\Controllers\Member\WelfareController as MemberWelfareController;
 use App\Http\Controllers\WelcomeController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
-Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
+Route::get('/', function () {
+    return redirect()->route('login');
+})->name('welcome');
 
 // Authentication routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -77,10 +80,48 @@ Route::middleware('auth')->group(function () {
         Route::get('profile/settings', [MemberProfileController::class, 'settings'])->name('profile.settings');
         Route::put('profile/settings', [MemberProfileController::class, 'updateSettings'])->name('profile.settings.update');
 
-        // Membership Application
-        Route::get('membership/application', [MembershipController::class, 'application'])->name('membership.application');
-        Route::post('membership/application', [MembershipController::class, 'store'])->name('membership.store');
+        // Membership Application - Individual Steps
+        Route::get('membership/step/1', [MembershipController::class, 'showStep1'])->name('membership.step1');
+        Route::post('membership/step/1', [MembershipController::class, 'storeStep1'])->name('membership.store-step1');
+        
+        Route::get('membership/step/2', [MembershipController::class, 'showStep2'])->name('membership.step2');
+        Route::post('membership/step/2', [MembershipController::class, 'storeStep2'])->name('membership.store-step2');
+        
+        Route::get('membership/step/3', [MembershipController::class, 'showStep3'])->name('membership.step3');
+        Route::post('membership/step/3', [MembershipController::class, 'storeStep3'])->name('membership.store-step3');
+        
+        Route::get('membership/step/4', [MembershipController::class, 'showStep4'])->name('membership.step4');
+        Route::post('membership/step/4', [MembershipController::class, 'storeStep4'])->name('membership.store-step4');
+        
+        Route::get('membership/step/5', [MembershipController::class, 'showStep5'])->name('membership.step5');
+        Route::post('membership/step/5', [MembershipController::class, 'storeStep5'])->name('membership.store-step5');
+        
+        Route::get('membership/step/6', [MembershipController::class, 'showStep6'])->name('membership.step6');
+        Route::post('membership/step/6', [MembershipController::class, 'storeStep6'])->name('membership.store-step6');
+        
+        Route::get('membership/step/7', [MembershipController::class, 'showStep7'])->name('membership.step7');
+        Route::post('membership/step/7', [MembershipController::class, 'storeStep7'])->name('membership.store-step7');
+        
+        Route::get('membership/step/8', [MembershipController::class, 'showStep8'])->name('membership.step8');
+        Route::post('membership/step/8', [MembershipController::class, 'storeStep8'])->name('membership.store-step8');
+        
+        Route::get('membership/step/9', [MembershipController::class, 'showStep9'])->name('membership.step9');
+        Route::post('membership/step/9', [MembershipController::class, 'storeStep9'])->name('membership.store-step9');
+        
+        Route::get('membership/step/10', [MembershipController::class, 'showStep10'])->name('membership.step10');
+        Route::post('membership/step/10', [MembershipController::class, 'storeStep10'])->name('membership.store-step10');
+        
+        // Legacy route redirect
+        Route::get('membership/application', function() {
+            $user = Auth::user();
+            $nextStep = $user->membership_application_current_step ?? 1;
+            if ($nextStep == 0) $nextStep = 1;
+            return redirect()->route('member.membership.step' . $nextStep);
+        })->name('membership.application');
+        
         Route::get('membership/status', [MembershipController::class, 'status'])->name('membership.status');
+        Route::get('membership/preview', [MembershipController::class, 'preview'])->name('membership.preview');
+        Route::get('membership/download-pdf', [MembershipController::class, 'downloadPdf'])->name('membership.download-pdf');
 
         // Member Guide
         Route::get('guide', [\App\Http\Controllers\Member\GuideController::class, 'index'])->name('guide');

@@ -25,27 +25,41 @@ class DashboardController extends Controller
         $welfare = SocialWelfare::where('user_id', $user->id)->latest()->take(5)->get();
         $issues = Issue::where('user_id', $user->id)->latest()->take(5)->get();
 
-        // Calculate statistics
+        // Calculate detailed statistics
         $stats = [
             'total_loans' => Loan::where('user_id', $user->id)->count(),
             'active_loans' => Loan::where('user_id', $user->id)->where('status', 'active')->count(),
+            'pending_loans' => Loan::where('user_id', $user->id)->where('status', 'pending')->count(),
+            'completed_loans' => Loan::where('user_id', $user->id)->where('status', 'completed')->count(),
             'total_loan_amount' => Loan::where('user_id', $user->id)->sum('principal_amount'),
             'paid_amount' => Loan::where('user_id', $user->id)->sum('paid_amount'),
             'remaining_amount' => Loan::where('user_id', $user->id)->sum('remaining_amount'),
+            'overdue_loans' => Loan::where('user_id', $user->id)->where('status', 'active')->where('maturity_date', '<', now())->count(),
 
             'total_savings' => SavingsAccount::where('user_id', $user->id)->count(),
+            'active_savings' => SavingsAccount::where('user_id', $user->id)->where('status', 'active')->count(),
             'total_savings_balance' => SavingsAccount::where('user_id', $user->id)->sum('balance'),
+            'total_savings_deposits' => Transaction::where('user_id', $user->id)->where('transaction_type', 'savings_deposit')->where('related_type', 'savings_account')->sum('amount'),
+            'total_savings_withdrawals' => Transaction::where('user_id', $user->id)->where('transaction_type', 'savings_withdrawal')->where('related_type', 'savings_account')->sum('amount'),
 
             'total_investments' => Investment::where('user_id', $user->id)->count(),
             'active_investments' => Investment::where('user_id', $user->id)->where('status', 'active')->count(),
+            'matured_investments' => Investment::where('user_id', $user->id)->where('status', 'matured')->count(),
             'total_investment_amount' => Investment::where('user_id', $user->id)->sum('principal_amount'),
             'total_profit' => Investment::where('user_id', $user->id)->sum('profit_share'),
+            'expected_profit' => Investment::where('user_id', $user->id)->where('status', 'active')->sum('expected_return'),
 
             'total_welfare_contributions' => SocialWelfare::where('user_id', $user->id)->where('type', 'contribution')->sum('amount'),
             'total_welfare_benefits' => SocialWelfare::where('user_id', $user->id)->where('type', 'benefit')->sum('amount'),
+            'welfare_balance' => SocialWelfare::where('user_id', $user->id)->where('type', 'contribution')->sum('amount') - SocialWelfare::where('user_id', $user->id)->where('type', 'benefit')->sum('amount'),
 
             'pending_issues' => Issue::where('user_id', $user->id)->where('status', 'pending')->count(),
+            'resolved_issues' => Issue::where('user_id', $user->id)->where('status', 'resolved')->count(),
             'total_issues' => Issue::where('user_id', $user->id)->count(),
+            
+            'total_transactions' => Transaction::where('user_id', $user->id)->count(),
+            'total_income' => Transaction::where('user_id', $user->id)->whereIn('transaction_type', ['savings_deposit', 'investment_disbursement', 'welfare_benefit', 'loan_disbursement'])->sum('amount'),
+            'total_expenses' => Transaction::where('user_id', $user->id)->whereIn('transaction_type', ['savings_withdrawal', 'loan_payment', 'welfare_contribution', 'investment_deposit'])->sum('amount'),
         ];
 
         // Recent transactions
