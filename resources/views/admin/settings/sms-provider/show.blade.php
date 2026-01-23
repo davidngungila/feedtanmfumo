@@ -75,7 +75,12 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-500 mb-1">Bearer Token (API Key)</label>
-                    <p class="text-sm text-gray-900 font-mono">{{ $smsProvider->username }}</p>
+                    @if($smsProvider->username)
+                    <p class="text-sm text-gray-900 font-mono break-all">{{ $smsProvider->username }}</p>
+                    <p class="text-xs text-gray-500 mt-1">Length: {{ strlen($smsProvider->username) }} characters</p>
+                    @else
+                    <p class="text-sm text-red-600 font-medium">⚠️ Bearer token is missing! Please update the provider.</p>
+                    @endif
                     <p class="text-xs text-gray-500 mt-1">Stored in username field</p>
                 </div>
 

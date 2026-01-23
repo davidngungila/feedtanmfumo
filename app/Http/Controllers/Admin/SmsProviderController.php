@@ -108,7 +108,23 @@ class SmsProviderController extends Controller
             }
 
             // Use Bearer token authentication (username field contains the Bearer token)
-            $bearerToken = $request->username;
+            $bearerToken = trim((string)$request->username); // Trim whitespace
+            
+            // Validate token is not empty
+            if (empty($bearerToken)) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Bearer token (API Key) is required'
+                ], 400);
+            }
+            
+            Log::info('SMS connection test request', [
+                'api_url' => $apiUrl,
+                'from' => $from,
+                'to' => $cleaned,
+                'token_length' => strlen($bearerToken),
+                'token_preview' => substr($bearerToken, 0, 10) . '...'
+            ]);
             
             $response = Http::timeout(30)
                 ->withHeaders([
@@ -341,7 +357,26 @@ class SmsProviderController extends Controller
             }
 
             // Use Bearer token authentication (username field contains the Bearer token)
-            $bearerToken = $smsProvider->username; // Username field is actually the Bearer token
+            $bearerToken = trim((string)$smsProvider->username); // Trim whitespace
+            
+            // Validate token is not empty
+            if (empty($bearerToken)) {
+                Log::error('SMS test failed: Bearer token is empty', [
+                    'provider_id' => $smsProvider->id,
+                    'provider_name' => $smsProvider->name
+                ]);
+                return redirect()->route('admin.sms-provider.show', $smsProvider)
+                    ->with('error', 'Bearer token (API Key) is missing. Please update the provider configuration.');
+            }
+            
+            Log::info('SMS test request', [
+                'provider_id' => $smsProvider->id,
+                'api_url' => $apiUrl,
+                'from' => $from,
+                'to' => $cleaned,
+                'token_length' => strlen($bearerToken),
+                'token_preview' => substr($bearerToken, 0, 10) . '...'
+            ]);
             
             $response = Http::timeout(30)
                 ->withHeaders([

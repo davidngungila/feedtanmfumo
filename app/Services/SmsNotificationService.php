@@ -174,8 +174,28 @@ class SmsNotificationService
                 }
                 
                 // Use Bearer token (username field contains the Bearer token)
-                $bearerToken = $provider->username;
+                $bearerToken = trim((string)$provider->username); // Trim whitespace
+                
+                if (empty($bearerToken)) {
+                    Log::error('SMS sending failed: Bearer token is empty', [
+                        'provider_id' => $provider->id,
+                        'phone' => $phoneNumber
+                    ]);
+                    return [
+                        'success' => false,
+                        'error' => 'Bearer token (API Key) is missing. Please configure the SMS provider.'
+                    ];
+                }
+                
                 $headers['Authorization'] = 'Bearer ' . $bearerToken;
+                
+                Log::info('SMS sending request', [
+                    'provider_id' => $provider->id,
+                    'api_url' => $apiUrl,
+                    'from' => $this->smsFrom,
+                    'to' => $phoneNumber,
+                    'token_length' => strlen($bearerToken)
+                ]);
                 
                 $response = Http::timeout(30)
                     ->withHeaders($headers)
@@ -203,7 +223,27 @@ class SmsNotificationService
                     $apiUrl = 'https://messaging-service.co.tz/api/sms/v2/text/single';
                 }
                 
-                $headers['Authorization'] = 'Bearer ' . $this->smsApiKey;
+                $bearerToken = trim((string)$this->smsApiKey); // Trim whitespace
+                
+                if (empty($bearerToken)) {
+                    Log::error('SMS sending failed: Bearer token is empty from settings', [
+                        'phone' => $phoneNumber
+                    ]);
+                    return [
+                        'success' => false,
+                        'error' => 'Bearer token (API Key) is missing. Please configure SMS settings.'
+                    ];
+                }
+                
+                $headers['Authorization'] = 'Bearer ' . $bearerToken;
+                
+                Log::info('SMS sending request (from settings)', [
+                    'api_url' => $apiUrl,
+                    'from' => $this->smsFrom,
+                    'to' => $phoneNumber,
+                    'token_length' => strlen($bearerToken)
+                ]);
+                
                 $response = Http::timeout(30)
                     ->withHeaders($headers)
                     ->post($apiUrl, [
