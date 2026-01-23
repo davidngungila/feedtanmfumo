@@ -140,25 +140,48 @@ class LoginController extends Controller
      */
     public function resendOtp(Request $request)
     {
-        $userId = session('otp_user_id');
-        
-        if (!$userId) {
-            return redirect()->route('login')->with('error', 'Session expired. Please login again.');
+        try {
+            $userId = session('otp_user_id');
+            
+            if (!$userId) {
+                return redirect()->route('login')->with('error', 'Session expired. Please login again.');
+            }
+
+            $user = User::find($userId);
+            
+            if (!$user) {
+                return redirect()->route('login')->with('error', 'User not found.');
+            }
+
+            // Check rate limiting - prevent too many resend requests
+            $recentOtps = OtpCode::where('user_id', $user->id)
+                ->where('type', 'login')
+                ->where('created_at', '>=', now()->subMinutes(1))
+                ->count();
+            
+            if ($recentOtps >= 3) {
+                return back()->with('error', 'Too many requests. Please wait a moment before requesting another OTP code.');
+            }
+
+            // Generate new OTP
+            $otp = OtpCode::createForUser($user, 'login', 10);
+            
+            // Send OTP via email
+            $emailSent = $this->sendOtpEmail($user, $otp->code);
+            
+            if (!$emailSent) {
+                \Log::error("Failed to send resend OTP email to user ID: {$user->id}");
+                return back()->with('error', 'Failed to send OTP email. Please try again or contact support.');
+            }
+
+            \Log::info("OTP resent to user ID: {$user->id}, email: {$user->email}");
+            
+            return back()->with('success', 'A new OTP code has been sent to your email address. Please check your inbox.');
+        } catch (\Exception $e) {
+            \Log::error('Error resending OTP: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            return back()->with('error', 'An error occurred while resending the OTP. Please try again.');
         }
-
-        $user = User::find($userId);
-        
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'User not found.');
-        }
-
-        // Generate new OTP
-        $otp = OtpCode::createForUser($user, 'login', 10);
-        
-        // Send OTP via email
-        $this->sendOtpEmail($user, $otp->code);
-
-        return back()->with('success', 'A new OTP code has been sent to your email.');
     }
 
     /**

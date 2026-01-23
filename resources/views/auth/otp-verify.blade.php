@@ -62,12 +62,13 @@
             </div>
 
             <div class="text-center">
-                <form action="{{ route('otp.resend') }}" method="POST" class="inline">
+                <form id="resendOtpForm" action="{{ route('otp.resend') }}" method="POST" class="inline">
                     @csrf
-                    <button type="submit" class="text-sm text-[#015425] hover:text-[#013019] font-medium">
-                        Resend OTP Code
+                    <button type="submit" id="resendOtpBtn" class="text-sm text-[#015425] hover:text-[#013019] font-medium transition disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span id="resendOtpText">Resend OTP Code</span>
                     </button>
                 </form>
+                <p id="resendCountdown" class="text-xs text-gray-500 mt-2 hidden"></p>
             </div>
 
             <div class="text-center">
@@ -160,6 +161,62 @@
         // Add inputmode for mobile numeric keyboard
         otpInput.setAttribute('inputmode', 'numeric');
         otpInput.setAttribute('autocomplete', 'one-time-code');
+        
+        // Resend OTP functionality with rate limiting
+        const resendOtpForm = document.getElementById('resendOtpForm');
+        const resendOtpBtn = document.getElementById('resendOtpBtn');
+        const resendOtpText = document.getElementById('resendOtpText');
+        const resendCountdown = document.getElementById('resendCountdown');
+        let resendCooldown = 0;
+        let countdownInterval = null;
+        
+        // Check if there's a cooldown from previous session
+        const lastResendTime = sessionStorage.getItem('lastOtpResend');
+        if (lastResendTime) {
+            const timeSinceLastResend = Math.floor((Date.now() - parseInt(lastResendTime)) / 1000);
+            if (timeSinceLastResend < 60) {
+                resendCooldown = 60 - timeSinceLastResend;
+                startCountdown();
+            }
+        }
+        
+        function startCountdown() {
+            if (resendCooldown > 0) {
+                resendOtpBtn.disabled = true;
+                resendCountdown.classList.remove('hidden');
+                resendCountdown.textContent = `Please wait ${resendCooldown} seconds before requesting a new code.`;
+                
+                countdownInterval = setInterval(function() {
+                    resendCooldown--;
+                    if (resendCooldown > 0) {
+                        resendCountdown.textContent = `Please wait ${resendCooldown} seconds before requesting a new code.`;
+                    } else {
+                        clearInterval(countdownInterval);
+                        resendOtpBtn.disabled = false;
+                        resendCountdown.classList.add('hidden');
+                        resendOtpText.textContent = 'Resend OTP Code';
+                    }
+                }, 1000);
+            }
+        }
+        
+        resendOtpForm.addEventListener('submit', function(e) {
+            if (resendCooldown > 0) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Disable button and show loading state
+            resendOtpBtn.disabled = true;
+            resendOtpText.textContent = 'Sending...';
+            
+            // Set cooldown after successful submission
+            setTimeout(function() {
+                resendCooldown = 60; // 60 seconds cooldown
+                sessionStorage.setItem('lastOtpResend', Date.now().toString());
+                startCountdown();
+            }, 1000);
+        });
     });
 </script>
 @endsection
