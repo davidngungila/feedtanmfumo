@@ -4,10 +4,47 @@
 
 @section('content')
 <div class="space-y-6">
+    <!-- Header Section -->
     <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-6 text-white">
-        <h1 class="text-2xl sm:text-3xl font-bold mb-2">Organization Profile</h1>
-        <p class="text-white text-opacity-90">Manage organization information</p>
+        <div class="flex flex-col md:flex-row md:items-center">
+            <div class="flex-1">
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2">Organization Profile</h1>
+                <p class="text-white text-opacity-90 text-sm sm:text-base">Manage organization information</p>
+            </div>
+            <div class="mt-4 md:mt-0 md:ml-auto flex flex-wrap gap-3 justify-end">
+                <a href="{{ route('admin.settings.index') }}" class="inline-flex items-center px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 text-[#015425] rounded-md transition font-medium">
+                    Back to Settings
+                </a>
+            </div>
+        </div>
     </div>
+
+    @if(session('success'))
+        <div class="bg-green-50 border-l-4 border-green-400 text-green-800 px-4 py-3 rounded-md shadow-sm">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                {{ session('success') }}
+            </div>
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="bg-red-50 border-l-4 border-red-400 text-red-800 px-4 py-3 rounded-md shadow-sm">
+            <div class="flex items-center mb-2">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                </svg>
+                <strong>Please fix the following errors:</strong>
+            </div>
+            <ul class="list-disc list-inside ml-7">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
     <div class="bg-white rounded-lg shadow-md p-6">
         <form action="{{ route('admin.system-settings.organization-profile.update') }}" method="POST">

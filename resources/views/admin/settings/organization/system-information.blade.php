@@ -4,10 +4,19 @@
 
 @section('content')
 <div class="space-y-6">
-    <!-- Header -->
+    <!-- Header Section -->
     <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-6 text-white">
-        <h1 class="text-2xl sm:text-3xl font-bold mb-2">System Information</h1>
-        <p class="text-white text-opacity-90">View system configuration and environment details</p>
+        <div class="flex flex-col md:flex-row md:items-center">
+            <div class="flex-1">
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2">System Information</h1>
+                <p class="text-white text-opacity-90 text-sm sm:text-base">View system configuration and environment details</p>
+            </div>
+            <div class="mt-4 md:mt-0 md:ml-auto flex flex-wrap gap-3 justify-end">
+                <a href="{{ route('admin.settings.index') }}" class="inline-flex items-center px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 text-[#015425] rounded-md transition font-medium">
+                    Back to Settings
+                </a>
+            </div>
+        </div>
     </div>
 
     <!-- System Info Cards -->
@@ -89,13 +98,6 @@
         </div>
     </div>
 
-    <!-- Actions -->
-    <div class="flex justify-end">
-        <a href="{{ route('admin.settings.index') }}" 
-           class="px-4 py-2 bg-[#015425] text-white rounded-md hover:bg-[#027a3a]">
-            Back to Settings
-        </a>
-    </div>
 </div>
 @endsection
 
