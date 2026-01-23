@@ -74,7 +74,43 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">From Name</label>
-                            <input type="text" name="mail_from_name" value="{{ isset($settings['mail_from_name']) ? $settings['mail_from_name']->value : 'FEEDTAN DIGITAL' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                            <input type="text" name="mail_from_name" value="{{ isset($settings['mail_from_name']) ? $settings['mail_from_name']->value : 'FeedTan Community Microfinance Group' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                        </div>
+                    </div>
+                    
+                    <!-- Organization Information for Email Headers -->
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <h4 class="text-md font-semibold text-gray-800 mb-4">Organization Information (Used in Email Headers)</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Organization Name</label>
+                                <input type="text" name="organization_name" value="{{ isset($settings['organization_name']) ? $settings['organization_name']->value : 'FeedTan Community Microfinance Group' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">P.O. Box</label>
+                                <input type="text" name="organization_po_box" value="{{ isset($settings['organization_po_box']) ? $settings['organization_po_box']->value : 'P.O.Box 7744' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Street Address</label>
+                                <input type="text" name="organization_address" value="{{ isset($settings['organization_address']) ? $settings['organization_address']->value : 'Ushirika Sokoine Road' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
+                                <input type="text" name="organization_city" value="{{ isset($settings['organization_city']) ? $settings['organization_city']->value : 'Moshi' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Region</label>
+                                <input type="text" name="organization_region" value="{{ isset($settings['organization_region']) ? $settings['organization_region']->value : 'Kilimanjaro' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                                <input type="text" name="organization_country" value="{{ isset($settings['organization_country']) ? $settings['organization_country']->value : 'Tanzania' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                            </div>
                         </div>
                     </div>
                 </div>

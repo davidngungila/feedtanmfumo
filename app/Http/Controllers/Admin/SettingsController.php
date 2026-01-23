@@ -102,6 +102,14 @@ class SettingsController extends Controller
             'mail_from_address' => 'nullable|email',
             'mail_from_name' => 'nullable|string',
             
+            // Organization Information for Email Headers
+            'organization_name' => 'nullable|string|max:255',
+            'organization_po_box' => 'nullable|string|max:255',
+            'organization_address' => 'nullable|string|max:255',
+            'organization_city' => 'nullable|string|max:255',
+            'organization_region' => 'nullable|string|max:255',
+            'organization_country' => 'nullable|string|max:255',
+            
             // SMS Settings
             'sms_provider' => 'nullable|string',
             'sms_api_key' => 'nullable|string',

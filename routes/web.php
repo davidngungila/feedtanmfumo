@@ -39,6 +39,11 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+// OTP Verification routes
+Route::get('/otp/verify', [LoginController::class, 'showOtpVerification'])->name('otp.verify');
+Route::post('/otp/verify', [LoginController::class, 'verifyOtp']);
+Route::post('/otp/resend', [LoginController::class, 'resendOtp'])->name('otp.resend');
+
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
 
