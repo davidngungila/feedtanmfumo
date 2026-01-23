@@ -3,6 +3,23 @@
 @section('page-title', 'Verify OTP')
 
 @section('content')
+<!-- Splash Screen with Progress -->
+<div id="splashScreen" class="fixed inset-0 bg-gradient-to-br from-[#015425] to-[#027a3a] z-50 flex items-center justify-center hidden">
+    <div class="text-center">
+        <div class="mb-8">
+            <div class="mx-auto h-20 w-20 bg-white rounded-full flex items-center justify-center mb-6 animate-pulse">
+                <span class="text-3xl font-bold text-[#015425]">FD</span>
+            </div>
+            <h2 class="text-3xl font-extrabold text-white mb-4">Verifying OTP...</h2>
+            <div class="w-64 bg-white bg-opacity-20 rounded-full h-3 mb-4 overflow-hidden">
+                <div id="progressBar" class="bg-white h-full rounded-full transition-all duration-300 ease-out" style="width: 0%"></div>
+            </div>
+            <p id="progressText" class="text-white text-lg font-semibold">0%</p>
+            <p class="text-white text-opacity-80 text-sm mt-2">Please wait while we verify your code</p>
+        </div>
+    </div>
+</div>
+
 <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#015425] to-[#027a3a] py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-md w-full space-y-8">
         <div>
@@ -103,6 +120,9 @@
             if (value.length === 6 && !isSubmitting) {
                 isSubmitting = true;
                 
+                // Show splash screen with progress
+                showSplashScreen();
+                
                 // Visual feedback - disable input and show loading
                 otpInput.disabled = true;
                 otpInput.classList.add('opacity-75', 'cursor-not-allowed');
@@ -129,6 +149,10 @@
             // Auto-submit if 6 digits pasted
             if (numbers.length === 6 && !isSubmitting) {
                 isSubmitting = true;
+                
+                // Show splash screen with progress
+                showSplashScreen();
+                
                 otpInput.disabled = true;
                 otpInput.classList.add('opacity-75', 'cursor-not-allowed');
                 if (submitButton) {
@@ -153,6 +177,14 @@
                 otpInput.select();
                 return false;
             }
+            
+            // Mark that form is submitting
+            sessionStorage.setItem('otpSubmitting', 'true');
+            
+            // Show splash screen if not already shown
+            if (!isSubmitting) {
+                showSplashScreen();
+            }
         });
         
         // Focus on input when page loads
@@ -161,6 +193,46 @@
         // Add inputmode for mobile numeric keyboard
         otpInput.setAttribute('inputmode', 'numeric');
         otpInput.setAttribute('autocomplete', 'one-time-code');
+        
+        // Splash screen with progress counter
+        const splashScreen = document.getElementById('splashScreen');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        let progressInterval = null;
+        
+        function showSplashScreen() {
+            splashScreen.classList.remove('hidden');
+            let progress = 0;
+            
+            // Animate progress from 0 to 100%
+            progressInterval = setInterval(function() {
+                progress += 2; // Increment by 2% each interval
+                
+                if (progress > 100) {
+                    progress = 100;
+                }
+                
+                progressBar.style.width = progress + '%';
+                progressText.textContent = Math.floor(progress) + '%';
+                
+                // Stop at 100% and wait for form submission
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    // Keep showing splash until page redirects
+                }
+            }, 50); // Update every 50ms for smooth animation
+        }
+        
+        // Hide splash if there's an error (page reloads with error)
+        @if(session('error') || $errors->has('otp_code'))
+            // Don't show splash on error
+        @else
+            // Check if form was just submitted
+            if (sessionStorage.getItem('otpSubmitting')) {
+                showSplashScreen();
+                sessionStorage.removeItem('otpSubmitting');
+            }
+        @endif
         
         // Resend OTP functionality with rate limiting
         const resendOtpForm = document.getElementById('resendOtpForm');

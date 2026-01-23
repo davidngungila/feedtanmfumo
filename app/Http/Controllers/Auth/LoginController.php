@@ -91,48 +91,90 @@ class LoginController extends Controller
      */
     public function verifyOtp(Request $request)
     {
-        $request->validate([
-            'otp_code' => 'required|string|size:6',
-        ]);
+        try {
+            $request->validate([
+                'otp_code' => 'required|string|size:6|regex:/^[0-9]{6}$/',
+            ], [
+                'otp_code.required' => 'OTP code is required.',
+                'otp_code.size' => 'OTP code must be exactly 6 digits.',
+                'otp_code.regex' => 'OTP code must contain only numbers.',
+            ]);
 
-        $userId = session('otp_user_id');
-        
-        if (!$userId) {
-            return redirect()->route('login')->with('error', 'Session expired. Please login again.');
+            $userId = session('otp_user_id');
+            
+            if (!$userId) {
+                \Log::warning('OTP verification attempted without session user_id');
+                return redirect()->route('login')->with('error', 'Session expired. Please login again.');
+            }
+
+            $user = User::find($userId);
+            
+            if (!$user) {
+                \Log::warning("OTP verification attempted for non-existent user ID: {$userId}");
+                return redirect()->route('login')->with('error', 'User not found.');
+            }
+
+            // Clean and normalize OTP code (remove spaces, ensure numeric)
+            $otpCode = preg_replace('/[^0-9]/', '', $request->otp_code);
+            
+            if (strlen($otpCode) !== 6) {
+                \Log::warning("Invalid OTP code length for user ID: {$user->id}");
+                return back()->withErrors(['otp_code' => 'OTP code must be exactly 6 digits.'])->withInput();
+            }
+
+            // Find valid OTP - check most recent first
+            $otp = OtpCode::where('user_id', $user->id)
+                ->where('code', $otpCode)
+                ->where('type', 'login')
+                ->where('used', false)
+                ->where('expires_at', '>', now())
+                ->orderBy('created_at', 'desc')
+                ->first();
+
+            if (!$otp) {
+                \Log::warning("Invalid or expired OTP attempt for user ID: {$user->id}, code: {$otpCode}");
+                
+                // Check if code exists but is expired
+                $expiredOtp = OtpCode::where('user_id', $user->id)
+                    ->where('code', $otpCode)
+                    ->where('type', 'login')
+                    ->first();
+                
+                if ($expiredOtp) {
+                    if ($expiredOtp->used) {
+                        return back()->withErrors(['otp_code' => 'This OTP code has already been used. Please request a new one.'])->withInput();
+                    } elseif ($expiredOtp->expires_at <= now()) {
+                        return back()->withErrors(['otp_code' => 'OTP code has expired. Please request a new one.'])->withInput();
+                    }
+                }
+                
+                return back()->withErrors(['otp_code' => 'Invalid OTP code. Please check and try again.'])->withInput();
+            }
+
+            // Mark OTP as used
+            $otp->markAsUsed();
+            \Log::info("OTP verified successfully for user ID: {$user->id}, email: {$user->email}");
+
+            // Login the user
+            Auth::login($user, $request->filled('remember'));
+            $request->session()->regenerate();
+            $request->session()->forget('otp_user_id');
+
+            // Redirect based on role
+            if ($user->hasAnyRole(['loan_officer', 'deposit_officer', 'investment_officer', 'chairperson', 'secretary', 'accountant'])) {
+                return redirect()->intended('/admin/role-dashboard')->with('success', 'Login successful!');
+            }
+
+            return redirect()->intended('/admin/dashboard')->with('success', 'Login successful!');
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::warning('OTP validation failed: ' . json_encode($e->errors()));
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Error verifying OTP: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            return back()->withErrors(['otp_code' => 'An error occurred during verification. Please try again.'])->withInput();
         }
-
-        $user = User::find($userId);
-        
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'User not found.');
-        }
-
-        // Find valid OTP
-        $otp = OtpCode::where('user_id', $user->id)
-            ->where('code', $request->otp_code)
-            ->where('type', 'login')
-            ->where('used', false)
-            ->where('expires_at', '>', now())
-            ->first();
-
-        if (!$otp) {
-            return back()->withErrors(['otp_code' => 'Invalid or expired OTP code.'])->withInput();
-        }
-
-        // Mark OTP as used
-        $otp->markAsUsed();
-
-        // Login the user
-        Auth::login($user, $request->filled('remember'));
-        $request->session()->regenerate();
-        $request->session()->forget('otp_user_id');
-
-        // Redirect based on role
-        if ($user->hasAnyRole(['loan_officer', 'deposit_officer', 'investment_officer', 'chairperson', 'secretary', 'accountant'])) {
-            return redirect()->intended('/admin/role-dashboard');
-        }
-
-        return redirect()->intended('/admin/dashboard');
     }
 
     /**
