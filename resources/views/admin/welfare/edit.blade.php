@@ -12,10 +12,10 @@
                 <p class="text-white text-opacity-90 text-sm sm:text-base">{{ $welfare->welfare_number }}</p>
             </div>
             <div class="mt-4 md:mt-0 md:ml-auto flex flex-wrap gap-3 justify-end">
-                <a href="{{ route('admin.welfare.show', $welfare) }}" class="inline-flex items-center px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-md transition font-medium">
+                <a href="{{ route('admin.welfare.show', $welfare) }}" class="inline-flex items-center px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 text-[#015425] rounded-md transition font-medium">
                     View Details
                 </a>
-                <a href="{{ route('admin.welfare.index') }}" class="inline-flex items-center px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-md transition font-medium">
+                <a href="{{ route('admin.welfare.index') }}" class="inline-flex items-center px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 text-[#015425] rounded-md transition font-medium">
                     Back to List
                 </a>
             </div>

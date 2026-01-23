@@ -27,7 +27,7 @@
                     </svg>
                     View Details
                 </a>
-                <a href="{{ route('admin.users.directory') }}" class="inline-flex items-center px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-md transition font-medium">
+                <a href="{{ route('admin.users.directory') }}" class="inline-flex items-center px-6 py-3 bg-white bg-opacity-20 hover:bg-opacity-30 text-[#015425] rounded-md transition font-medium">
                     Back to Directory
                 </a>
             </div>
