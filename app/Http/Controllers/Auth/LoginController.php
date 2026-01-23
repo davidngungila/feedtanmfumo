@@ -130,13 +130,13 @@ class LoginController extends Controller
                 ->get(['code', 'used', 'expires_at', 'created_at']);
             
             \Log::info("OTP Verification Attempt - User ID: {$user->id}, Input Code: {$otpCode}");
-            \Log::info("Recent OTPs for user: " . json_encode($recentOtps->map(function($o) {
+            \Log::info("Recent OTPs for user: " . json_encode($recentOtps->map(function($o) use ($otpCode) {
                 return [
                     'code' => $o->code,
                     'used' => $o->used,
                     'expires_at' => $o->expires_at->toDateTimeString(),
                     'is_expired' => $o->expires_at <= now(),
-                    'matches' => $o->code === $otpCode
+                    'matches' => trim((string)$o->code) === trim((string)$otpCode)
                 ];
             })));
 
