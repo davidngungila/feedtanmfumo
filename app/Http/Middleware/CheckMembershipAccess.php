@@ -28,12 +28,8 @@ class CheckMembershipAccess
                 ->with('error', 'Your membership application is pending approval. You cannot access this service yet.');
         }
 
-        // Check if user's membership type has access to this service
-        if (!$user->hasMembershipAccessTo($service)) {
-            return redirect()->route('member.dashboard')
-                ->with('error', 'Your membership type does not have access to this service.');
-        }
-
+        // Approved members have access to all services
+        // No need to check membership type restrictions for approved members
         return $next($request);
     }
 }
