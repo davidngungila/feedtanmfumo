@@ -123,7 +123,123 @@ class SettingsController extends Controller
             Setting::set($key, $value, 'communication', $type);
         }
 
+        // Clear config cache to reload mail settings
+        \Artisan::call('config:clear');
+
         return redirect()->route('admin.settings.communication')->with('success', 'Communication settings updated successfully.');
+    }
+
+    /**
+     * Send test email
+     */
+    public function sendTestEmail(Request $request)
+    {
+        $request->validate([
+            'test_email' => 'required|email',
+        ]);
+
+        try {
+            // Reload mail config from database
+            $this->reloadMailConfig();
+            
+            $settings = Setting::getByGroup('communication');
+            $orgInfo = [
+                'name' => $settings['organization_name']->value ?? 'FeedTan Community Microfinance Group',
+                'po_box' => $settings['organization_po_box']->value ?? 'P.O.Box 7744',
+                'address' => $settings['organization_address']->value ?? 'Ushirika Sokoine Road',
+                'city' => $settings['organization_city']->value ?? 'Moshi',
+                'region' => $settings['organization_region']->value ?? 'Kilimanjaro',
+                'country' => $settings['organization_country']->value ?? 'Tanzania',
+                'from_name' => $settings['mail_from_name']->value ?? 'FeedTan Community Microfinance Group',
+                'from_email' => $settings['mail_from_address']->value ?? config('mail.from.address'),
+            ];
+            
+            $address = "{$orgInfo['name']}\n{$orgInfo['po_box']}, {$orgInfo['address']}\n{$orgInfo['city']}, {$orgInfo['region']}, {$orgInfo['country']}";
+            
+            $subject = "Test Email - {$orgInfo['name']}";
+            $message = "This is a test email from {$orgInfo['name']}.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+EMAIL CONFIGURATION TEST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If you received this email, your email configuration is working correctly!
+
+Mail Settings:
+• Mailer: " . ($settings['mail_mailer']->value ?? 'SMTP') . "
+• Host: " . ($settings['mail_host']->value ?? 'N/A') . "
+• Port: " . ($settings['mail_port']->value ?? 'N/A') . "
+• Encryption: " . ($settings['mail_encryption']->value ?? 'TLS') . "
+• From: {$orgInfo['from_email']} ({$orgInfo['from_name']})
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This email was sent at: " . now()->format('Y-m-d H:i:s') . "
+
+Best regards,
+{$address}";
+
+            \Mail::raw($message, function ($mail) use ($request, $subject, $orgInfo) {
+                $mail->to($request->test_email)
+                     ->subject($subject)
+                     ->from($orgInfo['from_email'], $orgInfo['from_name']);
+            });
+
+            return redirect()->route('admin.settings.communication')
+                ->with('success', "Test email sent successfully to {$request->test_email}!");
+        } catch (\Exception $e) {
+            \Log::error('Failed to send test email: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            return redirect()->route('admin.settings.communication')
+                ->with('error', 'Failed to send test email: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Reload mail configuration from database
+     */
+    protected function reloadMailConfig(): void
+    {
+        try {
+            $settings = Setting::getByGroup('communication');
+            
+            if (isset($settings['mail_mailer']) && $settings['mail_mailer']->value) {
+                config(['mail.default' => $settings['mail_mailer']->value]);
+            }
+            
+            if (isset($settings['mail_host']) && $settings['mail_host']->value) {
+                config(['mail.mailers.smtp.host' => $settings['mail_host']->value]);
+            }
+            
+            if (isset($settings['mail_port']) {
+                config(['mail.mailers.smtp.port' => $settings['mail_port']->value ?? 587]);
+            }
+            
+            if (isset($settings['mail_username']) && $settings['mail_username']->value) {
+                config(['mail.mailers.smtp.username' => $settings['mail_username']->value]);
+            }
+            
+            if (isset($settings['mail_password']) && $settings['mail_password']->value) {
+                config(['mail.mailers.smtp.password' => $settings['mail_password']->value]);
+            }
+            
+            if (isset($settings['mail_encryption']) && $settings['mail_encryption']->value) {
+                config(['mail.mailers.smtp.encryption' => $settings['mail_encryption']->value]);
+            } else {
+                config(['mail.mailers.smtp.encryption' => 'tls']);
+            }
+            
+            if (isset($settings['mail_from_address']) && $settings['mail_from_address']->value) {
+                config(['mail.from.address' => $settings['mail_from_address']->value]);
+            }
+            
+            if (isset($settings['mail_from_name']) && $settings['mail_from_name']->value) {
+                config(['mail.from.name' => $settings['mail_from_name']->value]);
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Failed to reload mail config: ' . $e->getMessage());
+        }
     }
 
     public function productConfiguration()

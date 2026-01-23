@@ -30,10 +30,31 @@
                 <!-- Email Settings -->
                 <div>
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Email Configuration</h3>
+                    
+                    <!-- Quick Setup Presets -->
+                    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <h4 class="text-sm font-semibold text-blue-900 mb-2">Quick Setup Presets</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <button type="button" onclick="setGmailConfig()" class="px-3 py-2 bg-white border border-blue-300 rounded-md text-sm text-blue-700 hover:bg-blue-50 transition">
+                                Gmail SMTP
+                            </button>
+                            <button type="button" onclick="setOutlookConfig()" class="px-3 py-2 bg-white border border-blue-300 rounded-md text-sm text-blue-700 hover:bg-blue-50 transition">
+                                Outlook/Hotmail
+                            </button>
+                            <button type="button" onclick="setCustomConfig()" class="px-3 py-2 bg-white border border-blue-300 rounded-md text-sm text-blue-700 hover:bg-blue-50 transition">
+                                Custom SMTP
+                            </button>
+                        </div>
+                        <p class="text-xs text-blue-700 mt-2">
+                            <strong>Note:</strong> For Gmail, you need to use an "App Password" instead of your regular password. 
+                            Enable 2-Step Verification and generate an App Password from your Google Account settings.
+                        </p>
+                    </div>
+                    
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Mail Driver</label>
-                            <select name="mail_mailer" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                            <select name="mail_mailer" id="mail_mailer" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
                                 <option value="smtp" {{ (isset($settings['mail_mailer']) ? $settings['mail_mailer']->value : 'smtp') == 'smtp' ? 'selected' : '' }}>SMTP</option>
                                 <option value="sendmail" {{ (isset($settings['mail_mailer']) ? $settings['mail_mailer']->value : '') == 'sendmail' ? 'selected' : '' }}>Sendmail</option>
                             </select>
@@ -41,42 +62,71 @@
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">SMTP Host</label>
-                            <input type="text" name="mail_host" value="{{ isset($settings['mail_host']) ? $settings['mail_host']->value : '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                            <input type="text" name="mail_host" id="mail_host" value="{{ isset($settings['mail_host']) ? $settings['mail_host']->value : '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="smtp.gmail.com">
+                            <p class="text-xs text-gray-500 mt-1">Gmail: smtp.gmail.com | Outlook: smtp-mail.outlook.com</p>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">SMTP Port</label>
-                            <input type="number" name="mail_port" value="{{ isset($settings['mail_port']) ? $settings['mail_port']->value : '587' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                            <input type="number" name="mail_port" id="mail_port" value="{{ isset($settings['mail_port']) ? $settings['mail_port']->value : '587' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                            <p class="text-xs text-gray-500 mt-1">TLS: 587 | SSL: 465</p>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Encryption</label>
-                            <select name="mail_encryption" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
-                                <option value="tls" {{ (isset($settings['mail_encryption']) ? $settings['mail_encryption']->value : 'tls') == 'tls' ? 'selected' : '' }}>TLS</option>
+                            <select name="mail_encryption" id="mail_encryption" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                                <option value="tls" {{ (isset($settings['mail_encryption']) ? $settings['mail_encryption']->value : 'tls') == 'tls' ? 'selected' : '' }}>TLS (Recommended)</option>
                                 <option value="ssl" {{ (isset($settings['mail_encryption']) ? $settings['mail_encryption']->value : '') == 'ssl' ? 'selected' : '' }}>SSL</option>
                             </select>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">SMTP Username</label>
-                            <input type="text" name="mail_username" value="{{ isset($settings['mail_username']) ? $settings['mail_username']->value : '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                            <input type="text" name="mail_username" id="mail_username" value="{{ isset($settings['mail_username']) ? $settings['mail_username']->value : '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="your-email@gmail.com">
+                            <p class="text-xs text-gray-500 mt-1">Your full email address</p>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">SMTP Password</label>
-                            <input type="password" name="mail_password" value="{{ isset($settings['mail_password']) ? $settings['mail_password']->value : '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                            <input type="password" name="mail_password" id="mail_password" value="{{ isset($settings['mail_password']) ? $settings['mail_password']->value : '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="App Password for Gmail">
+                            <p class="text-xs text-gray-500 mt-1">For Gmail: Use App Password (not your regular password)</p>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">From Address</label>
-                            <input type="email" name="mail_from_address" value="{{ isset($settings['mail_from_address']) ? $settings['mail_from_address']->value : '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                            <input type="email" name="mail_from_address" id="mail_from_address" value="{{ isset($settings['mail_from_address']) ? $settings['mail_from_address']->value : '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="noreply@feedtan.com">
+                            <p class="text-xs text-gray-500 mt-1">Email address that will appear as sender</p>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">From Name</label>
-                            <input type="text" name="mail_from_name" value="{{ isset($settings['mail_from_name']) ? $settings['mail_from_name']->value : 'FeedTan Community Microfinance Group' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                            <input type="text" name="mail_from_name" id="mail_from_name" value="{{ isset($settings['mail_from_name']) ? $settings['mail_from_name']->value : 'FeedTan Community Microfinance Group' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                            <p class="text-xs text-gray-500 mt-1">Name that will appear as sender</p>
                         </div>
                     </div>
+                    
+                    <script>
+                        function setGmailConfig() {
+                            document.getElementById('mail_host').value = 'smtp.gmail.com';
+                            document.getElementById('mail_port').value = '587';
+                            document.getElementById('mail_encryption').value = 'tls';
+                            document.getElementById('mail_mailer').value = 'smtp';
+                        }
+                        
+                        function setOutlookConfig() {
+                            document.getElementById('mail_host').value = 'smtp-mail.outlook.com';
+                            document.getElementById('mail_port').value = '587';
+                            document.getElementById('mail_encryption').value = 'tls';
+                            document.getElementById('mail_mailer').value = 'smtp';
+                        }
+                        
+                        function setCustomConfig() {
+                            document.getElementById('mail_host').value = '';
+                            document.getElementById('mail_port').value = '587';
+                            document.getElementById('mail_encryption').value = 'tls';
+                            document.getElementById('mail_mailer').value = 'smtp';
+                        }
+                    </script>
                     
                     <!-- Organization Information for Email Headers -->
                     <div class="mt-6 pt-6 border-t border-gray-200">
@@ -163,6 +213,39 @@
                 </a>
             </div>
         </form>
+        
+        <!-- Test Email Section -->
+        <div class="mt-8 pt-8 border-t border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Test Email Configuration</h3>
+            <p class="text-sm text-gray-600 mb-4">Send a test email to verify your email settings are working correctly.</p>
+            
+            @if(session('success'))
+            <div class="mb-4 bg-green-50 border border-green-200 rounded-md p-4">
+                <p class="text-sm text-green-800">{{ session('success') }}</p>
+            </div>
+            @endif
+            
+            @if(session('error'))
+            <div class="mb-4 bg-red-50 border border-red-200 rounded-md p-4">
+                <p class="text-sm text-red-800">{{ session('error') }}</p>
+            </div>
+            @endif
+            
+            <form action="{{ route('admin.settings.communication.test-email') }}" method="POST">
+                @csrf
+                <div class="flex gap-4">
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Test Email Address</label>
+                        <input type="email" name="test_email" value="davidngungila@gmail.com" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+                            Send Test Email
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 </div>

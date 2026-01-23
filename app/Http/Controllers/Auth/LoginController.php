@@ -167,6 +167,9 @@ class LoginController extends Controller
     protected function sendOtpEmail(User $user, string $code): void
     {
         try {
+            // Reload mail config from database
+            $this->reloadMailConfig();
+            
             $orgInfo = $this->emailService->getOrganizationInfo();
             $address = $this->emailService->getFormattedAddress();
             
@@ -195,6 +198,52 @@ Best regards,
             });
         } catch (\Exception $e) {
             \Log::error('Failed to send OTP email: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Reload mail configuration from database
+     */
+    protected function reloadMailConfig(): void
+    {
+        try {
+            $settings = \App\Models\Setting::getByGroup('communication');
+            
+            if (isset($settings['mail_mailer']) && $settings['mail_mailer']->value) {
+                \Illuminate\Support\Facades\Config::set('mail.default', $settings['mail_mailer']->value);
+            }
+            
+            if (isset($settings['mail_host']) && $settings['mail_host']->value) {
+                \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.host', $settings['mail_host']->value);
+            }
+            
+            if (isset($settings['mail_port'])) {
+                \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.port', $settings['mail_port']->value ?? 587);
+            }
+            
+            if (isset($settings['mail_username']) && $settings['mail_username']->value) {
+                \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.username', $settings['mail_username']->value);
+            }
+            
+            if (isset($settings['mail_password']) && $settings['mail_password']->value) {
+                \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.password', $settings['mail_password']->value);
+            }
+            
+            if (isset($settings['mail_encryption']) && $settings['mail_encryption']->value) {
+                \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.encryption', $settings['mail_encryption']->value);
+            } else {
+                \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.encryption', 'tls');
+            }
+            
+            if (isset($settings['mail_from_address']) && $settings['mail_from_address']->value) {
+                \Illuminate\Support\Facades\Config::set('mail.from.address', $settings['mail_from_address']->value);
+            }
+            
+            if (isset($settings['mail_from_name']) && $settings['mail_from_name']->value) {
+                \Illuminate\Support\Facades\Config::set('mail.from.name', $settings['mail_from_name']->value);
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Failed to reload mail config: ' . $e->getMessage());
         }
     }
 

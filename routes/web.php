@@ -242,6 +242,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('settings/organization', [SettingsController::class, 'updateOrganization'])->name('settings.organization.update');
     Route::get('settings/communication', [SettingsController::class, 'communication'])->name('settings.communication');
     Route::put('settings/communication', [SettingsController::class, 'updateCommunication'])->name('settings.communication.update');
+    Route::post('settings/communication/test-email', [SettingsController::class, 'sendTestEmail'])->name('settings.communication.test-email');
 
     // Advanced System Settings Routes
     Route::prefix('system-settings')->name('system-settings.')->group(function () {

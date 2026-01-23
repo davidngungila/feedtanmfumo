@@ -6,9 +6,56 @@ use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Config;
 
 class EmailNotificationService
 {
+    /**
+     * Reload mail configuration from database before sending
+     */
+    protected function reloadMailConfig(): void
+    {
+        try {
+            $settings = Setting::getByGroup('communication');
+            
+            if (isset($settings['mail_mailer']) && $settings['mail_mailer']->value) {
+                Config::set('mail.default', $settings['mail_mailer']->value);
+            }
+            
+            if (isset($settings['mail_host']) && $settings['mail_host']->value) {
+                Config::set('mail.mailers.smtp.host', $settings['mail_host']->value);
+            }
+            
+            if (isset($settings['mail_port'])) {
+                Config::set('mail.mailers.smtp.port', $settings['mail_port']->value ?? 587);
+            }
+            
+            if (isset($settings['mail_username']) && $settings['mail_username']->value) {
+                Config::set('mail.mailers.smtp.username', $settings['mail_username']->value);
+            }
+            
+            if (isset($settings['mail_password']) && $settings['mail_password']->value) {
+                Config::set('mail.mailers.smtp.password', $settings['mail_password']->value);
+            }
+            
+            if (isset($settings['mail_encryption']) && $settings['mail_encryption']->value) {
+                Config::set('mail.mailers.smtp.encryption', $settings['mail_encryption']->value);
+            } else {
+                Config::set('mail.mailers.smtp.encryption', 'tls');
+            }
+            
+            if (isset($settings['mail_from_address']) && $settings['mail_from_address']->value) {
+                Config::set('mail.from.address', $settings['mail_from_address']->value);
+            }
+            
+            if (isset($settings['mail_from_name']) && $settings['mail_from_name']->value) {
+                Config::set('mail.from.name', $settings['mail_from_name']->value);
+            }
+        } catch (\Exception $e) {
+            Log::warning('Failed to reload mail config: ' . $e->getMessage());
+        }
+    }
+
     /**
      * Get organization information for email headers
      */
@@ -43,6 +90,7 @@ class EmailNotificationService
     public function sendLoanApprovalNotification(User $user, array $loanDetails): bool
     {
         try {
+            $this->reloadMailConfig();
             $orgInfo = $this->getOrganizationInfo();
             $address = $this->getFormattedAddress();
             
@@ -68,6 +116,7 @@ class EmailNotificationService
     public function sendLoanDisbursementNotification(User $user, array $loanDetails): bool
     {
         try {
+            $this->reloadMailConfig();
             $orgInfo = $this->getOrganizationInfo();
             $address = $this->getFormattedAddress();
             
@@ -93,6 +142,7 @@ class EmailNotificationService
     public function sendPaymentReminderNotification(User $user, array $paymentDetails): bool
     {
         try {
+            $this->reloadMailConfig();
             $orgInfo = $this->getOrganizationInfo();
             $address = $this->getFormattedAddress();
             
@@ -118,6 +168,7 @@ class EmailNotificationService
     public function sendSavingsAccountNotification(User $user, string $event, array $accountDetails): bool
     {
         try {
+            $this->reloadMailConfig();
             $orgInfo = $this->getOrganizationInfo();
             $address = $this->getFormattedAddress();
             
@@ -150,6 +201,7 @@ class EmailNotificationService
     public function sendInvestmentNotification(User $user, string $event, array $investmentDetails): bool
     {
         try {
+            $this->reloadMailConfig();
             $orgInfo = $this->getOrganizationInfo();
             $address = $this->getFormattedAddress();
             
@@ -182,6 +234,7 @@ class EmailNotificationService
     public function sendWelfareNotification(User $user, string $event, array $welfareDetails): bool
     {
         try {
+            $this->reloadMailConfig();
             $orgInfo = $this->getOrganizationInfo();
             $address = $this->getFormattedAddress();
             
