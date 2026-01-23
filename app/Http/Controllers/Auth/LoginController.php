@@ -186,12 +186,18 @@ class LoginController extends Controller
             $userId = session('otp_user_id');
             
             if (!$userId) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['error' => 'Session expired. Please login again.'], 401);
+                }
                 return redirect()->route('login')->with('error', 'Session expired. Please login again.');
             }
 
             $user = User::find($userId);
             
             if (!$user) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['error' => 'User not found.'], 404);
+                }
                 return redirect()->route('login')->with('error', 'User not found.');
             }
 
@@ -202,7 +208,11 @@ class LoginController extends Controller
                 ->count();
             
             if ($recentOtps >= 3) {
-                return back()->with('error', 'Too many requests. Please wait a moment before requesting another OTP code.');
+                $message = 'Too many requests. Please wait a moment before requesting another OTP code.';
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['error' => $message], 429);
+                }
+                return back()->with('error', $message);
             }
 
             // Generate new OTP
@@ -213,16 +223,29 @@ class LoginController extends Controller
             
             if (!$emailSent) {
                 \Log::error("Failed to send resend OTP email to user ID: {$user->id}");
-                return back()->with('error', 'Failed to send OTP email. Please try again or contact support.');
+                $message = 'Failed to send OTP email. Please try again or contact support.';
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['error' => $message], 500);
+                }
+                return back()->with('error', $message);
             }
 
-            \Log::info("OTP resent to user ID: {$user->id}, email: {$user->email}");
+            \Log::info("OTP resent successfully to user ID: {$user->id}, email: {$user->email}, OTP: {$otp->code}");
             
-            return back()->with('success', 'A new OTP code has been sent to your email address. Please check your inbox.');
+            $message = 'A new OTP code has been sent to your email address. Please check your inbox.';
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => $message], 200);
+            }
+            return back()->with('success', $message);
+            
         } catch (\Exception $e) {
             \Log::error('Error resending OTP: ' . $e->getMessage());
             \Log::error('Stack trace: ' . $e->getTraceAsString());
-            return back()->with('error', 'An error occurred while resending the OTP. Please try again.');
+            $message = 'An error occurred while resending the OTP. Please try again.';
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['error' => $message], 500);
+            }
+            return back()->with('error', $message);
         }
     }
 

@@ -81,11 +81,18 @@
             <div class="text-center">
                 <form id="resendOtpForm" action="{{ route('otp.resend') }}" method="POST" class="inline">
                     @csrf
-                    <button type="submit" id="resendOtpBtn" class="text-sm text-[#015425] hover:text-[#013019] font-medium transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button type="submit" id="resendOtpBtn" class="text-sm text-[#015425] hover:text-[#013019] font-medium transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mx-auto">
                         <span id="resendOtpText">Resend OTP Code</span>
+                        <span id="resendOtpSpinner" class="hidden">
+                            <svg class="animate-spin h-4 w-4 text-[#015425]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
                     </button>
                 </form>
                 <p id="resendCountdown" class="text-xs text-gray-500 mt-2 hidden"></p>
+                <p id="resendStatus" class="text-xs mt-2 hidden"></p>
             </div>
 
             <div class="text-center">
@@ -234,13 +241,16 @@
             }
         @endif
         
-        // Resend OTP functionality with rate limiting
+        // Resend OTP functionality with rate limiting and better UX
         const resendOtpForm = document.getElementById('resendOtpForm');
         const resendOtpBtn = document.getElementById('resendOtpBtn');
         const resendOtpText = document.getElementById('resendOtpText');
+        const resendOtpSpinner = document.getElementById('resendOtpSpinner');
         const resendCountdown = document.getElementById('resendCountdown');
+        const resendStatus = document.getElementById('resendStatus');
         let resendCooldown = 0;
         let countdownInterval = null;
+        let isResending = false;
         
         // Check if there's a cooldown from previous session
         const lastResendTime = sessionStorage.getItem('lastOtpResend');
@@ -258,36 +268,114 @@
                 resendCountdown.classList.remove('hidden');
                 resendCountdown.textContent = `Please wait ${resendCooldown} seconds before requesting a new code.`;
                 
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                }
+                
                 countdownInterval = setInterval(function() {
                     resendCooldown--;
                     if (resendCooldown > 0) {
                         resendCountdown.textContent = `Please wait ${resendCooldown} seconds before requesting a new code.`;
                     } else {
                         clearInterval(countdownInterval);
+                        countdownInterval = null;
                         resendOtpBtn.disabled = false;
                         resendCountdown.classList.add('hidden');
                         resendOtpText.textContent = 'Resend OTP Code';
+                        resendOtpSpinner.classList.add('hidden');
                     }
                 }, 1000);
             }
         }
         
+        function showSuccessMessage(message) {
+            resendStatus.classList.remove('hidden', 'text-red-600');
+            resendStatus.classList.add('text-green-600');
+            resendStatus.textContent = message;
+            setTimeout(function() {
+                resendStatus.classList.add('hidden');
+            }, 5000);
+        }
+        
+        function showErrorMessage(message) {
+            resendStatus.classList.remove('hidden', 'text-green-600');
+            resendStatus.classList.add('text-red-600');
+            resendStatus.textContent = message;
+            setTimeout(function() {
+                resendStatus.classList.add('hidden');
+            }, 5000);
+        }
+        
         resendOtpForm.addEventListener('submit', function(e) {
-            if (resendCooldown > 0) {
+            if (resendCooldown > 0 || isResending) {
                 e.preventDefault();
                 return false;
             }
             
+            isResending = true;
+            
             // Disable button and show loading state
             resendOtpBtn.disabled = true;
             resendOtpText.textContent = 'Sending...';
+            resendOtpSpinner.classList.remove('hidden');
+            resendStatus.classList.add('hidden');
             
-            // Set cooldown after successful submission
-            setTimeout(function() {
-                resendCooldown = 60; // 60 seconds cooldown
-                sessionStorage.setItem('lastOtpResend', Date.now().toString());
-                startCountdown();
-            }, 1000);
+            // Use fetch API for better error handling
+            fetch(resendOtpForm.action, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || document.querySelector('input[name="_token"]')?.value
+                },
+                body: new URLSearchParams(new FormData(resendOtpForm))
+            })
+            .then(response => {
+                if (response.redirected) {
+                    // Follow redirect to get the response message
+                    return fetch(response.url, {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                }
+                return response.text();
+            })
+            .then(html => {
+                // Check if response contains success or error message
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const successMsg = doc.querySelector('.bg-green-50 .text-green-800');
+                const errorMsg = doc.querySelector('.bg-red-50 .text-red-800');
+                
+                if (successMsg) {
+                    showSuccessMessage(successMsg.textContent.trim());
+                    resendCooldown = 60;
+                    sessionStorage.setItem('lastOtpResend', Date.now().toString());
+                    startCountdown();
+                } else if (errorMsg) {
+                    showErrorMessage(errorMsg.textContent.trim());
+                    resendOtpBtn.disabled = false;
+                    resendOtpText.textContent = 'Resend OTP Code';
+                    resendOtpSpinner.classList.add('hidden');
+                    isResending = false;
+                } else {
+                    // Fallback: reload page to show server response
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error resending OTP:', error);
+                showErrorMessage('Failed to send OTP. Please try again.');
+                resendOtpBtn.disabled = false;
+                resendOtpText.textContent = 'Resend OTP Code';
+                resendOtpSpinner.classList.add('hidden');
+                isResending = false;
+            });
+            
+            e.preventDefault();
+            return false;
         });
     });
 </script>
