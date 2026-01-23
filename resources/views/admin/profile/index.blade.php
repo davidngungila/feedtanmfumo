@@ -11,8 +11,8 @@
     @endif
     <!-- Header -->
     <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-8 text-white">
-        <div class="flex flex-col md:flex-row items-center md:items-start justify-between">
-            <div class="flex items-center space-x-6 mb-4 md:mb-0">
+        <div class="flex flex-col md:flex-row items-center md:items-start">
+            <div class="flex items-center space-x-6 mb-4 md:mb-0 flex-1">
                 <div class="w-24 h-24 rounded-full bg-white bg-opacity-20 backdrop-blur-sm flex items-center justify-center text-4xl font-bold border-4 border-white border-opacity-30">
                     {{ strtoupper(substr($user->name, 0, 2)) }}
                 </div>
@@ -24,7 +24,7 @@
                     @endif
                 </div>
             </div>
-            <div class="mt-4 md:mt-0 flex flex-wrap gap-3">
+            <div class="mt-4 md:mt-0 md:ml-auto flex flex-wrap gap-3 justify-end">
                 <a href="{{ route('admin.profile.edit') }}" class="inline-flex items-center px-6 py-3 bg-white text-[#015425] rounded-md hover:bg-gray-100 transition font-medium shadow-md">
                     Edit Profile
                 </a>

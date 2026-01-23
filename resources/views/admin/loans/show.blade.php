@@ -6,8 +6,8 @@
 <div class="space-y-6">
     <!-- Header Section -->
     <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-6 text-white">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-            <div>
+        <div class="flex flex-col md:flex-row md:items-center">
+            <div class="flex-1">
                 <div class="flex items-center mb-2">
                     <h1 class="text-2xl sm:text-3xl font-bold mr-3">Loan Details</h1>
                     <span class="px-3 py-1 text-sm rounded-full font-semibold {{ 
@@ -23,7 +23,7 @@
                 </div>
                 <p class="text-white text-opacity-90 text-sm sm:text-base">Loan Number: <strong>{{ $loan->loan_number }}</strong></p>
             </div>
-            <div class="mt-4 md:mt-0 flex flex-wrap gap-3">
+            <div class="mt-4 md:mt-0 md:ml-auto flex flex-wrap gap-3 justify-end">
                 <a href="{{ route('admin.loans.edit', $loan) }}" class="inline-flex items-center px-6 py-3 bg-white text-[#015425] rounded-md hover:bg-gray-100 transition font-medium shadow-md">
                     <div class="flex items-center">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

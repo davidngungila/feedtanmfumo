@@ -6,8 +6,8 @@
 <div class="space-y-6">
     <!-- Header Section -->
     <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-6 text-white">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-            <div class="flex items-center space-x-4">
+        <div class="flex flex-col md:flex-row md:items-center">
+            <div class="flex items-center space-x-4 flex-1">
                 <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
                     <span class="text-2xl font-bold">{{ strtoupper(substr($user->name, 0, 2)) }}</span>
                 </div>
@@ -19,7 +19,7 @@
                     @endif
                 </div>
             </div>
-            <div class="mt-4 md:mt-0 flex flex-wrap gap-3">
+            <div class="mt-4 md:mt-0 md:ml-auto flex flex-wrap gap-3 justify-end">
                 <a href="{{ route('admin.users.show', $user) }}" class="inline-flex items-center px-6 py-3 bg-white text-[#015425] rounded-md hover:bg-gray-100 transition font-medium shadow-md">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
