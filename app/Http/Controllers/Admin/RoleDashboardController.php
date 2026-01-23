@@ -169,6 +169,8 @@ class RoleDashboardController extends Controller
      */
     protected function getLoanOfficerData()
     {
+        $user = Auth::user();
+        
         return [
             'pending_approvals' => Loan::where('status', 'pending')->count(),
             'active_loans' => Loan::where('status', 'active')->count(),
@@ -187,6 +189,12 @@ class RoleDashboardController extends Controller
             'monthly_amount' => Loan::whereMonth('created_at', now()->month)
                 ->whereYear('created_at', now()->year)
                 ->sum('principal_amount'),
+            // Issues assigned to this officer only
+            'my_issues' => Issue::where('assigned_to', $user->id)->latest()->limit(10)->get(),
+            'my_pending_issues' => Issue::where('assigned_to', $user->id)->where('status', 'pending')->count(),
+            'my_in_progress_issues' => Issue::where('assigned_to', $user->id)->where('status', 'in_progress')->count(),
+            'my_resolved_issues' => Issue::where('assigned_to', $user->id)->where('status', 'resolved')->count(),
+            'total_my_issues' => Issue::where('assigned_to', $user->id)->count(),
         ];
     }
     
@@ -195,6 +203,8 @@ class RoleDashboardController extends Controller
      */
     protected function getDepositOfficerData()
     {
+        $user = Auth::user();
+        
         return [
             'total_accounts' => SavingsAccount::count(),
             'active_accounts' => SavingsAccount::where('status', 'active')->count(),
@@ -214,6 +224,12 @@ class RoleDashboardController extends Controller
                 ->whereMonth('created_at', now()->month)
                 ->whereYear('created_at', now()->year)
                 ->sum('amount'),
+            // Issues assigned to this officer only
+            'my_issues' => Issue::where('assigned_to', $user->id)->latest()->limit(10)->get(),
+            'my_pending_issues' => Issue::where('assigned_to', $user->id)->where('status', 'pending')->count(),
+            'my_in_progress_issues' => Issue::where('assigned_to', $user->id)->where('status', 'in_progress')->count(),
+            'my_resolved_issues' => Issue::where('assigned_to', $user->id)->where('status', 'resolved')->count(),
+            'total_my_issues' => Issue::where('assigned_to', $user->id)->count(),
         ];
     }
     
@@ -222,6 +238,8 @@ class RoleDashboardController extends Controller
      */
     protected function getInvestmentOfficerData()
     {
+        $user = Auth::user();
+        
         return [
             'total_investments' => Investment::count(),
             'active_investments' => Investment::where('status', 'active')->count(),
@@ -237,6 +255,12 @@ class RoleDashboardController extends Controller
             'monthly_investments' => Investment::whereMonth('created_at', now()->month)
                 ->whereYear('created_at', now()->year)
                 ->sum('principal_amount'),
+            // Issues assigned to this officer only
+            'my_issues' => Issue::where('assigned_to', $user->id)->latest()->limit(10)->get(),
+            'my_pending_issues' => Issue::where('assigned_to', $user->id)->where('status', 'pending')->count(),
+            'my_in_progress_issues' => Issue::where('assigned_to', $user->id)->where('status', 'in_progress')->count(),
+            'my_resolved_issues' => Issue::where('assigned_to', $user->id)->where('status', 'resolved')->count(),
+            'total_my_issues' => Issue::where('assigned_to', $user->id)->count(),
         ];
     }
     
@@ -245,18 +269,26 @@ class RoleDashboardController extends Controller
      */
     protected function getChairpersonData()
     {
+        $user = Auth::user();
+        
         return [
             'total_members' => User::whereHas('roles', function($q) { $q->where('slug', 'member'); })->count(),
             'total_loans' => Loan::count(),
             'total_savings' => SavingsAccount::sum('balance'),
             'total_investments' => Investment::sum('principal_amount'),
-            'pending_issues' => Issue::where('status', 'open')->count(),
+            'pending_issues' => Issue::whereIn('status', ['pending', 'in_progress'])->count(),
             'recent_issues' => Issue::latest()->limit(10)->get(),
             'financial_summary' => [
                 'total_assets' => SavingsAccount::sum('balance') + Investment::sum('principal_amount'),
                 'total_liabilities' => Loan::where('status', 'active')->sum('remaining_amount'),
                 'net_position' => (SavingsAccount::sum('balance') + Investment::sum('principal_amount')) - Loan::where('status', 'active')->sum('remaining_amount'),
             ],
+            // Issues assigned to this officer only
+            'my_issues' => Issue::where('assigned_to', $user->id)->latest()->limit(10)->get(),
+            'my_pending_issues' => Issue::where('assigned_to', $user->id)->where('status', 'pending')->count(),
+            'my_in_progress_issues' => Issue::where('assigned_to', $user->id)->where('status', 'in_progress')->count(),
+            'my_resolved_issues' => Issue::where('assigned_to', $user->id)->where('status', 'resolved')->count(),
+            'total_my_issues' => Issue::where('assigned_to', $user->id)->count(),
         ];
     }
     
@@ -265,9 +297,11 @@ class RoleDashboardController extends Controller
      */
     protected function getSecretaryData()
     {
+        $user = Auth::user();
+        
         return [
             'total_members' => User::whereHas('roles', function($q) { $q->where('slug', 'member'); })->count(),
-            'pending_issues' => Issue::where('status', 'open')->count(),
+            'pending_issues' => Issue::whereIn('status', ['pending', 'in_progress'])->count(),
             'resolved_issues' => Issue::where('status', 'resolved')->count(),
             'recent_members' => User::whereHas('roles', function($q) { $q->where('slug', 'member'); })
                 ->latest()
@@ -278,6 +312,12 @@ class RoleDashboardController extends Controller
                 ->whereMonth('created_at', now()->month)
                 ->whereYear('created_at', now()->year)
                 ->count(),
+            // Issues assigned to this officer only
+            'my_issues' => Issue::where('assigned_to', $user->id)->latest()->limit(10)->get(),
+            'my_pending_issues' => Issue::where('assigned_to', $user->id)->where('status', 'pending')->count(),
+            'my_in_progress_issues' => Issue::where('assigned_to', $user->id)->where('status', 'in_progress')->count(),
+            'my_resolved_issues' => Issue::where('assigned_to', $user->id)->where('status', 'resolved')->count(),
+            'total_my_issues' => Issue::where('assigned_to', $user->id)->count(),
         ];
     }
     
@@ -286,6 +326,8 @@ class RoleDashboardController extends Controller
      */
     protected function getAccountantData()
     {
+        $user = Auth::user();
+        
         return [
             'total_revenue' => Transaction::where('transaction_type', 'loan_payment')->sum('amount'),
             'total_expenses' => Transaction::whereIn('transaction_type', ['loan_disbursement', 'welfare_benefit'])->sum('amount'),
@@ -305,6 +347,12 @@ class RoleDashboardController extends Controller
                 'total_savings' => SavingsAccount::sum('balance'),
                 'total_investments' => Investment::sum('principal_amount'),
             ],
+            // Issues assigned to this officer only
+            'my_issues' => Issue::where('assigned_to', $user->id)->latest()->limit(10)->get(),
+            'my_pending_issues' => Issue::where('assigned_to', $user->id)->where('status', 'pending')->count(),
+            'my_in_progress_issues' => Issue::where('assigned_to', $user->id)->where('status', 'in_progress')->count(),
+            'my_resolved_issues' => Issue::where('assigned_to', $user->id)->where('status', 'resolved')->count(),
+            'total_my_issues' => Issue::where('assigned_to', $user->id)->count(),
         ];
     }
 }

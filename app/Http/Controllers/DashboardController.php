@@ -15,11 +15,16 @@ class DashboardController extends Controller
         $user = Auth::user();
         
         // Redirect members to member dashboard
-        if ($user->role === 'user' || $user->hasRole('member')) {
+        if ($user->isMember() || ($user->role === 'user' && !$user->hasAnyRole(['loan_officer', 'deposit_officer', 'investment_officer', 'chairperson', 'secretary', 'accountant', 'admin']))) {
             return redirect()->route('member.dashboard');
         }
         
-        // Redirect all other users (admin, staff, etc.) to admin dashboard
+        // Redirect officers to role-specific dashboard
+        if ($user->hasAnyRole(['loan_officer', 'deposit_officer', 'investment_officer', 'chairperson', 'secretary', 'accountant'])) {
+            return redirect()->route('admin.role-dashboard');
+        }
+        
+        // Redirect all other users (admin, etc.) to admin dashboard
         return redirect()->route('admin.dashboard');
     }
 }

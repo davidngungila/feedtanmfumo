@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\RoleDashboardController;
 use App\Http\Controllers\Admin\SavingsAccountController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\SystemSettingsController;
 use App\Http\Controllers\Admin\ShareController;
 use App\Http\Controllers\Admin\SocialWelfareController;
 use App\Http\Controllers\Admin\UserController;
@@ -236,6 +237,97 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('settings/organization', [SettingsController::class, 'updateOrganization'])->name('settings.organization.update');
     Route::get('settings/communication', [SettingsController::class, 'communication'])->name('settings.communication');
     Route::put('settings/communication', [SettingsController::class, 'updateCommunication'])->name('settings.communication.update');
+
+    // Advanced System Settings Routes
+    Route::prefix('system-settings')->name('system-settings.')->group(function () {
+        // User & Access Management
+        Route::get('users', [SystemSettingsController::class, 'users'])->name('users');
+        Route::get('roles', [SystemSettingsController::class, 'roles'])->name('roles');
+        Route::get('permissions', [SystemSettingsController::class, 'permissions'])->name('permissions');
+        Route::get('role-assignment', [SystemSettingsController::class, 'roleAssignment'])->name('role-assignment');
+        Route::get('login-sessions', [SystemSettingsController::class, 'loginSessions'])->name('login-sessions');
+        Route::get('password-policy', [SystemSettingsController::class, 'passwordPolicy'])->name('password-policy');
+        Route::put('password-policy', [SystemSettingsController::class, 'updatePasswordPolicy'])->name('password-policy.update');
+
+        // Organization / General
+        Route::get('system-information', [SystemSettingsController::class, 'systemInformation'])->name('system-information');
+        Route::get('organization-profile', [SystemSettingsController::class, 'organizationProfile'])->name('organization-profile');
+        Route::get('contact-details', [SystemSettingsController::class, 'contactDetails'])->name('contact-details');
+        Route::get('logo-branding', [SystemSettingsController::class, 'logoBranding'])->name('logo-branding');
+        Route::get('language-settings', [SystemSettingsController::class, 'languageSettings'])->name('language-settings');
+        Route::get('timezone-date-format', [SystemSettingsController::class, 'timezoneDateFormat'])->name('timezone-date-format');
+
+        // Application Settings
+        Route::get('general-settings', [SystemSettingsController::class, 'generalSettings'])->name('general-settings');
+        Route::get('feature-toggles', [SystemSettingsController::class, 'featureToggles'])->name('feature-toggles');
+        Route::get('maintenance-mode', [SystemSettingsController::class, 'maintenanceMode'])->name('maintenance-mode');
+        Route::post('toggle-maintenance-mode', [SystemSettingsController::class, 'toggleMaintenanceMode'])->name('toggle-maintenance-mode');
+        Route::get('default-values', [SystemSettingsController::class, 'defaultValues'])->name('default-values');
+        Route::get('system-preferences', [SystemSettingsController::class, 'systemPreferences'])->name('system-preferences');
+
+        // Notifications
+        Route::get('email-settings', [SystemSettingsController::class, 'emailSettings'])->name('email-settings');
+        Route::put('email-settings', [SystemSettingsController::class, 'updateEmailSettings'])->name('email-settings.update');
+        Route::get('sms-settings', [SystemSettingsController::class, 'smsSettings'])->name('sms-settings');
+        Route::get('push-notifications', [SystemSettingsController::class, 'pushNotifications'])->name('push-notifications');
+        Route::get('notification-templates', [SystemSettingsController::class, 'notificationTemplates'])->name('notification-templates');
+        Route::get('alert-rules', [SystemSettingsController::class, 'alertRules'])->name('alert-rules');
+
+        // Data Management
+        Route::get('backup-restore', [SystemSettingsController::class, 'backupRestore'])->name('backup-restore');
+        Route::post('create-backup', [SystemSettingsController::class, 'createBackup'])->name('create-backup');
+        Route::get('import-data', [SystemSettingsController::class, 'importData'])->name('import-data');
+        Route::get('export-data', [SystemSettingsController::class, 'exportData'])->name('export-data');
+        Route::get('database-settings', [SystemSettingsController::class, 'databaseSettings'])->name('database-settings');
+        Route::get('data-retention-policy', [SystemSettingsController::class, 'dataRetentionPolicy'])->name('data-retention-policy');
+
+        // Security
+        Route::get('security-settings', [SystemSettingsController::class, 'securitySettings'])->name('security-settings');
+        Route::get('two-factor-auth', [SystemSettingsController::class, 'twoFactorAuth'])->name('two-factor-auth');
+        Route::get('ip-whitelisting', [SystemSettingsController::class, 'ipWhitelisting'])->name('ip-whitelisting');
+        Route::post('add-ip-address', [SystemSettingsController::class, 'addIpAddress'])->name('add-ip-address');
+        Route::get('audit-logs', [SystemSettingsController::class, 'auditLogs'])->name('audit-logs');
+        Route::get('activity-logs', [SystemSettingsController::class, 'activityLogs'])->name('activity-logs');
+
+        // Documents & Templates
+        Route::get('pdf-templates', [SystemSettingsController::class, 'pdfTemplates'])->name('pdf-templates');
+        Route::get('email-templates', [SystemSettingsController::class, 'emailTemplates'])->name('email-templates');
+        Route::get('report-templates', [SystemSettingsController::class, 'reportTemplates'])->name('report-templates');
+        Route::get('certificate-templates', [SystemSettingsController::class, 'certificateTemplates'])->name('certificate-templates');
+
+        // Integrations
+        Route::get('api-settings', [SystemSettingsController::class, 'apiSettings'])->name('api-settings');
+        Route::get('payment-gateways', [SystemSettingsController::class, 'paymentGateways'])->name('payment-gateways');
+        Route::get('third-party-services', [SystemSettingsController::class, 'thirdPartyServices'])->name('third-party-services');
+        Route::get('webhooks', [SystemSettingsController::class, 'webhooks'])->name('webhooks');
+
+        // System Tools
+        Route::get('cache-management', [SystemSettingsController::class, 'cacheManagement'])->name('cache-management');
+        Route::post('clear-cache', [SystemSettingsController::class, 'clearCache'])->name('clear-cache');
+        Route::get('system-logs', [SystemSettingsController::class, 'systemLogs'])->name('system-logs');
+        Route::get('queue-jobs', [SystemSettingsController::class, 'queueJobs'])->name('queue-jobs');
+        Route::get('cron-jobs', [SystemSettingsController::class, 'cronJobs'])->name('cron-jobs');
+        Route::get('debug-settings', [SystemSettingsController::class, 'debugSettings'])->name('debug-settings');
+
+        // Updates & Maintenance
+        Route::get('system-updates', [SystemSettingsController::class, 'systemUpdates'])->name('system-updates');
+        Route::get('version-info', [SystemSettingsController::class, 'versionInfo'])->name('version-info');
+        Route::get('changelog', [SystemSettingsController::class, 'changelog'])->name('changelog');
+        Route::post('optimize-system', [SystemSettingsController::class, 'optimizeSystem'])->name('optimize-system');
+
+        // Reports & Monitoring
+        Route::get('system-reports', [SystemSettingsController::class, 'systemReports'])->name('system-reports');
+        Route::get('usage-statistics', [SystemSettingsController::class, 'usageStatistics'])->name('usage-statistics');
+        Route::get('performance-monitoring', [SystemSettingsController::class, 'performanceMonitoring'])->name('performance-monitoring');
+        Route::get('error-reports', [SystemSettingsController::class, 'errorReports'])->name('error-reports');
+
+        // Bonus Features
+        Route::get('custom-fields', [SystemSettingsController::class, 'customFields'])->name('custom-fields');
+        Route::get('module-management', [SystemSettingsController::class, 'moduleManagement'])->name('module-management');
+        Route::get('menu-builder', [SystemSettingsController::class, 'menuBuilder'])->name('menu-builder');
+        Route::get('theme-appearance', [SystemSettingsController::class, 'themeAppearance'])->name('theme-appearance');
+        Route::get('license-management', [SystemSettingsController::class, 'licenseManagement'])->name('license-management');
+    });
 
     // Shares Management
     Route::get('shares', [ShareController::class, 'index'])->name('shares.index');

@@ -139,6 +139,81 @@
     </div>
     @endif
 
+    <!-- My Assigned Issues -->
+    @if(isset($data['my_issues']) && $data['my_issues']->count() > 0)
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="text-xl font-bold text-[#015425]">My Assigned Issues</h3>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 text-sm">
+                    <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">{{ $data['my_pending_issues'] }} Pending</span>
+                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">{{ $data['my_in_progress_issues'] }} In Progress</span>
+                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">{{ $data['my_resolved_issues'] }} Resolved</span>
+                </div>
+                <a href="{{ route('admin.issues.index', ['assigned_to' => $user->id]) }}" class="text-sm text-[#015425] hover:underline">View All ({{ $data['total_my_issues'] }}) →</a>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Issue #</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Priority</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    @foreach($data['my_issues'] as $issue)
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-3 text-sm font-medium">{{ $issue->issue_number }}</td>
+                        <td class="px-4 py-3 text-sm">{{ Str::limit($issue->title, 40) }}</td>
+                        <td class="px-4 py-3 text-sm">
+                            <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs">{{ ucfirst($issue->category) }}</span>
+                        </td>
+                        <td class="px-4 py-3 text-sm">
+                            <span class="px-2 py-1 rounded-full text-xs font-semibold {{ 
+                                $issue->priority === 'urgent' ? 'bg-red-100 text-red-800' : 
+                                ($issue->priority === 'high' ? 'bg-orange-100 text-orange-800' : 
+                                ($issue->priority === 'medium' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'))
+                            }}">
+                                {{ ucfirst($issue->priority) }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-sm">
+                            <span class="px-2 py-1 rounded-full text-xs font-semibold {{ 
+                                $issue->status === 'resolved' ? 'bg-green-100 text-green-800' : 
+                                ($issue->status === 'in_progress' ? 'bg-blue-100 text-blue-800' : 
+                                ($issue->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'))
+                            }}">
+                                {{ ucfirst(str_replace('_', ' ', $issue->status)) }}
+                            </span>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-gray-500">{{ $issue->created_at->format('M d, Y') }}</td>
+                        <td class="px-4 py-3 text-sm">
+                            <a href="{{ route('admin.issues.show', $issue) }}" class="text-[#015425] hover:underline">View</a>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @elseif(isset($data['total_my_issues']) && $data['total_my_issues'] == 0)
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <div class="text-center py-8">
+            <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">No Assigned Issues</h3>
+            <p class="text-sm text-gray-600">You don't have any issues assigned to you at the moment.</p>
+        </div>
+    </div>
+    @endif
+
     <!-- Quick Actions -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <a href="{{ route('admin.users.index') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition group">

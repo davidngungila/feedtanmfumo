@@ -33,12 +33,18 @@ class LoginController extends Controller
             $user = Auth::user();
             
             // Redirect based on role
-            // Members (users with role 'user' or 'member') go to member dashboard
-            if ($user->role === 'user' || $user->hasRole('member')) {
+            // Members only go to member dashboard
+            if ($user->isMember() || ($user->role === 'user' && !$user->hasAnyRole(['loan_officer', 'deposit_officer', 'investment_officer', 'chairperson', 'secretary', 'accountant', 'admin']))) {
                 return redirect()->intended('/member/dashboard');
             }
 
-            // All other users (admin, staff, etc.) go to admin dashboard
+            // All officers and admins go to admin dashboard
+            // Check if user has officer roles - redirect to role-specific dashboard
+            if ($user->hasAnyRole(['loan_officer', 'deposit_officer', 'investment_officer', 'chairperson', 'secretary', 'accountant'])) {
+                return redirect()->intended('/admin/role-dashboard');
+            }
+
+            // Default admin dashboard
             return redirect()->intended('/admin/dashboard');
         }
 

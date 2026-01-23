@@ -22,6 +22,12 @@ class DashboardController extends Controller
      */
     public function index()
     {
+        $user = auth()->user();
+        
+        // Redirect officers to their role-specific dashboard
+        if ($user->hasAnyRole(['loan_officer', 'deposit_officer', 'investment_officer', 'chairperson', 'secretary', 'accountant'])) {
+            return redirect()->route('admin.role-dashboard');
+        }
         // User Statistics
         $stats = [
             'total_users' => User::count(),

@@ -22,11 +22,12 @@ class AdminMiddleware
         $user = auth()->user();
         
         // Block members (users with role 'user' or 'member') from accessing admin areas
-        if ($user->role === 'user' || $user->hasRole('member')) {
+        if ($user->isMember() || ($user->role === 'user' && !$user->hasAnyRole(['loan_officer', 'deposit_officer', 'investment_officer', 'chairperson', 'secretary', 'accountant', 'admin']))) {
             return redirect()->route('member.dashboard')->with('error', 'You do not have access to this area.');
         }
 
-        // All other users (admin, staff, loan officer, etc.) can access admin areas
+        // All officers and admins can access admin areas
+        // Officers: loan_officer, deposit_officer, investment_officer, chairperson, secretary, accountant
         // Access control for specific features is handled by role-based checks in controllers/views
         return $next($request);
     }
