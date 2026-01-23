@@ -25,8 +25,8 @@ class SmsProviderController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'username' => 'required|string|max:255',
-            'password' => 'required|string',
+            'username' => 'required|string|max:255', // This is actually the Bearer token
+            'password' => 'nullable|string', // Optional
             'from' => 'nullable|string|max:11',
             'api_url' => 'required|url',
             'description' => 'nullable|string',
@@ -37,8 +37,8 @@ class SmsProviderController extends Controller
         try {
             $provider = SmsProvider::create([
                 'name' => $validated['name'],
-                'username' => $validated['username'],
-                'password' => $validated['password'],
+                'username' => $validated['username'], // Bearer token stored here
+                'password' => $validated['password'] ?? null, // Optional
                 'from' => $validated['from'] ?? 'FEEDTAN',
                 'api_url' => $validated['api_url'],
                 'description' => $validated['description'] ?? null,
