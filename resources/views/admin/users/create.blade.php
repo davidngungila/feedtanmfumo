@@ -6,17 +6,19 @@
 <div class="space-y-6">
     <!-- Header Section -->
     <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-6 text-white">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-            <div>
+        <div class="flex flex-col md:flex-row md:items-center">
+            <div class="flex-1">
                 <h1 class="text-2xl sm:text-3xl font-bold mb-2">Register New Member</h1>
                 <p class="text-white text-opacity-90 text-sm sm:text-base">Complete member registration form with comprehensive information and advanced features</p>
             </div>
-            <a href="{{ route('admin.users.directory') }}" class="mt-4 md:mt-0 inline-flex items-center px-6 py-3 bg-white text-[#015425] rounded-md hover:bg-gray-100 transition font-medium shadow-md">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                </svg>
-                Back to Directory
-            </a>
+            <div class="mt-4 md:mt-0 md:ml-auto flex flex-wrap gap-3 justify-end">
+                <a href="{{ route('admin.users.directory') }}" class="inline-flex items-center px-6 py-3 bg-white text-[#015425] rounded-md hover:bg-gray-100 transition font-medium shadow-md">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                    Back to Directory
+                </a>
+            </div>
         </div>
     </div>
 

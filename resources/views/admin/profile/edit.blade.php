@@ -6,8 +6,8 @@
 <div class="space-y-6">
     <!-- Header Section -->
     <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-6 text-white">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-            <div>
+        <div class="flex flex-col md:flex-row md:items-center">
+            <div class="flex-1">
                 <h1 class="text-2xl sm:text-3xl font-bold mb-2">Edit Profile</h1>
                 <p class="text-white text-opacity-90 text-sm sm:text-base">Update your personal information and account settings</p>
             </div>
