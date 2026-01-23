@@ -170,4 +170,73 @@ class EmailProviderController extends Controller
                 ->with('error', 'Failed to set primary email provider: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Show the specified email provider
+     */
+    public function show(EmailProvider $emailProvider)
+    {
+        return view('admin.settings.email-provider.show', compact('emailProvider'));
+    }
+
+    /**
+     * Test email provider configuration
+     */
+    public function test(Request $request, EmailProvider $emailProvider)
+    {
+        $request->validate([
+            'test_email' => 'required|email',
+        ]);
+
+        try {
+            // Temporarily set mail config from provider
+            config(['mail.default' => $emailProvider->mailer]);
+            config(['mail.mailers.smtp.host' => $emailProvider->host]);
+            config(['mail.mailers.smtp.port' => $emailProvider->port]);
+            config(['mail.mailers.smtp.encryption' => $emailProvider->encryption]);
+            config(['mail.mailers.smtp.username' => $emailProvider->username]);
+            config(['mail.mailers.smtp.password' => $emailProvider->password]);
+            config(['mail.from.address' => $emailProvider->from_address]);
+            config(['mail.from.name' => $emailProvider->from_name ?? 'FeedTan CMG']);
+
+            $subject = "Test Email - {$emailProvider->name}";
+            $message = "This is a test email from {$emailProvider->name}.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+EMAIL PROVIDER CONFIGURATION TEST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+If you received this email, your email provider configuration is working correctly!
+
+Provider Details:
+• Provider Name: {$emailProvider->name}
+• Mailer: {$emailProvider->mailer}
+• Host: {$emailProvider->host}
+• Port: {$emailProvider->port}
+• Encryption: {$emailProvider->encryption}
+• From: {$emailProvider->from_address} ({$emailProvider->from_name})
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This email was sent at: " . now()->format('Y-m-d H:i:s') . "
+
+Best regards,
+FeedTan Community Microfinance Group";
+
+            \Mail::raw($message, function ($mail) use ($request, $subject, $emailProvider) {
+                $mail->to($request->test_email)
+                     ->subject($subject)
+                     ->from($emailProvider->from_address, $emailProvider->from_name ?? 'FeedTan CMG');
+            });
+
+            return redirect()->route('admin.email-provider.show', $emailProvider)
+                ->with('success', "Test email sent successfully to {$request->test_email}!");
+        } catch (\Exception $e) {
+            Log::error('Failed to send test email: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            return redirect()->route('admin.email-provider.show', $emailProvider)
+                ->with('error', 'Failed to send test email: ' . $e->getMessage());
+        }
+    }
 }

@@ -248,18 +248,22 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Email Provider Management
     Route::get('email-provider/create', [\App\Http\Controllers\Admin\EmailProviderController::class, 'create'])->name('email-provider.create');
     Route::post('email-provider/store', [\App\Http\Controllers\Admin\EmailProviderController::class, 'store'])->name('email-provider.store');
+    Route::get('email-provider/{emailProvider}', [\App\Http\Controllers\Admin\EmailProviderController::class, 'show'])->name('email-provider.show');
     Route::get('email-provider/{emailProvider}/edit', [\App\Http\Controllers\Admin\EmailProviderController::class, 'edit'])->name('email-provider.edit');
     Route::put('email-provider/{emailProvider}', [\App\Http\Controllers\Admin\EmailProviderController::class, 'update'])->name('email-provider.update');
     Route::delete('email-provider/{emailProvider}', [\App\Http\Controllers\Admin\EmailProviderController::class, 'destroy'])->name('email-provider.destroy');
     Route::post('email-provider/{emailProvider}/set-primary', [\App\Http\Controllers\Admin\EmailProviderController::class, 'setPrimary'])->name('email-provider.set-primary');
+    Route::post('email-provider/{emailProvider}/test', [\App\Http\Controllers\Admin\EmailProviderController::class, 'test'])->name('email-provider.test');
 
     // SMS Provider Management
     Route::get('sms-provider/create', [\App\Http\Controllers\Admin\SmsProviderController::class, 'create'])->name('sms-provider.create');
     Route::post('sms-provider/store', [\App\Http\Controllers\Admin\SmsProviderController::class, 'store'])->name('sms-provider.store');
+    Route::get('sms-provider/{smsProvider}', [\App\Http\Controllers\Admin\SmsProviderController::class, 'show'])->name('sms-provider.show');
     Route::get('sms-provider/{smsProvider}/edit', [\App\Http\Controllers\Admin\SmsProviderController::class, 'edit'])->name('sms-provider.edit');
     Route::put('sms-provider/{smsProvider}', [\App\Http\Controllers\Admin\SmsProviderController::class, 'update'])->name('sms-provider.update');
     Route::delete('sms-provider/{smsProvider}', [\App\Http\Controllers\Admin\SmsProviderController::class, 'destroy'])->name('sms-provider.destroy');
     Route::post('sms-provider/{smsProvider}/set-primary', [\App\Http\Controllers\Admin\SmsProviderController::class, 'setPrimary'])->name('sms-provider.set-primary');
+    Route::post('sms-provider/{smsProvider}/test', [\App\Http\Controllers\Admin\SmsProviderController::class, 'test'])->name('sms-provider.test');
     Route::post('sms-provider/test-connection', [\App\Http\Controllers\Admin\SmsProviderController::class, 'testConnection'])->name('sms-provider.test-connection');
 
     // Advanced System Settings Routes
