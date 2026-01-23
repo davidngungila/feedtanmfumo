@@ -248,6 +248,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // SMS Provider Management
     Route::get('sms-provider/create', [\App\Http\Controllers\Admin\SmsProviderController::class, 'create'])->name('sms-provider.create');
     Route::post('sms-provider/store', [\App\Http\Controllers\Admin\SmsProviderController::class, 'store'])->name('sms-provider.store');
+    Route::get('sms-provider/{smsProvider}/edit', [\App\Http\Controllers\Admin\SmsProviderController::class, 'edit'])->name('sms-provider.edit');
+    Route::put('sms-provider/{smsProvider}', [\App\Http\Controllers\Admin\SmsProviderController::class, 'update'])->name('sms-provider.update');
+    Route::delete('sms-provider/{smsProvider}', [\App\Http\Controllers\Admin\SmsProviderController::class, 'destroy'])->name('sms-provider.destroy');
+    Route::post('sms-provider/{smsProvider}/set-primary', [\App\Http\Controllers\Admin\SmsProviderController::class, 'setPrimary'])->name('sms-provider.set-primary');
     Route::post('sms-provider/test-connection', [\App\Http\Controllers\Admin\SmsProviderController::class, 'testConnection'])->name('sms-provider.test-connection');
 
     // Advanced System Settings Routes

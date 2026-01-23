@@ -227,23 +227,89 @@
                         </a>
                     </div>
                     
-                    @php
-                        $primaryProvider = \App\Models\SmsProvider::getPrimary();
-                        $providers = \App\Models\SmsProvider::getActive();
-                    @endphp
-                    
-                    @if($primaryProvider)
-                    <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-green-800">Primary Provider: <strong>{{ $primaryProvider->name }}</strong></p>
-                                <p class="text-xs text-green-600 mt-1">{{ $primaryProvider->description ?? 'No description' }}</p>
-                            </div>
-                            <span class="px-3 py-1 bg-green-200 text-green-800 rounded-full text-xs font-medium">Active</span>
-                        </div>
+                    @if($providers->count() > 0)
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Provider Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Username</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">From</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">API URL</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Primary</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                @foreach($providers as $provider)
+                                <tr class="hover:bg-gray-50 {{ $provider->is_primary ? 'bg-green-50' : '' }}">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-medium text-gray-900">{{ $provider->name }}</div>
+                                        @if($provider->description)
+                                        <div class="text-xs text-gray-500 mt-1">{{ Str::limit($provider->description, 50) }}</div>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ $provider->username }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm text-gray-900">{{ $provider->from ?? 'N/A' }}</div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm text-gray-900 max-w-xs truncate" title="{{ $provider->api_url }}">{{ $provider->api_url }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @if($provider->active)
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                                        @else
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Inactive</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @if($provider->is_primary)
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-[#015425] text-white">Primary</span>
+                                        @else
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">-</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <div class="flex items-center justify-end space-x-2">
+                                            @if(!$provider->is_primary)
+                                            <form action="{{ route('admin.sms-provider.set-primary', $provider) }}" method="POST" class="inline">
+                                                @csrf
+                                                <button type="submit" class="text-blue-600 hover:text-blue-900" title="Set as Primary">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                            @endif
+                                            <a href="{{ route('admin.sms-provider.edit', $provider) }}" class="text-indigo-600 hover:text-indigo-900" title="Edit">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                </svg>
+                                            </a>
+                                            @if(!$provider->is_primary)
+                                            <form action="{{ route('admin.sms-provider.destroy', $provider) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this SMS provider?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:text-red-900" title="Delete">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                    </svg>
+                                                </button>
+                                            </form>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                     @else
-                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                         <p class="text-sm text-yellow-800">No SMS provider configured. <a href="{{ route('admin.sms-provider.create') }}" class="underline font-medium">Add one now</a> to enable SMS notifications.</p>
                     </div>
                     @endif

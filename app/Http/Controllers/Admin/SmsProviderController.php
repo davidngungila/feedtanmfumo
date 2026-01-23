@@ -173,4 +173,100 @@ class SmsProviderController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Show the form for editing the specified SMS provider
+     */
+    public function edit(SmsProvider $smsProvider)
+    {
+        return view('admin.settings.sms-provider.edit', compact('smsProvider'));
+    }
+
+    /**
+     * Update the specified SMS provider
+     */
+    public function update(Request $request, SmsProvider $smsProvider)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'username' => 'required|string|max:255',
+            'password' => 'nullable|string',
+            'from' => 'nullable|string|max:11',
+            'api_url' => 'required|url',
+            'description' => 'nullable|string',
+            'active' => 'nullable|boolean',
+            'is_primary' => 'nullable|boolean',
+        ]);
+
+        try {
+            $updateData = [
+                'name' => $validated['name'],
+                'username' => $validated['username'],
+                'from' => $validated['from'] ?? 'FEEDTAN',
+                'api_url' => $validated['api_url'],
+                'description' => $validated['description'] ?? null,
+                'active' => $request->has('active'),
+                'is_primary' => $request->has('is_primary'),
+            ];
+
+            // Only update password if provided
+            if ($request->filled('password')) {
+                $updateData['password'] = $validated['password'];
+            }
+
+            $smsProvider->update($updateData);
+
+            // If set as primary, ensure it's the only primary
+            if ($request->has('is_primary')) {
+                $smsProvider->setAsPrimary();
+            }
+
+            return redirect()->route('admin.settings.communication')
+                ->with('success', 'SMS provider updated successfully.');
+        } catch (\Exception $e) {
+            Log::error('Failed to update SMS provider: ' . $e->getMessage());
+            return back()->withInput()
+                ->with('error', 'Failed to update SMS provider: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Remove the specified SMS provider
+     */
+    public function destroy(SmsProvider $smsProvider)
+    {
+        try {
+            // Prevent deleting primary provider
+            if ($smsProvider->is_primary) {
+                return redirect()->route('admin.settings.communication')
+                    ->with('error', 'Cannot delete the primary SMS provider. Please set another provider as primary first.');
+            }
+
+            $smsProvider->delete();
+
+            return redirect()->route('admin.settings.communication')
+                ->with('success', 'SMS provider deleted successfully.');
+        } catch (\Exception $e) {
+            Log::error('Failed to delete SMS provider: ' . $e->getMessage());
+            return redirect()->route('admin.settings.communication')
+                ->with('error', 'Failed to delete SMS provider: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Set provider as primary
+     */
+    public function setPrimary(SmsProvider $smsProvider)
+    {
+        try {
+            $smsProvider->setAsPrimary();
+
+            return redirect()->route('admin.settings.communication')
+                ->with('success', 'SMS provider set as primary successfully.');
+        } catch (\Exception $e) {
+            Log::error('Failed to set primary SMS provider: ' . $e->getMessage());
+            return redirect()->route('admin.settings.communication')
+                ->with('error', 'Failed to set primary SMS provider: ' . $e->getMessage());
+        }
+    }
 }

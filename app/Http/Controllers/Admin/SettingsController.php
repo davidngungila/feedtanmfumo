@@ -35,7 +35,11 @@ class SettingsController extends Controller
     {
         $settings = Setting::getByGroup('communication');
         $primaryProvider = \App\Models\SmsProvider::getPrimary();
-        return view('admin.settings.communication', compact('settings', 'primaryProvider'));
+        $providers = \App\Models\SmsProvider::orderBy('is_primary', 'desc')
+            ->orderBy('active', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+        return view('admin.settings.communication', compact('settings', 'primaryProvider', 'providers'));
     }
 
     public function updateSystem(Request $request)
