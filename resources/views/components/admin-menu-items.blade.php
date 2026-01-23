@@ -123,7 +123,7 @@
                 <a href="{{ route('admin.issues.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Open Tickets</a>
                 <a href="{{ route('admin.issues.tracking') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Issue Tracking</a>
                 <a href="{{ route('admin.issues.resolution-status') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Resolution Status</a>
-                <a href="{{ route('admin.issues.categories') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Issue Categories (Login, Transactions, Reports, etc.)</a>
+                <a href="{{ route('admin.issues.categories') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Issue Categories (Login, Transactions, Reports, etc.)">Issue Categories</a>
             </div>
         </div>
         <!-- Operational Issues -->
@@ -284,10 +284,10 @@
                 </svg>
             </button>
             <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
-                <a href="{{ route('admin.savings.index', ['account_type' => 'emergency']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Emergency Savings Account</a>
-                <a href="{{ route('admin.savings.index', ['account_type' => 'rda']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Recurrent Deposit Account (RDA)</a>
-                <a href="{{ route('admin.savings.index', ['account_type' => 'flex']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Flex Account</a>
-                <a href="{{ route('admin.savings.index', ['account_type' => 'business']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Business Savings Account</a>
+                <a href="{{ route('admin.savings.index', ['account_type' => 'emergency']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Emergency Savings Account">Emergency Savings</a>
+                <a href="{{ route('admin.savings.index', ['account_type' => 'rda']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Recurrent Deposit Account (RDA)">RDA Account</a>
+                <a href="{{ route('admin.savings.index', ['account_type' => 'flex']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate">Flex Account</a>
+                <a href="{{ route('admin.savings.index', ['account_type' => 'business']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Business Savings Account">Business Savings</a>
             </div>
         </div>
         <!-- Savings Operations -->
@@ -301,9 +301,9 @@
             <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
                 <a href="{{ route('admin.savings.deposits') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Deposit Transactions</a>
                 <a href="{{ route('admin.savings.withdrawals') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Withdrawal Requests</a>
-                <a href="{{ route('admin.savings.transfers') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Transfer Between Accounts</a>
-                <a href="{{ route('admin.savings.interest-posting') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Interest Posting</a>
-                <a href="{{ route('admin.savings.statements') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Account Statements</a>
+                <a href="{{ route('admin.savings.transfers') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Transfer Between Accounts">Account Transfers</a>
+                <a href="{{ route('admin.savings.interest-posting') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate">Interest Posting</a>
+                <a href="{{ route('admin.savings.statements') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate">Account Statements</a>
             </div>
         </div>
         <!-- Account Management -->
@@ -317,9 +317,9 @@
             <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
                 <a href="{{ route('admin.savings.create') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Open New Account</a>
                 <a href="{{ route('admin.savings.close-account') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Close Account</a>
-                <a href="{{ route('admin.savings.freeze-unfreeze') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Account Freeze/Unfreeze</a>
-                <a href="{{ route('admin.savings.upgrades') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Account Upgrades</a>
-                <a href="{{ route('admin.savings.minimum-balance') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Minimum Balance Monitoring</a>
+                <a href="{{ route('admin.savings.freeze-unfreeze') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Account Freeze/Unfreeze">Freeze/Unfreeze</a>
+                <a href="{{ route('admin.savings.upgrades') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate">Account Upgrades</a>
+                <a href="{{ route('admin.savings.minimum-balance') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Minimum Balance Monitoring">Min Balance Monitor</a>
             </div>
         </div>
         <!-- Savings Reports -->
@@ -331,10 +331,10 @@
                 </svg>
             </button>
             <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
-                <a href="{{ route('admin.savings.total-balance') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Total Savings Balance</a>
-                <a href="{{ route('admin.reports.savings') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Account Growth Trend</a>
-                <a href="{{ route('admin.reports.savings') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Deposit/Withdrawal Summary</a>
-                <a href="{{ route('admin.reports.savings') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Interest Accrued Report</a>
+                <a href="{{ route('admin.savings.total-balance') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Total Savings Balance">Total Balance</a>
+                <a href="{{ route('admin.reports.savings') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate">Growth Trend</a>
+                <a href="{{ route('admin.reports.savings') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Deposit/Withdrawal Summary">Deposit/Withdrawal</a>
+                <a href="{{ route('admin.reports.savings') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Interest Accrued Report">Interest Report</a>
             </div>
         </div>
     </div>
@@ -377,7 +377,7 @@
                 </svg>
             </button>
             <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
-                <a href="{{ route('admin.investments.create') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">New Investment Enrollment</a>
+                <a href="{{ route('admin.investments.create') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="New Investment Enrollment">New Enrollment</a>
                 <a href="{{ route('admin.investments.index', ['status' => 'active']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Investment Top-up</a>
                 <a href="{{ route('admin.investments.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Maturity Calculation</a>
                 <a href="{{ route('admin.investments.index', ['status' => 'matured']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Profit Distribution</a>
@@ -445,8 +445,8 @@
             <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
                 <a href="{{ route('admin.welfare.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Contribution Collection</a>
                 <a href="{{ route('admin.welfare.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Fund Balance</a>
-                <a href="{{ route('admin.welfare.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Investment of Welfare Fund</a>
-                <a href="{{ route('admin.welfare.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Fund Utilization Rate</a>
+                <a href="{{ route('admin.welfare.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Investment of Welfare Fund">Fund Investment</a>
+                <a href="{{ route('admin.welfare.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Fund Utilization Rate">Utilization Rate</a>
             </div>
         </div>
         <!-- Welfare Services -->
@@ -462,7 +462,7 @@
                 <a href="{{ route('admin.welfare.index', ['type' => 'funeral']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Funeral Assistance</a>
                 <a href="{{ route('admin.welfare.index', ['type' => 'education']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Education Support</a>
                 <a href="{{ route('admin.welfare.index', ['type' => 'emergency']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Emergency Grants</a>
-                <a href="{{ route('admin.welfare.index', ['type' => 'special_needs']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Special Needs Support</a>
+                <a href="{{ route('admin.welfare.index', ['type' => 'special_needs']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Special Needs Support">Special Needs</a>
             </div>
         </div>
         <!-- Claims Processing -->
@@ -474,10 +474,10 @@
                 </svg>
             </button>
             <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
-                <a href="{{ route('admin.welfare.create') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">New Claim Application</a>
-                <a href="{{ route('admin.welfare.index', ['status' => 'pending']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Claim Verification</a>
-                <a href="{{ route('admin.welfare.index', ['status' => 'pending']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Approval Workflow</a>
-                <a href="{{ route('admin.welfare.index', ['status' => 'approved']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Disbursement Processing</a>
+                <a href="{{ route('admin.welfare.create') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="New Claim Application">New Claim</a>
+                <a href="{{ route('admin.welfare.index', ['status' => 'pending']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate">Claim Verification</a>
+                <a href="{{ route('admin.welfare.index', ['status' => 'pending']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate">Approval Workflow</a>
+                <a href="{{ route('admin.welfare.index', ['status' => 'approved']) }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Disbursement Processing">Disbursement</a>
                 <a href="{{ route('admin.welfare.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Claim History</a>
             </div>
         </div>
@@ -539,10 +539,10 @@
                 </svg>
             </button>
             <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
-                <a href="{{ route('admin.reports.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Daily Transaction Report</a>
-                <a href="{{ route('admin.reports.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Monthly Performance Report</a>
-                <a href="{{ route('admin.reports.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Member Activity Report</a>
-                <a href="{{ route('admin.reports.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Product Performance Report</a>
+                <a href="{{ route('admin.reports.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Daily Transaction Report">Daily Transactions</a>
+                <a href="{{ route('admin.reports.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Monthly Performance Report">Monthly Performance</a>
+                <a href="{{ route('admin.reports.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Member Activity Report">Member Activity</a>
+                <a href="{{ route('admin.reports.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Product Performance Report">Product Performance</a>
             </div>
         </div>
         <!-- Compliance Reports -->
@@ -571,7 +571,7 @@
             <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
                 <a href="{{ route('admin.reports.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Report Builder</a>
                 <a href="{{ route('admin.reports.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Custom Queries</a>
-                <a href="{{ route('admin.reports.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Export Options (PDF, Excel, Print)</a>
+                <a href="{{ route('admin.reports.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Export Options (PDF, Excel, Print)">Export Options</a>
             </div>
         </div>
     </div>
@@ -595,7 +595,7 @@
         <!-- Share Capital Operations -->
         <div class="nested-dropdown-container">
             <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
-                <span>Share Capital Operations</span>
+                <span class="truncate">Share Capital Ops</span>
                 <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
@@ -618,10 +618,10 @@
             </button>
             <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
                 <a href="{{ route('admin.shares.price-setting') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Share Price Setting</a>
-                <a href="{{ route('admin.shares.minimum-shares') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Minimum Shares per Member</a>
-                <a href="{{ route('admin.shares.maximum-shares') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Maximum Shares per Member</a>
-                <a href="{{ route('admin.shares.certificate-template') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Share Certificate Template</a>
-                <a href="{{ route('admin.shares.dividend-policy') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Dividend Policy Settings</a>
+                <a href="{{ route('admin.shares.minimum-shares') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Minimum Shares per Member">Min Shares/Member</a>
+                <a href="{{ route('admin.shares.maximum-shares') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Maximum Shares per Member">Max Shares/Member</a>
+                <a href="{{ route('admin.shares.certificate-template') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Share Certificate Template">Certificate Template</a>
+                <a href="{{ route('admin.shares.dividend-policy') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Dividend Policy Settings">Dividend Policy</a>
             </div>
         </div>
         <!-- Member Shares -->
@@ -633,11 +633,11 @@
                 </svg>
             </button>
             <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
-                <a href="{{ route('admin.shares.ownership-register') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Share Ownership Register</a>
-                <a href="{{ route('admin.shares.balance-per-member') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Share Balance per Member</a>
-                <a href="{{ route('admin.shares.transaction-history') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Share Transaction History</a>
-                <a href="{{ route('admin.shares.certificates-issued') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Share Certificates Issued</a>
-                <a href="{{ route('admin.shares.dividend-distribution') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Dividend Distribution List</a>
+                <a href="{{ route('admin.shares.ownership-register') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Share Ownership Register">Ownership Register</a>
+                <a href="{{ route('admin.shares.balance-per-member') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Share Balance per Member">Balance/Member</a>
+                <a href="{{ route('admin.shares.transaction-history') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Share Transaction History">Transaction History</a>
+                <a href="{{ route('admin.shares.certificates-issued') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Share Certificates Issued">Certificates Issued</a>
+                <a href="{{ route('admin.shares.dividend-distribution') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Dividend Distribution List">Dividend List</a>
             </div>
         </div>
         <!-- Share Reports -->
@@ -651,9 +651,9 @@
             <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
                 <a href="{{ route('admin.shares.capital-report') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Share Capital Report</a>
                 <a href="{{ route('admin.shares.shareholder-register') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Shareholder Register</a>
-                <a href="{{ route('admin.shares.transaction-ledger') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Share Transaction Ledger</a>
-                <a href="{{ route('admin.shares.dividend-report') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Dividend Distribution Report</a>
-                <a href="{{ route('admin.shares.growth-analysis') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Share Capital Growth Analysis</a>
+                <a href="{{ route('admin.shares.transaction-ledger') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Share Transaction Ledger">Transaction Ledger</a>
+                <a href="{{ route('admin.shares.dividend-report') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Dividend Distribution Report">Dividend Report</a>
+                <a href="{{ route('admin.shares.growth-analysis') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs truncate" title="Share Capital Growth Analysis">Growth Analysis</a>
             </div>
         </div>
     </div>
@@ -893,8 +893,8 @@
         <!-- Communication Settings -->
         <div class="nested-dropdown-container">
             <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
-                <span>Communication Settings</span>
-                <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <span class="truncate">Comm Settings</span>
+                <svg class="w-3 h-3 nested-dropdown-arrow transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </button>

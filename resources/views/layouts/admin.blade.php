@@ -41,6 +41,32 @@
     <!-- Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
+    <style>
+        /* Ensure all sidebar menu items fit in single line */
+        .dropdown-toggle span,
+        .nested-dropdown-toggle span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .dropdown-menu a,
+        .nested-dropdown-menu a {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
+        }
+        
+        /* Ensure dropdown arrows don't shrink */
+        .dropdown-arrow,
+        .nested-dropdown-arrow {
+            flex-shrink: 0;
+        }
+    </style>
+    
     @stack('styles')
 </head>
 <body class="h-full bg-[#fafafa] text-[#41546b] overflow-hidden">
