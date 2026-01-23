@@ -85,29 +85,81 @@
 </div>
 
 <script>
-    // Auto-focus and format OTP input
+    // Auto-focus and format OTP input with auto-verification
     document.addEventListener('DOMContentLoaded', function() {
         const otpInput = document.getElementById('otp_code');
+        const otpForm = otpInput.closest('form');
+        const submitButton = otpForm.querySelector('button[type="submit"]');
+        let isSubmitting = false;
         
+        // Ensure input only accepts numbers
         otpInput.addEventListener('input', function(e) {
             // Only allow numbers
-            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            e.target.value = value;
             
-            // Auto-submit when 6 digits are entered
-            if (e.target.value.length === 6) {
-                e.target.form.submit();
+            // Auto-submit when exactly 6 digits are entered
+            if (value.length === 6 && !isSubmitting) {
+                isSubmitting = true;
+                
+                // Visual feedback - disable input and show loading
+                otpInput.disabled = true;
+                otpInput.classList.add('opacity-75', 'cursor-not-allowed');
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.textContent = 'Verifying...';
+                    submitButton.classList.add('opacity-75', 'cursor-not-allowed');
+                }
+                
+                // Small delay to ensure value is set, then submit
+                setTimeout(function() {
+                    otpForm.submit();
+                }, 150);
             }
         });
         
+        // Handle paste events
         otpInput.addEventListener('paste', function(e) {
             e.preventDefault();
             const pasted = (e.clipboardData || window.clipboardData).getData('text');
             const numbers = pasted.replace(/[^0-9]/g, '').substring(0, 6);
-            e.target.value = numbers;
-            if (numbers.length === 6) {
-                e.target.form.submit();
+            otpInput.value = numbers;
+            
+            // Auto-submit if 6 digits pasted
+            if (numbers.length === 6 && !isSubmitting) {
+                isSubmitting = true;
+                otpInput.disabled = true;
+                otpInput.classList.add('opacity-75', 'cursor-not-allowed');
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.textContent = 'Verifying...';
+                    submitButton.classList.add('opacity-75', 'cursor-not-allowed');
+                }
+                
+                setTimeout(function() {
+                    otpForm.submit();
+                }, 150);
             }
         });
+        
+        // Prevent manual submission if less than 6 digits
+        otpForm.addEventListener('submit', function(e) {
+            const value = otpInput.value.replace(/[^0-9]/g, '');
+            if (value.length !== 6) {
+                e.preventDefault();
+                alert('Please enter a complete 6-digit OTP code.');
+                otpInput.focus();
+                otpInput.select();
+                return false;
+            }
+        });
+        
+        // Focus on input when page loads
+        otpInput.focus();
+        
+        // Add inputmode for mobile numeric keyboard
+        otpInput.setAttribute('inputmode', 'numeric');
+        otpInput.setAttribute('autocomplete', 'one-time-code');
     });
 </script>
 @endsection
