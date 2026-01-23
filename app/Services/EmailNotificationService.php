@@ -246,6 +246,55 @@ class EmailNotificationService
     }
 
     /**
+     * Send deposit statement email
+     */
+    public function sendDepositStatementEmail(User $user, string $pdfLink, string $period, ?string $periodStart = null): bool
+    {
+        try {
+            $this->reloadMailConfig();
+            $orgInfo = $this->getOrganizationInfo();
+            
+            $subject = "Deposit Statement for {$user->name} - {$period}";
+            
+            // Format period date
+            try {
+                $periodDate = \Carbon\Carbon::parse($period);
+                $formattedPeriod = $periodDate->format('D M d, Y');
+            } catch (\Exception $e) {
+                $formattedPeriod = $period; // Use as-is if parsing fails
+            }
+            
+            // Use the statement email template
+            $htmlBody = View::make('emails.statement', [
+                'name' => $user->name,
+                'pdfLink' => $pdfLink,
+                'period' => $formattedPeriod,
+                'periodStart' => $periodStart ?? 'Machi 2025',
+                'organizationInfo' => $orgInfo,
+            ])->render();
+            
+            Mail::html($htmlBody, function ($mail) use ($user, $subject, $orgInfo) {
+                $mail->to($user->email, $user->name)
+                     ->subject($subject)
+                     ->from($orgInfo['from_email'], $orgInfo['from_name'] ?? 'FeedTan CMG-Deposit Statement');
+                
+                // Add additional emails as CC if configured
+                if (!empty($orgInfo['additional_emails'])) {
+                    foreach ($orgInfo['additional_emails'] as $additionalEmail) {
+                        $mail->cc($additionalEmail);
+                    }
+                }
+            });
+            
+            Log::info("Deposit statement email sent to {$user->email} for user ID {$user->id}.");
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Failed to send deposit statement email to {$user->email}: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Send welfare notification
      */
     public function sendWelfareNotification(User $user, string $event, array $welfareDetails): bool
