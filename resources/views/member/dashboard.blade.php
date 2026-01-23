@@ -70,25 +70,25 @@
                             {{ $user->membership_status === 'suspended' ? 'text-orange-700' : '' }}">
                             Membership Application Status
                         </h3>
-                        <p class="text-sm sm:text-base text-gray-600 mt-1">
+                        <p class="text-sm sm:text-base text-[#015425] mt-1">
                             @if($user->membership_status === 'approved')
                                 <span class="font-semibold text-green-700">✓ Approved</span>
                                 @if($user->membershipType)
-                                    <span class="text-gray-500">- {{ $user->membershipType->name }}</span>
+                                    <span class="text-[#015425]">- {{ $user->membershipType->name }}</span>
                                 @endif
                             @elseif($user->membership_status === 'pending')
                                 <span class="font-semibold text-yellow-700">⏳ In Approval / Pending Review</span>
-                                <span class="text-gray-500 block mt-1 text-xs sm:text-sm">Your application is being reviewed by administrators</span>
+                                <span class="text-[#015425] block mt-1 text-xs sm:text-sm">Your application is being reviewed by administrators</span>
                             @elseif($user->membership_status === 'rejected')
                                 <span class="font-semibold text-red-700">✗ Rejected</span>
-                                <span class="text-gray-500 block mt-1 text-xs sm:text-sm">Your application has been rejected. Please contact support for more information.</span>
+                                <span class="text-[#015425] block mt-1 text-xs sm:text-sm">Your application has been rejected. Please contact support for more information.</span>
                             @elseif($user->membership_status === 'suspended')
                                 <span class="font-semibold text-orange-700">⚠ Suspended</span>
-                                <span class="text-gray-500 block mt-1 text-xs sm:text-sm">Your membership has been suspended. Please contact support.</span>
+                                <span class="text-[#015425] block mt-1 text-xs sm:text-sm">Your membership has been suspended. Please contact support.</span>
                             @endif
                         </p>
                         @if($user->membership_code)
-                            <p class="text-xs sm:text-sm text-gray-500 mt-1">Membership Code: <span class="font-mono font-semibold">{{ $user->membership_code }}</span></p>
+                            <p class="text-xs sm:text-sm text-[#015425] mt-1">Membership Code: <span class="font-mono font-semibold">{{ $user->membership_code }}</span></p>
                         @endif
                     </div>
                 </div>
@@ -128,7 +128,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 <div class="flex-1">
-                    <p class="text-sm text-gray-700">
+                    <p class="text-sm text-[#015425]">
                         <strong>Note:</strong> While your membership application is pending approval, some features may be limited. 
                         You can still access your dashboard and update your application.
                     </p>
@@ -190,7 +190,7 @@
                 </div>
                 <a href="{{ route('member.loans.index') }}" class="text-xs sm:text-sm text-[#015425] hover:underline">View All</a>
             </div>
-            <h3 class="text-xs sm:text-sm text-gray-600 mb-1">Total Loans</h3>
+            <h3 class="text-xs sm:text-sm text-[#015425] mb-1">Total Loans</h3>
             <p class="text-xl sm:text-2xl font-bold text-[#015425]">{{ $stats['total_loans'] }}</p>
             <div class="mt-2 sm:mt-3 space-y-1">
                 <div class="flex items-center justify-between text-xs sm:text-sm">
@@ -203,7 +203,7 @@
                 </div>
                 <div class="flex items-center justify-between text-xs sm:text-sm">
                     <span class="text-gray-600">Remaining:</span>
-                    <span class="text-gray-900 font-semibold">{{ number_format($stats['remaining_amount'], 0) }} TZS</span>
+                    <span class="text-[#015425] font-semibold">{{ number_format($stats['remaining_amount'], 0) }} TZS</span>
                 </div>
                 @if($stats['overdue_loans'] > 0)
                 <div class="flex items-center justify-between text-xs sm:text-sm">
@@ -224,12 +224,12 @@
                 </div>
                 <a href="{{ route('member.savings.index') }}" class="text-xs sm:text-sm text-[#015425] hover:underline">View All</a>
             </div>
-            <h3 class="text-xs sm:text-sm text-gray-600 mb-1">Total Savings</h3>
+            <h3 class="text-xs sm:text-sm text-[#015425] mb-1">Total Savings</h3>
             <p class="text-xl sm:text-2xl font-bold text-green-600">{{ number_format($stats['total_savings_balance'], 0) }} TZS</p>
             <div class="mt-2 sm:mt-3 space-y-1">
                 <div class="flex items-center justify-between text-xs sm:text-sm">
                     <span class="text-gray-600">Accounts:</span>
-                    <span class="text-gray-900 font-semibold">{{ $stats['total_savings'] }}</span>
+                    <span class="text-[#015425] font-semibold">{{ $stats['total_savings'] }}</span>
                 </div>
                 <div class="flex items-center justify-between text-xs sm:text-sm">
                     <span class="text-gray-600">Active:</span>
@@ -252,7 +252,7 @@
                 </div>
                 <a href="{{ route('member.investments.index') }}" class="text-xs sm:text-sm text-[#015425] hover:underline">View All</a>
             </div>
-            <h3 class="text-xs sm:text-sm text-gray-600 mb-1">Investments</h3>
+            <h3 class="text-xs sm:text-sm text-[#015425] mb-1">Investments</h3>
             <p class="text-xl sm:text-2xl font-bold text-purple-600">{{ number_format($stats['total_investment_amount'], 0) }} TZS</p>
             <div class="mt-2 sm:mt-3 space-y-1">
                 <div class="flex items-center justify-between text-xs sm:text-sm">
@@ -282,7 +282,7 @@
                 </div>
                 <a href="{{ route('member.welfare.index') }}" class="text-xs sm:text-sm text-[#015425] hover:underline">View All</a>
             </div>
-            <h3 class="text-xs sm:text-sm text-gray-600 mb-1">Welfare Fund</h3>
+            <h3 class="text-xs sm:text-sm text-[#015425] mb-1">Welfare Fund</h3>
             <p class="text-xl sm:text-2xl font-bold text-orange-600">{{ number_format($stats['welfare_balance'], 0) }} TZS</p>
             <div class="mt-2 sm:mt-3 space-y-1">
                 <div class="flex items-center justify-between text-xs sm:text-sm">
@@ -304,7 +304,7 @@
             <div class="space-y-2">
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-gray-600">Total Transactions</span>
-                    <span class="text-sm font-semibold text-gray-900">{{ $stats['total_transactions'] }}</span>
+                    <span class="text-sm font-semibold text-[#015425]">{{ $stats['total_transactions'] }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-gray-600">Total Income</span>
@@ -316,7 +316,7 @@
                 </div>
                 <div class="pt-2 border-t border-gray-200">
                     <div class="flex items-center justify-between">
-                        <span class="text-sm font-semibold text-gray-900">Net Flow</span>
+                        <span class="text-sm font-semibold text-[#015425]">Net Flow</span>
                         <span class="text-sm font-bold {{ ($stats['total_income'] - $stats['total_expenses']) >= 0 ? 'text-green-600' : 'text-red-600' }}">
                             {{ number_format($stats['total_income'] - $stats['total_expenses'], 0) }} TZS
                         </span>
@@ -330,7 +330,7 @@
             <div class="space-y-2">
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-gray-600">Total Borrowed</span>
-                    <span class="text-sm font-semibold text-gray-900">{{ number_format($stats['total_loan_amount'], 0) }} TZS</span>
+                    <span class="text-sm font-semibold text-[#015425]">{{ number_format($stats['total_loan_amount'], 0) }} TZS</span>
                 </div>
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-gray-600">Amount Paid</span>
@@ -343,7 +343,7 @@
                 @if($stats['total_loan_amount'] > 0)
                 <div class="pt-2 border-t border-gray-200">
                     <div class="flex items-center justify-between">
-                        <span class="text-sm font-semibold text-gray-900">Repayment Rate</span>
+                        <span class="text-sm font-semibold text-[#015425]">Repayment Rate</span>
                         <span class="text-sm font-bold text-blue-600">
                             {{ number_format(($stats['paid_amount'] / $stats['total_loan_amount']) * 100, 1) }}%
                         </span>
@@ -358,7 +358,7 @@
             <div class="space-y-2">
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-gray-600">Total Invested</span>
-                    <span class="text-sm font-semibold text-gray-900">{{ number_format($stats['total_investment_amount'], 0) }} TZS</span>
+                    <span class="text-sm font-semibold text-[#015425]">{{ number_format($stats['total_investment_amount'], 0) }} TZS</span>
                 </div>
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-gray-600">Profit Earned</span>
@@ -371,7 +371,7 @@
                 @if($stats['total_investment_amount'] > 0)
                 <div class="pt-2 border-t border-gray-200">
                     <div class="flex items-center justify-between">
-                        <span class="text-sm font-semibold text-gray-900">ROI</span>
+                        <span class="text-sm font-semibold text-[#015425]">ROI</span>
                         <span class="text-sm font-bold text-purple-600">
                             {{ number_format(($stats['total_profit'] / $stats['total_investment_amount']) * 100, 2) }}%
                         </span>
@@ -394,8 +394,8 @@
                     @forelse($loans as $loan)
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition gap-2 sm:gap-0">
                             <div class="flex-1">
-                                <p class="font-semibold text-sm sm:text-base text-gray-900">{{ $loan->loan_number }}</p>
-                                <p class="text-xs sm:text-sm text-gray-600">{{ number_format($loan->principal_amount, 0) }} TZS</p>
+                                <p class="font-semibold text-sm sm:text-base text-[#015425]">{{ $loan->loan_number }}</p>
+                                <p class="text-xs sm:text-sm text-[#015425]">{{ number_format($loan->principal_amount, 0) }} TZS</p>
                             </div>
                             <div class="flex items-center justify-between sm:block sm:text-right">
                                 <span class="px-2 py-1 text-xs rounded-full {{ 
@@ -408,7 +408,7 @@
                             </div>
                         </div>
                     @empty
-                        <p class="text-gray-500 text-center py-4 text-sm">No loans found</p>
+                        <p class="text-[#015425] text-center py-4 text-sm">No loans found</p>
                     @endforelse
                 </div>
             </div>
@@ -423,8 +423,8 @@
                     @forelse($investments as $investment)
                         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition gap-2 sm:gap-0">
                             <div class="flex-1">
-                                <p class="font-semibold text-sm sm:text-base text-gray-900">{{ $investment->investment_number }}</p>
-                                <p class="text-xs sm:text-sm text-gray-600">{{ $investment->plan_type_name }} - {{ number_format($investment->principal_amount, 0) }} TZS</p>
+                                <p class="font-semibold text-sm sm:text-base text-[#015425]">{{ $investment->investment_number }}</p>
+                                <p class="text-xs sm:text-sm text-[#015425]">{{ $investment->plan_type_name }} - {{ number_format($investment->principal_amount, 0) }} TZS</p>
                             </div>
                             <div class="flex items-center justify-between sm:block sm:text-right">
                                 <span class="px-2 py-1 text-xs rounded-full {{ 
@@ -437,7 +437,7 @@
                             </div>
                         </div>
                     @empty
-                        <p class="text-gray-500 text-center py-4 text-sm">No investments found</p>
+                        <p class="text-[#015425] text-center py-4 text-sm">No investments found</p>
                     @endforelse
                 </div>
             </div>
