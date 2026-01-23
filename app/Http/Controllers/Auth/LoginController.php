@@ -187,14 +187,23 @@ class LoginController extends Controller
     /**
      * Send OTP code via email
      */
-    protected function sendOtpEmail(User $user, string $code): void
+    protected function sendOtpEmail(User $user, string $code): bool
     {
         try {
             // Use EmailNotificationService to send OTP email
-            $this->emailService->sendOtpNotification($user, $code);
+            $result = $this->emailService->sendOtpNotification($user, $code);
+            
+            if ($result) {
+                \Log::info("OTP email sent successfully to {$user->email} for user ID {$user->id}.");
+            } else {
+                \Log::warning("OTP email sending returned false for user ID {$user->id}.");
+            }
+            
+            return $result;
         } catch (\Exception $e) {
             \Log::error('Failed to send OTP email: ' . $e->getMessage());
             \Log::error('Stack trace: ' . $e->getTraceAsString());
+            return false;
         }
     }
 
