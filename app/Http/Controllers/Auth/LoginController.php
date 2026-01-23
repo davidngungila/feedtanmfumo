@@ -167,37 +167,11 @@ class LoginController extends Controller
     protected function sendOtpEmail(User $user, string $code): void
     {
         try {
-            // Reload mail config from database
-            $this->reloadMailConfig();
-            
-            $orgInfo = $this->emailService->getOrganizationInfo();
-            $address = $this->emailService->getFormattedAddress();
-            
-            $subject = "Login OTP Code - {$orgInfo['name']}";
-            $message = "Dear {$user->name},
-
-You have requested to login to your account. Please use the following OTP code to complete your login:
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-YOUR OTP CODE: {$code}
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-This code will expire in 10 minutes.
-
-If you did not request this code, please ignore this email or contact us immediately.
-
-Best regards,
-{$address}";
-
-            Mail::raw($message, function ($mail) use ($user, $subject, $orgInfo) {
-                $mail->to($user->email, $user->name)
-                     ->subject($subject)
-                     ->from($orgInfo['from_email'], $orgInfo['from_name']);
-            });
+            // Use EmailNotificationService to send OTP email
+            $this->emailService->sendOtpNotification($user, $code);
         } catch (\Exception $e) {
             \Log::error('Failed to send OTP email: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
         }
     }
 
