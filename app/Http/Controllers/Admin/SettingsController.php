@@ -218,7 +218,7 @@ class SettingsController extends Controller
             Setting::set($key, $value, 'email', 'text');
         }
 
-        return redirect()->route('admin.settings.email-settings')->with('success', 'Email settings updated successfully.');
+        return redirect()->route('admin.settings.email-templates')->with('success', 'Email templates updated successfully.');
     }
 
     public function notificationPreferences()

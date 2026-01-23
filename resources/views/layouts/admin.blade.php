@@ -247,106 +247,92 @@
                 });
             }
 
-            // Dropdown hover functionality
+            // Dropdown click functionality
             const dropdownContainers = document.querySelectorAll('.dropdown-container');
             dropdownContainers.forEach(container => {
-                let hoverTimeout;
+                const toggleButton = container.querySelector('.dropdown-toggle');
                 const menu = container.querySelector('.dropdown-menu');
                 const arrow = container.querySelector('.dropdown-arrow');
-                const isActive = !menu?.classList.contains('hidden'); // Check if already expanded (active)
                 
-                function showDropdown() {
-                    if (hoverTimeout) {
-                        clearTimeout(hoverTimeout);
-                    }
-                    
-                    // Close all other dropdowns except this one
-                    dropdownContainers.forEach(otherContainer => {
-                        if (otherContainer !== container) {
-                            const otherMenu = otherContainer.querySelector('.dropdown-menu');
-                            const otherArrow = otherContainer.querySelector('.dropdown-arrow');
-                            if (otherMenu && otherArrow) {
-                                otherMenu.classList.add('hidden');
-                                otherArrow.classList.remove('rotate-180');
-                                // Close nested dropdowns
-                                otherMenu.querySelectorAll('.nested-dropdown-menu').forEach(nested => nested.classList.add('hidden'));
-                                otherMenu.querySelectorAll('.nested-dropdown-arrow').forEach(nestedArrow => nestedArrow.classList.remove('rotate-180'));
+                if (toggleButton) {
+                    toggleButton.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const isHidden = menu?.classList.contains('hidden');
+                        
+                        // Close all other dropdowns
+                        dropdownContainers.forEach(otherContainer => {
+                            if (otherContainer !== container) {
+                                const otherMenu = otherContainer.querySelector('.dropdown-menu');
+                                const otherArrow = otherContainer.querySelector('.dropdown-arrow');
+                                if (otherMenu && otherArrow) {
+                                    otherMenu.classList.add('hidden');
+                                    otherArrow.classList.remove('rotate-180');
+                                    // Close nested dropdowns
+                                    otherMenu.querySelectorAll('.nested-dropdown-menu').forEach(nested => nested.classList.add('hidden'));
+                                    otherMenu.querySelectorAll('.nested-dropdown-arrow').forEach(nestedArrow => nestedArrow.classList.remove('rotate-180'));
+                                }
                             }
-                        }
-                    });
-                    
-                    // Show current dropdown
-                    if (menu && arrow) {
-                        menu.classList.remove('hidden');
-                        arrow.classList.add('rotate-180');
-                    }
-                }
-
-                function hideDropdown() {
-                    // Only hide if not active (not pre-expanded)
-                    if (!isActive) {
-                        hoverTimeout = setTimeout(function() {
-                            if (menu && arrow) {
+                        });
+                        
+                        // Toggle current dropdown
+                        if (menu && arrow) {
+                            if (isHidden) {
+                                menu.classList.remove('hidden');
+                                arrow.classList.add('rotate-180');
+                            } else {
                                 menu.classList.add('hidden');
                                 arrow.classList.remove('rotate-180');
                                 // Close nested dropdowns
                                 menu.querySelectorAll('.nested-dropdown-menu').forEach(nested => nested.classList.add('hidden'));
                                 menu.querySelectorAll('.nested-dropdown-arrow').forEach(nestedArrow => nestedArrow.classList.remove('rotate-180'));
                             }
-                        }, 150);
-                    }
+                        }
+                    });
                 }
-
-                // Show on hover over container
-                container.addEventListener('mouseenter', showDropdown);
-                container.addEventListener('mouseleave', hideDropdown);
             });
 
-            // Nested dropdown hover functionality
+            // Nested dropdown click functionality
             const nestedDropdownContainers = document.querySelectorAll('.nested-dropdown-container');
             nestedDropdownContainers.forEach(container => {
-                let nestedHoverTimeout;
+                const toggleButton = container.querySelector('.nested-dropdown-toggle');
                 const menu = container.querySelector('.nested-dropdown-menu');
                 const arrow = container.querySelector('.nested-dropdown-arrow');
                 
-                function showNestedDropdown() {
-                    if (nestedHoverTimeout) {
-                        clearTimeout(nestedHoverTimeout);
-                    }
-                    
-                    // Close other nested dropdowns in the same parent
-                    const parentDropdown = container.closest('.dropdown-menu');
-                    if (parentDropdown) {
-                        parentDropdown.querySelectorAll('.nested-dropdown-menu').forEach(m => {
-                            if (m !== menu) {
-                                m.classList.add('hidden');
-                                const nestedArrow = m.closest('.nested-dropdown-container')?.querySelector('.nested-dropdown-arrow');
-                                if (nestedArrow) {
-                                    nestedArrow.classList.remove('rotate-180');
+                if (toggleButton) {
+                    toggleButton.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        const isHidden = menu?.classList.contains('hidden');
+                        
+                        // Close other nested dropdowns in the same parent
+                        const parentDropdown = container.closest('.dropdown-menu');
+                        if (parentDropdown) {
+                            parentDropdown.querySelectorAll('.nested-dropdown-menu').forEach(m => {
+                                if (m !== menu) {
+                                    m.classList.add('hidden');
+                                    const nestedArrow = m.closest('.nested-dropdown-container')?.querySelector('.nested-dropdown-arrow');
+                                    if (nestedArrow) {
+                                        nestedArrow.classList.remove('rotate-180');
+                                    }
                                 }
-                            }
-                        });
-                    }
-                    
-                    // Show current nested dropdown
-                    if (menu && arrow) {
-                        menu.classList.remove('hidden');
-                        arrow.classList.add('rotate-180');
-                    }
-                }
-
-                function hideNestedDropdown() {
-                    nestedHoverTimeout = setTimeout(function() {
-                        if (menu && arrow) {
-                            menu.classList.add('hidden');
-                            arrow.classList.remove('rotate-180');
+                            });
                         }
-                    }, 150);
+                        
+                        // Toggle current nested dropdown
+                        if (menu && arrow) {
+                            if (isHidden) {
+                                menu.classList.remove('hidden');
+                                arrow.classList.add('rotate-180');
+                            } else {
+                                menu.classList.add('hidden');
+                                arrow.classList.remove('rotate-180');
+                            }
+                        }
+                    });
                 }
-
-                // Show on hover
-                container.addEventListener('mouseenter', showNestedDropdown);
-                container.addEventListener('mouseleave', hideNestedDropdown);
             });
 
             // Notification dropdown toggle

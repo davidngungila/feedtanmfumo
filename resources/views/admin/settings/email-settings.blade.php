@@ -22,7 +22,7 @@
         </div>
     </div>
 
-    <form action="{{ route('admin.settings.email-settings.update') }}" method="POST">
+    <form action="{{ route('admin.settings.email-templates.update') }}" method="POST">
         @csrf
         @method('PUT')
 

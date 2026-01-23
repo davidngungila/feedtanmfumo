@@ -164,17 +164,17 @@
             </div>
         </a>
 
-        <!-- Email Settings -->
-        <a href="{{ route('admin.settings.email-settings') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition cursor-pointer group">
+        <!-- Email Templates -->
+        <a href="{{ route('admin.settings.email-templates') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition cursor-pointer group">
             <div class="flex items-center mb-4">
                 <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center group-hover:bg-yellow-200 transition">
                     <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                     </svg>
                 </div>
-                <h3 class="text-xl font-bold text-gray-900 ml-4">Email Settings</h3>
+                <h3 class="text-xl font-bold text-gray-900 ml-4">Email Templates</h3>
             </div>
-            <p class="text-sm text-gray-600 mb-4">Configure SMTP settings and email templates</p>
+            <p class="text-sm text-gray-600 mb-4">Manage email message templates</p>
             <div class="flex items-center text-[#015425] font-medium group-hover:underline">
                 <span>Configure</span>
                 <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

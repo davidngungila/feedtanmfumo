@@ -123,16 +123,68 @@ class SystemSettingsController extends Controller
         return view('admin.settings.organization.profile', compact('settings'));
     }
 
+    public function updateOrganizationProfile(Request $request)
+    {
+        $validated = $request->validate([
+            'organization_name' => 'nullable|string|max:255',
+            'registration_number' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'founded_year' => 'nullable|integer|min:1900|max:' . date('Y'),
+            'member_count' => 'nullable|integer|min:0',
+        ]);
+
+        foreach ($validated as $key => $value) {
+            $type = in_array($key, ['founded_year', 'member_count']) ? 'number' : 'text';
+            Setting::set($key, $value, 'organization', $type);
+        }
+
+        return redirect()->route('admin.system-settings.organization-profile')
+            ->with('success', 'Organization profile updated successfully.');
+    }
+
     public function contactDetails()
     {
         $settings = Setting::getByGroup('organization');
         return view('admin.settings.organization.contact-details', compact('settings'));
     }
 
+    public function updateContactDetails(Request $request)
+    {
+        $validated = $request->validate([
+            'address' => 'nullable|string',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email',
+            'website' => 'nullable|url',
+            'whatsapp_number' => 'nullable|string|max:50',
+        ]);
+
+        foreach ($validated as $key => $value) {
+            Setting::set($key, $value, 'organization', 'text');
+        }
+
+        return redirect()->route('admin.system-settings.contact-details')
+            ->with('success', 'Contact details updated successfully.');
+    }
+
     public function logoBranding()
     {
         $settings = Setting::getByGroup('organization');
         return view('admin.settings.organization.logo-branding', compact('settings'));
+    }
+
+    public function updateLogoBranding(Request $request)
+    {
+        $validated = $request->validate([
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        if ($request->hasFile('logo')) {
+            $path = $request->file('logo')->store('logos', 'public');
+            Setting::set('logo', $path, 'organization', 'text');
+        }
+
+        return redirect()->route('admin.system-settings.logo-branding')
+            ->with('success', 'Logo updated successfully.');
     }
 
     public function languageSettings()
@@ -142,10 +194,37 @@ class SystemSettingsController extends Controller
         return view('admin.settings.organization.language', compact('settings', 'languages'));
     }
 
+    public function updateLanguageSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'language' => 'required|string|in:en,sw',
+        ]);
+
+        Setting::set('language', $validated['language'], 'system', 'text');
+
+        return redirect()->route('admin.system-settings.language-settings')
+            ->with('success', 'Language settings updated successfully.');
+    }
+
     public function timezoneDateFormat()
     {
         $settings = Setting::getByGroup('system');
         return view('admin.settings.organization.timezone', compact('settings'));
+    }
+
+    public function updateTimezoneDateFormat(Request $request)
+    {
+        $validated = $request->validate([
+            'timezone' => 'required|string',
+            'date_format' => 'required|string',
+        ]);
+
+        foreach ($validated as $key => $value) {
+            Setting::set($key, $value, 'system', 'text');
+        }
+
+        return redirect()->route('admin.system-settings.timezone-date-format')
+            ->with('success', 'Timezone and date format updated successfully.');
     }
 
     // ============================================
@@ -158,10 +237,44 @@ class SystemSettingsController extends Controller
         return view('admin.settings.application.general', compact('settings'));
     }
 
+    public function updateGeneralSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'app_name' => 'nullable|string|max:255',
+            'app_url' => 'nullable|url',
+            'currency' => 'nullable|string|max:10',
+            'currency_symbol' => 'nullable|string|max:10',
+        ]);
+
+        foreach ($validated as $key => $value) {
+            Setting::set($key, $value, 'system', 'text');
+        }
+
+        return redirect()->route('admin.system-settings.general-settings')
+            ->with('success', 'General settings updated successfully.');
+    }
+
     public function featureToggles()
     {
         $settings = Setting::getByGroup('features');
         return view('admin.settings.application.feature-toggles', compact('settings'));
+    }
+
+    public function updateFeatureToggles(Request $request)
+    {
+        $validated = $request->validate([
+            'feature_loans' => 'nullable|boolean',
+            'feature_savings' => 'nullable|boolean',
+            'feature_investments' => 'nullable|boolean',
+            'feature_welfare' => 'nullable|boolean',
+        ]);
+
+        foreach ($validated as $key => $value) {
+            Setting::set($key, $value ? '1' : '0', 'features', 'boolean');
+        }
+
+        return redirect()->route('admin.system-settings.feature-toggles')
+            ->with('success', 'Feature toggles updated successfully.');
     }
 
     public function maintenanceMode()
@@ -180,7 +293,7 @@ class SystemSettingsController extends Controller
             $message = 'Maintenance mode enabled.';
         }
 
-        return redirect()->route('admin.settings.maintenance-mode')
+        return redirect()->route('admin.system-settings.maintenance-mode')
             ->with('success', $message);
     }
 
@@ -190,10 +303,40 @@ class SystemSettingsController extends Controller
         return view('admin.settings.application.default-values', compact('settings'));
     }
 
+    public function updateDefaultValues(Request $request)
+    {
+        $validated = $request->validate([
+            'default_loan_interest_rate' => 'nullable|numeric|min:0|max:100',
+            'default_savings_interest_rate' => 'nullable|numeric|min:0|max:100',
+        ]);
+
+        foreach ($validated as $key => $value) {
+            Setting::set($key, $value, 'defaults', 'number');
+        }
+
+        return redirect()->route('admin.system-settings.default-values')
+            ->with('success', 'Default values updated successfully.');
+    }
+
     public function systemPreferences()
     {
         $settings = Setting::getByGroup('preferences');
         return view('admin.settings.application.preferences', compact('settings'));
+    }
+
+    public function updateSystemPreferences(Request $request)
+    {
+        $validated = $request->validate([
+            'session_timeout' => 'nullable|integer|min:5',
+            'cache_duration' => 'nullable|integer|min:1',
+        ]);
+
+        foreach ($validated as $key => $value) {
+            Setting::set($key, $value, 'preferences', 'number');
+        }
+
+        return redirect()->route('admin.system-settings.system-preferences')
+            ->with('success', 'System preferences updated successfully.');
     }
 
     // ============================================
@@ -233,10 +376,45 @@ class SystemSettingsController extends Controller
         return view('admin.settings.notifications.sms', compact('settings'));
     }
 
+    public function updateSmsSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'sms_provider' => 'nullable|string',
+            'sms_api_key' => 'nullable|string',
+            'sms_api_secret' => 'nullable|string',
+            'sms_sender_id' => 'nullable|string',
+            'sms_enabled' => 'nullable|boolean',
+        ]);
+
+        foreach ($validated as $key => $value) {
+            $type = is_bool($value) ? 'boolean' : 'text';
+            Setting::set($key, $value, 'sms', $type);
+        }
+
+        return redirect()->route('admin.system-settings.sms-settings')
+            ->with('success', 'SMS settings updated successfully.');
+    }
+
     public function pushNotifications()
     {
         $settings = Setting::getByGroup('push');
         return view('admin.settings.notifications.push', compact('settings'));
+    }
+
+    public function updatePushNotifications(Request $request)
+    {
+        $validated = $request->validate([
+            'push_enabled' => 'nullable|boolean',
+            'push_firebase_key' => 'nullable|string',
+        ]);
+
+        foreach ($validated as $key => $value) {
+            $type = is_bool($value) ? 'boolean' : 'text';
+            Setting::set($key, $value, 'push', $type);
+        }
+
+        return redirect()->route('admin.system-settings.push-notifications')
+            ->with('success', 'Push notification settings updated successfully.');
     }
 
     public function notificationTemplates()
@@ -313,6 +491,21 @@ class SystemSettingsController extends Controller
         return view('admin.settings.data.retention', compact('settings'));
     }
 
+    public function updateDataRetentionPolicy(Request $request)
+    {
+        $validated = $request->validate([
+            'audit_logs_retention' => 'nullable|integer|min:0',
+            'activity_logs_retention' => 'nullable|integer|min:0',
+        ]);
+
+        foreach ($validated as $key => $value) {
+            Setting::set($key, $value, 'data_retention', 'number');
+        }
+
+        return redirect()->route('admin.system-settings.data-retention-policy')
+            ->with('success', 'Data retention policy updated successfully.');
+    }
+
     // ============================================
     // SECURITY
     // ============================================
@@ -323,10 +516,44 @@ class SystemSettingsController extends Controller
         return view('admin.settings.security.settings', compact('settings'));
     }
 
+    public function updateSecuritySettings(Request $request)
+    {
+        $validated = $request->validate([
+            'max_login_attempts' => 'nullable|integer|min:1|max:10',
+            'lockout_duration_minutes' => 'nullable|integer|min:1',
+            'session_timeout_minutes' => 'nullable|integer|min:5',
+            'two_factor_enabled' => 'nullable|boolean',
+        ]);
+
+        foreach ($validated as $key => $value) {
+            $type = is_bool($value) ? 'boolean' : 'number';
+            Setting::set($key, $value, 'security', $type);
+        }
+
+        return redirect()->route('admin.system-settings.security-settings')
+            ->with('success', 'Security settings updated successfully.');
+    }
+
     public function twoFactorAuth()
     {
         $settings = Setting::getByGroup('2fa');
         return view('admin.settings.security.two-factor', compact('settings'));
+    }
+
+    public function updateTwoFactorAuth(Request $request)
+    {
+        $validated = $request->validate([
+            '2fa_enabled' => 'nullable|boolean',
+            '2fa_method' => 'nullable|string|in:totp,sms',
+        ]);
+
+        foreach ($validated as $key => $value) {
+            $type = is_bool($value) ? 'boolean' : 'text';
+            Setting::set($key, $value, '2fa', $type);
+        }
+
+        return redirect()->route('admin.system-settings.two-factor-auth')
+            ->with('success', 'Two-factor authentication settings updated successfully.');
     }
 
     public function ipWhitelisting()
@@ -406,6 +633,22 @@ class SystemSettingsController extends Controller
     {
         $settings = Setting::getByGroup('api');
         return view('admin.settings.integrations.api', compact('settings'));
+    }
+
+    public function updateApiSettings(Request $request)
+    {
+        $validated = $request->validate([
+            'api_enabled' => 'nullable|boolean',
+            'api_rate_limit' => 'nullable|integer|min:1',
+        ]);
+
+        foreach ($validated as $key => $value) {
+            $type = is_bool($value) ? 'boolean' : 'number';
+            Setting::set($key, $value, 'api', $type);
+        }
+
+        return redirect()->route('admin.system-settings.api-settings')
+            ->with('success', 'API settings updated successfully.');
     }
 
     public function paymentGateways()
@@ -593,6 +836,29 @@ class SystemSettingsController extends Controller
     {
         $settings = Setting::getByGroup('theme');
         return view('admin.settings.bonus.theme', compact('settings'));
+    }
+
+    public function updateThemeAppearance(Request $request)
+    {
+        $validated = $request->validate([
+            'theme_primary_color' => 'nullable|string',
+            'theme_secondary_color' => 'nullable|string',
+            'theme_logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        if ($request->hasFile('theme_logo')) {
+            $path = $request->file('theme_logo')->store('themes', 'public');
+            Setting::set('theme_logo', $path, 'theme', 'text');
+        }
+
+        foreach ($validated as $key => $value) {
+            if ($key !== 'theme_logo' && $value) {
+                Setting::set($key, $value, 'theme', 'text');
+            }
+        }
+
+        return redirect()->route('admin.system-settings.theme-appearance')
+            ->with('success', 'Theme settings updated successfully.');
     }
 
     public function licenseManagement()

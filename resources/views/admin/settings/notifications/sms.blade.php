@@ -10,7 +10,7 @@
     </div>
 
     <div class="bg-white rounded-lg shadow-md p-6">
-        <form action="{{ route('admin.settings.communication.update') }}" method="POST">
+        <form action="{{ route('admin.system-settings.sms-settings.update') }}" method="POST">
             @csrf
             @method('PUT')
             <div class="space-y-6">

@@ -22,10 +22,10 @@
         <!-- Header with Green Background -->
         <header class="bg-gradient-to-r from-[#015425] to-[#027a3a] shadow-lg sticky top-0 z-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center h-16">
-                    <div class="flex items-center">
+                <div class="flex items-center h-16 gap-4">
+                    <div class="flex items-center flex-shrink-0">
                         <!-- Mobile Menu Button -->
-                        <button type="button" id="mobile-menu-button" class="lg:hidden mr-3 p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-md transition focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#015425]">
+                        <button type="button" id="mobile-menu-button" class="md:hidden mr-3 p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-md transition focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#015425]">
                             <svg id="mobile-menu-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                             </svg>
@@ -39,7 +39,7 @@
                     </div>
                     
                     <!-- Desktop Navigation -->
-                    <nav class="hidden lg:flex items-center space-x-4 xl:space-x-6">
+                    <nav class="hidden md:flex items-center space-x-2 lg:space-x-3 xl:space-x-4 flex-1 justify-center">
                         <a href="{{ route('member.dashboard') }}" class="text-white hover:text-white hover:bg-white hover:bg-opacity-20 px-3 py-2 rounded-md transition {{ request()->routeIs('member.dashboard') ? 'bg-white bg-opacity-20 font-semibold' : '' }}">
                             Dashboard
                         </a>
@@ -117,7 +117,7 @@
                         </div>
                     </nav>
                     
-                    <div class="flex items-center space-x-3 sm:space-x-4">
+                    <div class="flex items-center space-x-3 sm:space-x-4 flex-shrink-0 ml-auto">
                         <!-- Notifications with Hover -->
                         <div class="relative notification-container">
                             <button id="notification-button" class="relative p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-full transition focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#015425]">
@@ -514,26 +514,74 @@
                 }
             }
             
-            // Desktop Navigation dropdowns
+            // Desktop Navigation dropdowns - Hover on desktop (PC size), click on mobile
             const navDropdowns = document.querySelectorAll('.nav-dropdown');
             navDropdowns.forEach(function(dropdown) {
                 const toggle = dropdown.querySelector('.nav-dropdown-toggle');
                 const menu = dropdown.querySelector('.nav-dropdown-menu');
                 const arrow = dropdown.querySelector('.nav-dropdown-arrow');
+                let hoverTimeout;
                 
                 if (toggle && menu) {
-                    // Hover for desktop
-                    if (window.innerWidth >= 1024) {
+                    // Function to close all dropdowns except the specified one
+                    function closeOtherDropdowns(exceptDropdown) {
+                        navDropdowns.forEach(function(otherDropdown) {
+                            if (otherDropdown !== exceptDropdown) {
+                                const otherMenu = otherDropdown.querySelector('.nav-dropdown-menu');
+                                const otherArrow = otherDropdown.querySelector('.nav-dropdown-arrow');
+                                if (otherMenu) otherMenu.classList.add('hidden');
+                                if (otherArrow) otherArrow.classList.remove('rotate-180');
+                            }
+                        });
+                    }
+                    
+                    // Desktop (lg and above - 1024px+): Hover behavior
+                    function setupDesktopHover() {
                         dropdown.addEventListener('mouseenter', function() {
-                            menu.classList.remove('hidden');
-                            if (arrow) arrow.classList.add('rotate-180');
+                            if (window.innerWidth >= 1024) {
+                                if (hoverTimeout) {
+                                    clearTimeout(hoverTimeout);
+                                }
+                                closeOtherDropdowns(dropdown);
+                                menu.classList.remove('hidden');
+                                if (arrow) arrow.classList.add('rotate-180');
+                            }
                         });
                         
                         dropdown.addEventListener('mouseleave', function() {
-                            menu.classList.add('hidden');
-                            if (arrow) arrow.classList.remove('rotate-180');
+                            if (window.innerWidth >= 1024) {
+                                hoverTimeout = setTimeout(function() {
+                                    menu.classList.add('hidden');
+                                    if (arrow) arrow.classList.remove('rotate-180');
+                                }, 150);
+                            }
                         });
                     }
+                    
+                    // Mobile: Click behavior
+                    function setupMobileClick() {
+                        toggle.addEventListener('click', function(e) {
+                            if (window.innerWidth < 1024) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                
+                                const isHidden = menu.classList.contains('hidden');
+                                closeOtherDropdowns(dropdown);
+                                
+                                if (isHidden) {
+                                    menu.classList.remove('hidden');
+                                    if (arrow) arrow.classList.add('rotate-180');
+                                } else {
+                                    menu.classList.add('hidden');
+                                    if (arrow) arrow.classList.remove('rotate-180');
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Setup both behaviors
+                    setupDesktopHover();
+                    setupMobileClick();
                 }
             });
             

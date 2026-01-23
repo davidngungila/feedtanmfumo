@@ -222,8 +222,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('settings/security', [SettingsController::class, 'updateSecurity'])->name('settings.security.update');
     Route::get('settings/sms-templates', [SettingsController::class, 'smsTemplates'])->name('settings.sms-templates');
     Route::put('settings/sms-templates', [SettingsController::class, 'updateSmsTemplates'])->name('settings.sms-templates.update');
-    Route::get('settings/email-settings', [SettingsController::class, 'emailSettings'])->name('settings.email-settings');
-    Route::put('settings/email-settings', [SettingsController::class, 'updateEmailSettings'])->name('settings.email-settings.update');
+    Route::get('settings/email-templates', [SettingsController::class, 'emailSettings'])->name('settings.email-templates');
+    Route::put('settings/email-templates', [SettingsController::class, 'updateEmailSettings'])->name('settings.email-templates.update');
     Route::get('settings/notification-preferences', [SettingsController::class, 'notificationPreferences'])->name('settings.notification-preferences');
     Route::put('settings/notification-preferences', [SettingsController::class, 'updateNotificationPreferences'])->name('settings.notification-preferences.update');
     Route::get('settings/reminder-settings', [SettingsController::class, 'reminderSettings'])->name('settings.reminder-settings');
@@ -252,24 +252,35 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         // Organization / General
         Route::get('system-information', [SystemSettingsController::class, 'systemInformation'])->name('system-information');
         Route::get('organization-profile', [SystemSettingsController::class, 'organizationProfile'])->name('organization-profile');
+        Route::put('organization-profile', [SystemSettingsController::class, 'updateOrganizationProfile'])->name('organization-profile.update');
         Route::get('contact-details', [SystemSettingsController::class, 'contactDetails'])->name('contact-details');
+        Route::put('contact-details', [SystemSettingsController::class, 'updateContactDetails'])->name('contact-details.update');
         Route::get('logo-branding', [SystemSettingsController::class, 'logoBranding'])->name('logo-branding');
+        Route::put('logo-branding', [SystemSettingsController::class, 'updateLogoBranding'])->name('logo-branding.update');
         Route::get('language-settings', [SystemSettingsController::class, 'languageSettings'])->name('language-settings');
+        Route::put('language-settings', [SystemSettingsController::class, 'updateLanguageSettings'])->name('language-settings.update');
         Route::get('timezone-date-format', [SystemSettingsController::class, 'timezoneDateFormat'])->name('timezone-date-format');
+        Route::put('timezone-date-format', [SystemSettingsController::class, 'updateTimezoneDateFormat'])->name('timezone-date-format.update');
 
         // Application Settings
         Route::get('general-settings', [SystemSettingsController::class, 'generalSettings'])->name('general-settings');
+        Route::put('general-settings', [SystemSettingsController::class, 'updateGeneralSettings'])->name('general-settings.update');
         Route::get('feature-toggles', [SystemSettingsController::class, 'featureToggles'])->name('feature-toggles');
+        Route::put('feature-toggles', [SystemSettingsController::class, 'updateFeatureToggles'])->name('feature-toggles.update');
         Route::get('maintenance-mode', [SystemSettingsController::class, 'maintenanceMode'])->name('maintenance-mode');
         Route::post('toggle-maintenance-mode', [SystemSettingsController::class, 'toggleMaintenanceMode'])->name('toggle-maintenance-mode');
         Route::get('default-values', [SystemSettingsController::class, 'defaultValues'])->name('default-values');
+        Route::put('default-values', [SystemSettingsController::class, 'updateDefaultValues'])->name('default-values.update');
         Route::get('system-preferences', [SystemSettingsController::class, 'systemPreferences'])->name('system-preferences');
+        Route::put('system-preferences', [SystemSettingsController::class, 'updateSystemPreferences'])->name('system-preferences.update');
 
         // Notifications
         Route::get('email-settings', [SystemSettingsController::class, 'emailSettings'])->name('email-settings');
         Route::put('email-settings', [SystemSettingsController::class, 'updateEmailSettings'])->name('email-settings.update');
         Route::get('sms-settings', [SystemSettingsController::class, 'smsSettings'])->name('sms-settings');
+        Route::put('sms-settings', [SystemSettingsController::class, 'updateSmsSettings'])->name('sms-settings.update');
         Route::get('push-notifications', [SystemSettingsController::class, 'pushNotifications'])->name('push-notifications');
+        Route::put('push-notifications', [SystemSettingsController::class, 'updatePushNotifications'])->name('push-notifications.update');
         Route::get('notification-templates', [SystemSettingsController::class, 'notificationTemplates'])->name('notification-templates');
         Route::get('alert-rules', [SystemSettingsController::class, 'alertRules'])->name('alert-rules');
 
@@ -280,10 +291,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('export-data', [SystemSettingsController::class, 'exportData'])->name('export-data');
         Route::get('database-settings', [SystemSettingsController::class, 'databaseSettings'])->name('database-settings');
         Route::get('data-retention-policy', [SystemSettingsController::class, 'dataRetentionPolicy'])->name('data-retention-policy');
+        Route::put('data-retention-policy', [SystemSettingsController::class, 'updateDataRetentionPolicy'])->name('data-retention-policy.update');
 
         // Security
         Route::get('security-settings', [SystemSettingsController::class, 'securitySettings'])->name('security-settings');
+        Route::put('security-settings', [SystemSettingsController::class, 'updateSecuritySettings'])->name('security-settings.update');
         Route::get('two-factor-auth', [SystemSettingsController::class, 'twoFactorAuth'])->name('two-factor-auth');
+        Route::put('two-factor-auth', [SystemSettingsController::class, 'updateTwoFactorAuth'])->name('two-factor-auth.update');
         Route::get('ip-whitelisting', [SystemSettingsController::class, 'ipWhitelisting'])->name('ip-whitelisting');
         Route::post('add-ip-address', [SystemSettingsController::class, 'addIpAddress'])->name('add-ip-address');
         Route::get('audit-logs', [SystemSettingsController::class, 'auditLogs'])->name('audit-logs');
@@ -297,6 +311,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
         // Integrations
         Route::get('api-settings', [SystemSettingsController::class, 'apiSettings'])->name('api-settings');
+        Route::put('api-settings', [SystemSettingsController::class, 'updateApiSettings'])->name('api-settings.update');
         Route::get('payment-gateways', [SystemSettingsController::class, 'paymentGateways'])->name('payment-gateways');
         Route::get('third-party-services', [SystemSettingsController::class, 'thirdPartyServices'])->name('third-party-services');
         Route::get('webhooks', [SystemSettingsController::class, 'webhooks'])->name('webhooks');
@@ -326,6 +341,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('module-management', [SystemSettingsController::class, 'moduleManagement'])->name('module-management');
         Route::get('menu-builder', [SystemSettingsController::class, 'menuBuilder'])->name('menu-builder');
         Route::get('theme-appearance', [SystemSettingsController::class, 'themeAppearance'])->name('theme-appearance');
+        Route::put('theme-appearance', [SystemSettingsController::class, 'updateThemeAppearance'])->name('theme-appearance.update');
         Route::get('license-management', [SystemSettingsController::class, 'licenseManagement'])->name('license-management');
     });
 

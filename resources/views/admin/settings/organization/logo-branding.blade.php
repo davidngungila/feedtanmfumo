@@ -10,7 +10,7 @@
     </div>
 
     <div class="bg-white rounded-lg shadow-md p-6">
-        <form action="{{ route('admin.settings.organization.update') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('admin.system-settings.logo-branding.update') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             <div class="space-y-6">
