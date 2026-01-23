@@ -13,12 +13,32 @@
         .header .sub-title { font-size: 14px; opacity: 0.9; }
         .content { padding: 30px 25px; }
         .greeting { font-size: 18px; font-weight: 600; color: #2d3748; margin-bottom: 15px; }
-        .card { background-color: #f7fafc; border: 1px solid #edf2f7; border-radius: 8px; padding: 20px; margin-bottom: 25px; text-align: center; }
-        .otp-code { font-size: 48px; font-weight: 700; color: #006400; letter-spacing: 8px; margin: 20px 0; padding: 20px; background: white; border: 2px dashed #006400; border-radius: 8px; }
+        
+        .card { background-color: #f7fafc; border: 1px solid #edf2f7; border-radius: 8px; padding: 20px; margin-bottom: 25px; }
+        .card-header { display: flex; align-items: center; margin-bottom: 15px; }
+        .card-header .icon { font-size: 24px; margin-right: 12px; color: #4CAF50; }
+        .card-header h4 { margin: 0; font-size: 16px; font-weight: 600; color: #2d3748; }
+        
+        .otp-container { text-align: center; margin: 25px 0; padding: 30px; background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 2px dashed #4caf50; border-radius: 12px; }
+        .otp-label { font-size: 14px; font-weight: 600; color: #2d3748; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .otp-code { font-size: 56px; font-weight: 700; color: #006400; letter-spacing: 12px; margin: 20px 0; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); font-family: 'Courier New', monospace; }
+        .otp-expiry { font-size: 13px; color: #4a5568; margin-top: 15px; font-style: italic; }
+        
         .security-notice { background-color: #fff3cd; border-left: 5px solid #ffc107; padding: 20px; border-radius: 8px; margin: 25px 0; }
-        .security-notice h4 { margin-top: 0; font-size: 16px; color: #856404; font-weight: 600; }
-        .security-notice ul { margin: 10px 0; padding-left: 20px; color: #856404; font-size: 14px; }
+        .security-notice h4 { margin-top: 0; font-size: 16px; color: #856404; font-weight: 600; display: flex; align-items: center; }
+        .security-notice .icon { font-size: 20px; margin-right: 8px; }
+        .security-notice ul { margin: 10px 0; padding-left: 20px; color: #856404; font-size: 14px; line-height: 1.8; }
+        .security-notice li { margin-bottom: 8px; }
+        
+        .info-box { background-color: #e3f2fd; border-left: 5px solid #2196f3; padding: 20px; border-radius: 8px; margin: 25px 0; }
+        .info-box p { margin: 0; font-size: 14px; color: #1565c0; line-height: 1.6; }
+        
+        .button-container { text-align: center; margin: 30px 0; }
+        .action-button { display: inline-block; padding: 12px 25px; background-color: #006400; color: white !important; font-weight: 600; border-radius: 6px; text-decoration: none; transition: background-color 0.3s ease; }
+        .action-button:hover { background-color: #2e7d32; }
+        
         .signature { margin-top: 40px; font-size: 14px; color: #4a5568; }
+        .signature p { margin: 5px 0; }
         .footer { background-color: #006400; color: white; text-align: center; padding: 15px; font-size: 12px; letter-spacing: 0.5px; opacity: 0.8; }
     </style>
 </head>
@@ -29,32 +49,54 @@
             <div class="sub-title">{{ $organizationInfo['po_box'] ?? 'P.O.Box 7744' }}, {{ $organizationInfo['address'] ?? 'Ushirika Sokoine Road' }}, {{ $organizationInfo['city'] ?? 'Moshi' }}, {{ $organizationInfo['region'] ?? 'Kilimanjaro' }}, {{ $organizationInfo['country'] ?? 'Tanzania' }}</div>
         </div>
         <div class="content">
-            <p class="greeting">Dear {{ $name }},</p>
-            <p style="font-size: 14px; color: #4a5568;">You have requested to login to your account. Please use the following OTP code to complete your login:</p>
+            <p class="greeting">Habari {{ $name }},</p>
+            <p style="font-size: 14px; color: #4a5568;">Tunatumai ujumbe huu unakufikia ukiwa na afya njema. Umeomba kuingia kwenye akaunti yako. Tafadhali tumia nambari ya OTP hapa chini ili kukamilisha uingiaji wako.</p>
             
             <div class="card">
-                <h4 style="margin: 0 0 15px 0; font-size: 16px; font-weight: 600; color: #2d3748;">YOUR OTP CODE</h4>
-                <div class="otp-code">{{ $otpCode }}</div>
-                <p style="font-size: 14px; color: #4a5568; margin: 0;">This code will expire in 10 minutes.</p>
+                <div class="card-header">
+                    <span class="icon">🔐</span>
+                    <h4>Nambari ya Kuingia (OTP Code)</h4>
+                </div>
+                
+                <div class="otp-container">
+                    <div class="otp-label">Nambari Yako ya OTP</div>
+                    <div class="otp-code">{{ $otpCode }}</div>
+                    <div class="otp-expiry">⏰ Nambari hii itaisha baada ya dakika 10</div>
+                </div>
+                
+                <p style="font-size: 14px; color: #4a5568; text-align: center; margin-top: 20px;">
+                    Ingiza nambari hii kwenye fomu ya kuingia ili kuendelea.
+                </p>
             </div>
 
             <div class="security-notice">
-                <h4>🔒 IMPORTANT SECURITY NOTICE</h4>
+                <h4>
+                    <span class="icon">🔒</span>
+                    TAARIFA MUHIMU YA USALAMA
+                </h4>
                 <ul>
-                    <li>Do not share this code with anyone</li>
-                    <li>Our staff will never ask for your OTP code</li>
-                    <li>If you did not request this code, please ignore this email or contact us immediately</li>
+                    <li><strong>Usishirikishe</strong> nambari hii na mtu yeyote</li>
+                    <li><strong>Wafanyakazi wetu</strong> hawatawahi kuomba nambari yako ya OTP</li>
+                    <li><strong>Kama hukuiomba</strong> nambari hii, tafadhali piga simu kwetu mara moja</li>
+                    <li><strong>Usiwasiliane</strong> na nambari zozote za simu zisizojulikana zinazodai nambari yako ya OTP</li>
                 </ul>
             </div>
+
+            <div class="info-box">
+                <p>
+                    <strong>💡 Kidokezo:</strong> Ikiwa hukupokea nambari ya OTP au imeisha muda wake, unaweza kuomba nambari mpya kwa kubofya kitufe cha "Resend OTP" kwenye ukurasa wa kuingia.
+                </p>
+            </div>
             
-            <p style="font-size: 14px; color: #4a5568;">This is an automated security email from {{ $organizationInfo['name'] ?? 'FeedTan Community Microfinance Group' }}.</p>
+            <p style="font-size: 14px; color: #4a5568;">Hii ni barua pepe ya usalama ya kiotomatiki kutoka {{ $organizationInfo['name'] ?? 'FeedTan Community Microfinance Group' }}.</p>
             
             <div class="signature">
-                <p>Best regards,<br><strong>Timu ya FeedTan CMG</strong></p>
+                <p>Wapendwa,<br><strong>Timu ya FeedTan CMG</strong></p>
+                <p style="font-weight: 600; color: #006400;">Let's Grow Together! 🤝</p>
             </div>
         </div>
         <div class="footer">
-            FeedTan CMG Security System
+            FeedTan CMG Security System - Login Verification
         </div>
     </div>
 </body>
