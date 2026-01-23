@@ -101,6 +101,8 @@ class SettingsController extends Controller
             'mail_encryption' => 'nullable|string',
             'mail_from_address' => 'nullable|email',
             'mail_from_name' => 'nullable|string',
+            'mail_primary_email' => 'nullable|email',
+            'mail_additional_emails' => 'nullable|string',
             
             // Organization Information for Email Headers
             'organization_name' => 'nullable|string|max:255',
@@ -109,6 +111,7 @@ class SettingsController extends Controller
             'organization_city' => 'nullable|string|max:255',
             'organization_region' => 'nullable|string|max:255',
             'organization_country' => 'nullable|string|max:255',
+            'organization_phone' => 'nullable|string|max:255',
             
             // SMS Settings
             'sms_provider' => 'nullable|string',
@@ -121,6 +124,11 @@ class SettingsController extends Controller
         foreach ($validated as $key => $value) {
             $type = in_array($key, ['mail_port', 'sms_enabled']) ? (is_bool($value) ? 'boolean' : 'number') : 'text';
             Setting::set($key, $value, 'communication', $type);
+        }
+        
+        // If primary email is set, also update mail_from_address as fallback
+        if (isset($validated['mail_primary_email']) && $validated['mail_primary_email']) {
+            Setting::set('mail_from_address', $validated['mail_primary_email'], 'communication', 'text');
         }
 
         // Clear config cache to reload mail settings
@@ -193,6 +201,37 @@ Best regards,
             \Log::error('Stack trace: ' . $e->getTraceAsString());
             return redirect()->route('admin.settings.communication')
                 ->with('error', 'Failed to send test email: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Send test SMS
+     */
+    public function sendTestSms(Request $request)
+    {
+        $request->validate([
+            'test_phone' => 'required|string',
+            'test_message' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            $smsService = new \App\Services\SmsNotificationService();
+            
+            $message = $request->test_message ?? "Test message from FeedTan SMS System. This confirms your SMS gateway is working properly.";
+            
+            $result = $smsService->sendSms($request->test_phone, $message);
+            
+            if ($result['success']) {
+                return redirect()->route('admin.settings.communication')
+                    ->with('sms_success', "Test SMS sent successfully to {$request->test_phone}!");
+            } else {
+                return redirect()->route('admin.settings.communication')
+                    ->with('sms_error', 'Failed to send test SMS: ' . ($result['error'] ?? 'Unknown error'));
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to send test SMS: ' . $e->getMessage());
+            return redirect()->route('admin.settings.communication')
+                ->with('sms_error', 'Failed to send test SMS: ' . $e->getMessage());
         }
     }
 

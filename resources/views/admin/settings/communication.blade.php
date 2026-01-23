@@ -93,9 +93,21 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">From Address</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Primary Email Address <span class="text-red-500">*</span></label>
+                            <input type="email" name="mail_primary_email" id="mail_primary_email" value="{{ isset($settings['mail_primary_email']) ? $settings['mail_primary_email']->value : (isset($settings['mail_from_address']) ? $settings['mail_from_address']->value : '') }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="primary@feedtan.com" required>
+                            <p class="text-xs text-gray-500 mt-1">Primary email address used for sending emails</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">From Address (Legacy)</label>
                             <input type="email" name="mail_from_address" id="mail_from_address" value="{{ isset($settings['mail_from_address']) ? $settings['mail_from_address']->value : '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="noreply@feedtan.com">
-                            <p class="text-xs text-gray-500 mt-1">Email address that will appear as sender</p>
+                            <p class="text-xs text-gray-500 mt-1">Email address that will appear as sender (fallback)</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Additional Email Addresses</label>
+                            <textarea name="mail_additional_emails" id="mail_additional_emails" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="email1@feedtan.com, email2@feedtan.com">{{ isset($settings['mail_additional_emails']) ? $settings['mail_additional_emails']->value : '' }}</textarea>
+                            <p class="text-xs text-gray-500 mt-1">Comma-separated list of additional email addresses (for notifications, CC, etc.)</p>
                         </div>
 
                         <div>
@@ -187,18 +199,21 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">SMS API Key</label>
-                            <input type="text" name="sms_api_key" value="{{ isset($settings['sms_api_key']) ? $settings['sms_api_key']->value : '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">SMS API Key (Bearer Token)</label>
+                            <input type="text" name="sms_api_key" value="{{ isset($settings['sms_api_key']) ? $settings['sms_api_key']->value : '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="f9a89f439206e27169ead766463ca92c">
+                            <p class="text-xs text-gray-500 mt-1">Bearer token for messaging-service.co.tz API</p>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">SMS API Secret</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">SMS API Secret (Optional)</label>
                             <input type="password" name="sms_api_secret" value="{{ isset($settings['sms_api_secret']) ? $settings['sms_api_secret']->value : '' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                            <p class="text-xs text-gray-500 mt-1">API secret if required by provider</p>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Sender ID</label>
-                            <input type="text" name="sms_sender_id" value="{{ isset($settings['sms_sender_id']) ? $settings['sms_sender_id']->value : 'FEEDTAN DIGITAL' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">SMS Sender ID</label>
+                            <input type="text" name="sms_sender_id" value="{{ isset($settings['sms_sender_id']) ? $settings['sms_sender_id']->value : 'FEEDTAN' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="FEEDTAN" maxlength="11">
+                            <p class="text-xs text-gray-500 mt-1">Sender name (max 11 characters) that appears on recipient's phone</p>
                         </div>
                     </div>
                 </div>
@@ -243,6 +258,45 @@
                             Send Test Email
                         </button>
                     </div>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Test SMS Section -->
+        <div class="mt-8 pt-8 border-t border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Test SMS Configuration</h3>
+            <p class="text-sm text-gray-600 mb-4">Send a test SMS to verify your SMS settings are working correctly.</p>
+            
+            @if(session('sms_success'))
+            <div class="mb-4 bg-green-50 border border-green-200 rounded-md p-4">
+                <p class="text-sm text-green-800">{{ session('sms_success') }}</p>
+            </div>
+            @endif
+            
+            @if(session('sms_error'))
+            <div class="mb-4 bg-red-50 border border-red-200 rounded-md p-4">
+                <p class="text-sm text-red-800">{{ session('sms_error') }}</p>
+            </div>
+            @endif
+            
+            <form action="{{ route('admin.settings.communication.test-sms') }}" method="POST">
+                @csrf
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Test Phone Number</label>
+                        <input type="text" name="test_phone" value="" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="255612345678 or 0612345678">
+                        <p class="text-xs text-gray-500 mt-1">Enter phone number with country code (255) or local format (0)</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Custom Message (Optional)</label>
+                        <input type="text" name="test_message" value="" maxlength="160" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="Leave empty for default test message">
+                        <p class="text-xs text-gray-500 mt-1">Max 160 characters. Leave empty for default test message.</p>
+                    </div>
+                </div>
+                <div>
+                    <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">
+                        Send Test SMS
+                    </button>
                 </div>
             </form>
         </div>

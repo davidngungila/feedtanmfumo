@@ -63,6 +63,20 @@ class EmailNotificationService
     {
         $settings = Setting::getByGroup('communication');
         
+        // Use primary email if available, otherwise fallback to mail_from_address
+        $primaryEmail = $settings['mail_primary_email']->value ?? null;
+        $fallbackEmail = $settings['mail_from_address']->value ?? config('mail.from.address');
+        $fromEmail = $primaryEmail ?: $fallbackEmail;
+        
+        // Get additional emails
+        $additionalEmails = [];
+        if (isset($settings['mail_additional_emails']) && $settings['mail_additional_emails']->value) {
+            $additionalEmails = array_map('trim', explode(',', $settings['mail_additional_emails']->value));
+            $additionalEmails = array_filter($additionalEmails, function($email) {
+                return filter_var($email, FILTER_VALIDATE_EMAIL);
+            });
+        }
+        
         return [
             'name' => $settings['organization_name']->value ?? 'FeedTan Community Microfinance Group',
             'po_box' => $settings['organization_po_box']->value ?? 'P.O.Box 7744',
@@ -71,7 +85,9 @@ class EmailNotificationService
             'region' => $settings['organization_region']->value ?? 'Kilimanjaro',
             'country' => $settings['organization_country']->value ?? 'Tanzania',
             'from_name' => $settings['mail_from_name']->value ?? 'FeedTan Community Microfinance Group',
-            'from_email' => $settings['mail_from_address']->value ?? config('mail.from.address'),
+            'from_email' => $fromEmail,
+            'primary_email' => $primaryEmail,
+            'additional_emails' => $additionalEmails,
         ];
     }
 
