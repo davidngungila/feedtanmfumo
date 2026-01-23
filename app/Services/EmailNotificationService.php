@@ -6,7 +6,6 @@ use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\View;
 
