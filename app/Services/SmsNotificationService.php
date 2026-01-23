@@ -6,9 +6,21 @@ use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class SmsNotificationService
 {
+    protected $smsApiKey;
+    protected $smsApiSecret;
+    protected $smsFrom;
+    protected $smsUrl;
+    protected $smsEnabled;
+
+    public function __construct()
+    {
+        $this->reloadSmsConfig();
+    }
+
     /**
      * Reload SMS configuration from database
      */
@@ -17,28 +29,33 @@ class SmsNotificationService
         try {
             $settings = Setting::getByGroup('communication');
             
-            // Store config in cache for this request
-            if (isset($settings['sms_provider']) && $settings['sms_provider']->value) {
-                config(['sms.provider' => $settings['sms_provider']->value]);
-            }
+            // Get SMS settings with fallback to env
+            $this->smsApiKey = isset($settings['sms_api_key']) && $settings['sms_api_key']->value 
+                ? $settings['sms_api_key']->value 
+                : Setting::getValue('sms_api_key', env('SMS_API_KEY', ''));
             
-            if (isset($settings['sms_api_key']) && $settings['sms_api_key']->value) {
-                config(['sms.api_key' => $settings['sms_api_key']->value]);
-            }
+            $this->smsApiSecret = isset($settings['sms_api_secret']) && $settings['sms_api_secret']->value 
+                ? $settings['sms_api_secret']->value 
+                : Setting::getValue('sms_api_secret', env('SMS_API_SECRET', ''));
             
-            if (isset($settings['sms_api_secret']) && $settings['sms_api_secret']->value) {
-                config(['sms.api_secret' => $settings['sms_api_secret']->value]);
-            }
+            $this->smsFrom = isset($settings['sms_sender_id']) && $settings['sms_sender_id']->value 
+                ? $settings['sms_sender_id']->value 
+                : Setting::getValue('sms_sender_id', env('SMS_FROM', 'FEEDTAN'));
             
-            if (isset($settings['sms_sender_id']) && $settings['sms_sender_id']->value) {
-                config(['sms.sender_id' => $settings['sms_sender_id']->value]);
-            }
+            $this->smsUrl = Setting::getValue('sms_url', env('SMS_URL', 'https://messaging-service.co.tz/api/sms/v2/text/single'));
             
-            if (isset($settings['sms_enabled']) && $settings['sms_enabled']->value) {
-                config(['sms.enabled' => (bool)$settings['sms_enabled']->value]);
-            }
+            $this->smsEnabled = isset($settings['sms_enabled']) && $settings['sms_enabled']->value 
+                ? (bool)$settings['sms_enabled']->value 
+                : Setting::getValue('sms_enabled', env('SMS_ENABLED', true));
+                
         } catch (\Exception $e) {
             Log::warning('Failed to reload SMS config: ' . $e->getMessage());
+            // Use env fallback
+            $this->smsApiKey = env('SMS_API_KEY', '');
+            $this->smsApiSecret = env('SMS_API_SECRET', '');
+            $this->smsFrom = env('SMS_FROM', 'FEEDTAN');
+            $this->smsUrl = env('SMS_URL', 'https://messaging-service.co.tz/api/sms/v2/text/single');
+            $this->smsEnabled = env('SMS_ENABLED', true);
         }
     }
 
@@ -66,13 +83,23 @@ class SmsNotificationService
     protected function formatPhoneNumber(string $phone): string
     {
         // Remove any non-digit characters
-        $cleaned = preg_replace('/\D/', '', $phone);
+        $cleaned = preg_replace('/[^0-9]/', '', $phone);
         
         // Handle Tanzanian numbers
         if (strpos($cleaned, '0') === 0) {
             $cleaned = '255' . substr($cleaned, 1);
         } elseif (strpos($cleaned, '255') !== 0) {
             $cleaned = '255' . $cleaned;
+        }
+        
+        // Validate format: should be 255 followed by 9 digits
+        if (!preg_match('/^255[0-9]{9}$/', $cleaned)) {
+            Log::error('SMS sending failed: Invalid phone number format', [
+                'phone' => $phone,
+                'cleaned' => $cleaned,
+                'expected_format' => '255XXXXXXXXX'
+            ]);
+            throw new \Exception('Invalid phone number format. Expected: 255XXXXXXXXX or 0XXXXXXXXX');
         }
         
         return $cleaned;
@@ -83,41 +110,52 @@ class SmsNotificationService
      */
     public function sendSms(string $phoneNumber, string $message): array
     {
-        $this->reloadSmsConfig();
-        
-        if (!config('sms.enabled', true)) {
+        if (!$this->smsEnabled) {
             return [
                 'success' => false,
                 'error' => 'SMS is disabled in settings'
             ];
         }
 
+        if (!$this->smsApiKey) {
+            return [
+                'success' => false,
+                'error' => 'SMS API key not configured'
+            ];
+        }
+
         try {
             $phoneNumber = $this->formatPhoneNumber($phoneNumber);
-            $apiKey = config('sms.api_key');
-            $senderId = config('sms.sender_id', 'FEEDTAN');
             
-            if (!$apiKey) {
-                return [
-                    'success' => false,
-                    'error' => 'SMS API key not configured'
-                ];
-            }
+            Log::info('Attempting to send SMS', [
+                'phone' => $phoneNumber,
+                'message' => substr($message, 0, 50) . (strlen($message) > 50 ? '...' : ''),
+                'url' => $this->smsUrl,
+                'from' => $this->smsFrom
+            ]);
 
-            // Use messaging-service.co.tz API
+            // Use POST method with Bearer token (as per messaging-service.co.tz API)
             $response = Http::timeout(30)
                 ->withHeaders([
-                    'Authorization' => 'Bearer ' . $apiKey,
+                    'Authorization' => 'Bearer ' . $this->smsApiKey,
                     'Content-Type' => 'application/json',
                     'Accept' => 'application/json'
                 ])
-                ->post('https://messaging-service.co.tz/api/sms/v2/text/single', [
-                    'from' => $senderId,
+                ->post($this->smsUrl, [
+                    'from' => $this->smsFrom,
                     'to' => $phoneNumber,
                     'text' => $message,
                     'flash' => 0,
-                    'reference' => uniqid('feedtan_', true)
+                    'reference' => 'feedtan_' . time() . '_' . uniqid()
                 ]);
+
+            $httpCode = $response->status();
+            $responseBody = $response->body();
+
+            Log::info('SMS Response', [
+                'http_code' => $httpCode,
+                'response' => $responseBody
+            ]);
 
             if ($response->successful()) {
                 $responseData = $response->json();
@@ -136,15 +174,42 @@ class SmsNotificationService
                         ];
                     }
                     
-                    // Message is pending or sent
+                    // Message is pending or sent (status id 51 = ENROUTE (SENT))
                     if (($messageStatus['groupName'] ?? '') === 'PENDING' || ($messageStatus['id'] ?? 0) === 51) {
                         Log::info("SMS sent successfully to {$phoneNumber}");
+                        
+                        // Log SMS activity
+                        try {
+                            $userId = Auth::id();
+                            $user = User::where('phone', $phoneNumber)
+                                ->orWhere('mobile', $phoneNumber)
+                                ->first();
+                            
+                            // You can add activity logging here if you have ActivityLogService
+                            // ActivityLogService::logSMSSent($phoneNumber, $message, $userId, $user?->id, [
+                            //     'provider' => 'messaging-service.co.tz',
+                            //     'sms_from' => $this->smsFrom,
+                            //     'response_code' => $httpCode,
+                            // ]);
+                        } catch (\Exception $e) {
+                            Log::warning('Failed to log SMS activity', ['error' => $e->getMessage()]);
+                        }
+                        
                         return [
                             'success' => true,
                             'message_id' => $responseData['messages'][0]['messageId'] ?? null,
                             'response' => $responseData
                         ];
                     }
+                    
+                    // Other status codes
+                    return [
+                        'success' => false,
+                        'error' => $messageStatus['description'] ?? $messageStatus['name'] ?? 'Unknown status',
+                        'response' => $responseData,
+                        'status_group' => $messageStatus['groupName'] ?? null,
+                        'status_id' => $messageStatus['id'] ?? null
+                    ];
                 }
                 
                 // If response structure is different but status is 200, assume success
@@ -155,14 +220,35 @@ class SmsNotificationService
                 ];
             }
 
+            $errorMsg = "SMS failed with HTTP code {$httpCode}";
+            if ($responseBody) {
+                $errorMsg .= ': ' . substr($responseBody, 0, 200);
+            }
+            
+            Log::error('SMS failed with HTTP code', [
+                'http_code' => $httpCode,
+                'response' => $responseBody,
+                'phone' => $phoneNumber,
+                'error' => $errorMsg
+            ]);
+
             return [
                 'success' => false,
-                'error' => 'HTTP ' . $response->status() . ': ' . $response->body(),
-                'status' => $response->status()
+                'error' => $errorMsg,
+                'status' => $httpCode
             ];
 
         } catch (\Exception $e) {
-            Log::error("Failed to send SMS to {$phoneNumber}: " . $e->getMessage());
+            Log::error('SMS sending exception', [
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+                'phone' => $phoneNumber ?? 'unknown',
+                'message_text' => substr($message ?? 'unknown', 0, 50),
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            
             return [
                 'success' => false,
                 'error' => $e->getMessage()
@@ -175,46 +261,62 @@ class SmsNotificationService
      */
     public function sendBulkSms(array $recipients, string $message): array
     {
-        $this->reloadSmsConfig();
-        
-        if (!config('sms.enabled', true)) {
+        if (!$this->smsEnabled) {
             return [
                 'success' => false,
                 'error' => 'SMS is disabled in settings'
             ];
         }
 
-        try {
-            $apiKey = config('sms.api_key');
-            $senderId = config('sms.sender_id', 'FEEDTAN');
-            
-            if (!$apiKey) {
-                return [
-                    'success' => false,
-                    'error' => 'SMS API key not configured'
-                ];
-            }
+        if (!$this->smsApiKey) {
+            return [
+                'success' => false,
+                'error' => 'SMS API key not configured'
+            ];
+        }
 
+        try {
             // Prepare messages array
             $messages = [];
             foreach ($recipients as $phone) {
-                $messages[] = [
-                    'from' => $senderId,
-                    'to' => $this->formatPhoneNumber($phone),
-                    'text' => $message
+                try {
+                    $formattedPhone = $this->formatPhoneNumber($phone);
+                    $messages[] = [
+                        'from' => $this->smsFrom,
+                        'to' => $formattedPhone,
+                        'text' => $message
+                    ];
+                } catch (\Exception $e) {
+                    Log::warning('Skipping invalid phone number in bulk SMS', [
+                        'phone' => $phone,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+
+            if (empty($messages)) {
+                return [
+                    'success' => false,
+                    'error' => 'No valid phone numbers to send to'
                 ];
+            }
+
+            $bulkUrl = str_replace('/single', '/multi', $this->smsUrl);
+            if ($bulkUrl === $this->smsUrl) {
+                // If URL doesn't have /single, try to construct multi URL
+                $bulkUrl = 'https://messaging-service.co.tz/api/sms/v2/text/multi';
             }
 
             $response = Http::timeout(60)
                 ->withHeaders([
-                    'Authorization' => 'Bearer ' . $apiKey,
+                    'Authorization' => 'Bearer ' . $this->smsApiKey,
                     'Content-Type' => 'application/json',
                     'Accept' => 'application/json'
                 ])
-                ->post('https://messaging-service.co.tz/api/sms/v2/text/multi', [
+                ->post($bulkUrl, [
                     'messages' => $messages,
                     'flash' => 0,
-                    'reference' => uniqid('feedtan_bulk_', true)
+                    'reference' => 'feedtan_bulk_' . time() . '_' . uniqid()
                 ]);
 
             if ($response->successful()) {
@@ -270,7 +372,7 @@ class SmsNotificationService
             $orgInfo = $this->getOrganizationInfo();
             $message = $this->formatLoanApprovalSms($user, $loanDetails, $orgInfo);
             
-            $result = $this->sendSms($user->phone ?? $user->profile->phone ?? '', $message);
+            $result = $this->sendSms($user->phone ?? $user->mobile ?? '', $message);
             
             if ($result['success']) {
                 Log::info("Loan approval SMS sent to {$user->email} for user ID {$user->id}.");
@@ -313,7 +415,7 @@ class SmsNotificationService
             }
             $message .= ". Tafadhali fika ofisi au tumia M-Pesa. - {$orgInfo['name']}";
             
-            $result = $this->sendSms($user->phone ?? $user->profile->phone ?? '', $message);
+            $result = $this->sendSms($user->phone ?? $user->mobile ?? '', $message);
             
             if ($result['success']) {
                 Log::info("Payment reminder SMS sent to {$user->email}");
@@ -326,4 +428,3 @@ class SmsNotificationService
         }
     }
 }
-
