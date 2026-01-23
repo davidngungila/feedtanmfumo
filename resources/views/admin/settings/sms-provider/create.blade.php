@@ -111,7 +111,7 @@
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Connection Status</label>
                                     <div id="connectionStatus" class="px-4 py-3 bg-gray-100 border border-gray-300 rounded-md text-sm text-gray-600">
-                                        Loading...
+                                        Click "Test Connection" to check status
                                     </div>
                                 </div>
                             </div>
