@@ -127,6 +127,22 @@
             if (value.length === 6 && !isSubmitting) {
                 isSubmitting = true;
                 
+                // Ensure the input value is properly set
+                otpInput.value = value;
+                
+                // Create/update hidden input to ensure value is sent
+                let hiddenInput = otpForm.querySelector('input[name="otp_code"][type="hidden"]');
+                if (!hiddenInput) {
+                    hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'otp_code';
+                    otpForm.appendChild(hiddenInput);
+                }
+                hiddenInput.value = value;
+                
+                // Ensure the visible input name is correct
+                otpInput.name = 'otp_code';
+                
                 // Show splash screen with progress
                 showSplashScreen();
                 
@@ -141,8 +157,16 @@
                 
                 // Small delay to ensure value is set, then submit
                 setTimeout(function() {
-                    otpForm.submit();
-                }, 150);
+                    // Double-check value is set before submitting
+                    if (otpInput.value.length === 6) {
+                        otpForm.submit();
+                    } else {
+                        isSubmitting = false;
+                        otpInput.disabled = false;
+                        otpInput.classList.remove('opacity-75', 'cursor-not-allowed');
+                        alert('Please enter a complete 6-digit OTP code.');
+                    }
+                }, 200);
             }
         });
         
@@ -157,6 +181,22 @@
             if (numbers.length === 6 && !isSubmitting) {
                 isSubmitting = true;
                 
+                // Ensure the input value is properly set
+                otpInput.value = numbers;
+                
+                // Create/update hidden input to ensure value is sent
+                let hiddenInput = otpForm.querySelector('input[name="otp_code"][type="hidden"]');
+                if (!hiddenInput) {
+                    hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'otp_code';
+                    otpForm.appendChild(hiddenInput);
+                }
+                hiddenInput.value = numbers;
+                
+                // Ensure the visible input name is correct
+                otpInput.name = 'otp_code';
+                
                 // Show splash screen with progress
                 showSplashScreen();
                 
@@ -169,14 +209,26 @@
                 }
                 
                 setTimeout(function() {
-                    otpForm.submit();
-                }, 150);
+                    // Double-check value is set before submitting
+                    if (otpInput.value.length === 6) {
+                        otpForm.submit();
+                    } else {
+                        isSubmitting = false;
+                        otpInput.disabled = false;
+                        otpInput.classList.remove('opacity-75', 'cursor-not-allowed');
+                        alert('Please enter a complete 6-digit OTP code.');
+                    }
+                }, 200);
             }
         });
         
         // Prevent manual submission if less than 6 digits
         otpForm.addEventListener('submit', function(e) {
             const value = otpInput.value.replace(/[^0-9]/g, '');
+            
+            // Ensure the input value is set correctly before submission
+            otpInput.value = value;
+            
             if (value.length !== 6) {
                 e.preventDefault();
                 alert('Please enter a complete 6-digit OTP code.');
@@ -184,6 +236,21 @@
                 otpInput.select();
                 return false;
             }
+            
+            // Ensure the form field has the correct value
+            // Create a hidden input to ensure the value is sent
+            let hiddenInput = otpForm.querySelector('input[name="otp_code"][type="hidden"]');
+            if (!hiddenInput) {
+                hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'otp_code';
+                otpForm.appendChild(hiddenInput);
+            }
+            hiddenInput.value = value;
+            
+            // Also ensure the visible input has the value
+            otpInput.value = value;
+            otpInput.name = 'otp_code';
             
             // Mark that form is submitting
             sessionStorage.setItem('otpSubmitting', 'true');
