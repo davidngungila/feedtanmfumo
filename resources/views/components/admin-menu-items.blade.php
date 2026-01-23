@@ -17,7 +17,7 @@
     $isActiveInvestments = request()->routeIs(['admin.investments.*']);
     $isActiveWelfare = request()->routeIs(['admin.welfare.*']);
     $isActiveReports = request()->routeIs(['admin.reports.*']);
-    $isActiveSettings = request()->routeIs(['admin.settings.*']);
+    $isActiveSettings = request()->routeIs(['admin.settings.*', 'admin.system-settings.*']);
     $isActiveShares = request()->routeIs(['admin.shares.*']);
     $isActiveFormulas = request()->routeIs(['admin.formulas.*']);
 @endphp
@@ -843,66 +843,207 @@
     </button>
     <div class="dropdown-menu pl-4 mt-1 space-y-1 {{ $isActiveSettings ? '' : 'hidden' }}">
         <a href="{{ route('admin.settings.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">All Settings</a>
-        <!-- System Settings -->
+        
+        <!-- 🔐 User & Access Management -->
         <div class="nested-dropdown-container">
             <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
-                <span>System Settings</span>
+                <span>🔐 User & Access Management</span>
                 <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </button>
             <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
-                <a href="{{ route('admin.settings.system') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">System Settings</a>
-                <a href="{{ route('admin.settings.organization') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Organization Settings</a>
-                <a href="{{ route('admin.settings.system') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Financial Year Settings</a>
-                <a href="{{ route('admin.settings.system') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Currency Settings</a>
-                <a href="{{ route('admin.settings.system') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Interest Rate Configuration</a>
-                <a href="{{ route('admin.settings.system') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Penalty Settings</a>
+                <a href="{{ route('admin.system-settings.users') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Users</a>
+                <a href="{{ route('admin.system-settings.roles') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Roles</a>
+                <a href="{{ route('admin.system-settings.permissions') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Permissions</a>
+                <a href="{{ route('admin.system-settings.role-assignment') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Role Assignment</a>
+                <a href="{{ route('admin.system-settings.login-sessions') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Login Sessions</a>
+                <a href="{{ route('admin.system-settings.password-policy') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Password Policy</a>
             </div>
         </div>
-        <!-- Product Configuration -->
+
+        <!-- 🏢 Organization / General -->
         <div class="nested-dropdown-container">
             <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
-                <span>Product Configuration</span>
+                <span>🏢 Organization / General</span>
                 <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </button>
             <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
-                <a href="{{ route('admin.loans.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Loan Product Setup</a>
-                <a href="{{ route('admin.savings.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Savings Product Parameters</a>
-                <a href="{{ route('admin.investments.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Investment Plan Settings</a>
-                <a href="{{ route('admin.welfare.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Welfare Fund Rules</a>
+                <a href="{{ route('admin.system-settings.system-information') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">System Information</a>
+                <a href="{{ route('admin.system-settings.organization-profile') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Organization Profile</a>
+                <a href="{{ route('admin.system-settings.contact-details') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Contact Details</a>
+                <a href="{{ route('admin.system-settings.logo-branding') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Logo & Branding</a>
+                <a href="{{ route('admin.system-settings.language-settings') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Language Settings</a>
+                <a href="{{ route('admin.system-settings.timezone-date-format') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Timezone & Date Format</a>
             </div>
         </div>
-        <!-- Security Settings -->
+
+        <!-- ⚙️ Application Settings -->
         <div class="nested-dropdown-container">
             <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
-                <span>Security Settings</span>
+                <span>⚙️ Application Settings</span>
                 <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </button>
             <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
-                <a href="{{ route('admin.settings.system') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Password Policies</a>
-                <a href="{{ route('admin.settings.system') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Two-Factor Authentication</a>
-                <a href="{{ route('admin.settings.system') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Session Management</a>
-                <a href="{{ route('admin.settings.system') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Backup Configuration</a>
+                <a href="{{ route('admin.system-settings.general-settings') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">General Settings</a>
+                <a href="{{ route('admin.system-settings.feature-toggles') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Feature Toggles</a>
+                <a href="{{ route('admin.system-settings.maintenance-mode') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Maintenance Mode</a>
+                <a href="{{ route('admin.system-settings.default-values') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Default Values</a>
+                <a href="{{ route('admin.system-settings.system-preferences') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">System Preferences</a>
             </div>
         </div>
-        <!-- Communication Settings -->
+
+        <!-- 🔔 Notifications -->
         <div class="nested-dropdown-container">
             <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
-                <span>Communication Settings</span>
+                <span>🔔 Notifications</span>
                 <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
             </button>
             <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
-                <a href="{{ route('admin.settings.communication') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">SMS Templates</a>
-                <a href="{{ route('admin.settings.communication') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Email Settings</a>
-                <a href="{{ route('admin.settings.communication') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Notification Preferences</a>
-                <a href="{{ route('admin.settings.communication') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Reminder Settings</a>
+                <a href="{{ route('admin.system-settings.email-settings') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Email Settings (SMTP)</a>
+                <a href="{{ route('admin.system-settings.sms-settings') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">SMS Settings</a>
+                <a href="{{ route('admin.system-settings.push-notifications') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Push Notifications</a>
+                <a href="{{ route('admin.system-settings.notification-templates') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Notification Templates</a>
+                <a href="{{ route('admin.system-settings.alert-rules') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Alert Rules</a>
+            </div>
+        </div>
+
+        <!-- 🗂️ Data Management -->
+        <div class="nested-dropdown-container">
+            <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
+                <span>🗂️ Data Management</span>
+                <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+            <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
+                <a href="{{ route('admin.system-settings.backup-restore') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Backup & Restore</a>
+                <a href="{{ route('admin.system-settings.import-data') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Import Data</a>
+                <a href="{{ route('admin.system-settings.export-data') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Export Data</a>
+                <a href="{{ route('admin.system-settings.database-settings') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Database Settings</a>
+                <a href="{{ route('admin.system-settings.data-retention-policy') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Data Retention Policy</a>
+            </div>
+        </div>
+
+        <!-- 🔒 Security -->
+        <div class="nested-dropdown-container">
+            <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
+                <span>🔒 Security</span>
+                <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+            <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
+                <a href="{{ route('admin.system-settings.security-settings') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Security Settings</a>
+                <a href="{{ route('admin.system-settings.two-factor-auth') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Two-Factor Authentication (2FA)</a>
+                <a href="{{ route('admin.system-settings.ip-whitelisting') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">IP Whitelisting / Blacklisting</a>
+                <a href="{{ route('admin.system-settings.audit-logs') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Audit Logs</a>
+                <a href="{{ route('admin.system-settings.activity-logs') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Activity Logs</a>
+            </div>
+        </div>
+
+        <!-- 📄 Documents & Templates -->
+        <div class="nested-dropdown-container">
+            <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
+                <span>📄 Documents & Templates</span>
+                <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+            <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
+                <a href="{{ route('admin.system-settings.pdf-templates') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">PDF Templates</a>
+                <a href="{{ route('admin.system-settings.email-templates') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Email Templates</a>
+                <a href="{{ route('admin.system-settings.report-templates') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Report Templates</a>
+                <a href="{{ route('admin.system-settings.certificate-templates') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Certificate Templates</a>
+            </div>
+        </div>
+
+        <!-- 🔌 Integrations -->
+        <div class="nested-dropdown-container">
+            <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
+                <span>🔌 Integrations</span>
+                <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+            <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
+                <a href="{{ route('admin.system-settings.api-settings') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">API Settings</a>
+                <a href="{{ route('admin.system-settings.payment-gateways') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Payment Gateways</a>
+                <a href="{{ route('admin.system-settings.third-party-services') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Third-party Services</a>
+                <a href="{{ route('admin.system-settings.webhooks') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Webhooks</a>
+            </div>
+        </div>
+
+        <!-- 🧰 System Tools -->
+        <div class="nested-dropdown-container">
+            <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
+                <span>🧰 System Tools</span>
+                <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+            <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
+                <a href="{{ route('admin.system-settings.cache-management') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Cache Management</a>
+                <a href="{{ route('admin.system-settings.system-logs') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">System Logs</a>
+                <a href="{{ route('admin.system-settings.queue-jobs') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Queue Jobs</a>
+                <a href="{{ route('admin.system-settings.cron-jobs') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Cron Jobs</a>
+                <a href="{{ route('admin.system-settings.debug-settings') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Debug Settings</a>
+            </div>
+        </div>
+
+        <!-- 🔄 Updates & Maintenance -->
+        <div class="nested-dropdown-container">
+            <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
+                <span>🔄 Updates & Maintenance</span>
+                <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+            <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
+                <a href="{{ route('admin.system-settings.system-updates') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">System Updates</a>
+                <a href="{{ route('admin.system-settings.version-info') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Version Info</a>
+                <a href="{{ route('admin.system-settings.changelog') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Changelog</a>
+                <a href="{{ route('admin.system-settings.cache-management') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Clear Cache</a>
+                <a href="{{ route('admin.system-settings.system-updates') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Optimize System</a>
+            </div>
+        </div>
+
+        <!-- 📊 Reports & Monitoring -->
+        <div class="nested-dropdown-container">
+            <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
+                <span>📊 Reports & Monitoring</span>
+                <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+            <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
+                <a href="{{ route('admin.system-settings.system-reports') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">System Reports</a>
+                <a href="{{ route('admin.system-settings.usage-statistics') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Usage Statistics</a>
+                <a href="{{ route('admin.system-settings.performance-monitoring') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Performance Monitoring</a>
+                <a href="{{ route('admin.system-settings.error-reports') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Error Reports</a>
+            </div>
+        </div>
+
+        <!-- Bonus Features -->
+        <div class="nested-dropdown-container">
+            <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
+                <span>✨ Bonus</span>
+                <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+            <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
+                <a href="{{ route('admin.system-settings.custom-fields') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Custom Fields</a>
+                <a href="{{ route('admin.system-settings.module-management') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Module Management</a>
+                <a href="{{ route('admin.system-settings.menu-builder') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Menu Builder</a>
+                <a href="{{ route('admin.system-settings.theme-appearance') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Theme / Appearance</a>
+                <a href="{{ route('admin.system-settings.license-management') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">License Management</a>
             </div>
         </div>
     </div>
