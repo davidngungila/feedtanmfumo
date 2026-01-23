@@ -157,10 +157,16 @@ class SmsNotificationService
             
             // Use Basic Auth if username/password are configured, otherwise use Bearer token
             if ($useBasicAuth) {
+                // Ensure API URL has the correct endpoint
+                $apiUrl = $this->smsUrl;
+                if (strpos($apiUrl, '/api/sms') !== false && strpos($apiUrl, '/text/') === false) {
+                    $apiUrl = rtrim($apiUrl, '/') . '/v1/text/single';
+                }
+                
                 $response = Http::timeout(30)
                     ->withBasicAuth($provider->username, $provider->password)
                     ->withHeaders($headers)
-                    ->post($this->smsUrl, [
+                    ->post($apiUrl, [
                         'from' => $this->smsFrom,
                         'to' => $phoneNumber,
                         'text' => $message,

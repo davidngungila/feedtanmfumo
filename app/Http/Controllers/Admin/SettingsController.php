@@ -120,71 +120,11 @@ class SettingsController extends Controller
             'sms_api_secret' => 'nullable|string',
             'sms_sender_id' => 'nullable|string',
             'sms_enabled' => 'nullable|boolean',
-            
-            // SMS Provider Configuration
-            'provider_name' => 'nullable|string|max:255',
-            'provider_username' => 'nullable|string|max:255',
-            'provider_password' => 'nullable|string',
-            'provider_from' => 'nullable|string|max:11',
-            'provider_api_url' => 'nullable|url',
-            'provider_description' => 'nullable|string',
-            'provider_active' => 'nullable|boolean',
-            'provider_is_primary' => 'nullable|boolean',
         ]);
 
         foreach ($validated as $key => $value) {
-            if (strpos($key, 'provider_') === 0) {
-                continue; // Skip provider fields, handle separately
-            }
             $type = in_array($key, ['mail_port', 'sms_enabled']) ? (is_bool($value) ? 'boolean' : 'number') : 'text';
             Setting::set($key, $value, 'communication', $type);
-        }
-        
-        // Handle SMS Provider Configuration
-        if ($request->filled('provider_name') && $request->filled('provider_api_url')) {
-            $primaryProvider = \App\Models\SmsProvider::getPrimary();
-            
-            if ($primaryProvider) {
-                // Update existing provider
-                $updateData = [
-                    'name' => $request->provider_name,
-                    'username' => $request->provider_username,
-                    'from' => $request->provider_from ?? $request->sms_sender_id ?? 'FEEDTAN',
-                    'api_url' => $request->provider_api_url,
-                    'description' => $request->provider_description,
-                    'active' => $request->has('provider_active'),
-                    'is_primary' => $request->has('provider_is_primary'),
-                ];
-                
-                // Only update password if provided
-                if ($request->filled('provider_password')) {
-                    $updateData['password'] = $request->provider_password;
-                }
-                
-                $primaryProvider->update($updateData);
-                
-                // If set as primary, ensure it's the only primary
-                if ($request->has('provider_is_primary')) {
-                    $primaryProvider->setAsPrimary();
-                }
-            } else {
-                // Create new provider
-                $provider = \App\Models\SmsProvider::create([
-                    'name' => $request->provider_name,
-                    'username' => $request->provider_username,
-                    'password' => $request->provider_password,
-                    'from' => $request->provider_from ?? $request->sms_sender_id ?? 'FEEDTAN',
-                    'api_url' => $request->provider_api_url,
-                    'description' => $request->provider_description,
-                    'active' => $request->has('provider_active'),
-                    'is_primary' => $request->has('provider_is_primary'),
-                ]);
-                
-                // If set as primary, ensure it's the only primary
-                if ($request->has('provider_is_primary')) {
-                    $provider->setAsPrimary();
-                }
-            }
         }
         
         // If primary email is set, also update mail_from_address as fallback

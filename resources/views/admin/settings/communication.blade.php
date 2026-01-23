@@ -218,67 +218,35 @@
                     </div>
                 </div>
 
-                <!-- SMS Provider Configuration -->
+                <!-- SMS Provider Management -->
                 <div class="border-t border-gray-200 pt-6 mt-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Provider Configuration</h3>
-                    <p class="text-sm text-gray-600 mb-4">Configure SMS gateway provider settings</p>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800">SMS Provider Management</h3>
+                        <a href="{{ route('admin.sms-provider.create') }}" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm">
+                            Add SMS Provider
+                        </a>
+                    </div>
                     
                     @php
                         $primaryProvider = \App\Models\SmsProvider::getPrimary();
+                        $providers = \App\Models\SmsProvider::getActive();
                     @endphp
                     
-                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    @if($primaryProvider)
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                        <div class="flex items-center justify-between">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Provider Name <span class="text-red-500">*</span></label>
-                                <input type="text" name="provider_name" value="{{ $primaryProvider ? $primaryProvider->name : 'Primary SMS Gateway' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="Primary SMS Gateway" required>
-                                <p class="text-xs text-gray-500 mt-1">A descriptive name for this SMS provider</p>
+                                <p class="text-sm font-medium text-green-800">Primary Provider: <strong>{{ $primaryProvider->name }}</strong></p>
+                                <p class="text-xs text-green-600 mt-1">{{ $primaryProvider->description ?? 'No description' }}</p>
                             </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">SMS Username <span class="text-red-500">*</span></label>
-                                <input type="text" name="provider_username" value="{{ $primaryProvider ? $primaryProvider->username : 'emcatechn' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="emcatechn" required>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">SMS Password</label>
-                                <input type="password" name="provider_password" value="" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="Leave blank to keep current password">
-                                <p class="text-xs text-gray-500 mt-1">Leave blank to keep current password</p>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">SMS From (Sender Name)</label>
-                                <input type="text" name="provider_from" value="{{ $primaryProvider ? $primaryProvider->from : 'OfisiLink' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="OfisiLink" maxlength="11">
-                                <p class="text-xs text-gray-500 mt-1">Name displayed as sender (if supported by gateway)</p>
-                            </div>
-
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">SMS API URL <span class="text-red-500">*</span></label>
-                                <input type="url" name="provider_api_url" value="{{ $primaryProvider ? $primaryProvider->api_url : 'https://messaging-service.co.tz/link/sms/v1/text/single' }}" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="https://messaging-service.co.tz/link/sms/v1/text/single" required>
-                            </div>
-
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                                <textarea name="provider_description" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="Primary SMS gateway provider configured from system settings">{{ $primaryProvider ? $primaryProvider->description : 'Primary SMS gateway provider configured from system settings' }}</textarea>
-                            </div>
-
-                            <div>
-                                <div class="flex items-center space-x-3">
-                                    <input type="checkbox" name="provider_active" value="1" id="provider_active" {{ ($primaryProvider && $primaryProvider->active) ? 'checked' : 'checked' }} class="rounded border-gray-300 text-[#015425] focus:ring-[#015425]">
-                                    <label for="provider_active" class="text-sm font-medium text-gray-700">Active</label>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Provider will be available for use</p>
-                            </div>
-
-                            <div>
-                                <div class="flex items-center space-x-3">
-                                    <input type="checkbox" name="provider_is_primary" value="1" id="provider_is_primary" {{ ($primaryProvider && $primaryProvider->is_primary) ? 'checked' : 'checked' }} class="rounded border-gray-300 text-[#015425] focus:ring-[#015425]">
-                                    <label for="provider_is_primary" class="text-sm font-medium text-gray-700">Set as Primary</label>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Primary provider is used first</p>
-                            </div>
+                            <span class="px-3 py-1 bg-green-200 text-green-800 rounded-full text-xs font-medium">Active</span>
                         </div>
                     </div>
+                    @else
+                    <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+                        <p class="text-sm text-yellow-800">No SMS provider configured. <a href="{{ route('admin.sms-provider.create') }}" class="underline font-medium">Add one now</a> to enable SMS notifications.</p>
+                    </div>
+                    @endif
                 </div>
             </div>
 

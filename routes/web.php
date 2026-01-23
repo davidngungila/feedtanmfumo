@@ -245,6 +245,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('settings/communication/test-email', [SettingsController::class, 'sendTestEmail'])->name('settings.communication.test-email');
     Route::post('settings/communication/test-sms', [SettingsController::class, 'sendTestSms'])->name('settings.communication.test-sms');
 
+    // SMS Provider Management
+    Route::get('sms-provider/create', [\App\Http\Controllers\Admin\SmsProviderController::class, 'create'])->name('sms-provider.create');
+    Route::post('sms-provider/store', [\App\Http\Controllers\Admin\SmsProviderController::class, 'store'])->name('sms-provider.store');
+    Route::post('sms-provider/test-connection', [\App\Http\Controllers\Admin\SmsProviderController::class, 'testConnection'])->name('sms-provider.test-connection');
+
     // Advanced System Settings Routes
     Route::prefix('system-settings')->name('system-settings.')->group(function () {
         // User & Access Management
