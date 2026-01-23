@@ -146,20 +146,40 @@ class SmsNotificationService
                 'from' => $this->smsFrom
             ]);
 
-            // Use POST method with Bearer token (as per messaging-service.co.tz API)
-            $response = Http::timeout(30)
-                ->withHeaders([
-                    'Authorization' => 'Bearer ' . $this->smsApiKey,
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'application/json'
-                ])
-                ->post($this->smsUrl, [
-                    'from' => $this->smsFrom,
-                    'to' => $phoneNumber,
-                    'text' => $message,
-                    'flash' => 0,
-                    'reference' => 'feedtan_' . time() . '_' . uniqid()
-                ]);
+            // Determine authentication method based on provider configuration
+            $provider = \App\Models\SmsProvider::getPrimary();
+            $useBasicAuth = $provider && $provider->username && $provider->password;
+            
+            $headers = [
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json'
+            ];
+            
+            // Use Basic Auth if username/password are configured, otherwise use Bearer token
+            if ($useBasicAuth) {
+                $response = Http::timeout(30)
+                    ->withBasicAuth($provider->username, $provider->password)
+                    ->withHeaders($headers)
+                    ->post($this->smsUrl, [
+                        'from' => $this->smsFrom,
+                        'to' => $phoneNumber,
+                        'text' => $message,
+                        'flash' => 0,
+                        'reference' => 'feedtan_' . time() . '_' . uniqid()
+                    ]);
+            } else {
+                // Use Bearer token authentication
+                $headers['Authorization'] = 'Bearer ' . $this->smsApiKey;
+                $response = Http::timeout(30)
+                    ->withHeaders($headers)
+                    ->post($this->smsUrl, [
+                        'from' => $this->smsFrom,
+                        'to' => $phoneNumber,
+                        'text' => $message,
+                        'flash' => 0,
+                        'reference' => 'feedtan_' . time() . '_' . uniqid()
+                    ]);
+            }
 
             $httpCode = $response->status();
             $responseBody = $response->body();

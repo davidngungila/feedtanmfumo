@@ -342,26 +342,47 @@
             </div>
             @endif
             
-            <form action="{{ route('admin.settings.communication.test-sms') }}" method="POST">
+            <form action="{{ route('admin.settings.communication.test-sms') }}" method="POST" id="testSmsForm">
                 @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Test Phone Number</label>
-                        <input type="text" name="test_phone" value="" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="255612345678 or 0612345678">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Test Phone Number <span class="text-red-500">*</span></label>
+                        <input type="text" name="test_phone" id="test_phone" value="{{ isset($settings['organization_phone']) ? preg_replace('/[^0-9]/', '', $settings['organization_phone']->value) : '' }}" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="255612345678 or 0612345678">
                         <p class="text-xs text-gray-500 mt-1">Enter phone number with country code (255) or local format (0)</p>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Custom Message (Optional)</label>
-                        <input type="text" name="test_message" value="" maxlength="160" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="Leave empty for default test message">
-                        <p class="text-xs text-gray-500 mt-1">Max 160 characters. Leave empty for default test message.</p>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Test Message</label>
+                        <input type="text" name="test_message" id="test_message" value="Test SMS from FeedTan - SMS gateway is working correctly!" maxlength="160" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]" placeholder="Test message">
+                        <p class="text-xs text-gray-500 mt-1">Max 160 characters</p>
                     </div>
                 </div>
-                <div>
-                    <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">
-                        Send Test SMS
+                <div class="flex items-center gap-4">
+                    <button type="submit" id="testSmsBtn" class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span id="testSmsBtnText">Send Test SMS</span>
+                        <span id="testSmsSpinner" class="hidden ml-2">
+                            <svg class="animate-spin h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
                     </button>
+                    <p id="testSmsStatus" class="text-sm hidden"></p>
                 </div>
             </form>
+            
+            <script>
+                document.getElementById('testSmsForm').addEventListener('submit', function(e) {
+                    const btn = document.getElementById('testSmsBtn');
+                    const btnText = document.getElementById('testSmsBtnText');
+                    const spinner = document.getElementById('testSmsSpinner');
+                    const status = document.getElementById('testSmsStatus');
+                    
+                    btn.disabled = true;
+                    btnText.textContent = 'Sending...';
+                    spinner.classList.remove('hidden');
+                    status.classList.add('hidden');
+                });
+            </script>
         </div>
     </div>
 </div>
