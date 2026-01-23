@@ -251,7 +251,7 @@ Best regards,
                 config(['mail.mailers.smtp.host' => $settings['mail_host']->value]);
             }
             
-            if (isset($settings['mail_port']) {
+            if (isset($settings['mail_port'])) {
                 config(['mail.mailers.smtp.port' => $settings['mail_port']->value ?? 587]);
             }
             
