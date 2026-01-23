@@ -32,10 +32,11 @@ class SmsNotificationService
             
             if ($provider && $provider->active) {
                 // Use provider configuration
+                // Note: username field contains the Bearer token
                 $this->smsApiKey = $provider->username ?? '';
                 $this->smsApiSecret = $provider->password ?? '';
                 $this->smsFrom = $provider->from ?? 'FEEDTAN';
-                $this->smsUrl = $provider->api_url ?? 'https://messaging-service.co.tz/link/sms/v1/text/single';
+                $this->smsUrl = $provider->api_url ?? 'https://messaging-service.co.tz/api/sms/v2/text/single';
             } else {
                 // Fallback to settings
                 $settings = Setting::getByGroup('communication');
@@ -52,7 +53,7 @@ class SmsNotificationService
                     ? $settings['sms_sender_id']->value 
                     : Setting::getValue('sms_sender_id', env('SMS_FROM', 'FEEDTAN'));
                 
-                $this->smsUrl = Setting::getValue('sms_url', env('SMS_URL', 'https://messaging-service.co.tz/link/sms/v1/text/single'));
+                $this->smsUrl = Setting::getValue('sms_url', env('SMS_URL', 'https://messaging-service.co.tz/api/sms/v2/text/single'));
             }
             
             $settings = Setting::getByGroup('communication');
@@ -66,7 +67,7 @@ class SmsNotificationService
             $this->smsApiKey = env('SMS_API_KEY', '');
             $this->smsApiSecret = env('SMS_API_SECRET', '');
             $this->smsFrom = env('SMS_FROM', 'FEEDTAN');
-            $this->smsUrl = env('SMS_URL', 'https://messaging-service.co.tz/link/sms/v1/text/single');
+            $this->smsUrl = env('SMS_URL', 'https://messaging-service.co.tz/api/sms/v2/text/single');
             $this->smsEnabled = env('SMS_ENABLED', true);
         }
     }
@@ -148,23 +149,35 @@ class SmsNotificationService
 
             // Determine authentication method based on provider configuration
             $provider = \App\Models\SmsProvider::getPrimary();
-            $useBasicAuth = $provider && $provider->username && $provider->password;
             
             $headers = [
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json'
             ];
             
-            // Use Basic Auth if username/password are configured, otherwise use Bearer token
-            if ($useBasicAuth) {
-                // Ensure API URL has the correct endpoint
-                $apiUrl = $this->smsUrl;
-                if (strpos($apiUrl, '/api/sms') !== false && strpos($apiUrl, '/text/') === false) {
-                    $apiUrl = rtrim($apiUrl, '/') . '/v1/text/single';
+            // Normalize API URL and determine authentication
+            if ($provider && $provider->active) {
+                // Use provider configuration with Bearer token (username field contains token)
+                $apiUrl = $provider->api_url;
+                
+                // Normalize API URL to use v2 endpoint
+                if (strpos($apiUrl, '/api/sms') !== false) {
+                    if (strpos($apiUrl, '/v1/') !== false) {
+                        $apiUrl = str_replace('/v1/', '/v2/', $apiUrl);
+                    } elseif (strpos($apiUrl, '/v2/') === false && strpos($apiUrl, '/text/') === false) {
+                        $apiUrl = rtrim($apiUrl, '/') . '/v2/text/single';
+                    }
+                } elseif (strpos($apiUrl, '/link/sms') !== false) {
+                    $apiUrl = 'https://messaging-service.co.tz/api/sms/v2/text/single';
+                } else {
+                    $apiUrl = 'https://messaging-service.co.tz/api/sms/v2/text/single';
                 }
                 
+                // Use Bearer token (username field contains the Bearer token)
+                $bearerToken = $provider->username;
+                $headers['Authorization'] = 'Bearer ' . $bearerToken;
+                
                 $response = Http::timeout(30)
-                    ->withBasicAuth($provider->username, $provider->password)
                     ->withHeaders($headers)
                     ->post($apiUrl, [
                         'from' => $this->smsFrom,
@@ -174,11 +187,26 @@ class SmsNotificationService
                         'reference' => 'feedtan_' . time() . '_' . uniqid()
                     ]);
             } else {
-                // Use Bearer token authentication
+                // Use Bearer token authentication from settings
+                $apiUrl = $this->smsUrl;
+                
+                // Normalize API URL
+                if (strpos($apiUrl, '/api/sms') !== false) {
+                    if (strpos($apiUrl, '/v1/') !== false) {
+                        $apiUrl = str_replace('/v1/', '/v2/', $apiUrl);
+                    } elseif (strpos($apiUrl, '/v2/') === false && strpos($apiUrl, '/text/') === false) {
+                        $apiUrl = rtrim($apiUrl, '/') . '/v2/text/single';
+                    }
+                } elseif (strpos($apiUrl, '/link/sms') !== false) {
+                    $apiUrl = 'https://messaging-service.co.tz/api/sms/v2/text/single';
+                } else {
+                    $apiUrl = 'https://messaging-service.co.tz/api/sms/v2/text/single';
+                }
+                
                 $headers['Authorization'] = 'Bearer ' . $this->smsApiKey;
                 $response = Http::timeout(30)
                     ->withHeaders($headers)
-                    ->post($this->smsUrl, [
+                    ->post($apiUrl, [
                         'from' => $this->smsFrom,
                         'to' => $phoneNumber,
                         'text' => $message,

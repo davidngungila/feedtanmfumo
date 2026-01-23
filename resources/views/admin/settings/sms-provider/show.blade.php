@@ -74,8 +74,9 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-500 mb-1">SMS Username</label>
-                    <p class="text-sm text-gray-900">{{ $smsProvider->username }}</p>
+                    <label class="block text-sm font-medium text-gray-500 mb-1">Bearer Token (API Key)</label>
+                    <p class="text-sm text-gray-900 font-mono">{{ $smsProvider->username }}</p>
+                    <p class="text-xs text-gray-500 mt-1">Stored in username field</p>
                 </div>
 
                 <div>

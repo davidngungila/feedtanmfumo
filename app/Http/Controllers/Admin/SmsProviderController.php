@@ -93,14 +93,30 @@ class SmsProviderController extends Controller
                 ], 400);
             }
 
-            // Test connection with Basic Auth
+            // Normalize API URL
+            $apiUrl = $request->api_url;
+            if (strpos($apiUrl, '/api/sms') !== false) {
+                if (strpos($apiUrl, '/v1/') !== false) {
+                    $apiUrl = str_replace('/v1/', '/v2/', $apiUrl);
+                } elseif (strpos($apiUrl, '/v2/') === false && strpos($apiUrl, '/text/') === false) {
+                    $apiUrl = rtrim($apiUrl, '/') . '/v2/text/single';
+                }
+            } elseif (strpos($apiUrl, '/link/sms') !== false) {
+                $apiUrl = 'https://messaging-service.co.tz/api/sms/v2/text/single';
+            } else {
+                $apiUrl = 'https://messaging-service.co.tz/api/sms/v2/text/single';
+            }
+
+            // Use Bearer token authentication (username field contains the Bearer token)
+            $bearerToken = $request->username;
+            
             $response = Http::timeout(30)
-                ->withBasicAuth($request->username, $request->password)
                 ->withHeaders([
+                    'Authorization' => 'Bearer ' . $bearerToken,
                     'Content-Type' => 'application/json',
                     'Accept' => 'application/json'
                 ])
-                ->post($request->api_url, [
+                ->post($apiUrl, [
                     'from' => $from,
                     'to' => $cleaned,
                     'text' => $message,
@@ -308,14 +324,28 @@ class SmsProviderController extends Controller
 
             // Ensure API URL has the correct endpoint
             $apiUrl = $smsProvider->api_url;
-            if (strpos($apiUrl, '/api/sms') !== false && strpos($apiUrl, '/text/') === false) {
-                $apiUrl = rtrim($apiUrl, '/') . '/v1/text/single';
+            // Normalize API URL to use v2 endpoint
+            if (strpos($apiUrl, '/api/sms') !== false) {
+                // Replace v1 with v2 if present, or add v2/text/single if not
+                if (strpos($apiUrl, '/v1/') !== false) {
+                    $apiUrl = str_replace('/v1/', '/v2/', $apiUrl);
+                } elseif (strpos($apiUrl, '/v2/') === false && strpos($apiUrl, '/text/') === false) {
+                    $apiUrl = rtrim($apiUrl, '/') . '/v2/text/single';
+                }
+            } elseif (strpos($apiUrl, '/link/sms') !== false) {
+                // Convert old link format to new API format
+                $apiUrl = 'https://messaging-service.co.tz/api/sms/v2/text/single';
+            } else {
+                // Default to v2 endpoint
+                $apiUrl = 'https://messaging-service.co.tz/api/sms/v2/text/single';
             }
 
-            // Test connection with Basic Auth
+            // Use Bearer token authentication (username field contains the Bearer token)
+            $bearerToken = $smsProvider->username; // Username field is actually the Bearer token
+            
             $response = Http::timeout(30)
-                ->withBasicAuth($smsProvider->username, $smsProvider->password)
                 ->withHeaders([
+                    'Authorization' => 'Bearer ' . $bearerToken,
                     'Content-Type' => 'application/json',
                     'Accept' => 'application/json'
                 ])
