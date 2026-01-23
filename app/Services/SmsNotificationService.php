@@ -27,23 +27,35 @@ class SmsNotificationService
     protected function reloadSmsConfig(): void
     {
         try {
+            // First, try to get from SMS Provider
+            $provider = \App\Models\SmsProvider::getPrimary();
+            
+            if ($provider && $provider->active) {
+                // Use provider configuration
+                $this->smsApiKey = $provider->username ?? '';
+                $this->smsApiSecret = $provider->password ?? '';
+                $this->smsFrom = $provider->from ?? 'FEEDTAN';
+                $this->smsUrl = $provider->api_url ?? 'https://messaging-service.co.tz/link/sms/v1/text/single';
+            } else {
+                // Fallback to settings
+                $settings = Setting::getByGroup('communication');
+                
+                $this->smsApiKey = isset($settings['sms_api_key']) && $settings['sms_api_key']->value 
+                    ? $settings['sms_api_key']->value 
+                    : Setting::getValue('sms_api_key', env('SMS_API_KEY', ''));
+                
+                $this->smsApiSecret = isset($settings['sms_api_secret']) && $settings['sms_api_secret']->value 
+                    ? $settings['sms_api_secret']->value 
+                    : Setting::getValue('sms_api_secret', env('SMS_API_SECRET', ''));
+                
+                $this->smsFrom = isset($settings['sms_sender_id']) && $settings['sms_sender_id']->value 
+                    ? $settings['sms_sender_id']->value 
+                    : Setting::getValue('sms_sender_id', env('SMS_FROM', 'FEEDTAN'));
+                
+                $this->smsUrl = Setting::getValue('sms_url', env('SMS_URL', 'https://messaging-service.co.tz/link/sms/v1/text/single'));
+            }
+            
             $settings = Setting::getByGroup('communication');
-            
-            // Get SMS settings with fallback to env
-            $this->smsApiKey = isset($settings['sms_api_key']) && $settings['sms_api_key']->value 
-                ? $settings['sms_api_key']->value 
-                : Setting::getValue('sms_api_key', env('SMS_API_KEY', ''));
-            
-            $this->smsApiSecret = isset($settings['sms_api_secret']) && $settings['sms_api_secret']->value 
-                ? $settings['sms_api_secret']->value 
-                : Setting::getValue('sms_api_secret', env('SMS_API_SECRET', ''));
-            
-            $this->smsFrom = isset($settings['sms_sender_id']) && $settings['sms_sender_id']->value 
-                ? $settings['sms_sender_id']->value 
-                : Setting::getValue('sms_sender_id', env('SMS_FROM', 'FEEDTAN'));
-            
-            $this->smsUrl = Setting::getValue('sms_url', env('SMS_URL', 'https://messaging-service.co.tz/api/sms/v2/text/single'));
-            
             $this->smsEnabled = isset($settings['sms_enabled']) && $settings['sms_enabled']->value 
                 ? (bool)$settings['sms_enabled']->value 
                 : Setting::getValue('sms_enabled', env('SMS_ENABLED', true));
@@ -54,7 +66,7 @@ class SmsNotificationService
             $this->smsApiKey = env('SMS_API_KEY', '');
             $this->smsApiSecret = env('SMS_API_SECRET', '');
             $this->smsFrom = env('SMS_FROM', 'FEEDTAN');
-            $this->smsUrl = env('SMS_URL', 'https://messaging-service.co.tz/api/sms/v2/text/single');
+            $this->smsUrl = env('SMS_URL', 'https://messaging-service.co.tz/link/sms/v1/text/single');
             $this->smsEnabled = env('SMS_ENABLED', true);
         }
     }
