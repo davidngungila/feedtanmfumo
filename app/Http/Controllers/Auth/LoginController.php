@@ -115,21 +115,55 @@ class LoginController extends Controller
             }
 
             // Clean and normalize OTP code (remove spaces, ensure numeric)
-            $otpCode = preg_replace('/[^0-9]/', '', $request->otp_code);
+            $otpCode = preg_replace('/[^0-9]/', '', trim($request->otp_code));
             
             if (strlen($otpCode) !== 6) {
-                \Log::warning("Invalid OTP code length for user ID: {$user->id}");
+                \Log::warning("Invalid OTP code length for user ID: {$user->id}, code length: " . strlen($otpCode));
                 return back()->withErrors(['otp_code' => 'OTP code must be exactly 6 digits.'])->withInput();
             }
 
+            // Debug: Log all recent OTPs for this user
+            $recentOtps = OtpCode::where('user_id', $user->id)
+                ->where('type', 'login')
+                ->orderBy('created_at', 'desc')
+                ->limit(5)
+                ->get(['code', 'used', 'expires_at', 'created_at']);
+            
+            \Log::info("OTP Verification Attempt - User ID: {$user->id}, Input Code: {$otpCode}");
+            \Log::info("Recent OTPs for user: " . json_encode($recentOtps->map(function($o) {
+                return [
+                    'code' => $o->code,
+                    'used' => $o->used,
+                    'expires_at' => $o->expires_at->toDateTimeString(),
+                    'is_expired' => $o->expires_at <= now(),
+                    'matches' => $o->code === $otpCode
+                ];
+            })));
+
             // Find valid OTP - check most recent first
-            $otp = OtpCode::where('user_id', $user->id)
-                ->where('code', $otpCode)
+            // Get all valid OTPs first, then compare codes
+            $validOtps = OtpCode::where('user_id', $user->id)
                 ->where('type', 'login')
                 ->where('used', false)
                 ->where('expires_at', '>', now())
                 ->orderBy('created_at', 'desc')
-                ->first();
+                ->get();
+            
+            // Find matching OTP using strict string comparison
+            $otp = null;
+            foreach ($validOtps as $otpRecord) {
+                // Compare codes as strings, ensuring both are trimmed
+                $storedCode = trim((string)$otpRecord->code);
+                $inputCode = trim((string)$otpCode);
+                
+                if ($storedCode === $inputCode) {
+                    $otp = $otpRecord;
+                    \Log::info("OTP match found - Stored: '{$storedCode}', Input: '{$inputCode}', Match: " . ($storedCode === $inputCode ? 'YES' : 'NO'));
+                    break;
+                } else {
+                    \Log::debug("OTP mismatch - Stored: '{$storedCode}' (length: " . strlen($storedCode) . "), Input: '{$inputCode}' (length: " . strlen($inputCode) . ")");
+                }
+            }
 
             if (!$otp) {
                 \Log::warning("Invalid or expired OTP attempt for user ID: {$user->id}, code: {$otpCode}");
