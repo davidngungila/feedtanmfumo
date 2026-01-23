@@ -102,6 +102,64 @@ class EmailNotificationService
     }
 
     /**
+     * Send OTP notification via email
+     */
+    public function sendOtpNotification(User $user, string $otpCode): bool
+    {
+        try {
+            $this->reloadMailConfig();
+            $orgInfo = $this->getOrganizationInfo();
+            $address = $this->getFormattedAddress();
+            
+            $subject = "Login OTP Code - {$orgInfo['name']}";
+            $message = $this->formatOtpEmail($user, $otpCode, $address, $orgInfo);
+            
+            Mail::raw($message, function ($mail) use ($user, $subject, $orgInfo) {
+                $mail->to($user->email, $user->name)
+                     ->subject($subject)
+                     ->from($orgInfo['from_email'], $orgInfo['from_name']);
+            });
+            
+            Log::info("OTP email sent to {$user->email} for user ID {$user->id}.");
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Failed to send OTP email to {$user->email}: " . $e->getMessage());
+            Log::error("Stack trace: " . $e->getTraceAsString());
+            return false;
+        }
+    }
+
+    /**
+     * Format OTP email message
+     */
+    protected function formatOtpEmail(User $user, string $otpCode, string $address, array $orgInfo): string
+    {
+        return "Dear {$user->name},
+
+You have requested to login to your account. Please use the following OTP code to complete your login:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+YOUR OTP CODE: {$otpCode}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This code will expire in 10 minutes.
+
+IMPORTANT SECURITY NOTICE:
+• Do not share this code with anyone
+• Our staff will never ask for your OTP code
+• If you did not request this code, please ignore this email or contact us immediately
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This is an automated security email from {$orgInfo['name']}.
+
+Best regards,
+{$address}";
+    }
+
+    /**
      * Send loan approval notification
      */
     public function sendLoanApprovalNotification(User $user, array $loanDetails): bool
