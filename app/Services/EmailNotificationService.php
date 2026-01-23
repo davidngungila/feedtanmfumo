@@ -260,7 +260,6 @@ class EmailNotificationService
         try {
             $this->reloadMailConfig();
             $orgInfo = $this->getOrganizationInfo();
-            $address = $this->getFormattedAddress();
             
             $subjects = [
                 'created' => "Investment Enrollment Confirmed - {$orgInfo['name']}",
@@ -269,20 +268,101 @@ class EmailNotificationService
                 'topup' => "Investment Top-up Confirmed - {$orgInfo['name']}",
             ];
             
-            $subject = $subjects[$event] ?? "Investment Update - {$orgInfo['name']}";
-            $message = $this->formatInvestmentEmail($user, $event, $investmentDetails, $address);
+            $messages = [
+                'created' => "Uwekezaji wako umeandikishwa kwa mafanikio.",
+                'matured' => "Hongera! Uwekezaji wako umekamilika.",
+                'profit' => "Faida imegawanywa kwenye akaunti yako ya uwekezaji.",
+                'topup' => "Ongezeko la uwekezaji wako limetekelezwa kwa mafanikio.",
+            ];
             
-            Mail::raw($message, function ($mail) use ($user, $subject, $orgInfo) {
+            $icons = [
+                'created' => '✅',
+                'matured' => '🎉',
+                'profit' => '💰',
+                'topup' => '📈',
+            ];
+            
+            $cardTitles = [
+                'created' => 'Uwekezaji Umeandikishwa',
+                'matured' => 'Uwekezaji Umekamilika',
+                'profit' => 'Faida Imegawanywa',
+                'topup' => 'Ongezeko la Uwekezaji',
+            ];
+            
+            $subject = $subjects[$event] ?? "Investment Update - {$orgInfo['name']}";
+            $mainMessage = $messages[$event] ?? "Uwekezaji wako umesasishwa.";
+            
+            $details = $this->formatInvestmentDetails($event, $investmentDetails);
+            
+            $htmlBody = View::make('emails.investment', [
+                'name' => $user->name,
+                'mainMessage' => $mainMessage,
+                'details' => $details,
+                'icon' => $icons[$event] ?? '📈',
+                'cardTitle' => $cardTitles[$event] ?? 'Uwekezaji Wako',
+                'organizationInfo' => $orgInfo,
+            ])->render();
+            
+            Mail::html($htmlBody, function ($mail) use ($user, $subject, $orgInfo) {
                 $mail->to($user->email, $user->name)
                      ->subject($subject)
                      ->from($orgInfo['from_email'], $orgInfo['from_name']);
+                
+                // Add additional emails as CC if configured
+                if (!empty($orgInfo['additional_emails'])) {
+                    foreach ($orgInfo['additional_emails'] as $additionalEmail) {
+                        $mail->cc($additionalEmail);
+                    }
+                }
             });
             
+            Log::info("Investment email sent to {$user->email} for user ID {$user->id}.");
             return true;
         } catch (\Exception $e) {
             Log::error('Failed to send investment email: ' . $e->getMessage());
             return false;
         }
+    }
+    
+    /**
+     * Format investment details for email
+     */
+    protected function formatInvestmentDetails(string $event, array $investmentDetails): array
+    {
+        $details = [];
+        
+        switch($event) {
+            case 'created':
+                $details['Namba ya Uwekezaji'] = $investmentDetails['investment_number'] ?? 'N/A';
+                $details['Aina ya Mpango'] = $investmentDetails['plan_type'] ?? 'N/A';
+                $details['Kiasi cha Msingi'] = number_format($investmentDetails['principal_amount'] ?? 0, 0) . ' TZS';
+                $details['Tarehe ya Kukamilika'] = isset($investmentDetails['maturity_date']) ? date('d/m/Y', strtotime($investmentDetails['maturity_date'])) : 'N/A';
+                $details['Faida Inayotarajiwa'] = number_format($investmentDetails['expected_return'] ?? 0, 0) . ' TZS';
+                break;
+            case 'matured':
+                $details['Namba ya Uwekezaji'] = $investmentDetails['investment_number'] ?? 'N/A';
+                $details['Kiasi cha Msingi'] = number_format($investmentDetails['principal_amount'] ?? 0, 0) . ' TZS';
+                $details['Jumla ya Faida'] = number_format($investmentDetails['total_profit'] ?? 0, 0) . ' TZS';
+                $details['Jumla ya Kurudi'] = number_format($investmentDetails['total_return'] ?? 0, 0) . ' TZS';
+                $details['Tarehe ya Kukamilika'] = isset($investmentDetails['maturity_date']) ? date('d/m/Y', strtotime($investmentDetails['maturity_date'])) : date('d/m/Y');
+                break;
+            case 'profit':
+                $details['Namba ya Uwekezaji'] = $investmentDetails['investment_number'] ?? 'N/A';
+                $details['Kiasi cha Faida'] = number_format($investmentDetails['profit_amount'] ?? 0, 0) . ' TZS';
+                $details['Salio Jipya'] = number_format($investmentDetails['new_balance'] ?? 0, 0) . ' TZS';
+                $details['Tarehe ya Mgawanyo'] = isset($investmentDetails['distribution_date']) ? date('d/m/Y', strtotime($investmentDetails['distribution_date'])) : date('d/m/Y');
+                break;
+            case 'topup':
+                $details['Namba ya Uwekezaji'] = $investmentDetails['investment_number'] ?? 'N/A';
+                $details['Kiasi cha Ongezeko'] = number_format($investmentDetails['topup_amount'] ?? 0, 0) . ' TZS';
+                $details['Msingi Mpya'] = number_format($investmentDetails['new_principal'] ?? 0, 0) . ' TZS';
+                $details['Tarehe ya Muamala'] = isset($investmentDetails['transaction_date']) ? date('d/m/Y', strtotime($investmentDetails['transaction_date'])) : date('d/m/Y');
+                break;
+            default:
+                $details['Namba ya Uwekezaji'] = $investmentDetails['investment_number'] ?? 'N/A';
+        }
+        
+        return $details;
     }
 
     /**
@@ -342,7 +422,6 @@ class EmailNotificationService
         try {
             $this->reloadMailConfig();
             $orgInfo = $this->getOrganizationInfo();
-            $address = $this->getFormattedAddress();
             
             $subjects = [
                 'contribution' => "Welfare Contribution Received - {$orgInfo['name']}",
@@ -350,20 +429,89 @@ class EmailNotificationService
                 'claim_disbursed' => "Welfare Benefit Disbursed - {$orgInfo['name']}",
             ];
             
-            $subject = $subjects[$event] ?? "Welfare Update - {$orgInfo['name']}";
-            $message = $this->formatWelfareEmail($user, $event, $welfareDetails, $address);
+            $messages = [
+                'contribution' => "Mchango wako wa ustawi umepokelewa kwa mafanikio.",
+                'claim_approved' => "Ombi lako la ustawi limeidhinishwa.",
+                'claim_disbursed' => "Faida ya ustawi imetolewa kwenye akaunti yako.",
+            ];
             
-            Mail::raw($message, function ($mail) use ($user, $subject, $orgInfo) {
+            $icons = [
+                'contribution' => '💳',
+                'claim_approved' => '✅',
+                'claim_disbursed' => '💰',
+            ];
+            
+            $cardTitles = [
+                'contribution' => 'Mchango Umeripokelewa',
+                'claim_approved' => 'Ombi Limeidhinishwa',
+                'claim_disbursed' => 'Faida Imetolewa',
+            ];
+            
+            $subject = $subjects[$event] ?? "Welfare Update - {$orgInfo['name']}";
+            $mainMessage = $messages[$event] ?? "Hali ya ustawi yako imesasishwa.";
+            
+            $details = $this->formatWelfareDetails($event, $welfareDetails);
+            
+            $htmlBody = View::make('emails.welfare', [
+                'name' => $user->name,
+                'mainMessage' => $mainMessage,
+                'details' => $details,
+                'icon' => $icons[$event] ?? '🤝',
+                'cardTitle' => $cardTitles[$event] ?? 'Ustawi wa Jamii',
+                'organizationInfo' => $orgInfo,
+            ])->render();
+            
+            Mail::html($htmlBody, function ($mail) use ($user, $subject, $orgInfo) {
                 $mail->to($user->email, $user->name)
                      ->subject($subject)
                      ->from($orgInfo['from_email'], $orgInfo['from_name']);
+                
+                // Add additional emails as CC if configured
+                if (!empty($orgInfo['additional_emails'])) {
+                    foreach ($orgInfo['additional_emails'] as $additionalEmail) {
+                        $mail->cc($additionalEmail);
+                    }
+                }
             });
             
+            Log::info("Welfare email sent to {$user->email} for user ID {$user->id}.");
             return true;
         } catch (\Exception $e) {
             Log::error('Failed to send welfare email: ' . $e->getMessage());
             return false;
         }
+    }
+    
+    /**
+     * Format welfare details for email
+     */
+    protected function formatWelfareDetails(string $event, array $welfareDetails): array
+    {
+        $details = [];
+        
+        switch($event) {
+            case 'contribution':
+                $details['Kiasi cha Mchango'] = number_format($welfareDetails['amount'] ?? 0, 0) . ' TZS';
+                $details['Tarehe ya Mchango'] = isset($welfareDetails['contribution_date']) ? date('d/m/Y', strtotime($welfareDetails['contribution_date'])) : date('d/m/Y');
+                $details['Jumla ya Michango'] = number_format($welfareDetails['total_contributions'] ?? 0, 0) . ' TZS';
+                break;
+            case 'claim_approved':
+                $details['Namba ya Ombi'] = $welfareDetails['claim_number'] ?? 'N/A';
+                $details['Aina ya Ombi'] = $welfareDetails['claim_type'] ?? 'N/A';
+                $details['Kiasi'] = number_format($welfareDetails['amount'] ?? 0, 0) . ' TZS';
+                $details['Tarehe ya Idhini'] = isset($welfareDetails['approval_date']) ? date('d/m/Y', strtotime($welfareDetails['approval_date'])) : date('d/m/Y');
+                break;
+            case 'claim_disbursed':
+                $details['Namba ya Ombi'] = $welfareDetails['claim_number'] ?? 'N/A';
+                $details['Kiasi Kilichotolewa'] = number_format($welfareDetails['amount'] ?? 0, 0) . ' TZS';
+                $details['Tarehe ya Kutolewa'] = isset($welfareDetails['disbursement_date']) ? date('d/m/Y', strtotime($welfareDetails['disbursement_date'])) : date('d/m/Y');
+                $details['Njia ya Malipo'] = $welfareDetails['payment_method'] ?? 'N/A';
+                break;
+            default:
+                $details['Hali'] = 'Imehakikishwa';
+        }
+        
+        return $details;
     }
 
     /**
