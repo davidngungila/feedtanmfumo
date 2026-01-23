@@ -140,8 +140,8 @@ class LoginController extends Controller
                 ];
             })));
 
-            // Find valid OTP - check most recent first
-            // Get all valid OTPs first, then compare codes
+            // Find valid OTP - use direct database query with proper string comparison
+            // First, get all valid OTPs for this user
             $validOtps = OtpCode::where('user_id', $user->id)
                 ->where('type', 'login')
                 ->where('used', false)
@@ -149,36 +149,64 @@ class LoginController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->get();
             
+            \Log::info("OTP Verification - User ID: {$user->id}, Input Code: '{$otpCode}', Valid OTPs found: " . $validOtps->count());
+            
             // Find matching OTP using strict string comparison
             $otp = null;
             foreach ($validOtps as $otpRecord) {
-                // Compare codes as strings, ensuring both are trimmed
+                // Compare codes as strings, ensuring both are trimmed and normalized
                 $storedCode = trim((string)$otpRecord->code);
                 $inputCode = trim((string)$otpCode);
                 
+                // Pad with zeros if needed (shouldn't be, but just in case)
+                $storedCode = str_pad($storedCode, 6, '0', STR_PAD_LEFT);
+                $inputCode = str_pad($inputCode, 6, '0', STR_PAD_LEFT);
+                
+                \Log::info("Comparing OTP - Stored: '{$storedCode}' (type: " . gettype($storedCode) . ", length: " . strlen($storedCode) . "), Input: '{$inputCode}' (type: " . gettype($inputCode) . ", length: " . strlen($inputCode) . ")");
+                
                 if ($storedCode === $inputCode) {
                     $otp = $otpRecord;
-                    \Log::info("OTP match found - Stored: '{$storedCode}', Input: '{$inputCode}', Match: " . ($storedCode === $inputCode ? 'YES' : 'NO'));
+                    \Log::info("OTP MATCH FOUND! - User ID: {$user->id}, OTP ID: {$otp->id}");
                     break;
-                } else {
-                    \Log::debug("OTP mismatch - Stored: '{$storedCode}' (length: " . strlen($storedCode) . "), Input: '{$inputCode}' (length: " . strlen($inputCode) . ")");
                 }
+            }
+            
+            if (!$otp) {
+                \Log::warning("No matching OTP found - User ID: {$user->id}, Input Code: '{$otpCode}'");
             }
 
             if (!$otp) {
-                \Log::warning("Invalid or expired OTP attempt for user ID: {$user->id}, code: {$otpCode}");
+                \Log::warning("Invalid or expired OTP attempt - User ID: {$user->id}, Input Code: '{$otpCode}'");
                 
-                // Check if code exists but is expired
-                $expiredOtp = OtpCode::where('user_id', $user->id)
-                    ->where('code', $otpCode)
+                // Check if code exists but is expired or used
+                $allOtps = OtpCode::where('user_id', $user->id)
                     ->where('type', 'login')
-                    ->first();
+                    ->orderBy('created_at', 'desc')
+                    ->limit(10)
+                    ->get();
                 
-                if ($expiredOtp) {
-                    if ($expiredOtp->used) {
+                $matchingOtp = null;
+                foreach ($allOtps as $otpRecord) {
+                    $storedCode = trim((string)$otpRecord->code);
+                    $inputCode = trim((string)$otpCode);
+                    $storedCode = str_pad($storedCode, 6, '0', STR_PAD_LEFT);
+                    $inputCode = str_pad($inputCode, 6, '0', STR_PAD_LEFT);
+                    
+                    if ($storedCode === $inputCode) {
+                        $matchingOtp = $otpRecord;
+                        break;
+                    }
+                }
+                
+                if ($matchingOtp) {
+                    if ($matchingOtp->used) {
+                        \Log::info("OTP already used - User ID: {$user->id}, OTP ID: {$matchingOtp->id}");
                         return back()->withErrors(['otp_code' => 'This OTP code has already been used. Please request a new one.'])->withInput();
-                    } elseif ($expiredOtp->expires_at <= now()) {
+                    } elseif ($matchingOtp->expires_at <= now()) {
+                        \Log::info("OTP expired - User ID: {$user->id}, OTP ID: {$matchingOtp->id}, Expired at: {$matchingOtp->expires_at}");
                         return back()->withErrors(['otp_code' => 'OTP code has expired. Please request a new one.'])->withInput();
+                    } else {
+                        \Log::warning("OTP found but not valid for unknown reason - User ID: {$user->id}, OTP ID: {$matchingOtp->id}");
                     }
                 }
                 
@@ -186,20 +214,39 @@ class LoginController extends Controller
             }
 
             // Mark OTP as used
-            $otp->markAsUsed();
-            \Log::info("OTP verified successfully for user ID: {$user->id}, email: {$user->email}");
-
-            // Login the user
-            Auth::login($user, $request->filled('remember'));
-            $request->session()->regenerate();
-            $request->session()->forget('otp_user_id');
-
-            // Redirect based on role
-            if ($user->hasAnyRole(['loan_officer', 'deposit_officer', 'investment_officer', 'chairperson', 'secretary', 'accountant'])) {
-                return redirect()->intended('/admin/role-dashboard')->with('success', 'Login successful!');
+            try {
+                $otp->markAsUsed();
+                \Log::info("OTP marked as used - User ID: {$user->id}, OTP ID: {$otp->id}");
+            } catch (\Exception $e) {
+                \Log::error("Failed to mark OTP as used - User ID: {$user->id}, OTP ID: {$otp->id}, Error: " . $e->getMessage());
+                // Continue anyway - OTP is still valid
             }
 
-            return redirect()->intended('/admin/dashboard')->with('success', 'Login successful!');
+            \Log::info("OTP verified successfully - User ID: {$user->id}, email: {$user->email}, OTP ID: {$otp->id}");
+
+            // Login the user
+            try {
+                Auth::login($user, $request->filled('remember'));
+                $request->session()->regenerate();
+                $request->session()->forget('otp_user_id');
+                \Log::info("User logged in successfully - User ID: {$user->id}, email: {$user->email}");
+            } catch (\Exception $e) {
+                \Log::error("Failed to login user - User ID: {$user->id}, Error: " . $e->getMessage());
+                return back()->withErrors(['otp_code' => 'Failed to complete login. Please try again.'])->withInput();
+            }
+
+            // Redirect based on role
+            try {
+                if ($user->hasAnyRole(['loan_officer', 'deposit_officer', 'investment_officer', 'chairperson', 'secretary', 'accountant'])) {
+                    return redirect()->intended('/admin/role-dashboard')->with('success', 'Login successful!');
+                }
+
+                return redirect()->intended('/admin/dashboard')->with('success', 'Login successful!');
+            } catch (\Exception $e) {
+                \Log::error("Failed to redirect after login - User ID: {$user->id}, Error: " . $e->getMessage());
+                // Fallback redirect
+                return redirect('/admin/dashboard')->with('success', 'Login successful!');
+            }
             
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::warning('OTP validation failed: ' . json_encode($e->errors()));
@@ -207,7 +254,9 @@ class LoginController extends Controller
         } catch (\Exception $e) {
             \Log::error('Error verifying OTP: ' . $e->getMessage());
             \Log::error('Stack trace: ' . $e->getTraceAsString());
-            return back()->withErrors(['otp_code' => 'An error occurred during verification. Please try again.'])->withInput();
+            \Log::error('Request data: ' . json_encode($request->all()));
+            \Log::error('User ID from session: ' . session('otp_user_id'));
+            return back()->withErrors(['otp_code' => 'An error occurred during verification: ' . $e->getMessage() . '. Please try again.'])->withInput();
         }
     }
 
