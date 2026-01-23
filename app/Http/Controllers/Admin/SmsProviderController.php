@@ -269,4 +269,107 @@ class SmsProviderController extends Controller
                 ->with('error', 'Failed to set primary SMS provider: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Show the specified SMS provider
+     */
+    public function show(SmsProvider $smsProvider)
+    {
+        return view('admin.settings.sms-provider.show', compact('smsProvider'));
+    }
+
+    /**
+     * Test SMS provider configuration
+     */
+    public function test(Request $request, SmsProvider $smsProvider)
+    {
+        $request->validate([
+            'test_phone' => 'required|string',
+            'test_message' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            $phoneNumber = $request->test_phone;
+            $message = $request->test_message ?? "Test SMS from {$smsProvider->name} - Configuration test successful!";
+            $from = $smsProvider->from ?? 'FEEDTAN';
+
+            // Format phone number
+            $cleaned = preg_replace('/[^0-9]/', '', $phoneNumber);
+            if (strpos($cleaned, '0') === 0) {
+                $cleaned = '255' . substr($cleaned, 1);
+            } elseif (strpos($cleaned, '255') !== 0) {
+                $cleaned = '255' . $cleaned;
+            }
+
+            if (!preg_match('/^255[0-9]{9}$/', $cleaned)) {
+                return redirect()->route('admin.sms-provider.show', $smsProvider)
+                    ->with('error', 'Invalid phone number format. Expected: 255XXXXXXXXX (12 digits starting with 255)');
+            }
+
+            // Ensure API URL has the correct endpoint
+            $apiUrl = $smsProvider->api_url;
+            if (strpos($apiUrl, '/api/sms') !== false && strpos($apiUrl, '/text/') === false) {
+                $apiUrl = rtrim($apiUrl, '/') . '/v1/text/single';
+            }
+
+            // Test connection with Basic Auth
+            $response = Http::timeout(30)
+                ->withBasicAuth($smsProvider->username, $smsProvider->password)
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                    'Accept' => 'application/json'
+                ])
+                ->post($apiUrl, [
+                    'from' => $from,
+                    'to' => $cleaned,
+                    'text' => $message,
+                    'flash' => 0,
+                    'reference' => 'feedtan_test_' . time()
+                ]);
+
+            $httpCode = $response->status();
+            $responseBody = $response->body();
+
+            if ($response->successful()) {
+                $responseData = $response->json();
+                
+                // Check response structure
+                if (isset($responseData['messages']) && is_array($responseData['messages']) && count($responseData['messages']) > 0) {
+                    $messageStatus = $responseData['messages'][0]['status'] ?? [];
+                    
+                    if (isset($messageStatus['groupName']) && $messageStatus['groupName'] === 'REJECTED') {
+                        $errorMsg = $messageStatus['description'] ?? $messageStatus['name'] ?? 'Message rejected';
+                        return redirect()->route('admin.sms-provider.show', $smsProvider)
+                            ->with('error', 'SMS test failed: ' . $errorMsg);
+                    }
+                    
+                    // Message is pending or sent
+                    if (($messageStatus['groupName'] ?? '') === 'PENDING' || ($messageStatus['id'] ?? 0) === 51) {
+                        return redirect()->route('admin.sms-provider.show', $smsProvider)
+                            ->with('success', "Test SMS sent successfully to {$cleaned}!");
+                    }
+                    
+                    return redirect()->route('admin.sms-provider.show', $smsProvider)
+                        ->with('error', 'SMS test failed: ' . ($messageStatus['description'] ?? $messageStatus['name'] ?? 'Unknown status'));
+                }
+                
+                // If response structure is different but status is 200, assume success
+                return redirect()->route('admin.sms-provider.show', $smsProvider)
+                    ->with('success', "Test SMS sent successfully to {$cleaned}!");
+            }
+
+            $errorMsg = "SMS test failed with HTTP code {$httpCode}";
+            if ($responseBody) {
+                $errorMsg .= ': ' . substr($responseBody, 0, 200);
+            }
+
+            return redirect()->route('admin.sms-provider.show', $smsProvider)
+                ->with('error', $errorMsg);
+
+        } catch (\Exception $e) {
+            Log::error('SMS test failed: ' . $e->getMessage());
+            return redirect()->route('admin.sms-provider.show', $smsProvider)
+                ->with('error', 'SMS test failed: ' . $e->getMessage());
+        }
+    }
 }
