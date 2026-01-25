@@ -12,7 +12,7 @@
     // Active route checking
     $isActiveUsers = request()->routeIs(['admin.users.*', 'admin.users.index', 'admin.users.create', 'admin.users.show', 'admin.users.edit', 'admin.users.directory', 'admin.users.profiles', 'admin.users.status', 'admin.users.groups', 'admin.users.kyc', 'admin.users.history', 'admin.users.officials.*', 'admin.users.roles', 'admin.users.permissions', 'admin.users.login-history', 'admin.users.activity-logs']);
     $isActiveIssues = request()->routeIs(['admin.issues.*']);
-    $isActiveLoans = request()->routeIs(['admin.loans.*']);
+    $isActiveLoans = request()->routeIs(['admin.loans.*', 'admin.loans.sms-reminders.*']);
     $isActiveSavings = request()->routeIs(['admin.savings.*']);
     $isActiveInvestments = request()->routeIs(['admin.investments.*']);
     $isActiveWelfare = request()->routeIs(['admin.welfare.*']);
@@ -223,6 +223,7 @@
                 <a href="{{ route('admin.loans.repayment-schedule') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Repayment Schedule</a>
                 <a href="{{ route('admin.loans.due-payments') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Due Payments</a>
                 <a href="{{ route('admin.loans.overdue') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Overdue Loans</a>
+                <a href="{{ route('admin.loans.sms-reminders.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">SMS Reminders</a>
                 <a href="{{ route('admin.loans.restructuring') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Loan Restructuring</a>
             </div>
         </div>

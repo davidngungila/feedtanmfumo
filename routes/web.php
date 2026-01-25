@@ -154,6 +154,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::resource('loans', LoanController::class);
 
+    // Loan SMS Reminders
+    Route::prefix('loans')->name('loans.')->group(function () {
+        Route::get('sms-reminders', [\App\Http\Controllers\Admin\LoanSmsReminderController::class, 'index'])->name('sms-reminders.index');
+        Route::post('sms-reminders/generate', [\App\Http\Controllers\Admin\LoanSmsReminderController::class, 'generate'])->name('sms-reminders.generate');
+        Route::post('sms-reminders/{reminder}/send', [\App\Http\Controllers\Admin\LoanSmsReminderController::class, 'send'])->name('sms-reminders.send');
+        Route::post('sms-reminders/send-bulk', [\App\Http\Controllers\Admin\LoanSmsReminderController::class, 'sendBulk'])->name('sms-reminders.send-bulk');
+        Route::delete('sms-reminders/{reminder}', [\App\Http\Controllers\Admin\LoanSmsReminderController::class, 'destroy'])->name('sms-reminders.destroy');
+    });
+
     // Savings - Specific routes before resource
     Route::get('savings/deposits', [SavingsAccountController::class, 'deposits'])->name('savings.deposits');
     Route::get('savings/withdrawals', [SavingsAccountController::class, 'withdrawals'])->name('savings.withdrawals');
