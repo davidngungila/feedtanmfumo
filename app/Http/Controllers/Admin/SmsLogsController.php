@@ -250,7 +250,7 @@ class SmsLogsController extends Controller
             'failed' => $logs->where('success', false)->count(),
         ];
 
-        $pdf = DomPDF::loadView('admin.sms.logs-pdf', [
+        $pdf = Pdf::loadView('admin.sms.logs-pdf', [
             'logs' => $logs,
             'balance' => $balance,
             'stats' => $stats,
