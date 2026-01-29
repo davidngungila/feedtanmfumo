@@ -40,7 +40,7 @@
                     
                     <!-- Desktop Navigation -->
                     <nav class="hidden md:flex items-center space-x-2 lg:space-x-3 xl:space-x-4 flex-1 justify-center">
-                        <a href="{{ route('member.dashboard') }}" class="text-white hover:text-white hover:bg-white hover:bg-opacity-20 px-3 py-2 rounded-md transition {{ request()->routeIs('member.dashboard') ? 'bg-white bg-opacity-20 font-semibold text-[#015425]' : '' }}">
+                        <a href="{{ route('member.dashboard') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('member.dashboard') ? 'bg-white font-semibold text-[#015425]' : 'bg-[#015425] text-white hover:bg-[#027a3a]' }}">
                             Dashboard
                         </a>
                         
@@ -50,9 +50,9 @@
                         
                         <!-- Loans Dropdown -->
                         <div class="relative nav-dropdown {{ !$isApproved ? 'opacity-50 cursor-not-allowed' : '' }}">
-                            <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="nav-dropdown-toggle flex items-center text-white hover:bg-white hover:bg-opacity-20 px-3 py-2 rounded-md transition {{ request()->routeIs('member.loans.*') ? 'bg-white bg-opacity-20 font-semibold text-[#015425]' : '' }}" {{ !$isApproved ? 'title="Membership must be approved to access Loans"' : '' }}>
+                            <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="nav-dropdown-toggle flex items-center px-3 py-2 rounded-md transition {{ request()->routeIs('member.loans.*') ? 'bg-white font-semibold text-[#015425]' : 'bg-[#015425] text-white hover:bg-[#027a3a]' }}" {{ !$isApproved ? 'title="Membership must be approved to access Loans"' : '' }}>
                                 Loans
-                                <svg class="w-4 h-4 ml-1 nav-dropdown-arrow transition-transform {{ request()->routeIs('member.loans.*') ? 'text-[#015425]' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 ml-1 nav-dropdown-arrow transition-transform {{ request()->routeIs('member.loans.*') ? 'text-[#015425]' : 'text-white' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>
@@ -66,9 +66,9 @@
                         
                         <!-- Savings Dropdown -->
                         <div class="relative nav-dropdown {{ !$isApproved ? 'opacity-50 cursor-not-allowed' : '' }}">
-                            <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="nav-dropdown-toggle flex items-center text-white hover:bg-white hover:bg-opacity-20 px-3 py-2 rounded-md transition {{ request()->routeIs('member.savings.*') ? 'bg-white bg-opacity-20 font-semibold text-[#015425]' : '' }}" {{ !$isApproved ? 'title="Membership must be approved to access Savings"' : '' }}>
+                            <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="nav-dropdown-toggle flex items-center px-3 py-2 rounded-md transition {{ request()->routeIs('member.savings.*') ? 'bg-white font-semibold text-[#015425]' : 'bg-[#015425] text-white hover:bg-[#027a3a]' }}" {{ !$isApproved ? 'title="Membership must be approved to access Savings"' : '' }}>
                                 Savings
-                                <svg class="w-4 h-4 ml-1 nav-dropdown-arrow transition-transform {{ request()->routeIs('member.savings.*') ? 'text-[#015425]' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 ml-1 nav-dropdown-arrow transition-transform {{ request()->routeIs('member.savings.*') ? 'text-[#015425]' : 'text-white' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>
@@ -82,9 +82,9 @@
                         
                         <!-- Investments Dropdown -->
                         <div class="relative nav-dropdown {{ !$isApproved ? 'opacity-50 cursor-not-allowed' : '' }}">
-                            <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="nav-dropdown-toggle flex items-center text-white hover:bg-white hover:bg-opacity-20 px-3 py-2 rounded-md transition {{ request()->routeIs('member.investments.*') ? 'bg-white bg-opacity-20 font-semibold text-[#015425]' : '' }}" {{ !$isApproved ? 'title="Membership must be approved to access Investments"' : '' }}>
+                            <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="nav-dropdown-toggle flex items-center px-3 py-2 rounded-md transition {{ request()->routeIs('member.investments.*') ? 'bg-white font-semibold text-[#015425]' : 'bg-[#015425] text-white hover:bg-[#027a3a]' }}" {{ !$isApproved ? 'title="Membership must be approved to access Investments"' : '' }}>
                                 Investments
-                                <svg class="w-4 h-4 ml-1 nav-dropdown-arrow transition-transform {{ request()->routeIs('member.investments.*') ? 'text-[#015425]' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 ml-1 nav-dropdown-arrow transition-transform {{ request()->routeIs('member.investments.*') ? 'text-[#015425]' : 'text-white' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>
@@ -96,15 +96,15 @@
                             @endif
                         </div>
                         
-                        <a href="{{ $isApproved ? route('member.welfare.index') : '#' }}" class="text-white hover:bg-white hover:bg-opacity-20 px-3 py-2 rounded-md transition {{ !$isApproved ? 'opacity-50 cursor-not-allowed' : '' }} {{ request()->routeIs('member.welfare.*') ? 'bg-white bg-opacity-20 font-semibold text-[#015425]' : '' }}" {{ !$isApproved ? 'title="Membership must be approved to access Welfare"' : '' }}>
+                        <a href="{{ $isApproved ? route('member.welfare.index') : '#' }}" class="px-3 py-2 rounded-md transition {{ !$isApproved ? 'opacity-50 cursor-not-allowed' : '' }} {{ request()->routeIs('member.welfare.*') ? 'bg-white font-semibold text-[#015425]' : 'bg-[#015425] text-white hover:bg-[#027a3a]' }}" {{ !$isApproved ? 'title="Membership must be approved to access Welfare"' : '' }}>
                             Welfare
                         </a>
                         
                         <!-- Issues Dropdown -->
                         <div class="relative nav-dropdown {{ !$isApproved ? 'opacity-50 cursor-not-allowed' : '' }}">
-                            <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="nav-dropdown-toggle flex items-center text-white hover:bg-white hover:bg-opacity-20 px-3 py-2 rounded-md transition {{ request()->routeIs('member.issues.*') ? 'bg-white bg-opacity-20 font-semibold text-[#015425]' : '' }}" {{ !$isApproved ? 'title="Membership must be approved to access Issues"' : '' }}>
+                            <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="nav-dropdown-toggle flex items-center px-3 py-2 rounded-md transition {{ request()->routeIs('member.issues.*') ? 'bg-white font-semibold text-[#015425]' : 'bg-[#015425] text-white hover:bg-[#027a3a]' }}" {{ !$isApproved ? 'title="Membership must be approved to access Issues"' : '' }}>
                                 Issues
-                                <svg class="w-4 h-4 ml-1 nav-dropdown-arrow transition-transform {{ request()->routeIs('member.issues.*') ? 'text-[#015425]' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 ml-1 nav-dropdown-arrow transition-transform {{ request()->routeIs('member.issues.*') ? 'text-[#015425]' : 'text-white' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>
@@ -221,7 +221,7 @@
                         $isApproved = Auth::user()->membership_status === 'approved';
                     @endphp
                     
-                    <a href="{{ route('member.dashboard') }}" class="flex items-center px-3 py-2 mb-2 rounded-md {{ request()->routeIs('member.dashboard') ? 'bg-[#015425] text-white' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <a href="{{ route('member.dashboard') }}" class="flex items-center px-3 py-2 mb-2 rounded-md {{ request()->routeIs('member.dashboard') ? 'bg-white text-[#015425] font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                         </svg>
