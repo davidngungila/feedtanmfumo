@@ -241,6 +241,28 @@
             </div>
             @endif
         </div>
+
+        <!-- Send SMS Section -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">Send Bulk SMS</h3>
+                    <p class="text-sm text-gray-600 mt-1">Upload Excel file to send SMS messages to multiple members</p>
+                </div>
+                <a href="{{ route('admin.sms.send') }}" class="px-6 py-3 bg-[#015425] text-white rounded-md hover:bg-[#027a3a] transition font-medium shadow-md">
+                    Send SMS
+                </a>
+            </div>
+            
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p class="text-sm text-blue-800">
+                    <strong>Quick Links:</strong>
+                    <a href="{{ route('admin.sms.send') }}" class="underline font-medium ml-2">Send SMS</a> |
+                    <a href="{{ route('admin.sms.settings') }}" class="underline font-medium">SMS Settings</a> |
+                    <a href="{{ route('admin.sms.templates') }}" class="underline font-medium">Message Templates</a>
+                </p>
+            </div>
+        </div>
     </div>
 </div>
 @endsection

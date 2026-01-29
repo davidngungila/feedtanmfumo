@@ -262,6 +262,22 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('settings/communication/test-email', [SettingsController::class, 'sendTestEmail'])->name('settings.communication.test-email');
     Route::post('settings/communication/test-sms', [SettingsController::class, 'sendTestSms'])->name('settings.communication.test-sms');
 
+    // SMS Sending
+    Route::get('sms/send', [\App\Http\Controllers\Admin\SmsSendController::class, 'index'])->name('sms.send');
+    Route::post('sms/send/upload', [\App\Http\Controllers\Admin\SmsSendController::class, 'uploadAndSend'])->name('sms.send.upload');
+
+    // SMS Settings
+    Route::get('sms/settings', [\App\Http\Controllers\Admin\SmsSettingsController::class, 'index'])->name('sms.settings');
+    Route::post('sms/settings', [\App\Http\Controllers\Admin\SmsSettingsController::class, 'store'])->name('sms.settings.store');
+    Route::put('sms/settings/{smsSetting}', [\App\Http\Controllers\Admin\SmsSettingsController::class, 'update'])->name('sms.settings.update');
+    Route::delete('sms/settings/{smsSetting}', [\App\Http\Controllers\Admin\SmsSettingsController::class, 'destroy'])->name('sms.settings.destroy');
+
+    // SMS Message Templates
+    Route::get('sms/templates', [\App\Http\Controllers\Admin\SmsMessageTemplateController::class, 'index'])->name('sms.templates');
+    Route::post('sms/templates', [\App\Http\Controllers\Admin\SmsMessageTemplateController::class, 'store'])->name('sms.templates.store');
+    Route::put('sms/templates/{smsMessageTemplate}', [\App\Http\Controllers\Admin\SmsMessageTemplateController::class, 'update'])->name('sms.templates.update');
+    Route::delete('sms/templates/{smsMessageTemplate}', [\App\Http\Controllers\Admin\SmsMessageTemplateController::class, 'destroy'])->name('sms.templates.destroy');
+
     // Email Provider Management
     Route::get('email-provider/create', [\App\Http\Controllers\Admin\EmailProviderController::class, 'create'])->name('email-provider.create');
     Route::post('email-provider/store', [\App\Http\Controllers\Admin\EmailProviderController::class, 'store'])->name('email-provider.store');
