@@ -32,7 +32,7 @@
                         </button>
                         <a href="{{ route('member.dashboard') }}" class="flex items-center">
                             <div class="w-8 h-8 sm:w-10 sm:h-10 bg-white bg-opacity-20 backdrop-blur-sm rounded-lg flex items-center justify-center mr-2 sm:mr-3 border border-white border-opacity-30">
-                                <span class="text-yellow-300 font-bold text-sm sm:text-lg">FD</span>
+                                <span class="text-[#015425] font-bold text-sm sm:text-lg">FD</span>
                             </div>
                             <span class="text-lg sm:text-xl font-bold text-white">FeedTan Digital</span>
                         </a>
@@ -143,7 +143,7 @@
                         <!-- User Profile Dropdown with Hover -->
                         <div class="relative user-profile-container">
                             <button id="user-menu-button" class="flex items-center space-x-2 sm:space-x-3 p-1 rounded-full hover:bg-white hover:bg-opacity-20 transition focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#015425]">
-                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 flex items-center justify-center text-yellow-300 font-semibold text-xs sm:text-sm">
+                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 flex items-center justify-center text-[#015425] font-semibold text-xs sm:text-sm">
                                     {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
                                 </div>
                                 <div class="hidden md:block text-left">
@@ -204,7 +204,7 @@
                 <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] px-4 py-4 flex items-center justify-between">
                     <div class="flex items-center">
                         <div class="w-10 h-10 bg-white bg-opacity-20 backdrop-blur-sm rounded-lg flex items-center justify-center mr-3 border border-white border-opacity-30">
-                            <span class="text-yellow-300 font-bold">FD</span>
+                            <span class="text-[#015425] font-bold">FD</span>
                         </div>
                         <span class="text-lg font-bold text-white">FeedTan</span>
                     </div>
@@ -331,7 +331,7 @@
                 <!-- Sidebar Footer -->
                 <div class="px-4 py-4 border-t border-gray-200">
                     <div class="flex items-center mb-3">
-                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#015425] to-[#027a3a] flex items-center justify-center text-yellow-300 font-semibold text-sm mr-3">
+                        <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 flex items-center justify-center text-[#015425] font-semibold text-sm mr-3">
                             {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
                         </div>
                         <div class="flex-1">
