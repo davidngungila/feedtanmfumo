@@ -732,7 +732,18 @@ class MembershipController extends Controller
         $user = Auth::user();
         $user->load('membershipType');
 
-        $pdf = PDF::loadView('member.membership.pdf', compact('user'));
+        // Get organization information (SMS service has phone number)
+        $orgInfo = $this->smsService->getOrganizationInfo();
+
+        // Also get email from email service
+        $emailOrgInfo = $this->emailService->getOrganizationInfo();
+        $orgInfo['from_email'] = $emailOrgInfo['from_email'] ?? null;
+        $orgInfo['primary_email'] = $emailOrgInfo['primary_email'] ?? null;
+
+        // Generate serial number (format: FCMGMA + date + sequence)
+        $serialNumber = 'FCMGMA'.date('dmy').str_pad($user->id, 4, '0', STR_PAD_LEFT);
+
+        $pdf = PDF::loadView('member.membership.pdf', compact('user', 'orgInfo', 'serialNumber'));
 
         $filename = 'Membership_Application_'.($user->membership_code ?? $user->id).'_'.date('Y-m-d').'.pdf';
 

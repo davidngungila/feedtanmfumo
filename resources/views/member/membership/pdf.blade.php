@@ -5,7 +5,7 @@
     <title>Membership Application - {{ $user->membership_code ?? $user->id }}</title>
     <style>
         @page {
-            margin: 20mm 15mm;
+            margin: 10mm 12mm;
             size: A4;
         }
         
@@ -17,107 +17,207 @@
         
         body {
             font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif;
-            font-size: 10pt;
-            line-height: 1.5;
+            font-size: 9pt;
+            line-height: 1.4;
             color: #1a1a1a;
             background: #ffffff;
         }
         
-        /* Header Styles */
+        /* Header Styles - Matching Loan Statement */
         .document-header {
-            border-bottom: 4px solid #015425;
-            padding-bottom: 15px;
-            margin-bottom: 25px;
-            position: relative;
+            border-bottom: 2px solid #015425;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
         }
         
         .header-top {
             display: table;
             width: 100%;
-            margin-bottom: 15px;
+            margin-bottom: 6px;
         }
         
         .header-left {
             display: table-cell;
-            vertical-align: middle;
-            width: 60%;
+            vertical-align: top;
+            width: 70%;
         }
         
         .header-right {
             display: table-cell;
-            vertical-align: middle;
+            vertical-align: top;
             text-align: right;
-            width: 40%;
+            width: 30%;
         }
         
-        .company-name {
-            font-size: 24pt;
+        .logo-section {
+            display: table;
+            width: 100%;
+            margin-bottom: 4px;
+        }
+        
+        .logo-box {
+            display: table-cell;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #015425 0%, #027a3a 100%);
+            border-radius: 6px;
+            vertical-align: middle;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16pt;
+            padding: 0;
+        }
+        
+        .logo-text {
+            display: table-cell;
+            vertical-align: middle;
+            padding-left: 8px;
+        }
+        
+        .company-name-main {
+            font-size: 16pt;
             font-weight: bold;
             color: #015425;
-            margin-bottom: 5px;
-            letter-spacing: 1px;
+            margin-bottom: 1px;
+            line-height: 1.2;
         }
         
-        .company-tagline {
-            font-size: 9pt;
-            color: #666;
-            font-style: italic;
+        .company-name-sub {
+            font-size: 11pt;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+            line-height: 1.2;
+        }
+        
+        .contact-info {
+            font-size: 8pt;
+            color: #4a5568;
+            line-height: 1.4;
         }
         
         .document-title {
-            font-size: 18pt;
+            font-size: 16pt;
             font-weight: bold;
             color: #015425;
             text-align: center;
-            margin: 15px 0 10px 0;
+            margin: 10px 0 4px 0;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 0.5px;
         }
         
-        .application-info {
-            display: table;
+        .serial-number {
+            text-align: center;
+            font-size: 8pt;
+            color: #666;
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        /* Member Details Table - Green Header */
+        .member-details-section {
+            margin-bottom: 12px;
+        }
+        
+        .section-header-green {
+            background: #015425;
+            color: white;
+            padding: 6px 10px;
+            font-weight: bold;
+            font-size: 10pt;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .member-details-table {
             width: 100%;
-            margin-top: 10px;
+            border-collapse: collapse;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .member-details-table td {
+            padding: 6px 10px;
+            border: 1px solid #e5e7eb;
             font-size: 9pt;
         }
         
-        .info-left, .info-right {
+        .member-details-table td:first-child {
+            background: #f9fafb;
+            font-weight: 600;
+            width: 35%;
+            color: #374151;
+        }
+        
+        .member-details-table td:last-child {
+            background: white;
+            color: #1a1a1a;
+        }
+        
+        /* Summary Section */
+        .summary-section {
+            margin: 12px 0;
+            background: #f9fafb;
+            border: 2px solid #015425;
+            border-radius: 4px;
+            padding: 10px;
+        }
+        
+        .summary-title {
+            font-size: 10pt;
+            font-weight: bold;
+            color: #015425;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        
+        .summary-grid {
+            display: table;
+            width: 100%;
+        }
+        
+        .summary-item {
             display: table-cell;
             width: 50%;
+            padding: 0 8px;
+            vertical-align: top;
         }
         
-        .info-right {
-            text-align: right;
+        .summary-label {
+            font-size: 8pt;
+            color: #6b7280;
+            margin-bottom: 3px;
+            text-transform: uppercase;
         }
         
-        .info-label {
+        .summary-value {
+            font-size: 12pt;
             font-weight: bold;
             color: #015425;
         }
         
         /* Section Styles */
         .section {
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             page-break-inside: avoid;
-            border: 1px solid #e0e0e0;
-            border-radius: 5px;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
             overflow: hidden;
         }
         
         .section-header {
-            background: linear-gradient(135deg, #015425 0%, #027a3a 100%);
+            background: #015425;
             color: white;
-            padding: 10px 15px;
+            padding: 5px 10px;
             font-weight: bold;
-            font-size: 12pt;
+            font-size: 9.5pt;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 2px solid #013019;
+            letter-spacing: 0.5px;
         }
         
         .section-content {
-            padding: 15px;
-            background: #fafafa;
+            padding: 8px;
+            background: white;
         }
         
         /* Table Styles */
@@ -136,42 +236,35 @@
             border-bottom: none;
         }
         
-        .info-table tr:nth-child(even) {
-            background: #f9fafb;
-        }
-        
         .info-table td {
-            padding: 10px 12px;
+            padding: 5px 8px;
             vertical-align: top;
+            font-size: 8.5pt;
         }
         
         .info-table td:first-child {
-            font-weight: bold;
+            font-weight: 600;
             width: 35%;
-            color: #015425;
-            background: #f0f7f4;
-            border-right: 2px solid #e5e7eb;
-            text-transform: uppercase;
-            font-size: 9pt;
-            letter-spacing: 0.5px;
+            color: #374151;
+            background: #f9fafb;
+            border-right: 1px solid #e5e7eb;
         }
         
         .info-table td:last-child {
             color: #1a1a1a;
-            font-size: 10pt;
         }
         
         /* Two Column Layout */
         .two-column {
             display: table;
             width: 100%;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
         }
         
         .column {
             display: table-cell;
             width: 50%;
-            padding: 0 10px;
+            padding: 0 6px;
             vertical-align: top;
         }
         
@@ -183,34 +276,12 @@
             padding-right: 0;
         }
         
-        /* Financial Highlight */
-        .financial-box {
-            background: linear-gradient(135deg, #f0f7f4 0%, #e8f5f0 100%);
-            border: 2px solid #015425;
-            border-radius: 5px;
-            padding: 12px;
-            margin: 10px 0;
-        }
-        
-        .financial-label {
-            font-size: 9pt;
-            color: #666;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-        
-        .financial-value {
-            font-size: 14pt;
-            font-weight: bold;
-            color: #015425;
-        }
-        
         /* Status Badge */
         .status-badge {
             display: inline-block;
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 9pt;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 8pt;
             font-weight: bold;
             text-transform: uppercase;
         }
@@ -218,20 +289,18 @@
         .status-pending {
             background: #fef3c7;
             color: #92400e;
-            border: 1px solid #fbbf24;
         }
         
         .status-approved {
             background: #d1fae5;
             color: #065f46;
-            border: 1px solid #10b981;
         }
         
         .status-uploaded {
             background: #d1fae5;
             color: #065f46;
             padding: 3px 8px;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 8pt;
         }
         
@@ -239,143 +308,48 @@
             background: #fee2e2;
             color: #991b1b;
             padding: 3px 8px;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 8pt;
         }
         
         /* Beneficiary Card */
         .beneficiary-card {
-            background: white;
-            border: 2px solid #e5e7eb;
-            border-radius: 5px;
-            padding: 12px;
-            margin-bottom: 12px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 4px;
+            padding: 6px;
+            margin-bottom: 6px;
             page-break-inside: avoid;
         }
         
         .beneficiary-header {
             background: #015425;
             color: white;
-            padding: 8px 12px;
-            margin: -12px -12px 10px -12px;
+            padding: 4px 8px;
+            margin: -6px -6px 5px -6px;
             font-weight: bold;
-            font-size: 10pt;
-        }
-        
-        /* Signature Section */
-        .signature-section {
-            margin-top: 40px;
-            page-break-inside: avoid;
-        }
-        
-        .signature-box {
-            display: table;
-            width: 100%;
-            margin-top: 30px;
-        }
-        
-        .signature-block {
-            display: table-cell;
-            width: 50%;
-            padding: 0 20px;
-            vertical-align: top;
-        }
-        
-        .signature-line {
-            border-top: 2px solid #1a1a1a;
-            width: 100%;
-            margin: 50px 0 10px 0;
-        }
-        
-        .signature-label {
-            text-align: center;
-            font-size: 9pt;
-            font-weight: bold;
-            color: #015425;
-            text-transform: uppercase;
-        }
-        
-        .signature-date {
-            text-align: center;
-            font-size: 8pt;
-            color: #666;
-            margin-top: 5px;
+            font-size: 8.5pt;
         }
         
         /* Footer */
         .document-footer {
-            margin-top: 40px;
-            padding-top: 15px;
-            border-top: 3px solid #e5e7eb;
+            margin-top: 15px;
+            padding-top: 8px;
+            border-top: 2px solid #e5e7eb;
             text-align: center;
-            font-size: 8pt;
+            font-size: 7pt;
             color: #666;
             page-break-inside: avoid;
         }
         
-        .footer-info {
-            margin: 5px 0;
+        /* Ensure content fits on page */
+        .section, .member-details-section, .summary-section {
+            page-break-inside: avoid;
         }
         
-        .footer-note {
-            margin-top: 10px;
-            font-style: italic;
-            color: #999;
-        }
-        
-        /* Page Break */
-        .page-break {
-            page-break-before: always;
-        }
-        
-        /* Highlight Box */
-        .highlight-box {
-            background: #fff9e6;
-            border-left: 4px solid #f59e0b;
-            padding: 12px;
-            margin: 15px 0;
-            border-radius: 3px;
-        }
-        
-        .highlight-title {
-            font-weight: bold;
-            color: #92400e;
-            margin-bottom: 5px;
-            font-size: 10pt;
-        }
-        
-        /* Divider */
-        .divider {
-            height: 2px;
-            background: linear-gradient(to right, transparent, #015425, transparent);
-            margin: 20px 0;
-        }
-        
-        /* Verification Section */
-        .verification-box {
-            background: #f9fafb;
-            border: 2px dashed #015425;
-            border-radius: 5px;
-            padding: 15px;
-            margin: 20px 0;
-            text-align: center;
-        }
-        
-        .verification-title {
-            font-weight: bold;
-            color: #015425;
-            font-size: 10pt;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-        }
-        
-        .verification-code {
-            font-family: 'Courier New', monospace;
-            font-size: 16pt;
-            font-weight: bold;
-            color: #015425;
-            letter-spacing: 3px;
-            margin: 10px 0;
+        /* Prevent orphaned headers */
+        .section-header, .section-header-green {
+            page-break-after: avoid;
         }
         
         /* Utility Classes */
@@ -391,27 +365,12 @@
             font-weight: bold;
         }
         
-        .text-uppercase {
-            text-transform: uppercase;
-        }
-        
         .mb-10 {
             margin-bottom: 10px;
         }
         
         .mt-10 {
             margin-top: 10px;
-        }
-        
-        /* Print Specific */
-        @media print {
-            .section {
-                page-break-inside: avoid;
-            }
-            
-            .beneficiary-card {
-                page-break-inside: avoid;
-            }
         }
     </style>
 </head>
@@ -420,13 +379,22 @@
     <div class="document-header">
         <div class="header-top">
             <div class="header-left">
-                <div class="company-name">FEEDTAN DIGITAL</div>
-                <div class="company-tagline">Empowering Communities Through Digital Solutions</div>
+                <div class="logo-section">
+                    <div class="logo-box">FD</div>
+                    <div class="logo-text">
+                        <div class="company-name-main">FeedTan</div>
+                        <div class="company-name-sub">{{ $orgInfo['name'] ?? 'Community Microfinance Group' }}</div>
+                    </div>
+                </div>
+                <div class="contact-info">
+                    {{ $orgInfo['po_box'] ?? 'P.O.Box 7744' }}, {{ $orgInfo['address'] ?? 'Ushirika Sokoine Road' }}, {{ $orgInfo['city'] ?? 'Moshi' }} {{ $orgInfo['region'] ?? 'Kilimanjaro' }} {{ $orgInfo['country'] ?? 'Tanzania' }}<br>
+                    Email: {{ $orgInfo['primary_email'] ?? $orgInfo['from_email'] ?? 'Feedtan15@gmail.com' }}<br>
+                    Mobile: {{ $orgInfo['phone'] ?? '0717358865' }}
+                </div>
             </div>
             <div class="header-right">
                 <div style="font-size: 8pt; color: #666; line-height: 1.8;">
-                    <div><strong>Document ID:</strong> APP-{{ str_pad($user->id, 6, '0', STR_PAD_LEFT) }}</div>
-                    <div><strong>Generated:</strong> {{ date('d M Y, H:i:s') }}</div>
+                    <div><strong>Generated:</strong> {{ date('d M Y, H:i') }}</div>
                     <div><strong>Status:</strong> 
                         <span class="status-badge status-{{ $user->membership_status ?? 'pending' }}">
                             {{ strtoupper($user->membership_status ?? 'PENDING') }}
@@ -436,27 +404,62 @@
             </div>
         </div>
         
-        <div class="divider"></div>
-        
-        <div class="document-title">Membership Application Form</div>
-        
-        <div class="application-info">
-            <div class="info-left">
-                <span class="info-label">Application Date:</span> {{ date('d F Y') }}<br>
-                <span class="info-label">Application Reference:</span> {{ $user->membership_code ?? 'PENDING' }}
-            </div>
-            <div class="info-right">
-                <span class="info-label">Applicant ID:</span> {{ str_pad($user->id, 6, '0', STR_PAD_LEFT) }}<br>
-                <span class="info-label">Form Version:</span> 1.0
-            </div>
-        </div>
+        <div class="document-title">Membership Application</div>
+        <div class="serial-number">Serial No: {{ $serialNumber ?? 'FCMGMA'.date('dmy').str_pad($user->id, 4, '0', STR_PAD_LEFT) }}</div>
     </div>
 
-    <!-- Verification Section -->
-    <div class="verification-box">
-        <div class="verification-title">Application Verification Code</div>
-        <div class="verification-code">{{ $user->membership_code ?? 'PENDING-' . str_pad($user->id, 6, '0', STR_PAD_LEFT) }}</div>
-        <div style="font-size: 8pt; color: #666;">Use this code to track your application status</div>
+    <!-- Member Details Section -->
+    <div class="member-details-section">
+        <div class="section-header-green">Member Details</div>
+        <table class="member-details-table">
+            <tr>
+                <td>Member Name</td>
+                <td><strong>{{ strtoupper($user->name) }}</strong></td>
+            </tr>
+            <tr>
+                <td>Member Type</td>
+                <td><strong>{{ $user->membershipType->name ?? 'Not Selected' }}</strong> ({{ $user->membership_code ?? 'Pending' }})</td>
+            </tr>
+            <tr>
+                <td>Application Date</td>
+                <td>{{ $user->created_at->format('F Y') }}</td>
+            </tr>
+            <tr>
+                <td>Email Address</td>
+                <td>{{ $user->email }}</td>
+            </tr>
+            <tr>
+                <td>Phone Number</td>
+                <td style="font-family: 'Courier New', monospace;">{{ $user->phone ?? 'Not provided' }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Application Summary -->
+    <div class="summary-section">
+        <div class="summary-title">Application Summary</div>
+        <div class="summary-grid">
+            <div class="summary-item">
+                <div class="summary-label">Membership Type</div>
+                <div class="summary-value" style="font-size: 14pt;">{{ $user->membershipType->name ?? 'Not Selected' }}</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Application Status</div>
+                <div class="summary-value" style="font-size: 14pt;">{{ strtoupper($user->membership_status ?? 'PENDING') }}</div>
+            </div>
+        </div>
+        @if($user->membershipType)
+        <div class="summary-grid" style="margin-top: 6px;">
+            <div class="summary-item">
+                <div class="summary-label">Entrance Fee</div>
+                <div class="summary-value" style="font-size: 11pt;">{{ number_format($user->membershipType->entrance_fee ?? 0) }} TZS</div>
+            </div>
+            <div class="summary-item">
+                <div class="summary-label">Capital Contribution</div>
+                <div class="summary-value" style="font-size: 11pt;">{{ number_format($user->membershipType->capital_contribution ?? 0) }} TZS</div>
+            </div>
+        </div>
+        @endif
     </div>
 
     <!-- Section 1: Membership Type -->
@@ -476,32 +479,9 @@
                 @endif
                 <tr>
                     <td>Membership Code</td>
-                    <td><strong style="font-family: 'Courier New', monospace; font-size: 12pt; color: #015425;">{{ $user->membership_code ?? 'Pending Assignment' }}</strong></td>
+                    <td><strong style="font-family: 'Courier New', monospace; font-size: 11pt; color: #015425;">{{ $user->membership_code ?? 'Pending Assignment' }}</strong></td>
                 </tr>
             </table>
-            
-            @if($user->membershipType)
-            <div class="two-column" style="margin-top: 15px;">
-                <div class="column">
-                    <div class="financial-box">
-                        <div class="financial-label">Entrance Fee</div>
-                        <div class="financial-value">{{ number_format($user->membershipType->entrance_fee ?? 0) }} TZS</div>
-                    </div>
-                </div>
-                <div class="column">
-                    <div class="financial-box">
-                        <div class="financial-label">Capital Contribution</div>
-                        <div class="financial-value">{{ number_format($user->membershipType->capital_contribution ?? 0) }} TZS</div>
-                    </div>
-                </div>
-            </div>
-            @if($user->membershipType->minimum_shares > 0)
-            <div class="highlight-box" style="margin-top: 15px;">
-                <div class="highlight-title">Minimum Shares Requirement</div>
-                <div style="font-size: 11pt; color: #92400e;">This membership type requires a minimum of <strong>{{ $user->membershipType->minimum_shares }} shares</strong> to be purchased.</div>
-            </div>
-            @endif
-            @endif
         </div>
     </div>
 
@@ -538,7 +518,7 @@
                         </tr>
                         <tr>
                             <td>Date of Birth</td>
-                            <td>{{ $user->date_of_birth ? $user->date_of_birth->format('d F Y') . ' (Age: ' . $user->date_of_birth->age . ' years)' : 'Not provided' }}</td>
+                            <td>{{ $user->date_of_birth ? $user->date_of_birth->format('d F Y') : 'Not provided' }}</td>
                         </tr>
                         <tr>
                             <td>National ID (NIDA)</td>
@@ -596,7 +576,7 @@
                     <td>Monthly Income</td>
                     <td>
                         @if($user->monthly_income)
-                            <strong style="font-size: 12pt; color: #015425;">{{ number_format($user->monthly_income) }} TZS</strong>
+                            <strong style="font-size: 11pt; color: #015425;">{{ number_format($user->monthly_income) }} TZS</strong>
                         @else
                             Not provided
                         @endif
@@ -621,7 +601,7 @@
                 </tr>
                 <tr>
                     <td>Account Number</td>
-                    <td style="font-family: 'Courier New', monospace; font-weight: bold; font-size: 11pt;">{{ $user->bank_account_number ?? 'Not provided' }}</td>
+                    <td style="font-family: 'Courier New', monospace; font-weight: bold; font-size: 10pt;">{{ $user->bank_account_number ?? 'Not provided' }}</td>
                 </tr>
                 <tr>
                     <td>Payment Reference Number</td>
@@ -638,16 +618,7 @@
             <table class="info-table">
                 <tr>
                     <td>Statement Preference</td>
-                    <td>
-                        <strong>{{ ucfirst($user->statement_preference ?? 'Not provided') }}</strong>
-                        @if($user->statement_preference === 'email')
-                            (Email Delivery)
-                        @elseif($user->statement_preference === 'sms')
-                            (SMS Delivery)
-                        @elseif($user->statement_preference === 'postal')
-                            (Postal Mail)
-                        @endif
-                    </td>
+                    <td><strong>{{ ucfirst($user->statement_preference ?? 'Not provided') }}</strong></td>
                 </tr>
                 @if($user->short_bibliography)
                 <tr>
@@ -684,7 +655,7 @@
                     </tr>
                     <tr>
                         <td>Allocation Percentage</td>
-                        <td><strong style="font-size: 12pt; color: #015425;">{{ $beneficiary['allocation'] ?? 0 }}%</strong></td>
+                        <td><strong style="font-size: 11pt; color: #015425;">{{ $beneficiary['allocation'] ?? 0 }}%</strong></td>
                     </tr>
                     <tr>
                         <td>Contact Information</td>
@@ -798,39 +769,13 @@
         </div>
     </div>
 
-    <!-- Signature Section -->
-    <div class="signature-section">
-        <div class="signature-box">
-            <div class="signature-block">
-                <div class="signature-line"></div>
-                <div class="signature-label">Applicant Signature</div>
-                <div class="signature-date">Date: _______________</div>
-            </div>
-            <div class="signature-block">
-                <div class="signature-line"></div>
-                <div class="signature-label">Authorized Officer Signature</div>
-                <div class="signature-date">Date: _______________</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Declaration -->
-    <div class="highlight-box" style="margin-top: 30px;">
-        <div class="highlight-title">Declaration</div>
-        <div style="font-size: 9pt; line-height: 1.6; text-align: justify;">
-            I hereby declare that all the information provided in this application form is true, accurate, and complete to the best of my knowledge. 
-            I understand that any false or misleading information may result in the rejection of my application or termination of membership. 
-            I agree to abide by the rules and regulations of FEEDTAN DIGITAL and authorize the organization to verify the information provided.
-        </div>
-    </div>
-
     <!-- Document Footer -->
     <div class="document-footer">
-        <div class="footer-info"><strong>FEEDTAN DIGITAL</strong> - Membership Application Form</div>
-        <div class="footer-info">This is a computer-generated document. Generated on {{ date('d F Y, H:i:s') }}</div>
-        <div class="footer-info">Document ID: APP-{{ str_pad($user->id, 6, '0', STR_PAD_LEFT) }} | Application Code: {{ $user->membership_code ?? 'PENDING' }}</div>
-        <div class="footer-note">
-            This document is confidential and intended solely for the use of the applicant and authorized personnel of FEEDTAN DIGITAL.
+        <div style="margin: 5px 0;"><strong>{{ $orgInfo['name'] ?? 'FeedTan Community Microfinance Group' }}</strong></div>
+        <div style="margin: 5px 0;">{{ $orgInfo['po_box'] ?? 'P.O.Box 7744' }}, {{ $orgInfo['address'] ?? 'Ushirika Sokoine Road' }}, {{ $orgInfo['city'] ?? 'Moshi' }}, {{ $orgInfo['region'] ?? 'Kilimanjaro' }}, {{ $orgInfo['country'] ?? 'Tanzania' }}</div>
+        <div style="margin: 5px 0;">Email: {{ $orgInfo['primary_email'] ?? $orgInfo['from_email'] ?? 'Feedtan15@gmail.com' }} | Mobile: {{ $orgInfo['phone'] ?? '0717358865' }}</div>
+        <div style="margin-top: 10px; font-size: 7pt; color: #999; font-style: italic;">
+            This is a computer-generated document. Generated on {{ date('d F Y, H:i:s') }} | Serial No: {{ $serialNumber ?? 'FCMGMA'.date('dmy').str_pad($user->id, 4, '0', STR_PAD_LEFT) }}
         </div>
     </div>
 </body>
