@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Setting;
+use App\Models\SmsLog;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -125,7 +126,7 @@ class SmsNotificationService
     /**
      * Send a single SMS message
      */
-    public function sendSms(string $phoneNumber, string $message): array
+    public function sendSms(string $phoneNumber, string $message, array $options = []): array
     {
         if (! $this->smsEnabled) {
             return [
@@ -291,19 +292,36 @@ class SmsNotificationService
                     if (($messageStatus['groupName'] ?? '') === 'PENDING' || ($messageStatus['id'] ?? 0) === 51) {
                         Log::info("SMS sent successfully to {$phoneNumber}");
 
-                        // Log SMS activity
+                        // Log SMS to database
                         try {
                             $userId = Auth::id();
                             $user = User::where('phone', $phoneNumber)->first();
+                            $messageId = $responseData['messages'][0]['messageId'] ?? null;
+                            $reference = $responseData['messages'][0]['reference'] ?? null;
 
-                            // You can add activity logging here if you have ActivityLogService
-                            // ActivityLogService::logSMSSent($phoneNumber, $message, $userId, $user?->id, [
-                            //     'provider' => 'messaging-service.co.tz',
-                            //     'sms_from' => $this->smsFrom,
-                            //     'response_code' => $httpCode,
-                            // ]);
+                            $this->logSms(array_merge([
+                                'message_id' => $messageId,
+                                'reference' => $reference,
+                                'from' => $this->smsFrom,
+                                'to' => $phoneNumber,
+                                'message' => $message,
+                                'channel' => $responseData['messages'][0]['channel'] ?? 'Internet SMS',
+                                'sms_count' => $responseData['messages'][0]['smsCount'] ?? 1,
+                                'status_group_id' => $messageStatus['groupId'] ?? null,
+                                'status_group_name' => $messageStatus['groupName'] ?? null,
+                                'status_id' => $messageStatus['id'] ?? null,
+                                'status_name' => $messageStatus['name'] ?? null,
+                                'status_description' => $messageStatus['description'] ?? null,
+                                'sent_at' => isset($responseData['messages'][0]['sentAt']) ? date('Y-m-d H:i:s', strtotime($responseData['messages'][0]['sentAt'])) : now(),
+                                'done_at' => isset($responseData['messages'][0]['doneAt']) ? date('Y-m-d H:i:s', strtotime($responseData['messages'][0]['doneAt'])) : now(),
+                                'delivery' => $responseData['messages'][0]['delivery'] ?? null,
+                                'api_response' => $responseData,
+                                'user_id' => $user?->id,
+                                'sent_by' => $userId,
+                                'success' => true,
+                            ], $options));
                         } catch (\Exception $e) {
-                            Log::warning('Failed to log SMS activity', ['error' => $e->getMessage()]);
+                            Log::warning('Failed to log SMS to database', ['error' => $e->getMessage()]);
                         }
 
                         return [
@@ -311,6 +329,27 @@ class SmsNotificationService
                             'message_id' => $responseData['messages'][0]['messageId'] ?? null,
                             'response' => $responseData,
                         ];
+                    }
+
+                    // Log failed SMS
+                    try {
+                        $userId = Auth::id();
+                        $user = User::where('phone', $phoneNumber)->first();
+                        $this->logSms([
+                            'from' => $this->smsFrom,
+                            'to' => $phoneNumber,
+                            'message' => $message,
+                            'status_group_name' => $messageStatus['groupName'] ?? 'REJECTED',
+                            'status_name' => $messageStatus['name'] ?? 'Unknown',
+                            'status_description' => $messageStatus['description'] ?? 'Unknown status',
+                            'api_response' => $responseData,
+                            'user_id' => $user?->id,
+                            'sent_by' => $userId,
+                            'success' => false,
+                            'error_message' => $messageStatus['description'] ?? $messageStatus['name'] ?? 'Unknown status',
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::warning('Failed to log failed SMS to database', ['error' => $e->getMessage()]);
                     }
 
                     // Other status codes
@@ -325,6 +364,23 @@ class SmsNotificationService
 
                 // If response structure is different but status is 200, assume success
                 Log::info("SMS sent successfully to {$phoneNumber}");
+
+                // Log to database
+                try {
+                    $userId = Auth::id();
+                    $user = User::where('phone', $phoneNumber)->first();
+                    $this->logSms([
+                        'from' => $this->smsFrom,
+                        'to' => $phoneNumber,
+                        'message' => $message,
+                        'api_response' => $responseData,
+                        'user_id' => $user?->id,
+                        'sent_by' => $userId,
+                        'success' => true,
+                    ]);
+                } catch (\Exception $e) {
+                    Log::warning('Failed to log SMS to database', ['error' => $e->getMessage()]);
+                }
 
                 return [
                     'success' => true,
@@ -344,6 +400,24 @@ class SmsNotificationService
                 'error' => $errorMsg,
             ]);
 
+            // Log failed SMS
+            try {
+                $userId = Auth::id();
+                $user = User::where('phone', $phoneNumber)->first();
+                $this->logSms([
+                    'from' => $this->smsFrom,
+                    'to' => $phoneNumber,
+                    'message' => $message,
+                    'api_response' => ['http_code' => $httpCode, 'body' => $responseBody],
+                    'user_id' => $user?->id,
+                    'sent_by' => $userId,
+                    'success' => false,
+                    'error_message' => $errorMsg,
+                ]);
+            } catch (\Exception $e) {
+                Log::warning('Failed to log failed SMS to database', ['error' => $e->getMessage()]);
+            }
+
             return [
                 'success' => false,
                 'error' => $errorMsg,
@@ -361,10 +435,42 @@ class SmsNotificationService
                 'line' => $e->getLine(),
             ]);
 
+            // Log exception
+            try {
+                $userId = Auth::id();
+                $user = User::where('phone', $phoneNumber ?? '')->first();
+                $this->logSms([
+                    'from' => $this->smsFrom ?? 'FEEDTAN',
+                    'to' => $phoneNumber ?? 'unknown',
+                    'message' => $message ?? '',
+                    'user_id' => $user?->id,
+                    'sent_by' => $userId,
+                    'success' => false,
+                    'error_message' => $e->getMessage(),
+                ]);
+            } catch (\Exception $logException) {
+                Log::warning('Failed to log exception SMS to database', ['error' => $logException->getMessage()]);
+            }
+
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
             ];
+        }
+    }
+
+    /**
+     * Log SMS details to database
+     */
+    protected function logSms(array $data): void
+    {
+        try {
+            SmsLog::create($data);
+        } catch (\Exception $e) {
+            Log::error('Failed to create SMS log', [
+                'error' => $e->getMessage(),
+                'data' => $data,
+            ]);
         }
     }
 

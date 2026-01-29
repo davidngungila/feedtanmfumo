@@ -12,6 +12,9 @@
                 <p class="text-white text-opacity-90 text-sm sm:text-base">Upload Excel file to send bulk SMS messages</p>
             </div>
             <div class="mt-4 md:mt-0 flex gap-3">
+                <a href="{{ route('admin.sms.logs') }}" class="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 text-[#015425] rounded-md hover:bg-opacity-30 transition font-medium">
+                    SMS Logs
+                </a>
                 <a href="{{ route('admin.sms.settings') }}" class="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 text-[#015425] rounded-md hover:bg-opacity-30 transition font-medium">
                     SMS Settings
                 </a>

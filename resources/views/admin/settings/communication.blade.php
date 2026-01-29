@@ -258,6 +258,7 @@
                 <p class="text-sm text-blue-800">
                     <strong>Quick Links:</strong>
                     <a href="{{ route('admin.sms.send') }}" class="underline font-medium ml-2">Send SMS</a> |
+                    <a href="{{ route('admin.sms.logs') }}" class="underline font-medium">SMS Logs</a> |
                     <a href="{{ route('admin.sms.settings') }}" class="underline font-medium">SMS Settings</a> |
                     <a href="{{ route('admin.sms.templates') }}" class="underline font-medium">Message Templates</a>
                 </p>

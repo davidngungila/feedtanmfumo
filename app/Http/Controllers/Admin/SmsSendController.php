@@ -226,8 +226,11 @@ class SmsSendController extends Controller
                     continue;
                 }
 
-                // Send SMS
-                $result = $this->smsService->sendSms($phone, $message);
+                // Send SMS with additional metadata
+                $result = $this->smsService->sendSms($phone, $message, [
+                    'template_id' => $template?->id ? (string) $template->id : null,
+                    'saving_behavior' => $savingBehavior,
+                ]);
 
                 if ($result['success']) {
                     $results['success']++;

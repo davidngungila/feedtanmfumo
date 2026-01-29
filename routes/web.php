@@ -279,6 +279,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('sms/templates/{smsMessageTemplate}', [\App\Http\Controllers\Admin\SmsMessageTemplateController::class, 'update'])->name('sms.templates.update');
     Route::delete('sms/templates/{smsMessageTemplate}', [\App\Http\Controllers\Admin\SmsMessageTemplateController::class, 'destroy'])->name('sms.templates.destroy');
 
+    // SMS Logs
+    Route::get('sms/logs', [\App\Http\Controllers\Admin\SmsLogsController::class, 'index'])->name('sms.logs');
+    Route::post('sms/logs/sync', [\App\Http\Controllers\Admin\SmsLogsController::class, 'syncFromApi'])->name('sms.logs.sync');
+    Route::get('sms/logs/{smsLog}', [\App\Http\Controllers\Admin\SmsLogsController::class, 'show'])->name('sms.logs.show');
+
     // Email Provider Management
     Route::get('email-provider/create', [\App\Http\Controllers\Admin\EmailProviderController::class, 'create'])->name('email-provider.create');
     Route::post('email-provider/store', [\App\Http\Controllers\Admin\EmailProviderController::class, 'store'])->name('email-provider.store');
