@@ -192,6 +192,52 @@
             </button>
         </form>
 
+        <!-- Request Edits Form -->
+        <div class="mb-6 pb-6 border-b border-gray-200">
+            @if($user->editing_requested)
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-lg mb-4">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-3 flex-1">
+                        <h4 class="text-sm font-semibold text-yellow-800 mb-2">Edit Request Active</h4>
+                        <p class="text-sm text-yellow-700 mb-2">Applicant has been requested to make changes. Current comments:</p>
+                        <div class="bg-white rounded p-3 mb-3">
+                            <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ $user->reviewer_comments }}</p>
+                        </div>
+                        @if($user->editing_requested_at)
+                        <p class="text-xs text-yellow-600">Requested on: {{ $user->editing_requested_at->format('F d, Y \a\t g:i A') }}</p>
+                        @endif
+                        <form method="POST" action="{{ route('admin.memberships.clear-edit-request', $user) }}" class="mt-3">
+                            @csrf
+                            <button type="submit" class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition text-sm">
+                                Clear Edit Request
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            @endif
+            
+            <form method="POST" action="{{ route('admin.memberships.request-edits', $user) }}">
+                @csrf
+                <h3 class="text-lg font-semibold text-yellow-700 mb-4">Request Edits from Applicant</h3>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Comments / Issues to Address *</label>
+                    <textarea name="reviewer_comments" rows="5" required 
+                              placeholder="Enter specific comments, issues, or details that need to be corrected or updated by the applicant..."
+                              class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">{{ old('reviewer_comments', $user->reviewer_comments) }}</textarea>
+                    <p class="text-xs text-gray-500 mt-1">The applicant will be able to see these comments and edit their application accordingly.</p>
+                </div>
+                <button type="submit" class="px-6 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition">
+                    Request Edits
+                </button>
+            </form>
+        </div>
+
         <!-- Reject Form -->
         <form method="POST" action="{{ route('admin.memberships.reject', $user) }}">
             @csrf

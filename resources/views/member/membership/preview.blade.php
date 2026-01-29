@@ -28,7 +28,40 @@
         border-bottom: 3px solid #015425;
         display: flex;
         align-items: center;
+        justify-content: space-between;
         gap: 0.75rem;
+    }
+    
+    .preview-section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex: 1;
+    }
+    
+    .edit-step-btn {
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #015425 0%, #027a3a 100%);
+        color: white;
+        border-radius: 8px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s;
+        box-shadow: 0 2px 8px rgba(1, 84, 37, 0.2);
+    }
+    
+    .edit-step-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(1, 84, 37, 0.3);
+    }
+    
+    .edit-step-btn svg {
+        width: 16px;
+        height: 16px;
     }
     
     .preview-section h3::before {
@@ -206,6 +239,30 @@
     </div>
     @endif
 
+    <!-- Reviewer Comments / Edit Request -->
+    @if($user->editing_requested && $user->reviewer_comments)
+    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-6 rounded-lg mb-6">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <svg class="h-6 w-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+            <div class="ml-3 flex-1">
+                <h3 class="text-lg font-semibold text-yellow-800 mb-2">Reviewer Requested Changes</h3>
+                <p class="text-sm text-yellow-700 mb-3">A reviewer has requested that you make changes to your application. Please review the comments below and update your application accordingly.</p>
+                <div class="bg-white rounded-lg p-4 border border-yellow-200">
+                    <p class="text-sm font-medium text-gray-700 mb-2">Reviewer Comments:</p>
+                    <p class="text-sm text-gray-600 whitespace-pre-wrap">{{ $user->reviewer_comments }}</p>
+                    @if($user->editing_requested_at)
+                    <p class="text-xs text-gray-500 mt-3">Requested on: {{ $user->editing_requested_at->format('F d, Y \a\t g:i A') }}</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Application Status Card -->
     <div class="info-card no-print">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between">
@@ -240,7 +297,19 @@
 
     <!-- Step 1: Membership Type -->
     <div class="preview-section">
-        <h3>1. Membership Type Selection</h3>
+        <h3>
+            <span class="preview-section-header">
+                <span>1. Membership Type Selection</span>
+            </span>
+            @if($user->editing_requested)
+            <a href="{{ route('member.membership.step1') }}" class="edit-step-btn no-print">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit
+            </a>
+            @endif
+        </h3>
         <div class="preview-row">
             <div class="preview-label">Membership Type:</div>
             <div class="preview-value font-bold text-[#015425]">{{ $user->membershipType->name ?? 'Not selected' }}</div>
@@ -275,7 +344,17 @@
 
     <!-- Step 2: Personal Information -->
     <div class="preview-section">
-        <h3>2. Personal Information</h3>
+        <h3>
+            <span class="preview-section-header">
+                <span>2. Personal Information</span>
+            </span>
+            <a href="{{ route('member.membership.step2') }}" class="edit-step-btn no-print">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit
+            </a>
+        </h3>
         <div class="preview-row">
             <div class="preview-label">Full Name:</div>
             <div class="preview-value font-semibold">{{ $user->name }}</div>
@@ -312,7 +391,17 @@
 
     <!-- Step 3: Address -->
     <div class="preview-section">
-        <h3>3. Address Information</h3>
+        <h3>
+            <span class="preview-section-header">
+                <span>3. Address Information</span>
+            </span>
+            <a href="{{ route('member.membership.step3') }}" class="edit-step-btn no-print">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit
+            </a>
+        </h3>
         <div class="preview-row">
             <div class="preview-label">Street Address:</div>
             <div class="preview-value">{{ $user->address ?? 'Not provided' }}</div>
@@ -333,7 +422,17 @@
 
     <!-- Step 4: Employment -->
     <div class="preview-section">
-        <h3>4. Employment Information</h3>
+        <h3>
+            <span class="preview-section-header">
+                <span>4. Employment Information</span>
+            </span>
+            <a href="{{ route('member.membership.step4') }}" class="edit-step-btn no-print">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit
+            </a>
+        </h3>
         <div class="preview-row">
             <div class="preview-label">Occupation/Profession:</div>
             <div class="preview-value">{{ $user->occupation ?? 'Not provided' }}</div>
@@ -350,7 +449,17 @@
 
     <!-- Step 5: Bank Information -->
     <div class="preview-section">
-        <h3>5. Bank Account Information</h3>
+        <h3>
+            <span class="preview-section-header">
+                <span>5. Bank Account Information</span>
+            </span>
+            <a href="{{ route('member.membership.step5') }}" class="edit-step-btn no-print">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit
+            </a>
+        </h3>
         <div class="preview-row">
             <div class="preview-label">Bank Name:</div>
             <div class="preview-value font-semibold">{{ $user->bank_name ?? 'Not provided' }}</div>
@@ -371,7 +480,17 @@
 
     <!-- Step 6: Additional Information -->
     <div class="preview-section">
-        <h3>6. Additional Information & Preferences</h3>
+        <h3>
+            <span class="preview-section-header">
+                <span>6. Additional Information & Preferences</span>
+            </span>
+            <a href="{{ route('member.membership.step6') }}" class="edit-step-btn no-print">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit
+            </a>
+        </h3>
         <div class="preview-row">
             <div class="preview-label">Statement Preference:</div>
             <div class="preview-value">
@@ -404,7 +523,17 @@
     <!-- Step 7: Beneficiaries -->
     @if($user->beneficiaries_info && count($user->beneficiaries_info) > 0)
     <div class="preview-section">
-        <h3>7. Beneficiaries Information</h3>
+        <h3>
+            <span class="preview-section-header">
+                <span>7. Beneficiaries Information</span>
+            </span>
+            <a href="{{ route('member.membership.step7') }}" class="edit-step-btn no-print">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit
+            </a>
+        </h3>
         @foreach($user->beneficiaries_info as $index => $beneficiary)
         <div class="beneficiary-card">
             <div class="beneficiary-header">Beneficiary {{ $index + 1 }}</div>
@@ -429,7 +558,17 @@
     </div>
     @else
     <div class="preview-section">
-        <h3>7. Beneficiaries Information</h3>
+        <h3>
+            <span class="preview-section-header">
+                <span>7. Beneficiaries Information</span>
+            </span>
+            <a href="{{ route('member.membership.step7') }}" class="edit-step-btn no-print">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit
+            </a>
+        </h3>
         <div class="preview-row">
             <div class="preview-label">Beneficiaries:</div>
             <div class="preview-value text-gray-500 italic">No beneficiaries added</div>
@@ -439,7 +578,17 @@
 
     <!-- Step 8: Group Information -->
     <div class="preview-section">
-        <h3>8. Group Registration Information</h3>
+        <h3>
+            <span class="preview-section-header">
+                <span>8. Group Registration Information</span>
+            </span>
+            <a href="{{ route('member.membership.step8') }}" class="edit-step-btn no-print">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit
+            </a>
+        </h3>
         <div class="preview-row">
             <div class="preview-label">Group Registered:</div>
             <div class="preview-value">
@@ -470,7 +619,17 @@
 
     <!-- Step 9: Documents -->
     <div class="preview-section">
-        <h3>9. Document Uploads</h3>
+        <h3>
+            <span class="preview-section-header">
+                <span>9. Document Uploads</span>
+            </span>
+            <a href="{{ route('member.membership.step9') }}" class="edit-step-btn no-print">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit
+            </a>
+        </h3>
         <div class="preview-row">
             <div class="preview-label">Passport Picture:</div>
             <div class="preview-value">
@@ -545,7 +704,17 @@
 
     <!-- Step 10: Options -->
     <div class="preview-section">
-        <h3>10. Additional Options</h3>
+        <h3>
+            <span class="preview-section-header">
+                <span>10. Additional Options</span>
+            </span>
+            <a href="{{ route('member.membership.step10') }}" class="edit-step-btn no-print">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                Edit
+            </a>
+        </h3>
         <div class="preview-row">
             <div class="preview-label">Ordinary Membership Request:</div>
             <div class="preview-value">

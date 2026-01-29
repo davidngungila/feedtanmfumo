@@ -445,6 +445,105 @@
     .toast.hiding {
         animation: slideOutRight 0.3s ease-out forwards;
     }
+    
+    /* Save Popup Modal */
+    .save-popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 20000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .save-popup-overlay.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .save-popup-content {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        max-width: 450px;
+        width: 90%;
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        text-align: center;
+    }
+
+    .save-popup-overlay.show .save-popup-content {
+        transform: scale(1);
+    }
+
+    .save-popup-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+    }
+
+    .save-popup-overlay.success .save-popup-icon {
+        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #10b981;
+    }
+
+    .save-popup-overlay.error .save-popup-icon {
+        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+        color: #ef4444;
+    }
+
+    .save-popup-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #1f2937;
+    }
+
+    .save-popup-overlay.success .save-popup-title {
+        color: #10b981;
+    }
+
+    .save-popup-overlay.error .save-popup-title {
+        color: #ef4444;
+    }
+
+    .save-popup-message {
+        font-size: 1rem;
+        color: #6b7280;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .save-popup-button {
+        padding: 0.875rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: none;
+        font-size: 0.95rem;
+        background: linear-gradient(135deg, #015425 0%, #027a3a 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(1, 84, 37, 0.3);
+    }
+
+    .save-popup-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(1, 84, 37, 0.4);
+    }
 </style>
 @endpush
 
@@ -563,6 +662,58 @@ function showToast(type, title, message, duration = 5000) {
     }, duration);
 }
 
+// Save Popup Notification System
+function showSavePopup(type, title, message) {
+    // Remove existing popup if any
+    const existingPopup = document.getElementById('savePopupOverlay');
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+    
+    const icons = {
+        success: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 40px; height: 40px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>',
+        error: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 40px; height: 40px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>'
+    };
+    
+    const popupHTML = `
+        <div id="savePopupOverlay" class="save-popup-overlay ${type}">
+            <div class="save-popup-content">
+                <div class="save-popup-icon">
+                    ${icons[type] || icons.success}
+                </div>
+                <div class="save-popup-title">${title}</div>
+                <div class="save-popup-message">${message}</div>
+                <button class="save-popup-button" onclick="closeSavePopup()">OK</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', popupHTML);
+    
+    // Show popup
+    setTimeout(() => {
+        const popup = document.getElementById('savePopupOverlay');
+        if (popup) {
+            popup.classList.add('show');
+        }
+    }, 10);
+    
+    // Auto close after 3 seconds
+    setTimeout(() => {
+        closeSavePopup();
+    }, 3000);
+}
+
+function closeSavePopup() {
+    const popup = document.getElementById('savePopupOverlay');
+    if (popup) {
+        popup.classList.remove('show');
+        setTimeout(() => {
+            popup.remove();
+        }, 300);
+    }
+}
+
 // Show success message from session
 @if(session('success'))
     showToast('success', 'Success!', '{{ session('success') }}');
@@ -622,17 +773,26 @@ function setupAjaxForm(formId, successCallback) {
         })
         .then(data => {
             if (data.success) {
-                showToast('success', 'Success!', data.message || 'Step saved successfully!');
+                // Show popup notification
+                showSavePopup('success', 'Success!', data.message || 'Step saved successfully!');
                 
                 if (data.redirect) {
                     setTimeout(() => {
                         window.location.href = data.redirect;
-                    }, 1500);
+                    }, 2000);
                 } else if (successCallback) {
                     successCallback(data);
+                } else {
+                    // Re-enable button after popup closes
+                    setTimeout(() => {
+                        if (submitButton) {
+                            submitButton.disabled = false;
+                            submitButton.innerHTML = originalText;
+                        }
+                    }, 2000);
                 }
             } else {
-                showToast('error', 'Error!', data.message || 'An error occurred. Please try again.');
+                showSavePopup('error', 'Error!', data.message || 'An error occurred. Please try again.');
                 if (submitButton) {
                     submitButton.disabled = false;
                     submitButton.innerHTML = originalText;
@@ -641,7 +801,7 @@ function setupAjaxForm(formId, successCallback) {
         })
         .catch(error => {
             console.error('Error:', error);
-            showToast('error', 'Error!', error.message || 'An error occurred. Please try again.');
+            showSavePopup('error', 'Error!', error.message || 'An error occurred. Please try again.');
             if (submitButton) {
                 submitButton.disabled = false;
                 submitButton.innerHTML = originalText;
@@ -653,9 +813,10 @@ function setupAjaxForm(formId, successCallback) {
 // Initialize AJAX forms on page load
 document.addEventListener('DOMContentLoaded', function() {
     // Auto-setup forms with class 'ajax-form' or id starting with 'step'
+    // Skip forms that have data-no-auto-setup attribute
     const forms = document.querySelectorAll('form.ajax-form, form[id^="step"]');
     forms.forEach(form => {
-        if (form.id) {
+        if (form.id && !form.dataset.noAutoSetup) {
             setupAjaxForm(form.id);
         }
     });

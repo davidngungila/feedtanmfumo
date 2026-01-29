@@ -841,4 +841,48 @@ Best regards,
             'organizationInfo' => $orgInfo,
         ])->render();
     }
+
+    /**
+     * Send membership application submission email
+     */
+    public function sendMembershipSubmissionEmail(User $user): bool
+    {
+        try {
+            $this->reloadMailConfig();
+            $orgInfo = $this->getOrganizationInfo();
+
+            $subject = "Thank You for Your Membership Application - {$orgInfo['name']}";
+            $htmlBody = $this->formatMembershipSubmissionEmail($user, $orgInfo);
+
+            Mail::html($htmlBody, function ($mail) use ($user, $subject, $orgInfo) {
+                $mail->to($user->email, $user->name)
+                    ->subject($subject)
+                    ->from($orgInfo['from_email'], $orgInfo['from_name']);
+            });
+
+            Log::info("Membership submission email sent to {$user->email} for user ID {$user->id}.");
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Failed to send membership submission email to {$user->email}: ".$e->getMessage());
+            Log::error('Stack trace: '.$e->getTraceAsString());
+
+            return false;
+        }
+    }
+
+    /**
+     * Format membership submission email message (HTML)
+     */
+    protected function formatMembershipSubmissionEmail(User $user, array $orgInfo): string
+    {
+        $dashboardUrl = route('member.dashboard');
+
+        return View::make('emails.membership-submission', [
+            'name' => $user->name,
+            'membershipCode' => $user->membership_code ?? 'Pending',
+            'dashboardUrl' => $dashboardUrl,
+            'organizationInfo' => $orgInfo,
+        ])->render();
+    }
 }

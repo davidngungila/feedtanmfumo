@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\MembershipType;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class MembershipController extends Controller
 {
@@ -32,18 +31,18 @@ class MembershipController extends Controller
         // Search
         if ($request->has('search') && $request->search !== '') {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('membership_code', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%")
-                  ->orWhere('national_id', 'like', "%{$search}%");
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('membership_code', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('national_id', 'like', "%{$search}%");
             });
         }
 
         $applications = $query->paginate(20);
         $membershipTypes = MembershipType::where('is_active', true)->get();
-        
+
         $stats = [
             'pending' => User::where('membership_status', 'pending')->whereNotNull('membership_type_id')->count(),
             'approved' => User::where('membership_status', 'approved')->whereNotNull('membership_type_id')->count(),
@@ -59,7 +58,8 @@ class MembershipController extends Controller
      */
     public function show(User $user)
     {
-        $user->load('membershipType', 'membershipApprovedBy');
+        $user->load('membershipType', 'membershipApprovedBy', 'editingRequestedBy');
+
         return view('admin.memberships.show', compact('user'));
     }
 
@@ -77,7 +77,7 @@ class MembershipController extends Controller
         ]);
 
         $capitalContribution = $request->capital_contribution ?? $user->capital_contribution ?? 0;
-        
+
         $user->update([
             'membership_status' => 'approved',
             'membership_approved_at' => now(),
@@ -91,14 +91,14 @@ class MembershipController extends Controller
         ]);
 
         // Generate member number if not exists
-        if (!$user->member_number) {
+        if (! $user->member_number) {
             $membershipType = $user->membershipType;
             if ($membershipType) {
                 $prefix = strtoupper(substr($membershipType->slug, 0, 3));
             } else {
                 $prefix = 'MEM';
             }
-            $user->member_number = $prefix . '-' . str_pad($user->id, 6, '0', STR_PAD_LEFT);
+            $user->member_number = $prefix.'-'.str_pad($user->id, 6, '0', STR_PAD_LEFT);
             $user->save();
         }
 
@@ -157,5 +157,41 @@ class MembershipController extends Controller
 
         return redirect()->route('admin.memberships.show', $user)
             ->with('success', 'Membership reactivated.');
+    }
+
+    /**
+     * Request edits from applicant
+     */
+    public function requestEdits(Request $request, User $user)
+    {
+        $request->validate([
+            'reviewer_comments' => 'required|string|max:2000',
+        ]);
+
+        $user->update([
+            'editing_requested' => true,
+            'reviewer_comments' => $request->reviewer_comments,
+            'editing_requested_at' => now(),
+            'editing_requested_by' => auth()->id(),
+        ]);
+
+        return redirect()->route('admin.memberships.show', $user)
+            ->with('success', 'Edit request sent to applicant. They will be able to make changes to their application.');
+    }
+
+    /**
+     * Clear edit request (when applicant resubmits)
+     */
+    public function clearEditRequest(User $user)
+    {
+        $user->update([
+            'editing_requested' => false,
+            'reviewer_comments' => null,
+            'editing_requested_at' => null,
+            'editing_requested_by' => null,
+        ]);
+
+        return redirect()->route('admin.memberships.show', $user)
+            ->with('success', 'Edit request cleared.');
     }
 }

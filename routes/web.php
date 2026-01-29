@@ -215,6 +215,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('memberships/{user}/reject', [\App\Http\Controllers\Admin\MembershipController::class, 'reject'])->name('memberships.reject');
     Route::post('memberships/{user}/suspend', [\App\Http\Controllers\Admin\MembershipController::class, 'suspend'])->name('memberships.suspend');
     Route::post('memberships/{user}/reactivate', [\App\Http\Controllers\Admin\MembershipController::class, 'reactivate'])->name('memberships.reactivate');
+    Route::post('memberships/{user}/request-edits', [\App\Http\Controllers\Admin\MembershipController::class, 'requestEdits'])->name('memberships.request-edits');
+    Route::post('memberships/{user}/clear-edit-request', [\App\Http\Controllers\Admin\MembershipController::class, 'clearEditRequest'])->name('memberships.clear-edit-request');
     Route::get('users/permissions', [UserController::class, 'permissions'])->name('users.permissions');
     Route::get('users/login-history', [UserController::class, 'loginHistory'])->name('users.login-history');
     Route::get('users/activity-logs', [UserController::class, 'activityLogs'])->name('users.activity-logs');

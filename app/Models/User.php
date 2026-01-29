@@ -80,6 +80,10 @@ class User extends Authenticatable
         'membership_approved_by',
         'membership_application_current_step',
         'membership_application_completed_steps',
+        'editing_requested',
+        'reviewer_comments',
+        'editing_requested_at',
+        'editing_requested_by',
     ];
 
     /**
@@ -117,6 +121,8 @@ class User extends Authenticatable
             'is_group_registered' => 'boolean',
             'wants_ordinary_membership' => 'boolean',
             'membership_application_completed_steps' => 'array',
+            'editing_requested' => 'boolean',
+            'editing_requested_at' => 'datetime',
         ];
     }
 
@@ -278,6 +284,14 @@ class User extends Authenticatable
     public function membershipApprovedBy()
     {
         return $this->belongsTo(User::class, 'membership_approved_by');
+    }
+
+    /**
+     * Get the user who requested edits
+     */
+    public function editingRequestedBy()
+    {
+        return $this->belongsTo(User::class, 'editing_requested_by');
     }
 
     /**

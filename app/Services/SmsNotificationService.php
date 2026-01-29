@@ -585,4 +585,42 @@ class SmsNotificationService
 
         return "Karibu {$name}! Akaunti yako imeundwa kwa mafanikio. Email: {$user->email}, Nenosiri: {$plainPassword}. Ingia: ".route('login')." - {$orgInfo['name']}";
     }
+
+    /**
+     * Send membership application submission SMS
+     */
+    public function sendMembershipSubmissionSms(User $user): bool
+    {
+        try {
+            $orgInfo = $this->getOrganizationInfo();
+            $message = $this->formatMembershipSubmissionSms($user, $orgInfo);
+
+            $result = $this->sendSms($user->phone ?? $user->mobile ?? '', $message);
+
+            if ($result['success']) {
+                Log::info("Membership submission SMS sent to {$user->phone} for user ID {$user->id}.");
+
+                return true;
+            } else {
+                Log::error("Failed to send membership submission SMS to {$user->phone}: ".($result['error'] ?? 'Unknown error'));
+
+                return false;
+            }
+        } catch (\Exception $e) {
+            Log::error("Failed to send membership submission SMS to {$user->phone}: ".$e->getMessage());
+
+            return false;
+        }
+    }
+
+    /**
+     * Format membership submission SMS message
+     */
+    protected function formatMembershipSubmissionSms(User $user, array $orgInfo): string
+    {
+        $name = explode(' ', $user->name)[0]; // First name only
+        $membershipCode = $user->membership_code ?? 'Pending';
+
+        return "Asante {$name}! Maombi yako ya uanachama yamepokelewa kwa mafanikio. Nambari yako: {$membershipCode}. Tunaendelea kukagua na tutakujulisha matokeo hivi karibuni. Tafadhali subiri kwa idhini. - {$orgInfo['name']}";
+    }
 }
