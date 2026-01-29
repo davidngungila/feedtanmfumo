@@ -294,9 +294,7 @@ class SmsNotificationService
                         // Log SMS activity
                         try {
                             $userId = Auth::id();
-                            $user = User::where('phone', $phoneNumber)
-                                ->orWhere('mobile', $phoneNumber)
-                                ->first();
+                            $user = User::where('phone', $phoneNumber)->first();
 
                             // You can add activity logging here if you have ActivityLogService
                             // ActivityLogService::logSMSSent($phoneNumber, $message, $userId, $user?->id, [
@@ -487,7 +485,7 @@ class SmsNotificationService
             $orgInfo = $this->getOrganizationInfo();
             $message = $this->formatLoanApprovalSms($user, $loanDetails, $orgInfo);
 
-            $result = $this->sendSms($user->phone ?? $user->mobile ?? '', $message);
+            $result = $this->sendSms($user->phone ?? $user->alternate_phone ?? '', $message);
 
             if ($result['success']) {
                 Log::info("Loan approval SMS sent to {$user->email} for user ID {$user->id}.");
@@ -533,7 +531,7 @@ class SmsNotificationService
             }
             $message .= ". Tafadhali fika ofisi au tumia M-Pesa. - {$orgInfo['name']}";
 
-            $result = $this->sendSms($user->phone ?? $user->mobile ?? '', $message);
+            $result = $this->sendSms($user->phone ?? $user->alternate_phone ?? '', $message);
 
             if ($result['success']) {
                 Log::info("Payment reminder SMS sent to {$user->email}");
@@ -558,7 +556,7 @@ class SmsNotificationService
             $orgInfo = $this->getOrganizationInfo();
             $message = $this->formatWelcomeSms($user, $plainPassword, $orgInfo);
 
-            $result = $this->sendSms($user->phone ?? $user->mobile ?? '', $message);
+            $result = $this->sendSms($user->phone ?? $user->alternate_phone ?? '', $message);
 
             if ($result['success']) {
                 Log::info("Welcome SMS sent to {$user->phone} for user ID {$user->id}.");
@@ -595,7 +593,7 @@ class SmsNotificationService
             $orgInfo = $this->getOrganizationInfo();
             $message = $this->formatMembershipSubmissionSms($user, $orgInfo);
 
-            $result = $this->sendSms($user->phone ?? $user->mobile ?? '', $message);
+            $result = $this->sendSms($user->phone ?? $user->alternate_phone ?? '', $message);
 
             if ($result['success']) {
                 Log::info("Membership submission SMS sent to {$user->phone} for user ID {$user->id}.");

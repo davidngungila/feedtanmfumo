@@ -178,9 +178,7 @@ class SmsSendController extends Controller
                 }
 
                 if (! $user && $phone) {
-                    $user = User::where('phone', $phone)
-                        ->orWhere('mobile', $phone)
-                        ->first();
+                    $user = User::where('phone', $phone)->first();
                 }
 
                 // If user not found but we have name, create a temporary user object
