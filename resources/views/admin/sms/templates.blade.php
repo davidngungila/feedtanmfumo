@@ -170,7 +170,7 @@
                               required
                               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#015425] focus:ring-[#015425]"></textarea>
                     <p class="mt-1 text-xs text-gray-500">
-                        Available variables: {{name}}, {{full_name}}, {{organization_name}}, {{amount}}, {{member_id}}
+                        Available variables: @{{name}}, @{{full_name}}, @{{organization_name}}, @{{amount}}, @{{member_id}}
                     </p>
                 </div>
 

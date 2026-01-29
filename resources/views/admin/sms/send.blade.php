@@ -163,7 +163,7 @@
                         <li>If a template is selected, the system will match it with the Saving Behavior column</li>
                         <li>If no template matches, the custom message will be used (if provided)</li>
                         <li>The system will try to find users by Member ID or Phone Number</li>
-                        <li>Template variables like {{name}}, {{organization_name}} will be automatically replaced</li>
+                        <li>Template variables like @{{name}}, @{{organization_name}} will be automatically replaced</li>
                     </ul>
                 </div>
             </div>
