@@ -9,9 +9,8 @@ use App\Services\SmsNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class SmsSendController extends Controller
 {
@@ -31,7 +30,7 @@ class SmsSendController extends Controller
 
     public function downloadSample()
     {
-        $spreadsheet = new Spreadsheet;
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet;
         $sheet = $spreadsheet->getActiveSheet();
 
         // Set headers
@@ -48,11 +47,11 @@ class SmsSendController extends Controller
                 'color' => ['rgb' => 'FFFFFF'],
             ],
             'fill' => [
-                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'fillType' => Fill::FILL_SOLID,
                 'startColor' => ['rgb' => '015425'],
             ],
             'alignment' => [
-                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
             ],
         ];
         $sheet->getStyle('A1:E1')->applyFromArray($headerStyle);
@@ -81,10 +80,10 @@ class SmsSendController extends Controller
         }
 
         // Create writer
-        $writer = new Xlsx($spreadsheet);
+        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
 
         // Create response
-        $response = new StreamedResponse(function () use ($writer) {
+        $response = new \Symfony\Component\HttpFoundation\StreamedResponse(function () use ($writer) {
             $writer->save('php://output');
         });
 
