@@ -299,7 +299,7 @@ class SmsNotificationService
                             $messageId = $responseData['messages'][0]['messageId'] ?? null;
                             $reference = $responseData['messages'][0]['reference'] ?? null;
 
-                            $this->logSms(array_merge([
+                            $logData = [
                                 'message_id' => $messageId,
                                 'reference' => $reference,
                                 'from' => $this->smsFrom,
@@ -319,7 +319,16 @@ class SmsNotificationService
                                 'user_id' => $user?->id,
                                 'sent_by' => $userId,
                                 'success' => true,
-                            ], $options));
+                            ];
+
+                            // Merge options but don't override message
+                            if (! empty($options)) {
+                                $logData = array_merge($logData, $options);
+                                // Ensure message is not overridden
+                                $logData['message'] = $message;
+                            }
+
+                            $this->logSms($logData);
                         } catch (\Exception $e) {
                             Log::warning('Failed to log SMS to database', ['error' => $e->getMessage()]);
                         }
