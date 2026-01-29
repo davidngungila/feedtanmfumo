@@ -507,9 +507,9 @@
                     >
                     <label for="terms" class="text-gray-600 cursor-pointer">
                         I agree to the 
-                        <a href="#" class="text-[#015425] hover:underline">Terms of Service</a> 
+                        <a href="{{ route('terms') }}" target="_blank" class="text-[#015425] hover:underline">Terms of Service</a> 
                         and 
-                        <a href="#" class="text-[#015425] hover:underline">Privacy Policy</a>
+                        <a href="{{ route('privacy') }}" target="_blank" class="text-[#015425] hover:underline">Privacy Policy</a>
                     </label>
                 </div>
 
