@@ -25,7 +25,7 @@
                 <div class="flex items-center h-16 gap-4">
                     <div class="flex items-center flex-shrink-0">
                         <!-- Mobile Menu Button -->
-                        <button type="button" id="mobile-menu-button" class="md:hidden mr-3 p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-md transition focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#015425]">
+                        <button type="button" id="mobile-menu-button" class="md:hidden mr-3 p-2 text-white hover:bg-white hover:bg-opacity-20 hover:text-[#015425] rounded-md transition focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#015425]">
                             <svg id="mobile-menu-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                             </svg>
@@ -58,8 +58,8 @@
                             </button>
                             @if($isApproved)
                             <div class="nav-dropdown-menu hidden absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
-                                <a href="{{ route('member.loans.index') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-gray-100 transition">All Loans</a>
-                                <a href="{{ route('member.loans.create') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-gray-100 transition">Apply for Loan</a>
+                                <a href="{{ route('member.loans.index') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-green-50 hover:text-[#015425] transition">All Loans</a>
+                                <a href="{{ route('member.loans.create') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-green-50 hover:text-[#015425] transition">Apply for Loan</a>
                             </div>
                             @endif
                         </div>
@@ -74,8 +74,8 @@
                             </button>
                             @if($isApproved)
                             <div class="nav-dropdown-menu hidden absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
-                                <a href="{{ route('member.savings.index') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-gray-100 transition">All Accounts</a>
-                                <a href="{{ route('member.savings.create') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-gray-100 transition">Open Account</a>
+                                <a href="{{ route('member.savings.index') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-green-50 hover:text-[#015425] transition">All Accounts</a>
+                                <a href="{{ route('member.savings.create') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-green-50 hover:text-[#015425] transition">Open Account</a>
                             </div>
                             @endif
                         </div>
@@ -90,8 +90,8 @@
                             </button>
                             @if($isApproved)
                             <div class="nav-dropdown-menu hidden absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
-                                <a href="{{ route('member.investments.index') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-gray-100 transition">All Investments</a>
-                                <a href="{{ route('member.investments.create') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-gray-100 transition">Start Investment</a>
+                                <a href="{{ route('member.investments.index') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-green-50 hover:text-[#015425] transition">All Investments</a>
+                                <a href="{{ route('member.investments.create') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-green-50 hover:text-[#015425] transition">Start Investment</a>
                             </div>
                             @endif
                         </div>
@@ -110,8 +110,8 @@
                             </button>
                             @if($isApproved)
                             <div class="nav-dropdown-menu hidden absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
-                                <a href="{{ route('member.issues.index') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-gray-100 transition">All Issues</a>
-                                <a href="{{ route('member.issues.create') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-gray-100 transition">Report Issue</a>
+                                <a href="{{ route('member.issues.index') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-green-50 hover:text-[#015425] transition">All Issues</a>
+                                <a href="{{ route('member.issues.create') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-green-50 hover:text-[#015425] transition">Report Issue</a>
                             </div>
                             @endif
                         </div>
@@ -120,7 +120,7 @@
                     <div class="flex items-center space-x-3 sm:space-x-4 flex-shrink-0 ml-auto">
                         <!-- Notifications with Hover -->
                         <div class="relative notification-container">
-                            <button id="notification-button" class="relative p-2 text-white hover:bg-white hover:bg-opacity-20 rounded-full transition focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#015425]">
+                            <button id="notification-button" class="relative p-2 text-white hover:bg-white hover:bg-opacity-20 hover:text-[#015425] rounded-full transition focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#015425]">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                                 </svg>
@@ -142,15 +142,15 @@
                         
                         <!-- User Profile Dropdown with Hover -->
                         <div class="relative user-profile-container">
-                            <button id="user-menu-button" class="flex items-center space-x-2 sm:space-x-3 p-1 rounded-full hover:bg-white hover:bg-opacity-20 transition focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#015425]">
-                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 flex items-center justify-center text-[#015425] font-semibold text-xs sm:text-sm">
+                            <button id="user-menu-button" class="flex items-center space-x-2 sm:space-x-3 p-1 rounded-full hover:bg-white hover:bg-opacity-20 transition focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#015425] group">
+                                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 flex items-center justify-center text-[#015425] font-semibold text-xs sm:text-sm group-hover:bg-white group-hover:border-[#015425] transition">
                                     {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
                                 </div>
                                 <div class="hidden md:block text-left">
-                                    <p class="text-sm font-medium text-white">{{ Auth::user()->name }}</p>
-                                    <p class="text-xs text-white text-opacity-80">{{ Auth::user()->email }}</p>
+                                    <p class="text-sm font-medium text-white group-hover:text-[#015425] transition">{{ Auth::user()->name }}</p>
+                                    <p class="text-xs text-white text-opacity-80 group-hover:text-[#015425] group-hover:text-opacity-80 transition">{{ Auth::user()->email }}</p>
                                 </div>
-                                <svg class="w-4 h-4 text-white hidden md:block user-menu-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 text-white hidden md:block user-menu-arrow transition-transform group-hover:text-[#015425]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>
@@ -165,14 +165,14 @@
                                     @endif
                                 </div>
                                 <div class="py-1">
-                                    <a href="{{ route('member.profile.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition">
-                                        <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <a href="{{ route('member.profile.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition group">
+                                        <svg class="w-4 h-4 mr-3 text-gray-400 group-hover:text-[#015425] transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                         </svg>
                                         My Profile
                                     </a>
-                                    <a href="{{ route('member.profile.settings') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition">
-                                        <svg class="w-4 h-4 mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <a href="{{ route('member.profile.settings') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition group">
+                                        <svg class="w-4 h-4 mr-3 text-gray-400 group-hover:text-[#015425] transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                         </svg>
@@ -208,7 +208,7 @@
                         </div>
                         <span class="text-lg font-bold text-white">FeedTan</span>
                     </div>
-                    <button id="close-sidebar" class="text-white hover:bg-white hover:bg-opacity-20 p-2 rounded-md">
+                    <button id="close-sidebar" class="text-white hover:bg-white hover:bg-opacity-20 hover:text-[#015425] p-2 rounded-md transition">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
@@ -221,7 +221,7 @@
                         $isApproved = Auth::user()->membership_status === 'approved';
                     @endphp
                     
-                    <a href="{{ route('member.dashboard') }}" class="flex items-center px-3 py-2 mb-2 rounded-md {{ request()->routeIs('member.dashboard') ? 'bg-white text-[#015425] font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <a href="{{ route('member.dashboard') }}" class="flex items-center px-3 py-2 mb-2 rounded-md {{ request()->routeIs('member.dashboard') ? 'bg-white text-[#015425] font-semibold' : 'text-gray-700 hover:bg-green-50 hover:text-[#015425]' }} transition">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                         </svg>
@@ -230,7 +230,7 @@
                     
                     <!-- Loans Mobile -->
                     <div class="mobile-dropdown {{ !$isApproved ? 'opacity-50' : '' }} mb-2">
-                        <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="mobile-dropdown-toggle w-full flex items-center justify-between px-3 py-2 rounded-md {{ !$isApproved ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100' }} {{ request()->routeIs('member.loans.*') ? 'bg-gray-100 text-[#015425] font-semibold' : '' }}">
+                        <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="mobile-dropdown-toggle w-full flex items-center justify-between px-3 py-2 rounded-md {{ !$isApproved ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-green-50 hover:text-[#015425]' }} {{ request()->routeIs('member.loans.*') ? 'bg-white text-[#015425] font-semibold' : '' }} transition">
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -245,15 +245,15 @@
                         </button>
                         @if($isApproved)
                         <div class="mobile-dropdown-menu hidden pl-4 mt-1 space-y-1">
-                            <a href="{{ route('member.loans.index') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-100">All Loans</a>
-                            <a href="{{ route('member.loans.create') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-100">Apply for Loan</a>
+                            <a href="{{ route('member.loans.index') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition">All Loans</a>
+                            <a href="{{ route('member.loans.create') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition">Apply for Loan</a>
                         </div>
                         @endif
                     </div>
                     
                     <!-- Savings Mobile -->
                     <div class="mobile-dropdown {{ !$isApproved ? 'opacity-50' : '' }} mb-2">
-                        <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="mobile-dropdown-toggle w-full flex items-center justify-between px-3 py-2 rounded-md {{ !$isApproved ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100' }} {{ request()->routeIs('member.savings.*') ? 'bg-gray-100 text-[#015425] font-semibold' : '' }}">
+                        <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="mobile-dropdown-toggle w-full flex items-center justify-between px-3 py-2 rounded-md {{ !$isApproved ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-green-50 hover:text-[#015425]' }} {{ request()->routeIs('member.savings.*') ? 'bg-white text-[#015425] font-semibold' : '' }} transition">
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
@@ -268,15 +268,15 @@
                         </button>
                         @if($isApproved)
                         <div class="mobile-dropdown-menu hidden pl-4 mt-1 space-y-1">
-                            <a href="{{ route('member.savings.index') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-100">All Accounts</a>
-                            <a href="{{ route('member.savings.create') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-100">Open Account</a>
+                            <a href="{{ route('member.savings.index') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition">All Accounts</a>
+                            <a href="{{ route('member.savings.create') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition">Open Account</a>
                         </div>
                         @endif
                     </div>
                     
                     <!-- Investments Mobile -->
                     <div class="mobile-dropdown {{ !$isApproved ? 'opacity-50' : '' }} mb-2">
-                        <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="mobile-dropdown-toggle w-full flex items-center justify-between px-3 py-2 rounded-md {{ !$isApproved ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100' }} {{ request()->routeIs('member.investments.*') ? 'bg-gray-100 text-[#015425] font-semibold' : '' }}">
+                        <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="mobile-dropdown-toggle w-full flex items-center justify-between px-3 py-2 rounded-md {{ !$isApproved ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-green-50 hover:text-[#015425]' }} {{ request()->routeIs('member.investments.*') ? 'bg-white text-[#015425] font-semibold' : '' }} transition">
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
@@ -291,13 +291,13 @@
                         </button>
                         @if($isApproved)
                         <div class="mobile-dropdown-menu hidden pl-4 mt-1 space-y-1">
-                            <a href="{{ route('member.investments.index') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-100">All Investments</a>
-                            <a href="{{ route('member.investments.create') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-100">Start Investment</a>
+                            <a href="{{ route('member.investments.index') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition">All Investments</a>
+                            <a href="{{ route('member.investments.create') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition">Start Investment</a>
                         </div>
                         @endif
                     </div>
                     
-                    <a href="{{ $isApproved ? route('member.welfare.index') : '#' }}" class="flex items-center px-3 py-2 mb-2 rounded-md {{ !$isApproved ? 'text-gray-400 cursor-not-allowed opacity-50' : 'text-gray-700 hover:bg-gray-100' }} {{ request()->routeIs('member.welfare.*') ? 'bg-gray-100 text-[#015425] font-semibold' : '' }}">
+                    <a href="{{ $isApproved ? route('member.welfare.index') : '#' }}" class="flex items-center px-3 py-2 mb-2 rounded-md {{ !$isApproved ? 'text-gray-400 cursor-not-allowed opacity-50' : 'text-gray-700 hover:bg-green-50 hover:text-[#015425]' }} {{ request()->routeIs('member.welfare.*') ? 'bg-white text-[#015425] font-semibold' : '' }} transition">
                         <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                         </svg>
@@ -306,7 +306,7 @@
                     
                     <!-- Issues Mobile -->
                     <div class="mobile-dropdown {{ !$isApproved ? 'opacity-50' : '' }} mb-2">
-                        <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="mobile-dropdown-toggle w-full flex items-center justify-between px-3 py-2 rounded-md {{ !$isApproved ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100' }} {{ request()->routeIs('member.issues.*') ? 'bg-gray-100 text-[#015425] font-semibold' : '' }}">
+                        <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="mobile-dropdown-toggle w-full flex items-center justify-between px-3 py-2 rounded-md {{ !$isApproved ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-green-50 hover:text-[#015425]' }} {{ request()->routeIs('member.issues.*') ? 'bg-white text-[#015425] font-semibold' : '' }} transition">
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
@@ -321,8 +321,8 @@
                         </button>
                         @if($isApproved)
                         <div class="mobile-dropdown-menu hidden pl-4 mt-1 space-y-1">
-                            <a href="{{ route('member.issues.index') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-100">All Issues</a>
-                            <a href="{{ route('member.issues.create') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-100">Report Issue</a>
+                            <a href="{{ route('member.issues.index') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition">All Issues</a>
+                            <a href="{{ route('member.issues.create') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition">Report Issue</a>
                         </div>
                         @endif
                     </div>

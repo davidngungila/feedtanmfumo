@@ -155,6 +155,7 @@
     </div>
     @endif
 
+    @if($user->membership_status === 'approved')
     <!-- Detailed Statistics Overview -->
     <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
         <h2 class="text-lg sm:text-xl font-bold text-[#015425] mb-4">Financial Overview</h2>
@@ -381,7 +382,9 @@
             </div>
         </div>
     </div>
+    @endif
 
+    @if($user->membership_status === 'approved')
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <!-- Recent Loans -->
         <div class="lg:col-span-2 space-y-4 sm:space-y-6">
@@ -442,7 +445,10 @@
                 </div>
             </div>
         </div>
+    </div>
+    @endif
 
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <!-- Sidebar -->
         <div class="space-y-4 sm:space-y-6">
             <!-- Quick Actions -->
