@@ -12,10 +12,10 @@
                 <p class="text-white text-opacity-90 text-sm sm:text-base">Manage SMS configuration settings</p>
             </div>
             <div class="mt-4 md:mt-0 flex gap-3">
-                <a href="{{ route('admin.sms.send') }}" class="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 text-white rounded-md hover:bg-opacity-30 transition font-medium">
+                <a href="{{ route('admin.sms.send') }}" class="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 text-[#015425] rounded-md hover:bg-opacity-30 transition font-medium">
                     Send SMS
                 </a>
-                <a href="{{ route('admin.sms.templates') }}" class="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 text-white rounded-md hover:bg-opacity-30 transition font-medium">
+                <a href="{{ route('admin.sms.templates') }}" class="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 text-[#015425] rounded-md hover:bg-opacity-30 transition font-medium">
                     Templates
                 </a>
                 <a href="{{ route('admin.settings.communication') }}" class="inline-flex items-center px-6 py-3 bg-white text-[#015425] rounded-md hover:bg-gray-100 transition font-medium shadow-md">
