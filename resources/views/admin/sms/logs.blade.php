@@ -85,12 +85,22 @@
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
                 <h3 class="text-lg font-semibold text-gray-800">Filters</h3>
-                <form action="{{ route('admin.sms.logs.sync') }}" method="POST" class="inline">
-                    @csrf
-                    <button type="submit" class="px-4 py-2 bg-[#015425] text-white rounded-md hover:bg-[#027a3a] transition font-medium text-sm">
-                        Sync from API
-                    </button>
-                </form>
+                <div class="flex gap-2">
+                    <a href="{{ route('admin.sms.logs.export.pdf', request()->query()) }}" 
+                       class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition font-medium text-sm">
+                        Export PDF
+                    </a>
+                    <a href="{{ route('admin.sms.logs.export.excel', request()->query()) }}" 
+                       class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition font-medium text-sm">
+                        Export Excel
+                    </a>
+                    <form action="{{ route('admin.sms.logs.sync') }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="px-4 py-2 bg-[#015425] text-white rounded-md hover:bg-[#027a3a] transition font-medium text-sm">
+                            Sync from API
+                        </button>
+                    </form>
+                </div>
             </div>
 
             <form method="GET" action="{{ route('admin.sms.logs') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
