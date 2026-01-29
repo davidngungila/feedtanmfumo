@@ -9,6 +9,9 @@ use App\Services\SmsNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SmsSendController extends Controller
 {
@@ -24,6 +27,72 @@ class SmsSendController extends Controller
         $templates = SmsMessageTemplate::orderBy('priority')->get();
 
         return view('admin.sms.send', compact('templates'));
+    }
+
+    public function downloadSample()
+    {
+        $spreadsheet = new Spreadsheet;
+        $sheet = $spreadsheet->getActiveSheet();
+
+        // Set headers
+        $sheet->setCellValue('A1', 'Member ID');
+        $sheet->setCellValue('B1', 'Full Name');
+        $sheet->setCellValue('C1', 'Phone Number');
+        $sheet->setCellValue('D1', 'Saving Behavior');
+        $sheet->setCellValue('E1', 'Status');
+
+        // Style header row
+        $headerStyle = [
+            'font' => [
+                'bold' => true,
+                'color' => ['rgb' => 'FFFFFF'],
+            ],
+            'fill' => [
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '015425'],
+            ],
+            'alignment' => [
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER,
+            ],
+        ];
+        $sheet->getStyle('A1:E1')->applyFromArray($headerStyle);
+
+        // Add sample data rows
+        $sampleData = [
+            ['M001', 'John Doe', '255712345678', 'Regular Saver', 'Active'],
+            ['M002', 'Jane Smith', '255723456789', 'Inconsistent Saver', 'Active'],
+            ['M003', 'Peter Johnson', '255734567890', 'Sporadic Saver', 'Active'],
+            ['M004', 'Mary Williams', '255745678901', 'Non-Saver', 'Pending'],
+        ];
+
+        $row = 2;
+        foreach ($sampleData as $data) {
+            $sheet->setCellValue('A'.$row, $data[0]);
+            $sheet->setCellValue('B'.$row, $data[1]);
+            $sheet->setCellValue('C'.$row, $data[2]);
+            $sheet->setCellValue('D'.$row, $data[3]);
+            $sheet->setCellValue('E'.$row, $data[4]);
+            $row++;
+        }
+
+        // Auto-size columns
+        foreach (range('A', 'E') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        // Create writer
+        $writer = new Xlsx($spreadsheet);
+
+        // Create response
+        $response = new StreamedResponse(function () use ($writer) {
+            $writer->save('php://output');
+        });
+
+        $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->headers->set('Content-Disposition', 'attachment;filename="sms_bulk_upload_sample.xlsx"');
+        $response->headers->set('Cache-Control', 'max-age=0');
+
+        return $response;
     }
 
     public function uploadAndSend(Request $request)
