@@ -136,16 +136,20 @@ class SmsLogsController extends Controller
                 $existing = SmsLog::where('message_id', $logData['message_id'])->first();
 
                 if ($existing) {
-                    // Only update message if it's missing and we have it from API
-                    if (empty($existing->message) && ! empty($logData['message'])) {
-                        $existing->update($logData);
-                    } else {
-                        // Update other fields but preserve existing message
-                        unset($logData['message']);
-                        $existing->update($logData);
+                    // Always preserve existing message - API doesn't return message content
+                    $existingMessage = $existing->message;
+                    // Update other fields but preserve existing message
+                    unset($logData['message']);
+                    $existing->update($logData);
+                    // Restore message if it existed
+                    if ($existingMessage) {
+                        $existing->message = $existingMessage;
+                        $existing->save();
                     }
                     $updated++;
                 } else {
+                    // For new logs from API, message will be null (API doesn't provide it)
+                    // But we'll create it anyway so it can be updated later when sending through our system
                     SmsLog::create($logData);
                     $synced++;
                 }

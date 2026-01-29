@@ -190,9 +190,15 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500">
+                                @if($log->message)
                                 <div class="max-w-xs truncate" title="{{ $log->message }}">
                                     {{ Str::limit($log->message, 50) }}
                                 </div>
+                                @else
+                                <div class="max-w-xs truncate">
+                                    <span class="text-gray-400 italic">No message available</span>
+                                </div>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {{ $log->channel ?? 'Internet SMS' }}

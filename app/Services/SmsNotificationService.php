@@ -474,6 +474,21 @@ class SmsNotificationService
     protected function logSms(array $data): void
     {
         try {
+            // If message_id exists, try to update existing log instead of creating new one
+            if (! empty($data['message_id'])) {
+                $existing = SmsLog::where('message_id', $data['message_id'])->first();
+                if ($existing) {
+                    // Update existing log, preserving message if it exists and new one is empty
+                    if (empty($data['message']) && ! empty($existing->message)) {
+                        unset($data['message']);
+                    }
+                    $existing->update($data);
+
+                    return;
+                }
+            }
+
+            // Create new log
             SmsLog::create($data);
         } catch (\Exception $e) {
             Log::error('Failed to create SMS log', [

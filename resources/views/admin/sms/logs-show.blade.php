@@ -73,7 +73,11 @@
             <div class="mt-4">
                 <p class="text-sm text-gray-500 mb-1">Message Content</p>
                 <div class="bg-gray-50 rounded-md p-4 border border-gray-200">
-                    <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ $smsLog->message ?? 'N/A' }}</p>
+                    @if($smsLog->message)
+                    <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ $smsLog->message }}</p>
+                    @else
+                    <p class="text-sm text-gray-400 italic">No message content available. This log was likely synced from the API, which doesn't include message content.</p>
+                    @endif
                 </div>
             </div>
         </div>
