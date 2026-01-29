@@ -2,315 +2,366 @@
 
 @push('styles')
 <style>
+    /* ===== CSS Variables ===== */
+    :root {
+        --primary-color: #015425;
+        --primary-dark: #013019;
+        --primary-light: #027a3a;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-600: #4b5563;
+        --gray-800: #1f2937;
+    }
+
+    /* ===== Container & Layout ===== */
     .login-container {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        background: linear-gradient(135deg, #013019 0%, #015425 25%, #027a3a 50%, #015425 75%, #013019 100%);
+        background-size: 400% 400%;
+        animation: gradientShift 15s ease infinite;
         position: relative;
         overflow: hidden;
+        min-height: 100vh;
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
-    
-    .login-container::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(1, 84, 37, 0.1) 0%, transparent 70%);
-        animation: pulse 15s ease-in-out infinite;
+
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
     }
-    
-    @keyframes pulse {
-        0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.5; }
-        50% { transform: scale(1.1) rotate(180deg); opacity: 0.8; }
+
+    .login-wrapper {
+        max-width: 450px;
+        width: 100%;
+        margin: 0 auto;
     }
-    
+
+    /* ===== Cards ===== */
     .login-card {
-        backdrop-filter: blur(10px);
+        backdrop-filter: blur(20px) saturate(180%);
         background: rgba(255, 255, 255, 0.95);
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.5);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .login-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 25px 70px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.5);
-    }
-    
-    .input-group {
-        position: relative;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        border-radius: 1rem;
+        padding: 1.5rem;
         transition: all 0.3s ease;
     }
-    
-    .input-group:focus-within .input-label,
-    .input-group input:not(:placeholder-shown) + .input-label,
-    .input-group input.has-value + .input-label,
-    .input-group input[value]:not([value=""]) + .input-label {
-        transform: translateY(-28px) scale(0.85);
-        color: #015425;
-        background: white;
-        padding: 0 4px;
-        left: 8px;
+
+    .login-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
     }
-    
+
+    /* ===== Form Inputs ===== */
+    .input-group {
+        position: relative;
+        margin-bottom: 0.75rem;
+    }
+
+    .input-field {
+        width: 100%;
+        padding: 0.875rem 2.75rem 0.875rem 0.75rem;
+        font-size: 14px;
+        background: white;
+        border: 2px solid var(--gray-200);
+        border-radius: 0.75rem;
+        transition: all 0.3s ease;
+    }
+
+    .input-field:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(1, 84, 37, 0.1);
+    }
+
     .input-label {
         position: absolute;
-        left: 16px;
+        left: 0.75rem;
         top: 50%;
         transform: translateY(-50%);
         pointer-events: none;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        color: #6b7280;
-        font-size: 14px;
+        color: var(--gray-600);
+        font-size: 13px;
         z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
     }
-    
-    .input-field {
-        transition: all 0.3s ease;
+
+    .input-group:focus-within .input-label,
+    .input-group input:not(:placeholder-shown) + .input-label,
+    .input-group input.has-value + .input-label {
+        transform: translateY(-24px) scale(0.85);
+        color: var(--primary-color);
         background: white;
-        padding-top: 1rem;
-        padding-bottom: 1rem;
+        padding: 0 4px;
+        left: 8px;
+        font-weight: 600;
     }
-    
-    .input-field:focus {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(1, 84, 37, 0.15);
+
+    .input-field.pr-10 {
+        padding-right: 2.75rem;
     }
-    
-    .input-field:focus + .input-label {
-        color: #015425;
-    }
-    
-    .input-group:has(.input-field:invalid:not(:placeholder-shown)) .input-label {
-        color: #dc2626;
-    }
-    
+
+    /* ===== Password Toggle ===== */
     .password-toggle {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: var(--gray-600);
+        cursor: pointer;
+        padding: 0.25rem;
         transition: all 0.2s ease;
     }
-    
+
     .password-toggle:hover {
-        transform: scale(1.1);
+        color: var(--primary-color);
+        transform: translateY(-50%) scale(1.1);
     }
-    
+
+    /* ===== Buttons ===== */
     .btn-submit {
-        position: relative;
-        overflow: hidden;
+        width: 100%;
+        padding: 0.75rem 1.5rem;
+        font-size: 14px;
+        font-weight: 600;
+        color: white;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        border: none;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 15px rgba(1, 84, 37, 0.3);
+        cursor: pointer;
         transition: all 0.3s ease;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
     }
-    
-    .btn-submit::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 0;
-        height: 0;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.3);
-        transform: translate(-50%, -50%);
-        transition: width 0.6s, height 0.6s;
+
+    .btn-submit:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(1, 84, 37, 0.4);
     }
-    
-    .btn-submit:hover::before {
-        width: 300px;
-        height: 300px;
-    }
-    
+
     .btn-submit:disabled {
         opacity: 0.7;
         cursor: not-allowed;
     }
-    
+
     .spinner {
         border: 2px solid rgba(255, 255, 255, 0.3);
         border-top: 2px solid white;
         border-radius: 50%;
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
         animation: spin 0.8s linear infinite;
     }
-    
+
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
-    
-    .error-shake {
-        animation: shake 0.5s ease-in-out;
+
+    /* ===== Typography ===== */
+    .text-gradient {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
-    
-    @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-10px); }
-        75% { transform: translateX(10px); }
+
+    /* ===== Responsive Design ===== */
+    @media (max-width: 640px) {
+        .login-container {
+            padding: 1rem;
+        }
+
+        .login-card {
+            padding: 1.25rem;
+        }
     }
-    
-    .fade-in {
-        animation: fadeIn 0.5s ease-in;
+
+    @media (max-width: 640px) {
+        .login-container {
+            padding: 1rem;
+        }
+
+        .login-card,
+        .info-card {
+            padding: 1.25rem;
+        }
+
+        .login-wrapper {
+            gap: 1rem;
+        }
     }
-    
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+
+    /* ===== Error States ===== */
+    .input-field.border-red-400 {
+        border-color: #f87171;
+    }
+
+    .error-message {
+        font-size: 12px;
+        color: #dc2626;
+        margin-top: 0.25rem;
+    }
+
+    /* ===== Notifications ===== */
+    .notification {
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .notification svg {
+        flex-shrink: 0;
     }
 </style>
 @endpush
 
 @section('content')
-<div class="login-container min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full fade-in">
-        <!-- Login Card -->
-        <div class="login-card rounded-2xl p-8 sm:p-10">
-            <!-- Header Section -->
-            <div class="text-center mb-8">
-                <h1 class="text-3xl font-bold text-gradient-emaoni mb-2">
-                    Welcome Back
-                </h1>
-                <p class="text-sm text-gray-600">
-                    Sign in to your FEEDTAN DIGITAL account
-                </p>
+<div class="login-container">
+    <div class="login-wrapper">
+        <!-- Login Form -->
+        <div class="login-card">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <div class="flex items-center justify-center gap-2 mb-2">
+                    <svg class="w-8 h-8 text-[#015425]" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    </svg>
+                    <h1 class="text-2xl font-bold text-gradient">Welcome Back</h1>
+                </div>
+                <p class="text-xs text-gray-600">Sign in to FEEDTAN DIGITAL</p>
             </div>
 
+            <!-- Notifications -->
+            @if(session('success'))
+            <div class="notification bg-green-50 border border-green-200 text-green-800">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                <span>{{ session('success') }}</span>
+            </div>
+            @endif
+
+            @if(session('error'))
+            <div class="notification bg-red-50 border border-red-200 text-red-800">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                </svg>
+                <span>{{ session('error') }}</span>
+            </div>
+            @endif
+
             <!-- Login Form -->
-            <form id="loginForm" action="{{ route('login') }}" method="POST" class="space-y-5">
+            <form id="loginForm" action="{{ route('login') }}" method="POST" class="space-y-3">
                 @csrf
                 
                 <!-- Email Field -->
-                <div class="space-y-1">
-                    <div class="input-group">
-                        <input 
-                            id="email" 
-                            name="email" 
-                            type="email" 
-                            autocomplete="email" 
-                            required 
-                            placeholder=" "
-                            value="{{ old('email') }}"
-                            class="input-field appearance-none relative block w-full px-4 py-3.5 border-2 border-gray-200 rounded-xl placeholder-transparent focus:outline-none focus:border-[#015425] sm:text-sm transition-all @error('email') border-red-400 error-shake @enderror"
-                        >
-                        <label for="email" class="input-label">
-                            <span class="flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
-                                </svg>
-                                Email Address
-                            </span>
-                        </label>
-                    </div>
+                <div class="input-group">
+                    <input 
+                        id="email" 
+                        name="email" 
+                        type="email" 
+                        autocomplete="email" 
+                        required 
+                        placeholder=" "
+                        value="{{ old('email') }}"
+                        class="input-field @error('email') border-red-400 @enderror"
+                    >
+                    <label for="email" class="input-label">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path>
+                        </svg>
+                        Email Address
+                    </label>
                     @error('email')
-                        <div class="mt-1.5 flex items-start gap-1.5">
-                            <svg class="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                            </svg>
-                            <p class="text-sm text-red-600 leading-tight">{{ $message }}</p>
-                        </div>
+                        <p class="error-message">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <!-- Password Field -->
-                <div class="space-y-1">
-                    <div class="input-group">
-                        <input 
-                            id="password" 
-                            name="password" 
-                            type="password" 
-                            autocomplete="current-password" 
-                            required 
-                            placeholder=" "
-                            class="input-field appearance-none relative block w-full px-4 py-3.5 pr-12 border-2 border-gray-200 rounded-xl placeholder-transparent focus:outline-none focus:border-[#015425] sm:text-sm transition-all @error('password') border-red-400 error-shake @enderror"
-                        >
-                        <label for="password" class="input-label">
-                            <span class="flex items-center gap-2">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                                </svg>
-                                Password
-                            </span>
-                        </label>
-                        <button 
-                            type="button" 
-                            id="togglePassword" 
-                            class="password-toggle absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#015425] focus:outline-none p-1 rounded-md hover:bg-gray-100 transition-colors"
-                            aria-label="Toggle password visibility"
-                        >
-                            <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                            </svg>
-                            <svg id="eyeOffIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
-                            </svg>
-                        </button>
-                    </div>
+                <div class="input-group">
+                    <input 
+                        id="password" 
+                        name="password" 
+                        type="password" 
+                        autocomplete="current-password" 
+                        required 
+                        placeholder=" "
+                        class="input-field pr-10 @error('password') border-red-400 @enderror"
+                    >
+                    <label for="password" class="input-label">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                        Password
+                    </label>
+                    <button 
+                        type="button" 
+                        id="togglePassword" 
+                        class="password-toggle"
+                        aria-label="Toggle password visibility"
+                    >
+                        <svg id="eyeIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        <svg id="eyeOffIcon" class="w-4 h-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                        </svg>
+                    </button>
                     @error('password')
-                        <div class="mt-1.5 flex items-start gap-1.5">
-                            <svg class="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
-                            </svg>
-                            <p class="text-sm text-red-600 leading-tight">{{ $message }}</p>
-                        </div>
+                        <p class="error-message">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <!-- Remember Me & Forgot Password -->
-                <div class="flex items-center justify-between pt-1">
-                    <div class="flex items-center">
-                        <input 
-                            id="remember" 
-                            name="remember" 
-                            type="checkbox" 
-                            class="h-4 w-4 text-[#015425] focus:ring-[#015425] border-gray-300 rounded cursor-pointer transition"
-                        >
-                        <label for="remember" class="ml-2.5 block text-sm text-gray-700 cursor-pointer select-none">
-                            Remember me
-                        </label>
-                    </div>
-                    <a href="#" class="text-sm font-medium text-[#015425] hover:text-[#013019] transition-colors">
-                        Forgot password?
-                    </a>
+                <!-- Remember & Forgot -->
+                <div class="flex items-center justify-between text-xs">
+                    <label class="flex items-center gap-1.5 cursor-pointer">
+                        <input type="checkbox" name="remember" class="w-3.5 h-3.5 text-[#015425] border-gray-300 rounded">
+                        <span class="text-gray-600">Remember me</span>
+                    </label>
+                    <a href="#" class="text-[#015425] hover:underline">Forgot password?</a>
                 </div>
 
                 <!-- Submit Button -->
-                <div class="pt-2">
-                    <button 
-                        type="submit" 
-                        id="submitBtn"
-                        class="btn-submit group relative w-full flex justify-center items-center gap-2 py-3.5 px-4 border border-transparent text-base font-semibold rounded-xl text-white bg-gradient-to-r from-[#015425] to-[#027a3a] hover:from-[#013019] hover:to-[#015425] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#015425] shadow-lg hover:shadow-xl transition-all duration-300"
-                    >
-                        <span id="submitText">Sign In</span>
-                        <div id="submitSpinner" class="spinner hidden"></div>
-                    </button>
+                <button 
+                    type="submit" 
+                    id="submitBtn"
+                    class="btn-submit"
+                >
+                    <span id="submitText">Sign In</span>
+                    <div id="submitSpinner" class="spinner hidden"></div>
+                </button>
+
+                <!-- Register Link -->
+                <div class="text-center pt-2 border-t border-gray-200">
+                    <p class="text-xs text-gray-600 mb-1">New to FEEDTAN?</p>
+                    <a href="{{ route('register') }}" class="text-xs font-medium text-[#015425] hover:underline">
+                        Create an account →
+                    </a>
                 </div>
             </form>
 
-            <!-- Divider -->
-            <div class="relative my-8">
-                <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-t border-gray-200"></div>
-                </div>
-                <div class="relative flex justify-center text-sm">
-                    <span class="px-4 bg-white text-gray-500">New to FEEDTAN?</span>
-                </div>
-            </div>
-
-            <!-- Register Link -->
-            <div class="text-center">
-                <a 
-                    href="{{ route('register') }}" 
-                    class="inline-flex items-center gap-2 text-sm font-medium text-[#015425] hover:text-[#013019] transition-colors group"
-                >
-                    <span>Create an account</span>
-                    <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
+            <!-- Footer -->
+            <div class="text-center text-xs text-gray-500 pt-4 mt-4 border-t border-gray-200">
+                <p>© {{ date('Y') }} FEEDTAN DIGITAL. All rights reserved.</p>
             </div>
         </div>
-
-        <!-- Footer -->
-        <p class="mt-8 text-center text-xs text-gray-500">
-            © {{ date('Y') }} FEEDTAN DIGITAL. All rights reserved.
-        </p>
     </div>
 </div>
 
@@ -327,7 +378,6 @@
         const submitSpinner = document.getElementById('submitSpinner');
         const emailField = document.getElementById('email');
 
-        // Initialize label positions for pre-filled fields
         function initializeLabels() {
             [emailField, passwordInput].forEach(field => {
                 if (field.value && field.value.trim() !== '') {
@@ -336,26 +386,27 @@
             });
         }
 
-        // Password visibility toggle
         if (togglePassword) {
             togglePassword.addEventListener('click', function(e) {
                 e.preventDefault();
                 const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
                 passwordInput.setAttribute('type', type);
-                
                 eyeIcon.classList.toggle('hidden');
                 eyeOffIcon.classList.toggle('hidden');
+                passwordInput.focus();
             });
         }
 
-        // Form submission with loading state
         loginForm.addEventListener('submit', function(e) {
+            if (!emailField.value || !passwordInput.value) {
+                e.preventDefault();
+                return;
+            }
             submitBtn.disabled = true;
             submitText.classList.add('hidden');
             submitSpinner.classList.remove('hidden');
         });
 
-        // Handle input changes for label positioning
         [emailField, passwordInput].forEach(field => {
             field.addEventListener('input', function() {
                 if (this.value && this.value.trim() !== '') {
@@ -366,17 +417,21 @@
             });
         });
 
-        // Auto-focus first empty field
         if (!emailField.value || emailField.value.trim() === '') {
-            emailField.focus();
-        } else if (!passwordInput.value || passwordInput.value.trim() === '') {
-            passwordInput.focus();
+            setTimeout(() => emailField.focus(), 100);
         }
 
-        // Initialize on load
+        const notifications = document.querySelectorAll('.notification');
+        notifications.forEach(notification => {
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.3s';
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        });
+
         initializeLabels();
     });
 </script>
 @endpush
 @endsection
-
