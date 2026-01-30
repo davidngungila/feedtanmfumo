@@ -177,7 +177,7 @@
                 <div class="border-t pt-4 mt-4">
                     <h5 class="font-semibold text-gray-700 mb-2">Additional Custom Columns</h5>
                     <p class="text-xs text-gray-500 mb-3">
-                        Map additional columns that you want to use in your message template. Use {{column_name}} in your message to insert values.
+                        Map additional columns that you want to use in your message template. Use @{{column_name}} in your message to insert values.
                     </p>
                     <div id="custom-columns" class="space-y-2">
                         <!-- Custom columns will be added here -->
