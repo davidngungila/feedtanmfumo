@@ -16,8 +16,10 @@
         }
         .header {
             border-bottom: 3px solid #015425;
-            padding-bottom: 10px;
+            padding-bottom: 15px;
             margin-bottom: 15px;
+            text-align: center;
+            width: 100%;
         }
         .logo-box {
             display: inline-block;
@@ -29,15 +31,20 @@
             margin-bottom: 10px;
         }
         .header-info {
-            font-size: 8pt;
+            font-size: 10pt;
             color: #666;
-            margin-top: 5px;
+            margin-top: 8px;
         }
         .title {
-            font-size: 14pt;
+            font-size: 18pt;
             font-weight: bold;
             color: #015425;
             margin: 15px 0 10px 0;
+        }
+        .organization-name {
+            font-size: 16pt;
+            color: #015425;
+            margin-top: 10px;
         }
         .stats {
             display: table;
@@ -123,14 +130,14 @@
 </head>
 <body>
     <div class="header">
-        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+        <div style="text-align: center; margin-bottom: 15px;">
             @if(isset($logoBase64) && $logoBase64)
-            <img src="{{ $logoBase64 }}" alt="FeedTan Logo" style="max-height: 60px; max-width: 150px;">
+            <img src="{{ $logoBase64 }}" alt="FeedTan Logo" style="max-height: 80px; max-width: 200px; margin-bottom: 10px;">
             @else
-            <div class="logo-box">FD</div>
+            <div class="logo-box" style="margin: 0 auto 10px auto;">FD</div>
             @endif
-            <div style="flex: 1;">
-                <strong style="font-size: 12pt; color: #015425;">FeedTan Community Microfinance Group</strong><br>
+            <div>
+                <div class="organization-name" style="font-weight: bold; margin-bottom: 8px;">FeedTan Community Microfinance Group</div>
                 <div class="header-info">
                     P.O.Box 7744, Ushirika Sokoine Road, Moshi, Kilimanjaro, Tanzania<br>
                     Email: feedtan15@gmail.com | Phone: +255622239304
