@@ -4,45 +4,12 @@
     <meta charset="utf-8">
     <title>SMS Logs Report</title>
     <style>
-        @if(isset($fontRegular) && $fontRegular)
-        @font-face {
-            font-family: 'Quicksand';
-            font-style: normal;
-            font-weight: 400;
-            src: url('{{ $fontRegular }}') format('truetype');
-        }
-        @endif
-        @if(isset($fontMedium) && $fontMedium)
-        @font-face {
-            font-family: 'Quicksand';
-            font-style: normal;
-            font-weight: 500;
-            src: url('{{ $fontMedium }}') format('truetype');
-        }
-        @endif
-        @if(isset($fontSemiBold) && $fontSemiBold)
-        @font-face {
-            font-family: 'Quicksand';
-            font-style: normal;
-            font-weight: 600;
-            src: url('{{ $fontSemiBold }}') format('truetype');
-        }
-        @endif
-        @if(isset($fontBold) && $fontBold)
-        @font-face {
-            font-family: 'Quicksand';
-            font-style: normal;
-            font-weight: 700;
-            src: url('{{ $fontBold }}') format('truetype');
-        }
-        @endif
-        
         @page {
             margin: 10mm 12mm;
             size: A4;
         }
         body {
-            font-family: 'Quicksand', 'DejaVu Sans', Arial, Helvetica, sans-serif;
+            font-family: Arial, sans-serif;
             font-size: 9pt;
             line-height: 1.4;
             color: #333;

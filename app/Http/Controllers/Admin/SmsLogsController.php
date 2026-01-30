@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SmsLog;
 use App\Models\SmsProvider;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -253,15 +254,20 @@ class SmsLogsController extends Controller
             'failed' => $logs->where('success', false)->count(),
         ];
 
-        // Use PdfHelper for consistent header and fonts
-        $pdf = \App\Helpers\PdfHelper::generatePdf('admin.sms.logs-pdf', [
+        // Use PdfHelper for consistent header
+        $headerBase64 = \App\Helpers\PdfHelper::getHeaderImageBase64();
+
+        $pdf = Pdf::loadView('admin.sms.logs-pdf', [
             'logs' => $logs,
             'balance' => $balance,
             'stats' => $stats,
             'filters' => $request->only(['from', 'to', 'status', 'sent_since', 'sent_until', 'success']),
+            'headerBase64' => $headerBase64,
             'documentTitle' => 'SMS Communication Logs Report',
             'generatedAt' => now()->format('Y-m-d H:i:s'),
-        ]);
+        ])->setPaper('a4', 'portrait')
+            ->setOption('isHtml5ParserEnabled', true)
+            ->setOption('isRemoteEnabled', true);
 
         return $pdf->download('sms-logs-'.date('Y-m-d-His').'.pdf');
     }
