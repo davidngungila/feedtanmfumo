@@ -448,9 +448,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateAvailableVariables(headers) {
         availableVariablesList.innerHTML = '';
         const commonVars = [
-            { key: 'name', label: '{{name}} - Member name' },
-            { key: 'member_id', label: '{{member_id}} - Member ID' },
-            { key: 'phone', label: '{{phone}} - Phone number' },
+            { key: 'name', label: '@{{name}} - Member name' },
+            { key: 'member_id', label: '@{{member_id}} - Member ID' },
+            { key: 'phone', label: '@{{phone}} - Phone number' },
         ];
         
         commonVars.forEach(v => {
