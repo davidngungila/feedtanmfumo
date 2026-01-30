@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\FormulaController;
 use App\Http\Controllers\Admin\InvestmentController;
 use App\Http\Controllers\Admin\IssueController;
 use App\Http\Controllers\Admin\LoanController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\RoleDashboardController;
@@ -248,6 +249,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('settings/email-templates', [SettingsController::class, 'updateEmailSettings'])->name('settings.email-templates.update');
     Route::get('settings/notification-preferences', [SettingsController::class, 'notificationPreferences'])->name('settings.notification-preferences');
     Route::put('settings/notification-preferences', [SettingsController::class, 'updateNotificationPreferences'])->name('settings.notification-preferences.update');
+
+    // Notifications
+    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-read');
+    Route::post('notifications/{notification}/mark-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
     Route::get('settings/reminder-settings', [SettingsController::class, 'reminderSettings'])->name('settings.reminder-settings');
     Route::put('settings/reminder-settings', [SettingsController::class, 'updateReminderSettings'])->name('settings.reminder-settings.update');
 

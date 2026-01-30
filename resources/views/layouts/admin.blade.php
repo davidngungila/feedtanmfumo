@@ -96,36 +96,10 @@
                                     <button id="mark-all-read" class="text-xs text-[#015425] hover:underline">Mark all as read</button>
                                 </div>
                                 <div id="notification-list" class="py-2">
-                                    <!-- Sample notifications - replace with dynamic content -->
-                                    <div class="px-4 py-3 hover:bg-gray-50 border-b border-gray-100 cursor-pointer notification-item" data-read="false">
-                                        <div class="flex items-start">
-                                            <div class="flex-shrink-0 w-2 h-2 mt-2 bg-blue-500 rounded-full"></div>
-                                            <div class="ml-3 flex-1">
-                                                <p class="text-sm font-medium text-gray-900">New loan application</p>
-                                                <p class="text-xs text-gray-500 mt-1">A new loan application requires your review</p>
-                                                <p class="text-xs text-gray-400 mt-1">2 minutes ago</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="px-4 py-3 hover:bg-gray-50 border-b border-gray-100 cursor-pointer notification-item" data-read="false">
-                                        <div class="flex items-start">
-                                            <div class="flex-shrink-0 w-2 h-2 mt-2 bg-orange-500 rounded-full"></div>
-                                            <div class="ml-3 flex-1">
-                                                <p class="text-sm font-medium text-gray-900">High priority issue</p>
-                                                <p class="text-xs text-gray-500 mt-1">A high priority issue has been reported</p>
-                                                <p class="text-xs text-gray-400 mt-1">15 minutes ago</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="px-4 py-3 hover:bg-gray-50 border-b border-gray-100 cursor-pointer notification-item" data-read="true">
-                                        <div class="flex items-start">
-                                            <div class="flex-shrink-0 w-2 h-2 mt-2 bg-gray-300 rounded-full"></div>
-                                            <div class="ml-3 flex-1">
-                                                <p class="text-sm font-medium text-gray-600">Payment received</p>
-                                                <p class="text-xs text-gray-500 mt-1">Loan payment of 50,000 TZS received</p>
-                                                <p class="text-xs text-gray-400 mt-1">1 hour ago</p>
-                                            </div>
-                                        </div>
+                                    <!-- Notifications will be loaded here via AJAX -->
+                                    <div class="px-4 py-3 text-center text-gray-500 text-sm">
+                                        <div class="animate-spin inline-block w-4 h-4 border-2 border-[#015425] border-t-transparent rounded-full"></div>
+                                        <span class="ml-2">Loading notifications...</span>
                                     </div>
                                 </div>
                                 <div class="px-4 py-3 border-t border-gray-200 text-center">
@@ -342,19 +316,73 @@
             const markAllReadButton = document.getElementById('mark-all-read');
 
             // Function to update notification badge
-            function updateNotificationBadge() {
-                const unreadCount = document.querySelectorAll('.notification-item[data-read="false"]').length;
+            function updateNotificationBadge(count) {
                 if (notificationBadge) {
-                    if (unreadCount === 0) {
+                    if (count === 0) {
                         notificationBadge.style.display = 'none';
                     } else {
                         notificationBadge.style.display = 'block';
+                        notificationBadge.textContent = count > 99 ? '99+' : count;
                     }
                 }
             }
 
-            // Initial badge update
-            updateNotificationBadge();
+            // Function to load notifications
+            function loadNotifications() {
+                fetch('{{ route("admin.notifications.index") }}', {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    },
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const notificationList = document.getElementById('notification-list');
+                    if (!notificationList) return;
+
+                    if (data.notifications && data.notifications.length > 0) {
+                        notificationList.innerHTML = data.notifications.map(notif => {
+                            const dotColor = notif.is_read ? 'bg-gray-300' : (notif.color === 'orange' ? 'bg-orange-500' : 'bg-blue-500');
+                            const titleColor = notif.is_read ? 'text-gray-600' : 'text-gray-900';
+                            const linkAttr = notif.link ? `onclick="window.location.href='${notif.link}'"` : '';
+                            
+                            return `
+                                <div class="px-4 py-3 hover:bg-gray-50 border-b border-gray-100 cursor-pointer notification-item" 
+                                     data-read="${notif.is_read}" 
+                                     data-id="${notif.id}"
+                                     ${linkAttr}>
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0 w-2 h-2 mt-2 ${dotColor} rounded-full"></div>
+                                        <div class="ml-3 flex-1">
+                                            <p class="text-sm font-medium ${titleColor}">${notif.icon || '🔔'} ${notif.title}</p>
+                                            <p class="text-xs text-gray-500 mt-1">${notif.message}</p>
+                                            <p class="text-xs text-gray-400 mt-1">${notif.time_ago}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('');
+                    } else {
+                        notificationList.innerHTML = '<div class="px-4 py-3 text-center text-gray-500 text-sm">No new notifications</div>';
+                    }
+
+                    updateNotificationBadge(data.unread_count || 0);
+                })
+                .catch(error => {
+                    console.error('Error loading notifications:', error);
+                    const notificationList = document.getElementById('notification-list');
+                    if (notificationList) {
+                        notificationList.innerHTML = '<div class="px-4 py-3 text-center text-red-500 text-sm">Error loading notifications</div>';
+                    }
+                });
+            }
+
+            // Load notifications on page load
+            loadNotifications();
+            
+            // Reload notifications every 30 seconds
+            setInterval(loadNotifications, 30000);
 
             const notificationContainer = document.getElementById('notification-container');
             if (notificationButton && notificationDropdown && notificationContainer) {
@@ -392,46 +420,54 @@
                         e.preventDefault();
                         e.stopPropagation();
                         
-                        // Mark all notifications as read
-                        document.querySelectorAll('.notification-item[data-read="false"]').forEach(item => {
-                            item.setAttribute('data-read', 'true');
-                            const dot = item.querySelector('.bg-blue-500, .bg-orange-500');
-                            if (dot) {
-                                dot.classList.remove('bg-blue-500', 'bg-orange-500');
-                                dot.classList.add('bg-gray-300');
+                        fetch('{{ route("admin.notifications.mark-all-read") }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                            },
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Reload notifications to reflect changes
+                                loadNotifications();
                             }
-                            const title = item.querySelector('.text-gray-900');
-                            if (title) {
-                                title.classList.remove('text-gray-900');
-                                title.classList.add('text-gray-600');
-                            }
+                        })
+                        .catch(error => {
+                            console.error('Error marking all as read:', error);
                         });
-                        
-                        // Update badge
-                        updateNotificationBadge();
                     });
                 }
 
-                // Mark individual notification as read on click
-                document.querySelectorAll('.notification-item').forEach(item => {
-                    item.addEventListener('click', function() {
-                        if (this.getAttribute('data-read') === 'false') {
-                            this.setAttribute('data-read', 'true');
-                            const dot = this.querySelector('.bg-blue-500, .bg-orange-500');
-                            if (dot) {
-                                dot.classList.remove('bg-blue-500', 'bg-orange-500');
-                                dot.classList.add('bg-gray-300');
-                            }
-                            const title = this.querySelector('.text-gray-900');
-                            if (title) {
-                                title.classList.remove('text-gray-900');
-                                title.classList.add('text-gray-600');
-                            }
-                            
-                            // Update badge
-                            updateNotificationBadge();
+                // Mark individual notification as read on click (using event delegation)
+                document.addEventListener('click', function(e) {
+                    const notificationItem = e.target.closest('.notification-item');
+                    if (notificationItem && notificationItem.getAttribute('data-read') === 'false') {
+                        const notificationId = notificationItem.getAttribute('data-id');
+                        
+                        if (notificationId) {
+                            fetch(`{{ url('admin/notifications') }}/${notificationId}/mark-read`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                                },
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Reload notifications to reflect changes
+                                    loadNotifications();
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error marking notification as read:', error);
+                            });
                         }
-                    });
+                    }
                 });
 
             }
