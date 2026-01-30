@@ -751,7 +751,6 @@ function closeTestModal() {
 }
 
 function editTemplate(id) {
-    // Redirect to edit page (or keep modal if preferred)
     window.location.href = '{{ route("admin.sms.templates") }}/' + id + '/edit';
 }
 
