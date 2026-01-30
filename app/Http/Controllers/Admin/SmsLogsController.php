@@ -254,9 +254,8 @@ class SmsLogsController extends Controller
             'failed' => $logs->where('success', false)->count(),
         ];
 
-        // Get logo path for PDF
+        // Get logo path and convert to base64 for PDF
         $logoPath = public_path('feedtan_logo.png');
-        // Convert to base64 for better PDF compatibility
         $logoBase64 = null;
         if (file_exists($logoPath)) {
             $logoData = file_get_contents($logoPath);

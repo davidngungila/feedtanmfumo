@@ -8,115 +8,37 @@
             margin: 10mm 12mm;
             size: A4;
         }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif;
+            font-family: Arial, sans-serif;
             font-size: 9pt;
             line-height: 1.4;
-            color: #1a1a1a;
-            background: #ffffff;
+            color: #333;
         }
-        
-        /* Header Styles - Matching Loan Statement */
-        .document-header {
-            border-bottom: 2px solid #015425;
-            padding-bottom: 8px;
-            margin-bottom: 12px;
+        .header {
+            border-bottom: 3px solid #015425;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
         }
-        
-        .header-top {
-            display: table;
-            width: 100%;
-            margin-bottom: 6px;
-        }
-        
-        .header-left {
-            display: table-cell;
-            vertical-align: top;
-            width: 70%;
-        }
-        
-        .header-right {
-            display: table-cell;
-            vertical-align: top;
-            text-align: right;
-            width: 30%;
-        }
-        
-        .logo-section {
-            display: table;
-            width: 100%;
-            margin-bottom: 4px;
-        }
-        
-        .logo-image {
-            display: table-cell;
-            vertical-align: middle;
-            width: 50px;
-            height: 50px;
-        }
-        
-        .logo-image img {
-            width: 50px;
-            height: 50px;
-            object-fit: contain;
-        }
-        
-        .logo-text {
-            display: table-cell;
-            vertical-align: middle;
-            padding-left: 8px;
-        }
-        
-        .company-name-main {
-            font-size: 16pt;
+        .logo-box {
+            display: inline-block;
+            background: #015425;
+            color: white;
+            padding: 8px 12px;
             font-weight: bold;
-            color: #015425;
-            margin-bottom: 1px;
-            line-height: 1.2;
+            font-size: 14pt;
+            margin-bottom: 10px;
         }
-        
-        .company-name-sub {
-            font-size: 11pt;
-            font-weight: 600;
-            color: #1a1a1a;
-            margin-bottom: 4px;
-            line-height: 1.2;
-        }
-        
-        .contact-info {
-            font-size: 8pt;
-            color: #4a5568;
-            line-height: 1.4;
-        }
-        
-        .document-title {
-            font-size: 16pt;
-            font-weight: bold;
-            color: #015425;
-            text-align: center;
-            margin: 12px 0 4px 0;
-        }
-        
-        .serial-number {
-            font-size: 9pt;
-            color: #4a5568;
-            text-align: center;
-            margin-bottom: 8px;
-        }
-        
         .header-info {
             font-size: 8pt;
             color: #666;
             margin-top: 5px;
         }
-        /* Stats Section */
+        .title {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #015425;
+            margin: 15px 0 10px 0;
+        }
         .stats {
             display: table;
             width: 100%;
@@ -137,8 +59,6 @@
             font-weight: bold;
             color: #015425;
         }
-        
-        /* Table Styles */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -161,8 +81,6 @@
         tr:nth-child(even) {
             background: #f9f9f9;
         }
-        
-        /* Status Badges */
         .status-badge {
             padding: 2px 6px;
             border-radius: 3px;
@@ -189,9 +107,7 @@
             background: #f8d7da;
             color: #721c24;
         }
-        
-        /* Footer */
-        .document-footer {
+        .footer {
             margin-top: 20px;
             padding-top: 10px;
             border-top: 1px solid #ddd;
@@ -199,7 +115,6 @@
             color: #666;
             text-align: center;
         }
-        
         .message-content {
             max-width: 200px;
             word-wrap: break-word;
@@ -207,35 +122,26 @@
     </style>
 </head>
 <body>
-    <!-- Document Header - Matching Loan Statement Style -->
-    <div class="document-header">
-        <div class="header-top">
-            <div class="header-left">
-                <div class="logo-section">
-                    <div class="logo-image">
-                        @if(isset($logoBase64) && $logoBase64)
-                        <img src="{{ $logoBase64 }}" alt="FeedTan Logo">
-                        @else
-                        <div style="width: 50px; height: 50px; background: #015425; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18pt;">FD</div>
-                        @endif
-                    </div>
-                    <div class="logo-text">
-                        <div class="company-name-main">FeedTan</div>
-                        <div class="company-name-sub">Community Microfinance Group</div>
-                    </div>
-                </div>
-                <div class="contact-info">
+    <div class="header">
+        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 10px;">
+            @if(isset($logoBase64) && $logoBase64)
+            <img src="{{ $logoBase64 }}" alt="FeedTan Logo" style="max-height: 60px; max-width: 150px;">
+            @else
+            <div class="logo-box">FD</div>
+            @endif
+            <div style="flex: 1;">
+                <strong style="font-size: 12pt; color: #015425;">FeedTan Community Microfinance Group</strong><br>
+                <div class="header-info">
                     P.O.Box 7744, Ushirika Sokoine Road, Moshi, Kilimanjaro, Tanzania<br>
-                    Email: feedtan15@gmail.com | Mobile: +255622239304
+                    Email: feedtan15@gmail.com | Phone: +255622239304
                 </div>
             </div>
         </div>
-        
-        <div class="document-title">SMS Communication Logs Report</div>
-        <div class="serial-number">
-            Generated: {{ now()->format('Y-m-d H:i:s') }}
+        <div class="title">SMS Communication Logs Report</div>
+        <div class="header-info">
+            Generated: {{ now()->format('Y-m-d H:i:s') }}<br>
             @if(!empty($filters))
-            | Filters: 
+            Filters Applied:
             @if(isset($filters['from'])) From: {{ $filters['from'] }} @endif
             @if(isset($filters['to'])) To: {{ $filters['to'] }} @endif
             @if(isset($filters['status'])) Status: {{ $filters['status'] }} @endif
@@ -308,14 +214,10 @@
         </tbody>
     </table>
 
-    <!-- Document Footer -->
-    <div class="document-footer">
-        <div style="margin: 5px 0;"><strong>FeedTan Community Microfinance Group</strong></div>
-        <div style="margin: 5px 0;">P.O.Box 7744, Ushirika Sokoine Road, Moshi, Kilimanjaro, Tanzania</div>
-        <div style="margin: 5px 0;">Email: feedtan15@gmail.com | Mobile: +255622239304</div>
-        <div style="margin-top: 10px; font-size: 7pt; color: #999; font-style: italic;">
-            This is a computer-generated document. Generated on {{ now()->format('d F Y, H:i:s') }} | Total Records: {{ $logs->count() }}
-        </div>
+    <div class="footer">
+        <p>FeedTan Community Microfinance Group - SMS Communication Logs</p>
+        <p>Report generated on {{ now()->format('F d, Y \a\t H:i:s') }}</p>
+        <p>Total Records: {{ $logs->count() }}</p>
     </div>
 </body>
 </html>
