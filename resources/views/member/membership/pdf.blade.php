@@ -4,7 +4,30 @@
     <meta charset="utf-8">
     <title>Membership Application - {{ $user->membership_code ?? $user->id }}</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
+        @font-face {
+            font-family: 'Quicksand';
+            font-style: normal;
+            font-weight: 400;
+            src: url('{{ public_path("font/Quicksand-Regular.ttf") }}') format('truetype');
+        }
+        @font-face {
+            font-family: 'Quicksand';
+            font-style: normal;
+            font-weight: 500;
+            src: url('{{ public_path("font/Quicksand-Medium.ttf") }}') format('truetype');
+        }
+        @font-face {
+            font-family: 'Quicksand';
+            font-style: normal;
+            font-weight: 600;
+            src: url('{{ public_path("font/Quicksand-SemiBold.ttf") }}') format('truetype');
+        }
+        @font-face {
+            font-family: 'Quicksand';
+            font-style: normal;
+            font-weight: 700;
+            src: url('{{ public_path("font/Quicksand-Bold.ttf") }}') format('truetype');
+        }
         
         @page {
             margin: 10mm 12mm;
