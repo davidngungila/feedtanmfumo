@@ -743,7 +743,15 @@ class MembershipController extends Controller
         // Generate serial number (format: FCMGMA + date + sequence)
         $serialNumber = 'FCMGMA'.date('dmy').str_pad($user->id, 4, '0', STR_PAD_LEFT);
 
-        $pdf = PDF::loadView('member.membership.pdf', compact('user', 'orgInfo', 'serialNumber'));
+        // Use PdfHelper for consistent header
+        $pdf = \App\Helpers\PdfHelper::generatePdf('member.membership.pdf', [
+            'user' => $user,
+            'orgInfo' => $orgInfo,
+            'serialNumber' => $serialNumber,
+            'documentTitle' => 'Membership Application',
+            'documentSubtitle' => 'Serial No: '.$serialNumber,
+            'footerInfo' => 'Serial No: '.$serialNumber.' | Generated on '.now()->format('d F Y, H:i:s'),
+        ]);
 
         $filename = 'Membership_Application_'.($user->membership_code ?? $user->id).'_'.date('Y-m-d').'.pdf';
 

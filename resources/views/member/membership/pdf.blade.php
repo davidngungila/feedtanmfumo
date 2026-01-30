@@ -1,412 +1,249 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Membership Application - {{ $user->membership_code ?? $user->id }}</title>
-    <style>
-        @page {
-            margin: 10mm 12mm;
-            size: A4;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif;
-            font-size: 9pt;
-            line-height: 1.4;
-            color: #1a1a1a;
-            background: #ffffff;
-        }
-        
-        /* Header Styles - Matching Loan Statement */
-        .document-header {
-            border-bottom: 2px solid #015425;
-            padding-bottom: 8px;
-            margin-bottom: 12px;
-        }
-        
-        .header-top {
-            display: table;
-            width: 100%;
-            margin-bottom: 6px;
-        }
-        
-        .header-left {
-            display: table-cell;
-            vertical-align: top;
-            width: 70%;
-        }
-        
-        .header-right {
-            display: table-cell;
-            vertical-align: top;
-            text-align: right;
-            width: 30%;
-        }
-        
-        .logo-section {
-            display: table;
-            width: 100%;
-            margin-bottom: 4px;
-        }
-        
-        .logo-box {
-            display: table-cell;
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #015425 0%, #027a3a 100%);
-            border-radius: 6px;
-            vertical-align: middle;
-            text-align: center;
-            color: white;
-            font-weight: bold;
-            font-size: 16pt;
-            padding: 0;
-        }
-        
-        .logo-text {
-            display: table-cell;
-            vertical-align: middle;
-            padding-left: 8px;
-        }
-        
-        .company-name-main {
-            font-size: 16pt;
-            font-weight: bold;
-            color: #015425;
-            margin-bottom: 1px;
-            line-height: 1.2;
-        }
-        
-        .company-name-sub {
-            font-size: 11pt;
-            font-weight: 600;
-            color: #1a1a1a;
-            margin-bottom: 4px;
-            line-height: 1.2;
-        }
-        
-        .contact-info {
-            font-size: 8pt;
-            color: #4a5568;
-            line-height: 1.4;
-        }
-        
-        .document-title {
-            font-size: 16pt;
-            font-weight: bold;
-            color: #015425;
-            text-align: center;
-            margin: 10px 0 4px 0;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .serial-number {
-            text-align: center;
-            font-size: 8pt;
-            color: #666;
-            margin-bottom: 10px;
-            font-family: 'Courier New', monospace;
-        }
-        
-        /* Member Details Table - Green Header */
-        .member-details-section {
-            margin-bottom: 12px;
-        }
-        
-        .section-header-green {
-            background: #015425;
-            color: white;
-            padding: 6px 10px;
-            font-weight: bold;
-            font-size: 10pt;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .member-details-table {
-            width: 100%;
-            border-collapse: collapse;
-            border: 1px solid #e5e7eb;
-        }
-        
-        .member-details-table td {
-            padding: 6px 10px;
-            border: 1px solid #e5e7eb;
-            font-size: 9pt;
-        }
-        
-        .member-details-table td:first-child {
-            background: #f9fafb;
-            font-weight: 600;
-            width: 35%;
-            color: #374151;
-        }
-        
-        .member-details-table td:last-child {
-            background: white;
-            color: #1a1a1a;
-        }
-        
-        /* Summary Section */
-        .summary-section {
-            margin: 12px 0;
-            background: #f9fafb;
-            border: 2px solid #015425;
-            border-radius: 4px;
-            padding: 10px;
-        }
-        
-        .summary-title {
-            font-size: 10pt;
-            font-weight: bold;
-            color: #015425;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-        
-        .summary-grid {
-            display: table;
-            width: 100%;
-        }
-        
-        .summary-item {
-            display: table-cell;
-            width: 50%;
-            padding: 0 8px;
-            vertical-align: top;
-        }
-        
-        .summary-label {
-            font-size: 8pt;
-            color: #6b7280;
-            margin-bottom: 3px;
-            text-transform: uppercase;
-        }
-        
-        .summary-value {
-            font-size: 12pt;
-            font-weight: bold;
-            color: #015425;
-        }
-        
-        /* Section Styles */
-        .section {
-            margin-bottom: 10px;
-            page-break-inside: avoid;
-            border: 1px solid #e5e7eb;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        
-        .section-header {
-            background: #015425;
-            color: white;
-            padding: 5px 10px;
-            font-weight: bold;
-            font-size: 9.5pt;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .section-content {
-            padding: 8px;
-            background: white;
-        }
-        
-        /* Table Styles */
-        .info-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 0;
-            background: white;
-        }
-        
-        .info-table tr {
-            border-bottom: 1px solid #e5e7eb;
-        }
-        
-        .info-table tr:last-child {
-            border-bottom: none;
-        }
-        
-        .info-table td {
-            padding: 5px 8px;
-            vertical-align: top;
-            font-size: 8.5pt;
-        }
-        
-        .info-table td:first-child {
-            font-weight: 600;
-            width: 35%;
-            color: #374151;
-            background: #f9fafb;
-            border-right: 1px solid #e5e7eb;
-        }
-        
-        .info-table td:last-child {
-            color: #1a1a1a;
-        }
-        
-        /* Two Column Layout */
-        .two-column {
-            display: table;
-            width: 100%;
-            margin-bottom: 8px;
-        }
-        
-        .column {
-            display: table-cell;
-            width: 50%;
-            padding: 0 6px;
-            vertical-align: top;
-        }
-        
-        .column:first-child {
-            padding-left: 0;
-        }
-        
-        .column:last-child {
-            padding-right: 0;
-        }
-        
-        /* Status Badge */
-        .status-badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 12px;
-            font-size: 8pt;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-        
-        .status-pending {
-            background: #fef3c7;
-            color: #92400e;
-        }
-        
-        .status-approved {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        
-        .status-uploaded {
-            background: #d1fae5;
-            color: #065f46;
-            padding: 3px 8px;
-            border-radius: 8px;
-            font-size: 8pt;
-        }
-        
-        .status-missing {
-            background: #fee2e2;
-            color: #991b1b;
-            padding: 3px 8px;
-            border-radius: 8px;
-            font-size: 8pt;
-        }
-        
-        /* Beneficiary Card */
-        .beneficiary-card {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 4px;
-            padding: 6px;
-            margin-bottom: 6px;
-            page-break-inside: avoid;
-        }
-        
-        .beneficiary-header {
-            background: #015425;
-            color: white;
-            padding: 4px 8px;
-            margin: -6px -6px 5px -6px;
-            font-weight: bold;
-            font-size: 8.5pt;
-        }
-        
-        /* Footer */
-        .document-footer {
-            margin-top: 15px;
-            padding-top: 8px;
-            border-top: 2px solid #e5e7eb;
-            text-align: center;
-            font-size: 7pt;
-            color: #666;
-            page-break-inside: avoid;
-        }
-        
-        /* Ensure content fits on page */
-        .section, .member-details-section, .summary-section {
-            page-break-inside: avoid;
-        }
-        
-        /* Prevent orphaned headers */
-        .section-header, .section-header-green {
-            page-break-after: avoid;
-        }
-        
-        /* Utility Classes */
-        .text-center {
-            text-align: center;
-        }
-        
-        .text-right {
-            text-align: right;
-        }
-        
-        .text-bold {
-            font-weight: bold;
-        }
-        
-        .mb-10 {
-            margin-bottom: 10px;
-        }
-        
-        .mt-10 {
-            margin-top: 10px;
-        }
-    </style>
-</head>
-<body>
-    <!-- Document Header -->
-    <div class="document-header">
-        <div class="header-top">
-            <div class="header-left">
-                <div class="logo-section">
-                    <div class="logo-box">FD</div>
-                    <div class="logo-text">
-                        <div class="company-name-main">FeedTan</div>
-                        <div class="company-name-sub">{{ $orgInfo['name'] ?? 'Community Microfinance Group' }}</div>
-                    </div>
-                </div>
-                <div class="contact-info">
-                    {{ $orgInfo['po_box'] ?? 'P.O.Box 7744' }}, {{ $orgInfo['address'] ?? 'Ushirika Sokoine Road' }}, {{ $orgInfo['city'] ?? 'Moshi' }} {{ $orgInfo['region'] ?? 'Kilimanjaro' }} {{ $orgInfo['country'] ?? 'Tanzania' }}<br>
-                    Email: {{ $orgInfo['primary_email'] ?? $orgInfo['from_email'] ?? 'Feedtan15@gmail.com' }}<br>
-                    Mobile: {{ $orgInfo['phone'] ?? '0717358865' }}
-                </div>
-            </div>
-            <div class="header-right">
-                <div style="font-size: 8pt; color: #666; line-height: 1.8;">
-                    <div><strong>Generated:</strong> {{ date('d M Y, H:i') }}</div>
-                    <div><strong>Status:</strong> 
-                        <span class="status-badge status-{{ $user->membership_status ?? 'pending' }}">
-                            {{ strtoupper($user->membership_status ?? 'PENDING') }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="document-title">Membership Application</div>
-        <div class="serial-number">Serial No: {{ $serialNumber ?? 'FCMGMA'.date('dmy').str_pad($user->id, 4, '0', STR_PAD_LEFT) }}</div>
-    </div>
+@extends('pdf.base')
+
+@section('title', 'Membership Application - '.($user->membership_code ?? $user->id))
+
+@push('styles')
+<style>
+    /* Custom styles for membership application */
+    .serial-number {
+        text-align: center;
+        font-size: 8pt;
+        color: #666;
+        margin-bottom: 15px;
+        font-family: 'Courier New', monospace;
+    }
+    
+    /* Member Details Table - Green Header */
+    .member-details-section {
+        margin-bottom: 12px;
+    }
+    
+    .section-header-green {
+        background: #015425;
+        color: white;
+        padding: 6px 10px;
+        font-weight: bold;
+        font-size: 10pt;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .member-details-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .member-details-table td {
+        padding: 6px 10px;
+        border: 1px solid #e5e7eb;
+        font-size: 9pt;
+    }
+    
+    .member-details-table td:first-child {
+        background: #f9fafb;
+        font-weight: 600;
+        width: 35%;
+        color: #374151;
+    }
+    
+    .member-details-table td:last-child {
+        background: white;
+        color: #1a1a1a;
+    }
+    
+    /* Summary Section */
+    .summary-section {
+        margin: 12px 0;
+        background: #f9fafb;
+        border: 2px solid #015425;
+        border-radius: 4px;
+        padding: 10px;
+    }
+    
+    .summary-title {
+        font-size: 10pt;
+        font-weight: bold;
+        color: #015425;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+    }
+    
+    .summary-grid {
+        display: table;
+        width: 100%;
+    }
+    
+    .summary-item {
+        display: table-cell;
+        width: 50%;
+        padding: 0 8px;
+        vertical-align: top;
+    }
+    
+    .summary-label {
+        font-size: 8pt;
+        color: #6b7280;
+        margin-bottom: 3px;
+        text-transform: uppercase;
+    }
+    
+    .summary-value {
+        font-size: 12pt;
+        font-weight: bold;
+        color: #015425;
+    }
+    
+    /* Custom Section Styles */
+    .section {
+        margin-bottom: 10px;
+        page-break-inside: avoid;
+        border: 1px solid #e5e7eb;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .section-header {
+        background: #015425;
+        color: white;
+        padding: 5px 10px;
+        font-weight: bold;
+        font-size: 9.5pt;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .section-content {
+        padding: 8px;
+        background: white;
+    }
+    
+    /* Table Styles */
+    .info-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+        background: white;
+    }
+    
+    .info-table tr {
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .info-table tr:last-child {
+        border-bottom: none;
+    }
+    
+    .info-table td {
+        padding: 5px 8px;
+        vertical-align: top;
+        font-size: 8.5pt;
+    }
+    
+    .info-table td:first-child {
+        font-weight: 600;
+        width: 35%;
+        color: #374151;
+        background: #f9fafb;
+        border-right: 1px solid #e5e7eb;
+    }
+    
+    .info-table td:last-child {
+        color: #1a1a1a;
+    }
+    
+    /* Two Column Layout */
+    .two-column {
+        display: table;
+        width: 100%;
+        margin-bottom: 8px;
+    }
+    
+    .column {
+        display: table-cell;
+        width: 50%;
+        padding: 0 6px;
+        vertical-align: top;
+    }
+    
+    .column:first-child {
+        padding-left: 0;
+    }
+    
+    .column:last-child {
+        padding-right: 0;
+    }
+    
+    /* Status Badge */
+    .status-badge {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 8pt;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+    
+    .status-pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    
+    .status-approved {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    
+    .status-uploaded {
+        background: #d1fae5;
+        color: #065f46;
+        padding: 3px 8px;
+        border-radius: 8px;
+        font-size: 8pt;
+    }
+    
+    .status-missing {
+        background: #fee2e2;
+        color: #991b1b;
+        padding: 3px 8px;
+        border-radius: 8px;
+        font-size: 8pt;
+    }
+    
+    /* Beneficiary Card */
+    .beneficiary-card {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 4px;
+        padding: 6px;
+        margin-bottom: 6px;
+        page-break-inside: avoid;
+    }
+    
+    .beneficiary-header {
+        background: #015425;
+        color: white;
+        padding: 4px 8px;
+        margin: -6px -6px 5px -6px;
+        font-weight: bold;
+        font-size: 8.5pt;
+    }
+    
+    /* Ensure content fits on page */
+    .section, .member-details-section, .summary-section {
+        page-break-inside: avoid;
+    }
+    
+    /* Prevent orphaned headers */
+    .section-header, .section-header-green {
+        page-break-after: avoid;
+    }
+</style>
+@endpush
+
+@section('content')
+    <!-- Serial Number -->
+    <div class="serial-number">Serial No: {{ $serialNumber ?? 'FCMGMA'.date('dmy').str_pad($user->id, 4, '0', STR_PAD_LEFT) }}</div>
 
     <!-- Member Details Section -->
     <div class="member-details-section">
@@ -768,15 +605,4 @@
             </table>
         </div>
     </div>
-
-    <!-- Document Footer -->
-    <div class="document-footer">
-        <div style="margin: 5px 0;"><strong>{{ $orgInfo['name'] ?? 'FeedTan Community Microfinance Group' }}</strong></div>
-        <div style="margin: 5px 0;">{{ $orgInfo['po_box'] ?? 'P.O.Box 7744' }}, {{ $orgInfo['address'] ?? 'Ushirika Sokoine Road' }}, {{ $orgInfo['city'] ?? 'Moshi' }}, {{ $orgInfo['region'] ?? 'Kilimanjaro' }}, {{ $orgInfo['country'] ?? 'Tanzania' }}</div>
-        <div style="margin: 5px 0;">Email: {{ $orgInfo['primary_email'] ?? $orgInfo['from_email'] ?? 'Feedtan15@gmail.com' }} | Mobile: {{ $orgInfo['phone'] ?? '0717358865' }}</div>
-        <div style="margin-top: 10px; font-size: 7pt; color: #999; font-style: italic;">
-            This is a computer-generated document. Generated on {{ date('d F Y, H:i:s') }} | Serial No: {{ $serialNumber ?? 'FCMGMA'.date('dmy').str_pad($user->id, 4, '0', STR_PAD_LEFT) }}
-        </div>
-    </div>
-</body>
-</html>
+@endsection
