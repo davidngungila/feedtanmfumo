@@ -297,6 +297,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('sms/logs/sync', [\App\Http\Controllers\Admin\SmsLogsController::class, 'syncFromApi'])->name('sms.logs.sync');
     Route::get('sms/logs/{smsLog}', [\App\Http\Controllers\Admin\SmsLogsController::class, 'show'])->name('sms.logs.show');
     Route::get('sms/logs/export/pdf', [\App\Http\Controllers\Admin\SmsLogsController::class, 'exportPdf'])->name('sms.logs.export.pdf');
+
+    // Transaction Receipts
+    Route::get('transactions/{transaction}/receipt', [\App\Http\Controllers\Admin\TransactionReceiptController::class, 'show'])->name('transactions.receipt');
     Route::get('sms/logs/export/excel', [\App\Http\Controllers\Admin\SmsLogsController::class, 'exportExcel'])->name('sms.logs.export.excel');
 
     // Email Provider Management

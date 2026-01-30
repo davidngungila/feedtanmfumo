@@ -266,6 +266,7 @@
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -287,6 +288,14 @@
                                             {{ ucfirst($transaction->status ?? 'completed') }}
                                         </span>
                                     </td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm">
+                                        <a href="{{ route('admin.transactions.receipt', $transaction) }}" target="_blank" class="inline-flex items-center px-3 py-1.5 bg-[#015425] text-white text-xs font-medium rounded-md hover:bg-[#027a3a] transition">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                                            </svg>
+                                            Print Receipt
+                                        </a>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -294,6 +303,7 @@
                             <tr>
                                 <td colspan="2" class="px-4 py-3 text-sm font-semibold text-gray-900">Total Paid</td>
                                 <td class="px-4 py-3 text-sm font-bold text-green-600">{{ number_format($loan->paid_amount, 0) }} TZS</td>
+                                <td></td>
                                 <td></td>
                             </tr>
                         </tfoot>

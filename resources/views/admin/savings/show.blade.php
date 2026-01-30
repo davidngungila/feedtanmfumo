@@ -99,6 +99,7 @@
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -114,10 +115,18 @@
                                             {{ ucfirst($transaction->status) }}
                                         </span>
                                     </td>
+                                    <td class="px-4 py-3 text-sm">
+                                        <a href="{{ route('admin.transactions.receipt', $transaction) }}" target="_blank" class="inline-flex items-center px-3 py-1.5 bg-[#015425] text-white text-xs font-medium rounded-md hover:bg-[#027a3a] transition">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                                            </svg>
+                                            Print Receipt
+                                        </a>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="4" class="px-4 py-8 text-center text-gray-500">No transactions found</td>
+                                    <td colspan="5" class="px-4 py-8 text-center text-gray-500">No transactions found</td>
                                 </tr>
                             @endforelse
                         </tbody>
