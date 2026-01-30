@@ -24,8 +24,14 @@ class PdfHelper
 
     /**
      * Generate PDF with standard header
+     * 
+     * @param string $view The view to render
+     * @param array $data Data to pass to the view
+     * @param string|null $filename Optional filename
+     * @param string|array $paperSize Paper size ('a4', 'letter', or [width, height] in points). Default: 'a4'
+     * @param string $orientation Paper orientation ('portrait' or 'landscape'). Default: 'portrait'
      */
-    public static function generatePdf(string $view, array $data = [], ?string $filename = null): \Barryvdh\DomPDF\PDF
+    public static function generatePdf(string $view, array $data = [], ?string $filename = null, $paperSize = 'a4', string $orientation = 'portrait'): \Barryvdh\DomPDF\PDF
     {
         // Add header image to data
         $data['headerBase64'] = self::getHeaderImageBase64();
@@ -36,7 +42,7 @@ class PdfHelper
         }
 
         $pdf = Pdf::loadView($view, $data)
-            ->setPaper('a4', 'portrait')
+            ->setPaper($paperSize, $orientation)
             ->setOption('isHtml5ParserEnabled', true)
             ->setOption('isRemoteEnabled', true);
 
@@ -45,13 +51,19 @@ class PdfHelper
 
     /**
      * Download PDF with standard header
+     * 
+     * @param string $view The view to render
+     * @param array $data Data to pass to the view
+     * @param string|null $filename Optional filename
+     * @param string|array $paperSize Paper size ('a4', 'letter', or [width, height] in points). Default: 'a4'
+     * @param string $orientation Paper orientation ('portrait' or 'landscape'). Default: 'portrait'
      */
-    public static function downloadPdf(string $view, array $data = [], ?string $filename = null)
+    public static function downloadPdf(string $view, array $data = [], ?string $filename = null, $paperSize = 'a4', string $orientation = 'portrait')
     {
         if (! $filename) {
             $filename = 'document-'.date('Y-m-d-His').'.pdf';
         }
 
-        return self::generatePdf($view, $data, $filename)->download($filename);
+        return self::generatePdf($view, $data, $filename, $paperSize, $orientation)->download($filename);
     }
 }

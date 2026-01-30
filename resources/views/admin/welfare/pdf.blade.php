@@ -7,6 +7,11 @@
         @page {
             margin: 5mm 8mm;
             size: 112mm auto;
+            width: 112mm;
+        }
+        * {
+            max-width: 112mm;
+            box-sizing: border-box;
         }
         body {
             font-family: Arial, sans-serif;
@@ -14,6 +19,8 @@
             line-height: 1.3;
             color: #333;
             width: 112mm;
+            margin: 0;
+            padding: 0;
         }
         .header {
             border-bottom: 2px solid #015425;

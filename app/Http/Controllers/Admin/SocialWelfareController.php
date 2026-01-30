@@ -428,11 +428,15 @@ class SocialWelfareController extends Controller
             'phone' => '+255622239304',
         ];
 
+        // 4-inch (112mm) receipt size: 112mm = 317 points (1mm = 2.83465 points)
+        // Using [width, height] where height = 0 means auto-height
+        $receiptSize = [317, 0]; // 112mm width, auto height
+
         return PdfHelper::downloadPdf('admin.welfare.pdf', [
             'welfare' => $welfare,
             'organizationInfo' => $organizationInfo,
             'documentTitle' => 'Social Welfare Record',
             'documentSubtitle' => ucfirst($welfare->type) . ' - ' . ($welfare->benefit_type_name ?? 'Record'),
-        ], 'welfare-'.$welfare->welfare_number.'-'.date('Y-m-d-His').'.pdf');
+        ], 'welfare-'.$welfare->welfare_number.'-'.date('Y-m-d-His').'.pdf', $receiptSize, 'portrait');
     }
 }
