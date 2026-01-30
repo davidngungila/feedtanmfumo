@@ -63,7 +63,7 @@ class SmsLogsController extends Controller
             ->pluck('count', 'channel');
 
         // Top recipients
-        $topRecipients = SmsLog::selectRaw('to, COUNT(*) as count, SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) as success_count')
+        $topRecipients = SmsLog::selectRaw('`to`, COUNT(*) as count, SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) as success_count')
             ->groupBy('to')
             ->orderByDesc('count')
             ->limit(10)
