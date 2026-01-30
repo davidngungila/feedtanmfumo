@@ -259,7 +259,9 @@ class SmsLogsController extends Controller
             'balance' => $balance,
             'stats' => $stats,
             'filters' => $request->only(['from', 'to', 'status', 'sent_since', 'sent_until', 'success']),
-        ]);
+        ])->setPaper('a4', 'portrait')
+            ->setOption('isHtml5ParserEnabled', true)
+            ->setOption('isRemoteEnabled', true);
 
         return $pdf->download('sms-logs-'.date('Y-m-d-His').'.pdf');
     }
