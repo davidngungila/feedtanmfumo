@@ -513,4 +513,44 @@ class SmsSendController extends Controller
 
         return false;
     }
+
+    /**
+     * Send test SMS for a template
+     */
+    protected function sendTestSms(Request $request)
+    {
+        $request->validate([
+            'test_template_id' => 'required|exists:sms_message_templates,id',
+            'test_phone' => 'required|string',
+            'test_message' => 'required|string',
+        ]);
+
+        try {
+            $phone = $request->input('test_phone');
+            $message = $request->input('test_message');
+
+            $result = $this->smsService->sendSms($phone, $message, [
+                'template_id' => $request->input('test_template_id'),
+            ]);
+
+            if ($result['success']) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Test SMS sent successfully!',
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'error' => $result['error'] ?? 'Failed to send SMS',
+                ], 400);
+            }
+        } catch (\Exception $e) {
+            Log::error('Test SMS error', ['error' => $e->getMessage()]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Error: '.$e->getMessage(),
+            ], 500);
+        }
+    }
 }
