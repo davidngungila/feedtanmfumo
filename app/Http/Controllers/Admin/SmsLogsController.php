@@ -255,7 +255,7 @@ class SmsLogsController extends Controller
         ];
 
         // Get logo path and convert to base64 for PDF
-        $logoPath = public_path('feedtan_logo.png');
+        $logoPath = public_path('header-mfumo.png');
         $logoBase64 = null;
         if (file_exists($logoPath)) {
             $logoData = file_get_contents($logoPath);
