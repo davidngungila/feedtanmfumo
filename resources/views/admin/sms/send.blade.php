@@ -236,7 +236,7 @@
                         @endforeach
                     </select>
                     <p class="mt-1 text-xs text-gray-500">
-                        Templates support variables like {{name}}, {{member_id}}, {{amount}}, etc. You can also use any column name from your Excel.
+                        Templates support variables like @{{name}}, @{{member_id}}, @{{amount}}, etc. You can also use any column name from your Excel.
                     </p>
                 </div>
 
