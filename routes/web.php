@@ -271,6 +271,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // SMS Sending
     Route::get('sms/send', [\App\Http\Controllers\Admin\SmsSendController::class, 'index'])->name('sms.send');
     Route::get('sms/send/sample', [\App\Http\Controllers\Admin\SmsSendController::class, 'downloadSample'])->name('sms.send.sample');
+    Route::post('sms/send/preview', [\App\Http\Controllers\Admin\SmsSendController::class, 'previewExcel'])->name('sms.send.preview');
     Route::post('sms/send/upload', [\App\Http\Controllers\Admin\SmsSendController::class, 'uploadAndSend'])->name('sms.send.upload');
 
     // SMS Settings
