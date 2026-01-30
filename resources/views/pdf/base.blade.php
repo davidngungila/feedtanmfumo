@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>{{ $title ?? 'Document' }} - FeedTan CMG</title>
+    <title>@yield('title', $title ?? 'Document') - FeedTan CMG</title>
     <style>
         @page {
             margin: 10mm 12mm;
