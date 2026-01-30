@@ -254,11 +254,21 @@ class SmsLogsController extends Controller
             'failed' => $logs->where('success', false)->count(),
         ];
 
+        // Get logo path for PDF
+        $logoPath = public_path('feedtan_logo.png');
+        // Convert to base64 for better PDF compatibility
+        $logoBase64 = null;
+        if (file_exists($logoPath)) {
+            $logoData = file_get_contents($logoPath);
+            $logoBase64 = 'data:image/png;base64,'.base64_encode($logoData);
+        }
+
         $pdf = Pdf::loadView('admin.sms.logs-pdf', [
             'logs' => $logs,
             'balance' => $balance,
             'stats' => $stats,
             'filters' => $request->only(['from', 'to', 'status', 'sent_since', 'sent_until', 'success']),
+            'logoBase64' => $logoBase64,
         ])->setPaper('a4', 'portrait')
             ->setOption('isHtml5ParserEnabled', true)
             ->setOption('isRemoteEnabled', true);
