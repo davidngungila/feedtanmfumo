@@ -5,19 +5,20 @@
     <title>Welfare Record - {{ $welfare->welfare_number }}</title>
     <style>
         @page {
-            margin: 10mm 12mm;
-            size: A4;
+            margin: 5mm 8mm;
+            size: 112mm auto;
         }
         body {
             font-family: Arial, sans-serif;
-            font-size: 9pt;
-            line-height: 1.4;
+            font-size: 8pt;
+            line-height: 1.3;
             color: #333;
+            width: 112mm;
         }
         .header {
-            border-bottom: 3px solid #015425;
-            padding-bottom: 15px;
-            margin-bottom: 15px;
+            border-bottom: 2px solid #015425;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
             text-align: center;
             width: 100%;
         }
@@ -29,10 +30,10 @@
             margin: 0 auto 15px auto;
         }
         .title {
-            font-size: 18pt;
+            font-size: 14pt;
             font-weight: bold;
             color: #015425;
-            margin: 15px 0 10px 0;
+            margin: 10px 0 8px 0;
         }
         .serial-number {
             text-align: center;
@@ -49,7 +50,7 @@
         .stats {
             display: table;
             width: 100%;
-            margin: 15px 0;
+            margin: 10px 0;
             border-collapse: collapse;
         }
         .stats-row {
@@ -67,7 +68,7 @@
             color: #015425;
         }
         .section {
-            margin: 15px 0;
+            margin: 10px 0;
             page-break-inside: avoid;
         }
         .section-header {
@@ -112,9 +113,9 @@
             background: #f0f9ff;
             border: 2px solid #015425;
             border-radius: 4px;
-            padding: 15px;
+            padding: 10px;
             text-align: center;
-            margin: 20px 0;
+            margin: 15px 0;
         }
         .amount-label {
             font-size: 9pt;
@@ -122,7 +123,7 @@
             margin-bottom: 5px;
         }
         .amount-value {
-            font-size: 24pt;
+            font-size: 18pt;
             font-weight: bold;
             color: #015425;
             font-family: 'Courier New', monospace;
@@ -281,7 +282,7 @@
                 @endif
                 <tr>
                     <td>Amount</td>
-                    <td><strong style="font-size: 14pt; color: #015425;">{{ number_format($welfare->amount, 2) }} TZS</strong></td>
+                    <td><strong style="font-size: 11pt; color: #015425;">{{ number_format($welfare->amount, 2) }} TZS</strong></td>
                 </tr>
                 <tr>
                     <td>Transaction Date</td>
