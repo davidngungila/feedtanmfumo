@@ -224,9 +224,19 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex space-x-3">
-                                    <a href="{{ route('admin.welfare.show', $welfare) }}" class="text-[#015425] hover:text-[#013019] font-medium">View</a>
-                                    <a href="{{ route('admin.welfare.edit', $welfare) }}" class="text-blue-600 hover:text-blue-800 font-medium">Edit</a>
+                                <div class="flex space-x-2">
+                                    <a href="{{ route('admin.welfare.show', $welfare) }}" class="inline-flex items-center px-3 py-1.5 text-[#015425] hover:text-[#013019] font-medium rounded-md hover:bg-green-50 transition">
+                                        View
+                                    </a>
+                                    <a href="{{ route('admin.welfare.edit', $welfare) }}" class="inline-flex items-center px-3 py-1.5 text-blue-600 hover:text-blue-800 font-medium rounded-md hover:bg-blue-50 transition">
+                                        Edit
+                                    </a>
+                                    <a href="{{ route('admin.welfare.pdf', $welfare) }}" target="_blank" class="inline-flex items-center px-3 py-1.5 bg-[#015425] text-white text-xs font-medium rounded-md hover:bg-[#027a3a] transition">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                        </svg>
+                                        PDF
+                                    </a>
                                 </div>
                             </td>
                         </tr>

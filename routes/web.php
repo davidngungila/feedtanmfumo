@@ -300,6 +300,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Transaction Receipts
     Route::get('transactions/{transaction}/receipt', [\App\Http\Controllers\Admin\TransactionReceiptController::class, 'show'])->name('transactions.receipt');
+
+    // Welfare PDF Export
+    Route::get('welfare/{welfare}/pdf', [\App\Http\Controllers\Admin\SocialWelfareController::class, 'exportPdf'])->name('welfare.pdf');
     Route::get('sms/logs/export/excel', [\App\Http\Controllers\Admin\SmsLogsController::class, 'exportExcel'])->name('sms.logs.export.excel');
 
     // Email Provider Management

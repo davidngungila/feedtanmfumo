@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\PdfHelper;
 use App\Models\SocialWelfare;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -410,5 +411,28 @@ class SocialWelfareController extends Controller
         ];
         
         return view('admin.welfare.reports', compact('stats', 'monthlyData', 'benefitTypes', 'statusBreakdown', 'topBeneficiaries', 'topContributors', 'dateFrom', 'dateTo'));
+    }
+
+    /**
+     * Export welfare record as PDF
+     */
+    public function exportPdf(SocialWelfare $welfare)
+    {
+        $welfare->load(['user', 'approver', 'transactions']);
+
+        // Get organization info
+        $organizationInfo = [
+            'name' => 'FeedTan Community Microfinance Group',
+            'address' => 'P.O.Box 7744, Ushirika Sokoine Road, Moshi, Kilimanjaro, Tanzania',
+            'email' => 'feedtan15@gmail.com',
+            'phone' => '+255622239304',
+        ];
+
+        return PdfHelper::downloadPdf('admin.welfare.pdf', [
+            'welfare' => $welfare,
+            'organizationInfo' => $organizationInfo,
+            'documentTitle' => 'Social Welfare Record',
+            'documentSubtitle' => ucfirst($welfare->type) . ' - ' . ($welfare->benefit_type_name ?? 'Record'),
+        ], 'welfare-'.$welfare->welfare_number.'-'.date('Y-m-d-His').'.pdf');
     }
 }
