@@ -254,13 +254,8 @@ class SmsLogsController extends Controller
             'failed' => $logs->where('success', false)->count(),
         ];
 
-        // Get header image path and convert to base64 for PDF
-        $headerPath = public_path('header-mfumo.png');
-        $headerBase64 = null;
-        if (file_exists($headerPath)) {
-            $headerData = file_get_contents($headerPath);
-            $headerBase64 = 'data:image/png;base64,'.base64_encode($headerData);
-        }
+        // Use PdfHelper for consistent header
+        $headerBase64 = \App\Helpers\PdfHelper::getHeaderImageBase64();
 
         $pdf = Pdf::loadView('admin.sms.logs-pdf', [
             'logs' => $logs,
@@ -268,6 +263,8 @@ class SmsLogsController extends Controller
             'stats' => $stats,
             'filters' => $request->only(['from', 'to', 'status', 'sent_since', 'sent_until', 'success']),
             'headerBase64' => $headerBase64,
+            'documentTitle' => 'SMS Communication Logs Report',
+            'generatedAt' => now()->format('Y-m-d H:i:s'),
         ])->setPaper('a4', 'portrait')
             ->setOption('isHtml5ParserEnabled', true)
             ->setOption('isRemoteEnabled', true);

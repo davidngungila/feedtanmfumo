@@ -137,7 +137,11 @@
             <div class="logo-box" style="margin: 0 auto 10px auto;">FD</div>
             @endif
         </div>
+        @if(isset($documentTitle))
+        <div class="title">{{ $documentTitle }}</div>
+        @else
         <div class="title">SMS Communication Logs Report</div>
+        @endif
         <div class="header-info">
             Generated: {{ now()->format('Y-m-d H:i:s') }}<br>
             @if(!empty($filters))
