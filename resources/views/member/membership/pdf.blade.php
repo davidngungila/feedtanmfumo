@@ -4,30 +4,38 @@
     <meta charset="utf-8">
     <title>Membership Application - {{ $user->membership_code ?? $user->id }}</title>
     <style>
+        @if(isset($fontRegular) && $fontRegular)
         @font-face {
             font-family: 'Quicksand';
             font-style: normal;
             font-weight: 400;
-            src: url('{{ public_path("font/Quicksand-Regular.ttf") }}') format('truetype');
+            src: url('{{ $fontRegular }}') format('truetype');
         }
+        @endif
+        @if(isset($fontMedium) && $fontMedium)
         @font-face {
             font-family: 'Quicksand';
             font-style: normal;
             font-weight: 500;
-            src: url('{{ public_path("font/Quicksand-Medium.ttf") }}') format('truetype');
+            src: url('{{ $fontMedium }}') format('truetype');
         }
+        @endif
+        @if(isset($fontSemiBold) && $fontSemiBold)
         @font-face {
             font-family: 'Quicksand';
             font-style: normal;
             font-weight: 600;
-            src: url('{{ public_path("font/Quicksand-SemiBold.ttf") }}') format('truetype');
+            src: url('{{ $fontSemiBold }}') format('truetype');
         }
+        @endif
+        @if(isset($fontBold) && $fontBold)
         @font-face {
             font-family: 'Quicksand';
             font-style: normal;
             font-weight: 700;
-            src: url('{{ public_path("font/Quicksand-Bold.ttf") }}') format('truetype');
+            src: url('{{ $fontBold }}') format('truetype');
         }
+        @endif
         
         @page {
             margin: 10mm 12mm;

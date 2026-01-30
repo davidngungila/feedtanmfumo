@@ -23,12 +23,34 @@ class PdfHelper
     }
 
     /**
+     * Get font as base64 for PDF
+     */
+    public static function getFontBase64(string $fontFile): ?string
+    {
+        $fontPath = public_path("font/{$fontFile}");
+
+        if (file_exists($fontPath)) {
+            $fontData = file_get_contents($fontPath);
+
+            return 'data:font/truetype;charset=utf-8;base64,'.base64_encode($fontData);
+        }
+
+        return null;
+    }
+
+    /**
      * Generate PDF with standard header
      */
     public static function generatePdf(string $view, array $data = [], ?string $filename = null): \Barryvdh\DomPDF\PDF
     {
         // Add header image to data
         $data['headerBase64'] = self::getHeaderImageBase64();
+
+        // Add font base64 data
+        $data['fontRegular'] = self::getFontBase64('Quicksand-Regular.ttf');
+        $data['fontMedium'] = self::getFontBase64('Quicksand-Medium.ttf');
+        $data['fontSemiBold'] = self::getFontBase64('Quicksand-SemiBold.ttf');
+        $data['fontBold'] = self::getFontBase64('Quicksand-Bold.ttf');
 
         // Add generated timestamp if not provided
         if (! isset($data['generatedAt'])) {
