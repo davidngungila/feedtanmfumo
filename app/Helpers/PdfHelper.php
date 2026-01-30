@@ -42,9 +42,17 @@ class PdfHelper
         }
 
         $pdf = Pdf::loadView($view, $data)
-            ->setPaper($paperSize, $orientation)
             ->setOption('isHtml5ParserEnabled', true)
             ->setOption('isRemoteEnabled', true);
+
+        // Handle custom paper size array format
+        if (is_array($paperSize) && count($paperSize) >= 2) {
+            // Custom size: [width, height] in points
+            $pdf->setPaper($paperSize, $orientation);
+        } else {
+            // Standard size: string like 'a4', 'letter', etc.
+            $pdf->setPaper($paperSize, $orientation);
+        }
 
         return $pdf;
     }
