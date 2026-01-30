@@ -48,7 +48,9 @@ class PdfHelper
         // Handle custom paper size array format
         if (is_array($paperSize) && count($paperSize) >= 2) {
             // Custom size: [width, height] in points
-            $pdf->setPaper($paperSize, $orientation);
+            // Convert to string format that DomPDF understands: "width,height"
+            $paperSizeString = $paperSize[0].','.$paperSize[1];
+            $pdf->setPaper($paperSizeString, $orientation);
         } else {
             // Standard size: string like 'a4', 'letter', etc.
             $pdf->setPaper($paperSize, $orientation);
