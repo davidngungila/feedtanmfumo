@@ -249,17 +249,17 @@
                               id="custom_message" 
                               rows="6"
                               maxlength="1000"
-                              placeholder="Enter a custom message. Use {{column_name}} to insert values from Excel columns..."
+                              placeholder="Enter a custom message. Use @{{column_name}} to insert values from Excel columns..."
                               class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#015425] focus:ring-[#015425]"></textarea>
                     <p class="mt-1 text-xs text-gray-500">
-                        <span id="char_count">0</span>/1000 characters. Use {{column_name}} syntax to insert Excel column values.
+                        <span id="char_count">0</span>/1000 characters. Use @{{column_name}} syntax to insert Excel column values.
                     </p>
                     <div class="mt-2 text-xs text-gray-500">
                         <p class="font-semibold">Available Variables:</p>
                         <ul class="list-disc list-inside ml-2 mt-1" id="available-variables">
-                            <li>{{name}} - Member name</li>
-                            <li>{{member_id}} - Member ID</li>
-                            <li>{{phone}} - Phone number</li>
+                            <li>@{{name}} - Member name</li>
+                            <li>@{{member_id}} - Member ID</li>
+                            <li>@{{phone}} - Phone number</li>
                         </ul>
                     </div>
                 </div>
@@ -284,16 +284,16 @@
                 </div>
                 <div>
                     <h4 class="font-semibold text-gray-800 mb-1">2. Select Sheet & Map Columns</h4>
-                    <p>Choose which sheet to use and map your Excel columns to the required fields. You can map any column from your Excel file.</p>
+                    <p>Choose which sheet to use and map your Excel columns to the required fields. You can map any column from your Excel file. Use @{{column_name}} in your message to insert values.</p>
                 </div>
                 <div>
                     <h4 class="font-semibold text-gray-800 mb-1">3. Use Variables in Messages</h4>
-                    <p>In your message template, use {{column_name}} to insert values from any Excel column. For example:</p>
+                    <p>In your message template, use @{{column_name}} to insert values from any Excel column. For example:</p>
                     <ul class="list-disc list-inside ml-4 mt-1 space-y-1">
-                        <li>{{name}} - Member name</li>
-                        <li>{{loan_amount}} - Loan amount from Excel</li>
-                        <li>{{balance}} - Account balance</li>
-                        <li>{{due_date}} - Due date</li>
+                        <li>@{{name}} - Member name</li>
+                        <li>@{{loan_amount}} - Loan amount from Excel</li>
+                        <li>@{{balance}} - Account balance</li>
+                        <li>@{{due_date}} - Due date</li>
                         <li>Any column name from your Excel file</li>
                     </ul>
                 </div>
@@ -462,7 +462,7 @@ document.addEventListener('DOMContentLoaded', function() {
         headers.forEach(header => {
             const key = header.toLowerCase().replace(/\s+/g, '_');
             const li = document.createElement('li');
-            li.textContent = `{{${key}}} - ${header}`;
+            li.textContent = '@{{' + key + '}} - ' + header;
             availableVariablesList.appendChild(li);
         });
     }
