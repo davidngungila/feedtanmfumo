@@ -845,10 +845,10 @@
     <div class="dropdown-menu pl-4 mt-1 space-y-1 {{ $isActiveSettings ? '' : 'hidden' }}">
         <a href="{{ route('admin.settings.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">All Settings</a>
         
-        <!-- 🔐 User & Access Management -->
+        <!-- 🔐 Users -->
         <div class="nested-dropdown-container">
             <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
-                <span>🔐 User & Access Management</span>
+                <span>🔐 Users</span>
                 <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
@@ -863,10 +863,10 @@
             </div>
         </div>
 
-        <!-- 🏢 Organization / General -->
+        <!-- 🏢 Organization -->
         <div class="nested-dropdown-container">
             <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
-                <span>🏢 Organization / General</span>
+                <span>🏢 Organization</span>
                 <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
@@ -881,10 +881,10 @@
             </div>
         </div>
 
-        <!-- ⚙️ Application Settings -->
+        <!-- ⚙️ Application -->
         <div class="nested-dropdown-container">
             <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
-                <span>⚙️ Application Settings</span>
+                <span>⚙️ Application</span>
                 <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
@@ -915,10 +915,10 @@
             </div>
         </div>
 
-        <!-- 🗂️ Data Management -->
+        <!-- 🗂️ Data -->
         <div class="nested-dropdown-container">
             <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
-                <span>🗂️ Data Management</span>
+                <span>🗂️ Data</span>
                 <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
@@ -949,10 +949,10 @@
             </div>
         </div>
 
-        <!-- 📄 Documents & Templates -->
+        <!-- 📄 Templates -->
         <div class="nested-dropdown-container">
             <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
-                <span>📄 Documents & Templates</span>
+                <span>📄 Templates</span>
                 <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
@@ -981,10 +981,10 @@
             </div>
         </div>
 
-        <!-- 🧰 System Tools -->
+        <!-- 🧰 Tools -->
         <div class="nested-dropdown-container">
             <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
-                <span>🧰 System Tools</span>
+                <span>🧰 Tools</span>
                 <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
@@ -998,10 +998,10 @@
             </div>
         </div>
 
-        <!-- 🔄 Updates & Maintenance -->
+        <!-- 🔄 Updates -->
         <div class="nested-dropdown-container">
             <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
-                <span>🔄 Updates & Maintenance</span>
+                <span>🔄 Updates</span>
                 <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>
@@ -1015,10 +1015,10 @@
             </div>
         </div>
 
-        <!-- 📊 Reports & Monitoring -->
+        <!-- 📊 Reports -->
         <div class="nested-dropdown-container">
             <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
-                <span>📊 Reports & Monitoring</span>
+                <span>📊 Reports</span>
                 <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>

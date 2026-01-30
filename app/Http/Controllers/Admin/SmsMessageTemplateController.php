@@ -15,6 +15,16 @@ class SmsMessageTemplateController extends Controller
         return view('admin.sms.templates', compact('templates'));
     }
 
+    public function create()
+    {
+        return view('admin.sms.templates-create');
+    }
+
+    public function edit(SmsMessageTemplate $smsMessageTemplate)
+    {
+        return view('admin.sms.templates-edit', compact('smsMessageTemplate'));
+    }
+
     public function store(Request $request)
     {
         $request->validate([
@@ -43,7 +53,7 @@ class SmsMessageTemplateController extends Controller
             'last_modified' => now(),
         ]);
 
-        return back()->with('success', 'Template created successfully.');
+        return redirect()->route('admin.sms.templates')->with('success', 'Template created successfully.');
     }
 
     public function update(Request $request, SmsMessageTemplate $smsMessageTemplate)
@@ -74,7 +84,7 @@ class SmsMessageTemplateController extends Controller
             'last_modified' => now(),
         ]);
 
-        return back()->with('success', 'Template updated successfully.');
+        return redirect()->route('admin.sms.templates')->with('success', 'Template updated successfully.');
     }
 
     public function destroy(SmsMessageTemplate $smsMessageTemplate)

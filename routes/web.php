@@ -282,6 +282,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // SMS Message Templates
     Route::get('sms/templates', [\App\Http\Controllers\Admin\SmsMessageTemplateController::class, 'index'])->name('sms.templates');
+    Route::get('sms/templates/create', [\App\Http\Controllers\Admin\SmsMessageTemplateController::class, 'create'])->name('sms.templates.create');
+    Route::get('sms/templates/{smsMessageTemplate}/edit', [\App\Http\Controllers\Admin\SmsMessageTemplateController::class, 'edit'])->name('sms.templates.edit');
     Route::post('sms/templates', [\App\Http\Controllers\Admin\SmsMessageTemplateController::class, 'store'])->name('sms.templates.store');
     Route::put('sms/templates/{smsMessageTemplate}', [\App\Http\Controllers\Admin\SmsMessageTemplateController::class, 'update'])->name('sms.templates.update');
     Route::delete('sms/templates/{smsMessageTemplate}', [\App\Http\Controllers\Admin\SmsMessageTemplateController::class, 'destroy'])->name('sms.templates.destroy');
