@@ -46,7 +46,7 @@ class PdfHelper
     /**
      * Download PDF with standard header
      */
-    public static function downloadPdf(string $view, array $data = [], ?string $filename = null): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    public static function downloadPdf(string $view, array $data = [], ?string $filename = null)
     {
         if (! $filename) {
             $filename = 'document-'.date('Y-m-d-His').'.pdf';
