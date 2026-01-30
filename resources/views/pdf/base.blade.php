@@ -4,6 +4,8 @@
     <meta charset="utf-8">
     <title>@yield('title', $title ?? 'Document') - FeedTan CMG</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
+        
         @page {
             margin: 10mm 12mm;
             size: A4;
@@ -16,7 +18,7 @@
         }
         
         body {
-            font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif;
+            font-family: 'Quicksand', 'DejaVu Sans', Arial, Helvetica, sans-serif;
             font-size: 9pt;
             line-height: 1.4;
             color: #1a1a1a;
