@@ -132,17 +132,10 @@
     <div class="header">
         <div style="text-align: center; margin-bottom: 15px;">
             @if(isset($logoBase64) && $logoBase64)
-            <img src="{{ $logoBase64 }}" alt="FeedTan Logo" style="max-height: 80px; max-width: 200px; margin-bottom: 10px;">
+            <img src="{{ $logoBase64 }}" alt="FeedTan Header" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0 auto;">
             @else
             <div class="logo-box" style="margin: 0 auto 10px auto;">FD</div>
             @endif
-            <div>
-                <div class="organization-name" style="font-weight: bold; margin-bottom: 8px;">FeedTan Community Microfinance Group</div>
-                <div class="header-info">
-                    P.O.Box 7744, Ushirika Sokoine Road, Moshi, Kilimanjaro, Tanzania<br>
-                    Email: feedtan15@gmail.com | Phone: +255622239304
-                </div>
-            </div>
         </div>
         <div class="title">SMS Communication Logs Report</div>
         <div class="header-info">
