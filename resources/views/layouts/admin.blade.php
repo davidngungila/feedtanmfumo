@@ -2,6 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
 <head>
     <meta charset="utf-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <meta content="FEEDTAN DIGITAL Admin - Community Feedback & Microfinance Management Platform" name="description">
     <title>@yield('page-title', 'Admin Dashboard') - FEEDTAN DIGITAL</title>
