@@ -27,14 +27,76 @@ class SmsLogsController extends Controller
             ->paginate(50)
             ->withQueryString();
 
+        // Enhanced statistics
         $stats = [
             'total' => SmsLog::count(),
             'success' => SmsLog::where('success', true)->count(),
             'failed' => SmsLog::where('success', false)->count(),
             'today' => SmsLog::whereDate('created_at', today())->count(),
+            'this_week' => SmsLog::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+            'this_month' => SmsLog::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count(),
+            'pending' => SmsLog::where('status_group_name', 'PENDING')->count(),
+            'delivered' => SmsLog::where('status_group_name', 'DELIVERED')->count(),
+            'rejected' => SmsLog::where('status_group_name', 'REJECTED')->count(),
+            'accepted' => SmsLog::where('status_group_name', 'ACCEPTED')->count(),
         ];
 
-        return view('admin.sms.logs', compact('logs', 'balance', 'stats'));
+        // Status breakdown for charts
+        $statusBreakdown = SmsLog::selectRaw('status_group_name, COUNT(*) as count')
+            ->whereNotNull('status_group_name')
+            ->groupBy('status_group_name')
+            ->get()
+            ->pluck('count', 'status_group_name');
+
+        // Daily statistics for last 30 days
+        $dailyStats = SmsLog::selectRaw('DATE(created_at) as date, COUNT(*) as count, SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) as success_count')
+            ->where('created_at', '>=', now()->subDays(30))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        // Channel breakdown
+        $channelBreakdown = SmsLog::selectRaw('channel, COUNT(*) as count')
+            ->whereNotNull('channel')
+            ->groupBy('channel')
+            ->get()
+            ->pluck('count', 'channel');
+
+        // Top recipients
+        $topRecipients = SmsLog::selectRaw('to, COUNT(*) as count, SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) as success_count')
+            ->groupBy('to')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get();
+
+        // Template usage statistics
+        $templateStats = SmsLog::selectRaw('template_id, COUNT(*) as count')
+            ->whereNotNull('template_id')
+            ->groupBy('template_id')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->with('template')
+            ->get();
+
+        // Hourly distribution for today
+        $hourlyStats = SmsLog::selectRaw('HOUR(created_at) as hour, COUNT(*) as count')
+            ->whereDate('created_at', today())
+            ->groupBy('hour')
+            ->orderBy('hour')
+            ->get()
+            ->pluck('count', 'hour');
+
+        return view('admin.sms.logs', compact(
+            'logs',
+            'balance',
+            'stats',
+            'statusBreakdown',
+            'dailyStats',
+            'channelBreakdown',
+            'topRecipients',
+            'templateStats',
+            'hourlyStats'
+        ));
     }
 
     public function syncFromApi(Request $request)

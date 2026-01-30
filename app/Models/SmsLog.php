@@ -53,9 +53,14 @@ class SmsLog extends Model
         return $this->belongsTo(User::class, 'sent_by');
     }
 
+    public function template(): BelongsTo
+    {
+        return $this->belongsTo(SmsMessageTemplate::class, 'template_id');
+    }
+
     public function getStatusBadgeAttribute(): string
     {
-        return match($this->status_group_name) {
+        return match ($this->status_group_name) {
             'ACCEPTED', 'DELIVERED' => 'bg-green-100 text-green-800',
             'PENDING' => 'bg-yellow-100 text-yellow-800',
             'REJECTED', 'FAILED' => 'bg-red-100 text-red-800',
