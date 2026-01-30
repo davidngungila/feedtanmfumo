@@ -212,7 +212,7 @@
             
             <form action="{{ route('admin.sms.send.upload') }}" method="POST" enctype="multipart/form-data" class="space-y-6" id="send-form">
                 @csrf
-                <input type="file" name="excel_file" id="excel_file_hidden" style="display: none;">
+                <input type="file" name="excel_file" id="excel_file_form" accept=".xlsx,.xls,.csv" style="display: none;">
                 <input type="hidden" name="sheet_index" id="sheet_index">
                 <input type="hidden" name="column_mapping" id="column_mapping_json">
 
@@ -538,7 +538,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Form submission - build column mapping JSON
-    document.querySelector('form').addEventListener('submit', function(e) {
+    document.getElementById('send-form').addEventListener('submit', function(e) {
         // Build column mapping object
         columnMapping = {
             phone: document.getElementById('map-phone').value,
@@ -566,14 +566,19 @@ document.addEventListener('DOMContentLoaded', function() {
         // Store mapping as JSON
         document.getElementById('column_mapping_json').value = JSON.stringify(columnMapping);
 
-        // Copy file to hidden input
+        // Copy file to form input
         const fileInput = document.getElementById('excel_file');
-        const hiddenFileInput = document.getElementById('excel_file_hidden');
-        if (fileInput.files.length) {
-            const dataTransfer = new DataTransfer();
-            dataTransfer.items.add(fileInput.files[0]);
-            hiddenFileInput.files = dataTransfer.files;
+        const formFileInput = document.getElementById('excel_file_form');
+        if (!fileInput.files.length) {
+            e.preventDefault();
+            alert('Please upload an Excel file');
+            return false;
         }
+        
+        // Copy file to form input using DataTransfer
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(fileInput.files[0]);
+        formFileInput.files = dataTransfer.files;
     });
 });
 </script>
