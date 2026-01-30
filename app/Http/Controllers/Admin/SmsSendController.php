@@ -267,6 +267,11 @@ class SmsSendController extends Controller
 
     public function uploadAndSend(Request $request)
     {
+        // Handle test SMS send
+        if ($request->has('test_template_id') && $request->has('test_phone')) {
+            return $this->sendTestSms($request);
+        }
+
         $request->validate([
             'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
             'sheet_index' => 'nullable|integer|min:0',

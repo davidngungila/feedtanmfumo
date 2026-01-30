@@ -23,8 +23,15 @@ class SmsMessageTemplateController extends Controller
             'message_content' => 'required|string',
             'language' => 'required|string|in:sw,en',
             'priority' => 'required|integer|min:1|max:10',
-            'variables' => 'nullable|array',
+            'variables' => 'nullable|string',
         ]);
+
+        // Convert comma-separated variables string to array
+        $variables = [];
+        if ($request->variables) {
+            $variables = array_map('trim', explode(',', $request->variables));
+            $variables = array_filter($variables); // Remove empty values
+        }
 
         SmsMessageTemplate::create([
             'template_name' => $request->template_name,
@@ -32,7 +39,7 @@ class SmsMessageTemplateController extends Controller
             'message_content' => $request->message_content,
             'language' => $request->language,
             'priority' => $request->priority,
-            'variables' => $request->variables ?? [],
+            'variables' => array_values($variables), // Re-index array
             'last_modified' => now(),
         ]);
 
@@ -47,8 +54,15 @@ class SmsMessageTemplateController extends Controller
             'message_content' => 'required|string',
             'language' => 'required|string|in:sw,en',
             'priority' => 'required|integer|min:1|max:10',
-            'variables' => 'nullable|array',
+            'variables' => 'nullable|string',
         ]);
+
+        // Convert comma-separated variables string to array
+        $variables = [];
+        if ($request->variables) {
+            $variables = array_map('trim', explode(',', $request->variables));
+            $variables = array_filter($variables); // Remove empty values
+        }
 
         $smsMessageTemplate->update([
             'template_name' => $request->template_name,
@@ -56,7 +70,7 @@ class SmsMessageTemplateController extends Controller
             'message_content' => $request->message_content,
             'language' => $request->language,
             'priority' => $request->priority,
-            'variables' => $request->variables ?? [],
+            'variables' => array_values($variables), // Re-index array
             'last_modified' => now(),
         ]);
 
