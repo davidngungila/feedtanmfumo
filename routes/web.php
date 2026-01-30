@@ -233,9 +233,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Reports
     Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('reports/financial', [ReportController::class, 'financial'])->name('reports.financial');
+    Route::get('reports/financial/pdf', [ReportController::class, 'exportFinancialPdf'])->name('reports.financial.pdf');
     Route::get('reports/loans', [ReportController::class, 'loans'])->name('reports.loans');
+    Route::get('reports/loans/pdf', [ReportController::class, 'exportLoansPdf'])->name('reports.loans.pdf');
     Route::get('reports/savings', [ReportController::class, 'savings'])->name('reports.savings');
+    Route::get('reports/savings/pdf', [ReportController::class, 'exportSavingsPdf'])->name('reports.savings.pdf');
     Route::get('reports/investments', [ReportController::class, 'investments'])->name('reports.investments');
+    Route::get('reports/investments/pdf', [ReportController::class, 'exportInvestmentsPdf'])->name('reports.investments.pdf');
     Route::post('reports/export', [ReportController::class, 'export'])->name('reports.export');
 
     // Settings - Specific routes before resource
