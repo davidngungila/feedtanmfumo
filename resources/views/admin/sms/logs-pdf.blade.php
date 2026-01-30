@@ -131,8 +131,8 @@
 <body>
     <div class="header">
         <div style="text-align: center; margin-bottom: 15px;">
-            @if(isset($logoBase64) && $logoBase64)
-            <img src="{{ $logoBase64 }}" alt="FeedTan Header" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0 auto;">
+            @if(isset($headerBase64) && $headerBase64)
+            <img src="{{ $headerBase64 }}" alt="FeedTan Header" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0 auto;">
             @else
             <div class="logo-box" style="margin: 0 auto 10px auto;">FD</div>
             @endif

@@ -254,12 +254,12 @@ class SmsLogsController extends Controller
             'failed' => $logs->where('success', false)->count(),
         ];
 
-        // Get logo path and convert to base64 for PDF
-        $logoPath = public_path('header-mfumo.png');
-        $logoBase64 = null;
-        if (file_exists($logoPath)) {
-            $logoData = file_get_contents($logoPath);
-            $logoBase64 = 'data:image/png;base64,'.base64_encode($logoData);
+        // Get header image path and convert to base64 for PDF
+        $headerPath = public_path('header-mfumo.png');
+        $headerBase64 = null;
+        if (file_exists($headerPath)) {
+            $headerData = file_get_contents($headerPath);
+            $headerBase64 = 'data:image/png;base64,'.base64_encode($headerData);
         }
 
         $pdf = Pdf::loadView('admin.sms.logs-pdf', [
@@ -267,7 +267,7 @@ class SmsLogsController extends Controller
             'balance' => $balance,
             'stats' => $stats,
             'filters' => $request->only(['from', 'to', 'status', 'sent_since', 'sent_until', 'success']),
-            'logoBase64' => $logoBase64,
+            'headerBase64' => $headerBase64,
         ])->setPaper('a4', 'portrait')
             ->setOption('isHtml5ParserEnabled', true)
             ->setOption('isRemoteEnabled', true);
