@@ -873,29 +873,164 @@ class SystemSettingsController extends Controller
         ));
     }
 
-    public function usageStatistics()
+    public function usageStatistics(Request $request)
     {
         $stats = [
             'total_users' => User::count(),
             'active_users' => User::where('status', 'active')->count(),
             'total_logins_today' => LoginSession::whereDate('login_at', today())->count(),
             'total_audit_logs' => AuditLog::count(),
+            'total_logins_this_week' => LoginSession::whereBetween('login_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+            'total_logins_this_month' => LoginSession::whereMonth('login_at', now()->month)->whereYear('login_at', now()->year)->count(),
         ];
-        return view('admin.settings.reports.usage', compact('stats'));
+
+        // Daily login trends (last 30 days)
+        $dailyLogins = LoginSession::select(DB::raw('DATE(login_at) as date'), DB::raw('COUNT(*) as count'))
+            ->whereBetween('login_at', [now()->subDays(30), now()])
+            ->groupBy('date')
+            ->orderBy('date', 'desc')
+            ->get();
+
+        // Top active users
+        $topActiveUsers = User::select('users.id', 'users.name', 'users.email', 'users.status', DB::raw('COUNT(login_sessions.id) as login_count'))
+            ->leftJoin('login_sessions', 'users.id', '=', 'login_sessions.user_id')
+            ->groupBy('users.id', 'users.name', 'users.email', 'users.status')
+            ->orderBy('login_count', 'desc')
+            ->limit(50)
+            ->get();
+
+        // Recent login sessions
+        $recentLogins = LoginSession::with('user')
+            ->orderBy('login_at', 'desc')
+            ->limit(100)
+            ->get();
+
+        // User activity breakdown
+        $userActivityBreakdown = User::select('users.id', 'users.name', 'users.email', 'users.created_at', DB::raw('COUNT(login_sessions.id) as total_logins'), DB::raw('MAX(login_sessions.login_at) as last_login'))
+            ->leftJoin('login_sessions', 'users.id', '=', 'login_sessions.user_id')
+            ->groupBy('users.id', 'users.name', 'users.email', 'users.created_at')
+            ->orderBy('total_logins', 'desc')
+            ->paginate(50);
+
+        // Monthly user registration trend
+        $monthlyRegistrations = User::select(DB::raw('YEAR(created_at) as year'), DB::raw('MONTH(created_at) as month'), DB::raw('COUNT(*) as count'))
+            ->whereBetween('created_at', [now()->subMonths(12), now()])
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
+            ->get();
+
+        return view('admin.settings.reports.usage', compact('stats', 'dailyLogins', 'topActiveUsers', 'recentLogins', 'userActivityBreakdown', 'monthlyRegistrations'));
     }
 
     public function performanceMonitoring()
     {
-        return view('admin.settings.reports.performance');
+        // Performance metrics
+        $performanceMetrics = [
+            'memory_usage' => round(memory_get_usage(true) / 1024 / 1024, 2), // MB
+            'peak_memory' => round(memory_get_peak_usage(true) / 1024 / 1024, 2), // MB
+            'memory_limit' => ini_get('memory_limit'),
+            'max_execution_time' => ini_get('max_execution_time'),
+            'php_version' => PHP_VERSION,
+            'laravel_version' => app()->version(),
+        ];
+
+        // Recent activities
+        $recentActivities = ActivityLog::orderBy('created_at', 'desc')
+            ->limit(100)
+            ->get();
+
+        // Activity by type
+        $activityByType = ActivityLog::select('action', DB::raw('COUNT(*) as count'))
+            ->whereBetween('created_at', [now()->subDays(30), now()])
+            ->groupBy('action')
+            ->orderBy('count', 'desc')
+            ->get();
+
+        // Activity by user
+        $activityByUser = ActivityLog::select('user_name', DB::raw('COUNT(*) as count'))
+            ->whereBetween('created_at', [now()->subDays(30), now()])
+            ->whereNotNull('user_name')
+            ->groupBy('user_name')
+            ->orderBy('count', 'desc')
+            ->limit(20)
+            ->get();
+
+        // Daily activity trend
+        $dailyActivityTrend = ActivityLog::select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as count'))
+            ->whereBetween('created_at', [now()->subDays(30), now()])
+            ->groupBy('date')
+            ->orderBy('date', 'desc')
+            ->get();
+
+        // Database query statistics
+        $dbStats = [
+            'total_queries_today' => DB::table('activity_logs')->whereDate('created_at', today())->count(),
+            'total_activities_today' => ActivityLog::whereDate('created_at', today())->count(),
+            'total_activities_this_week' => ActivityLog::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+            'total_activities_this_month' => ActivityLog::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count(),
+        ];
+
+        return view('admin.settings.reports.performance', compact(
+            'performanceMetrics',
+            'recentActivities',
+            'activityByType',
+            'activityByUser',
+            'dailyActivityTrend',
+            'dbStats'
+        ));
     }
 
-    public function errorReports()
+    public function errorReports(Request $request)
     {
-        $errors = DB::table('failed_jobs')
-            ->orderBy('failed_at', 'desc')
-            ->limit(50)
+        $query = DB::table('failed_jobs');
+
+        // Apply filters if provided
+        if ($request->has('date_from') && $request->date_from) {
+            $query->whereDate('failed_at', '>=', $request->date_from);
+        }
+        if ($request->has('date_to') && $request->date_to) {
+            $query->whereDate('failed_at', '<=', $request->date_to);
+        }
+        if ($request->has('queue') && $request->queue) {
+            $query->where('queue', $request->queue);
+        }
+
+        $errors = $query->orderBy('failed_at', 'desc')
+            ->paginate(50);
+
+        $stats = [
+            'total_errors' => DB::table('failed_jobs')->count(),
+            'errors_today' => DB::table('failed_jobs')->whereDate('failed_at', today())->count(),
+            'errors_this_week' => DB::table('failed_jobs')->whereBetween('failed_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+            'errors_this_month' => DB::table('failed_jobs')->whereMonth('failed_at', now()->month)->whereYear('failed_at', now()->year)->count(),
+        ];
+
+        // Error breakdown by queue
+        $errorsByQueue = DB::table('failed_jobs')
+            ->select('queue', DB::raw('COUNT(*) as count'))
+            ->groupBy('queue')
+            ->orderBy('count', 'desc')
             ->get();
-        return view('admin.settings.reports.errors', compact('errors'));
+
+        // Daily error trend
+        $dailyErrorTrend = DB::table('failed_jobs')
+            ->select(DB::raw('DATE(failed_at) as date'), DB::raw('COUNT(*) as count'))
+            ->whereBetween('failed_at', [now()->subDays(30), now()])
+            ->groupBy('date')
+            ->orderBy('date', 'desc')
+            ->get();
+
+        // Most common exceptions
+        $commonExceptions = DB::table('failed_jobs')
+            ->select('exception', DB::raw('COUNT(*) as count'))
+            ->whereBetween('failed_at', [now()->subDays(30), now()])
+            ->groupBy('exception')
+            ->orderBy('count', 'desc')
+            ->limit(10)
+            ->get();
+
+        return view('admin.settings.reports.errors', compact('errors', 'stats', 'errorsByQueue', 'dailyErrorTrend', 'commonExceptions'));
     }
 
     public function exportSystemReportsPdf()
@@ -1007,46 +1142,110 @@ class SystemSettingsController extends Controller
             ->orderBy('date', 'desc')
             ->get();
 
-        $userActivity = User::select('users.id', 'users.name', 'users.email', DB::raw('COUNT(login_sessions.id) as login_count'))
+        $topActiveUsers = User::select('users.id', 'users.name', 'users.email', 'users.status', DB::raw('COUNT(login_sessions.id) as login_count'))
             ->leftJoin('login_sessions', 'users.id', '=', 'login_sessions.user_id')
-            ->groupBy('users.id', 'users.name', 'users.email')
+            ->groupBy('users.id', 'users.name', 'users.email', 'users.status')
             ->orderBy('login_count', 'desc')
-            ->limit(20)
+            ->limit(50)
+            ->get();
+
+        $recentLogins = LoginSession::with('user')
+            ->orderBy('login_at', 'desc')
+            ->limit(100)
+            ->get();
+
+        $userActivityBreakdown = User::select('users.id', 'users.name', 'users.email', 'users.created_at', DB::raw('COUNT(login_sessions.id) as total_logins'), DB::raw('MAX(login_sessions.login_at) as last_login'))
+            ->leftJoin('login_sessions', 'users.id', '=', 'login_sessions.user_id')
+            ->groupBy('users.id', 'users.name', 'users.email', 'users.created_at')
+            ->orderBy('total_logins', 'desc')
+            ->limit(100)
+            ->get();
+
+        $monthlyRegistrations = User::select(DB::raw('YEAR(created_at) as year'), DB::raw('MONTH(created_at) as month'), DB::raw('COUNT(*) as count'))
+            ->whereBetween('created_at', [now()->subMonths(12), now()])
+            ->groupBy('year', 'month')
+            ->orderBy('year', 'desc')
+            ->orderBy('month', 'desc')
             ->get();
 
         return PdfHelper::downloadPdf('admin.settings.reports.pdf.usage', [
             'stats' => $stats,
             'dailyLogins' => $dailyLogins,
-            'userActivity' => $userActivity,
+            'topActiveUsers' => $topActiveUsers,
+            'recentLogins' => $recentLogins,
+            'userActivityBreakdown' => $userActivityBreakdown,
+            'monthlyRegistrations' => $monthlyRegistrations,
             'documentTitle' => 'Usage Statistics Report',
         ], 'usage-statistics-'.date('Y-m-d-His').'.pdf');
     }
 
     public function exportPerformanceMonitoringPdf()
     {
-        $stats = [
-            'total_requests' => DB::table('activity_logs')->where('created_at', '>=', now()->subDay())->count(),
-            'avg_response_time' => 120, // This would come from actual monitoring
-            'database_queries' => 45, // This would come from query logging
-            'memory_usage' => memory_get_usage(true) / 1024 / 1024, // MB
-            'peak_memory' => memory_get_peak_usage(true) / 1024 / 1024, // MB
+        $performanceMetrics = [
+            'memory_usage' => round(memory_get_usage(true) / 1024 / 1024, 2),
+            'peak_memory' => round(memory_get_peak_usage(true) / 1024 / 1024, 2),
+            'memory_limit' => ini_get('memory_limit'),
+            'max_execution_time' => ini_get('max_execution_time'),
+            'php_version' => PHP_VERSION,
+            'laravel_version' => app()->version(),
         ];
 
         $recentActivities = ActivityLog::orderBy('created_at', 'desc')
-            ->limit(30)
+            ->limit(100)
             ->get();
 
+        $activityByType = ActivityLog::select('action', DB::raw('COUNT(*) as count'))
+            ->whereBetween('created_at', [now()->subDays(30), now()])
+            ->groupBy('action')
+            ->orderBy('count', 'desc')
+            ->get();
+
+        $activityByUser = ActivityLog::select('user_name', DB::raw('COUNT(*) as count'))
+            ->whereBetween('created_at', [now()->subDays(30), now()])
+            ->whereNotNull('user_name')
+            ->groupBy('user_name')
+            ->orderBy('count', 'desc')
+            ->limit(20)
+            ->get();
+
+        $dailyActivityTrend = ActivityLog::select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as count'))
+            ->whereBetween('created_at', [now()->subDays(30), now()])
+            ->groupBy('date')
+            ->orderBy('date', 'desc')
+            ->get();
+
+        $dbStats = [
+            'total_activities_today' => ActivityLog::whereDate('created_at', today())->count(),
+            'total_activities_this_week' => ActivityLog::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+            'total_activities_this_month' => ActivityLog::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count(),
+        ];
+
         return PdfHelper::downloadPdf('admin.settings.reports.pdf.performance', [
-            'stats' => $stats,
+            'performanceMetrics' => $performanceMetrics,
             'recentActivities' => $recentActivities,
+            'activityByType' => $activityByType,
+            'activityByUser' => $activityByUser,
+            'dailyActivityTrend' => $dailyActivityTrend,
+            'dbStats' => $dbStats,
             'documentTitle' => 'Performance Monitoring Report',
         ], 'performance-monitoring-'.date('Y-m-d-His').'.pdf');
     }
 
-    public function exportErrorReportsPdf()
+    public function exportErrorReportsPdf(Request $request)
     {
-        $errors = DB::table('failed_jobs')
-            ->orderBy('failed_at', 'desc')
+        $query = DB::table('failed_jobs');
+
+        if ($request->has('date_from') && $request->date_from) {
+            $query->whereDate('failed_at', '>=', $request->date_from);
+        }
+        if ($request->has('date_to') && $request->date_to) {
+            $query->whereDate('failed_at', '<=', $request->date_to);
+        }
+        if ($request->has('queue') && $request->queue) {
+            $query->where('queue', $request->queue);
+        }
+
+        $errors = $query->orderBy('failed_at', 'desc')
             ->limit(100)
             ->get();
 
@@ -1057,9 +1256,33 @@ class SystemSettingsController extends Controller
             'errors_this_month' => DB::table('failed_jobs')->whereMonth('failed_at', now()->month)->whereYear('failed_at', now()->year)->count(),
         ];
 
+        $errorsByQueue = DB::table('failed_jobs')
+            ->select('queue', DB::raw('COUNT(*) as count'))
+            ->groupBy('queue')
+            ->orderBy('count', 'desc')
+            ->get();
+
+        $dailyErrorTrend = DB::table('failed_jobs')
+            ->select(DB::raw('DATE(failed_at) as date'), DB::raw('COUNT(*) as count'))
+            ->whereBetween('failed_at', [now()->subDays(30), now()])
+            ->groupBy('date')
+            ->orderBy('date', 'desc')
+            ->get();
+
+        $commonExceptions = DB::table('failed_jobs')
+            ->select('exception', DB::raw('COUNT(*) as count'))
+            ->whereBetween('failed_at', [now()->subDays(30), now()])
+            ->groupBy('exception')
+            ->orderBy('count', 'desc')
+            ->limit(10)
+            ->get();
+
         return PdfHelper::downloadPdf('admin.settings.reports.pdf.errors', [
             'errors' => $errors,
             'stats' => $stats,
+            'errorsByQueue' => $errorsByQueue,
+            'dailyErrorTrend' => $dailyErrorTrend,
+            'commonExceptions' => $commonExceptions,
             'documentTitle' => 'Error Reports',
         ], 'error-reports-'.date('Y-m-d-His').'.pdf');
     }

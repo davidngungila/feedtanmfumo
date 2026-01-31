@@ -178,25 +178,114 @@
     </div>
     @endif
 
-    <!-- User Activity -->
-    @if($userActivity->count() > 0)
+    <!-- Top Active Users -->
+    @if(isset($topActiveUsers) && $topActiveUsers->count() > 0)
     <div class="section">
         <div class="section-header">Top Active Users</div>
         <div class="section-content">
             <table>
                 <thead>
                     <tr>
+                        <th>Rank</th>
                         <th>User Name</th>
                         <th>Email</th>
+                        <th>Status</th>
                         <th style="text-align: right;">Login Count</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($userActivity as $user)
+                    @foreach($topActiveUsers->take(50) as $index => $user)
+                    <tr>
+                        <td>#{{ $index + 1 }}</td>
+                        <td><strong>{{ $user->name }}</strong></td>
+                        <td>{{ $user->email }}</td>
+                        <td>{{ ucfirst($user->status) }}</td>
+                        <td style="text-align: right;"><strong>{{ number_format($user->login_count) }}</strong></td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
+    <!-- Recent Login Sessions -->
+    @if(isset($recentLogins) && $recentLogins->count() > 0)
+    <div class="section">
+        <div class="section-header">Recent Login Sessions</div>
+        <div class="section-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>IP Address</th>
+                        <th>Login At</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($recentLogins->take(50) as $login)
+                    <tr>
+                        <td>{{ $login->user->name ?? 'N/A' }}</td>
+                        <td style="font-family: 'Courier New', monospace;">{{ $login->ip_address ?? 'N/A' }}</td>
+                        <td>{{ $login->login_at ? \Carbon\Carbon::parse($login->login_at)->format('M d, Y H:i') : 'N/A' }}</td>
+                        <td>{{ $login->logout_at ? 'Logged Out' : 'Active' }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
+    <!-- User Activity Breakdown -->
+    @if(isset($userActivityBreakdown) && $userActivityBreakdown->count() > 0)
+    <div class="section">
+        <div class="section-header">User Activity Breakdown</div>
+        <div class="section-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th>User Name</th>
+                        <th>Email</th>
+                        <th>Registered</th>
+                        <th style="text-align: right;">Total Logins</th>
+                        <th>Last Login</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($userActivityBreakdown->take(50) as $user)
                     <tr>
                         <td><strong>{{ $user->name }}</strong></td>
                         <td>{{ $user->email }}</td>
-                        <td style="text-align: right;"><strong>{{ number_format($user->login_count) }}</strong></td>
+                        <td>{{ $user->created_at ? \Carbon\Carbon::parse($user->created_at)->format('M d, Y') : 'N/A' }}</td>
+                        <td style="text-align: right;"><strong>{{ number_format($user->total_logins) }}</strong></td>
+                        <td>{{ $user->last_login ? \Carbon\Carbon::parse($user->last_login)->format('M d, Y H:i') : 'Never' }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
+    <!-- Monthly Registration Trend -->
+    @if(isset($monthlyRegistrations) && $monthlyRegistrations->count() > 0)
+    <div class="section">
+        <div class="section-header">Monthly User Registration Trend (Last 12 Months)</div>
+        <div class="section-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th style="text-align: right;">New Users</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($monthlyRegistrations as $month)
+                    <tr>
+                        <td>{{ \Carbon\Carbon::create($month->year, $month->month, 1)->format('F Y') }}</td>
+                        <td style="text-align: right;"><strong>{{ number_format($month->count) }}</strong></td>
                     </tr>
                     @endforeach
                 </tbody>
