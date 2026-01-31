@@ -9,7 +9,7 @@
         <div class="flex flex-col md:flex-row md:items-center">
             <div class="flex-1">
                 <h1 class="text-2xl sm:text-3xl font-bold mb-2">New Loan Application</h1>
-                <p class="text-white text-opacity-90 text-sm sm:text-base">Create a new loan application for a member</p>
+                <p class="text-white text-opacity-90 text-sm sm:text-base">Create a comprehensive loan application with detailed information and supporting documents</p>
             </div>
             <div class="mt-4 md:mt-0 md:ml-auto flex flex-wrap gap-3 justify-end">
                 <a href="{{ route('admin.loans.index') }}" class="inline-flex items-center px-6 py-3 bg-white text-[#015425] rounded-md hover:bg-gray-100 transition font-medium shadow-md">
@@ -19,7 +19,7 @@
         </div>
     </div>
 
-    <form action="{{ route('admin.loans.store') }}" method="POST" id="loan-form">
+    <form action="{{ route('admin.loans.store') }}" method="POST" id="loan-form" enctype="multipart/form-data">
         @csrf
         
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -82,6 +82,27 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Loan Type
+                            </label>
+                            <select name="loan_type" id="loan_type" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition">
+                                <option value="">-- Select loan type --</option>
+                                <option value="Personal">Personal Loan</option>
+                                <option value="Business">Business Loan</option>
+                                <option value="Agricultural">Agricultural Loan</option>
+                                <option value="Education">Education Loan</option>
+                                <option value="Emergency">Emergency Loan</option>
+                                <option value="Asset Financing">Asset Financing</option>
+                                <option value="Home Improvement">Home Improvement</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            @error('loan_type')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Principal Amount (TZS) <span class="text-red-500">*</span>
@@ -154,7 +175,6 @@
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
-
                     </div>
 
                     <div class="mt-6">
@@ -178,11 +198,264 @@
                         @error('purpose')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
-                        <p class="text-xs text-gray-500 mt-1">Detailed explanation of how the loan will be used, including any collateral or security information</p>
+                        <p class="text-xs text-gray-500 mt-1">Detailed explanation of how the loan will be used</p>
                     </div>
                 </div>
 
-                <!-- Additional Information -->
+                <!-- Collateral Information -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-[#015425]">Collateral Information</h2>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Collateral Description
+                            </label>
+                            <textarea name="collateral_description" id="collateral_description" rows="3"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
+                                placeholder="Describe the collateral being offered (e.g., land title, vehicle, property, etc.)"></textarea>
+                            @error('collateral_description')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Collateral Value (TZS)
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">TZS</span>
+                                <input type="number" name="collateral_value" id="collateral_value" step="0.01" min="0"
+                                    class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
+                                    placeholder="0.00">
+                            </div>
+                            @error('collateral_value')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Guarantor Information -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-[#015425]">Guarantor Information</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Guarantor Name
+                            </label>
+                            <input type="text" name="guarantor_name" id="guarantor_name"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
+                                placeholder="Full name">
+                            @error('guarantor_name')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Guarantor Phone
+                            </label>
+                            <input type="text" name="guarantor_phone" id="guarantor_phone"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
+                                placeholder="+255...">
+                            @error('guarantor_phone')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Guarantor Email
+                            </label>
+                            <input type="email" name="guarantor_email" id="guarantor_email"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
+                                placeholder="email@example.com">
+                            @error('guarantor_email')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Guarantor Address
+                            </label>
+                            <textarea name="guarantor_address" id="guarantor_address" rows="2"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
+                                placeholder="Physical address"></textarea>
+                            @error('guarantor_address')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Business Plan & Repayment -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-[#015425]">Business Plan & Repayment Source</h2>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Business Plan / Project Description
+                            </label>
+                            <textarea name="business_plan" id="business_plan" rows="4"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
+                                placeholder="Describe the business plan or project that the loan will finance..."></textarea>
+                            @error('business_plan')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Repayment Source
+                            </label>
+                            <textarea name="repayment_source" id="repayment_source" rows="3"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
+                                placeholder="Explain how the loan will be repaid (e.g., business income, salary, agricultural sales, etc.)"></textarea>
+                            @error('repayment_source')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Additional Notes
+                            </label>
+                            <textarea name="additional_notes" id="additional_notes" rows="3"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
+                                placeholder="Any additional information or notes about this loan application..."></textarea>
+                            @error('additional_notes')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Document Uploads -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-xl font-bold text-[#015425]">Loan Application Documents</h2>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Main Application Document <span class="text-gray-500">(PDF, DOC, DOCX, JPG, PNG - Max 10MB)</span>
+                            </label>
+                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-[#015425] transition">
+                                <div class="space-y-1 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <div class="flex text-sm text-gray-600">
+                                        <label for="application_document" class="relative cursor-pointer bg-white rounded-md font-medium text-[#015425] hover:text-[#027a3a] focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-[#015425]">
+                                            <span>Upload a file</span>
+                                            <input id="application_document" name="application_document" type="file" class="sr-only" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                        </label>
+                                        <p class="pl-1">or drag and drop</p>
+                                    </div>
+                                    <p class="text-xs text-gray-500">PDF, DOC, DOCX, JPG, PNG up to 10MB</p>
+                                </div>
+                            </div>
+                            @error('application_document')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                            <div id="application_document_preview" class="mt-2 hidden">
+                                <p class="text-sm text-green-600 font-medium">✓ File selected: <span id="application_document_name"></span></p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                ID Document <span class="text-gray-500">(PDF, JPG, PNG - Max 10MB)</span>
+                            </label>
+                            <input type="file" name="id_document" id="id_document" accept=".pdf,.jpg,.jpeg,.png"
+                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#015425] file:text-white hover:file:bg-[#027a3a] file:cursor-pointer">
+                            @error('id_document')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Proof of Income <span class="text-gray-500">(PDF, DOC, DOCX, JPG, PNG - Max 10MB)</span>
+                            </label>
+                            <input type="file" name="proof_of_income" id="proof_of_income" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#015425] file:text-white hover:file:bg-[#027a3a] file:cursor-pointer">
+                            @error('proof_of_income')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Collateral Document <span class="text-gray-500">(PDF, DOC, DOCX, JPG, PNG - Max 10MB)</span>
+                            </label>
+                            <input type="file" name="collateral_document" id="collateral_document" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#015425] file:text-white hover:file:bg-[#027a3a] file:cursor-pointer">
+                            @error('collateral_document')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Guarantor Document <span class="text-gray-500">(PDF, DOC, DOCX, JPG, PNG - Max 10MB)</span>
+                            </label>
+                            <input type="file" name="guarantor_document" id="guarantor_document" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#015425] file:text-white hover:file:bg-[#027a3a] file:cursor-pointer">
+                            @error('guarantor_document')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Supporting Documents <span class="text-gray-500">(Multiple files - PDF, DOC, DOCX, JPG, PNG - Max 10MB each)</span>
+                            </label>
+                            <input type="file" name="supporting_documents[]" id="supporting_documents" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#015425] file:text-white hover:file:bg-[#027a3a] file:cursor-pointer">
+                            @error('supporting_documents.*')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                            <p class="text-xs text-gray-500 mt-1">You can select multiple files (e.g., bank statements, references, etc.)</p>
+                            <div id="supporting_documents_preview" class="mt-2 hidden">
+                                <p class="text-sm text-green-600 font-medium">✓ <span id="supporting_documents_count"></span> file(s) selected</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terms & Conditions -->
                 <div class="bg-white rounded-lg shadow-md p-6">
                     <div class="flex items-center mb-4">
                         <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
@@ -199,6 +472,7 @@
                             <ul class="text-sm text-blue-800 space-y-1 list-disc list-inside">
                                 <li>Loan application will be created with "Pending" status</li>
                                 <li>Requires approval from authorized personnel before disbursement</li>
+                                <li>All uploaded documents will be securely stored</li>
                                 <li>Interest will be calculated based on the provided rate and term</li>
                                 <li>Loan number will be automatically generated upon creation</li>
                                 <li>Member will be notified once the loan is approved</li>
@@ -209,7 +483,7 @@
                             <input type="checkbox" id="terms_accepted" name="terms_accepted" required 
                                 class="mt-1 mr-3 h-4 w-4 text-[#015425] focus:ring-[#015425] border-gray-300 rounded">
                             <label for="terms_accepted" class="text-sm text-gray-700">
-                                I confirm that all information provided is accurate and the member has been properly verified.
+                                I confirm that all information provided is accurate, all documents are authentic, and the member has been properly verified.
                             </label>
                         </div>
                     </div>
@@ -277,6 +551,12 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                             <span class="text-gray-600">Requires approval before disbursement</span>
+                        </div>
+                        <div class="flex items-center text-sm">
+                            <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            </svg>
+                            <span class="text-gray-600">Documents will be securely stored</span>
                         </div>
                         <div class="flex items-center text-sm">
                             <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -381,6 +661,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initial calculation
     calculateLoan();
+
+    // File upload preview handlers
+    const applicationDocument = document.getElementById('application_document');
+    if (applicationDocument) {
+        applicationDocument.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                document.getElementById('application_document_name').textContent = e.target.files[0].name;
+                document.getElementById('application_document_preview').classList.remove('hidden');
+            } else {
+                document.getElementById('application_document_preview').classList.add('hidden');
+            }
+        });
+    }
+
+    const supportingDocuments = document.getElementById('supporting_documents');
+    if (supportingDocuments) {
+        supportingDocuments.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                document.getElementById('supporting_documents_count').textContent = e.target.files.length;
+                document.getElementById('supporting_documents_preview').classList.remove('hidden');
+            } else {
+                document.getElementById('supporting_documents_preview').classList.add('hidden');
+            }
+        });
+    }
 });
 </script>
 @endpush

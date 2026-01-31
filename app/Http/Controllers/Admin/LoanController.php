@@ -81,6 +81,24 @@ class LoanController extends Controller
             'purpose' => 'required|string|min:10',
             'application_date' => 'required|date',
             'terms_accepted' => 'required|accepted',
+            // Additional fields
+            'loan_type' => 'nullable|string|max:255',
+            'collateral_description' => 'nullable|string',
+            'collateral_value' => 'nullable|numeric|min:0',
+            'guarantor_name' => 'nullable|string|max:255',
+            'guarantor_phone' => 'nullable|string|max:20',
+            'guarantor_email' => 'nullable|email|max:255',
+            'guarantor_address' => 'nullable|string',
+            'business_plan' => 'nullable|string',
+            'repayment_source' => 'nullable|string',
+            'additional_notes' => 'nullable|string',
+            // Document uploads
+            'application_document' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
+            'supporting_documents.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
+            'id_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'proof_of_income' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
+            'collateral_document' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
+            'guarantor_document' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
         ]);
 
         $principal = $validated['principal_amount'];
@@ -93,7 +111,8 @@ class LoanController extends Controller
             $purpose = $request->loan_purpose_category . ': ' . $purpose;
         }
 
-        $loan = Loan::create([
+        // Handle file uploads
+        $loanData = [
             'user_id' => $validated['user_id'],
             'loan_number' => 'LN-' . strtoupper(Str::random(8)),
             'principal_amount' => $principal,
@@ -106,9 +125,55 @@ class LoanController extends Controller
             'status' => 'pending',
             'payment_frequency' => $validated['payment_frequency'],
             'purpose' => $purpose,
-        ]);
+            'loan_type' => $validated['loan_type'] ?? null,
+            'collateral_description' => $validated['collateral_description'] ?? null,
+            'collateral_value' => $validated['collateral_value'] ?? null,
+            'guarantor_name' => $validated['guarantor_name'] ?? null,
+            'guarantor_phone' => $validated['guarantor_phone'] ?? null,
+            'guarantor_email' => $validated['guarantor_email'] ?? null,
+            'guarantor_address' => $validated['guarantor_address'] ?? null,
+            'business_plan' => $validated['business_plan'] ?? null,
+            'repayment_source' => $validated['repayment_source'] ?? null,
+            'additional_notes' => $validated['additional_notes'] ?? null,
+        ];
 
-        return redirect()->route('admin.loans.show', $loan)->with('success', 'Loan application created successfully. It is now pending approval.');
+        // Upload application document
+        if ($request->hasFile('application_document')) {
+            $loanData['application_document'] = $request->file('application_document')->store('loans/documents', 'public');
+        }
+
+        // Upload supporting documents (multiple files)
+        if ($request->hasFile('supporting_documents')) {
+            $supportingDocs = [];
+            foreach ($request->file('supporting_documents') as $file) {
+                $supportingDocs[] = $file->store('loans/documents', 'public');
+            }
+            $loanData['supporting_documents'] = $supportingDocs;
+        }
+
+        // Upload ID document
+        if ($request->hasFile('id_document')) {
+            $loanData['id_document'] = $request->file('id_document')->store('loans/documents', 'public');
+        }
+
+        // Upload proof of income
+        if ($request->hasFile('proof_of_income')) {
+            $loanData['proof_of_income'] = $request->file('proof_of_income')->store('loans/documents', 'public');
+        }
+
+        // Upload collateral document
+        if ($request->hasFile('collateral_document')) {
+            $loanData['collateral_document'] = $request->file('collateral_document')->store('loans/documents', 'public');
+        }
+
+        // Upload guarantor document
+        if ($request->hasFile('guarantor_document')) {
+            $loanData['guarantor_document'] = $request->file('guarantor_document')->store('loans/documents', 'public');
+        }
+
+        $loan = Loan::create($loanData);
+
+        return redirect()->route('admin.loans.show', $loan)->with('success', 'Loan application created successfully with all documents. It is now pending approval.');
     }
 
     public function show(Loan $loan)

@@ -30,6 +30,22 @@ class Loan extends Model
         'purpose',
         'rejection_reason',
         'approved_by',
+        'loan_type',
+        'collateral_description',
+        'collateral_value',
+        'guarantor_name',
+        'guarantor_phone',
+        'guarantor_email',
+        'guarantor_address',
+        'business_plan',
+        'repayment_source',
+        'additional_notes',
+        'application_document',
+        'supporting_documents',
+        'id_document',
+        'proof_of_income',
+        'collateral_document',
+        'guarantor_document',
     ];
 
     protected $casts = [
@@ -38,10 +54,12 @@ class Loan extends Model
         'total_amount' => 'decimal:2',
         'paid_amount' => 'decimal:2',
         'remaining_amount' => 'decimal:2',
+        'collateral_value' => 'decimal:2',
         'application_date' => 'date',
         'approval_date' => 'date',
         'disbursement_date' => 'date',
         'maturity_date' => 'date',
+        'supporting_documents' => 'array',
     ];
 
     public function user(): BelongsTo
