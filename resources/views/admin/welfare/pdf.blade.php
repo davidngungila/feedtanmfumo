@@ -9,12 +9,12 @@
             .no-print { display: none !important; }
             @page {
                 margin: 0;
-                size: 80mm auto; /* Standard receipt printer */
+                size: 58mm auto; /* 58mm receipt printer */
             }
         }
         @page {
             margin: 0;
-            size: 80mm auto; /* Default to 80mm receipt width */
+            size: 58mm auto; /* 58mm receipt width - exact size */
         }
         * {
             box-sizing: border-box;
@@ -24,94 +24,94 @@
         body {
             font-family: 'Arial', 'Courier New', monospace;
             margin: 0;
-            padding: 10px;
+            padding: 8px;
             background: #ffffff;
             color: #000000;
-            line-height: 1.3;
-            font-size: 11px;
-            max-width: 80mm; /* Standard receipt width */
+            line-height: 1.2;
+            font-size: 9px;
+            max-width: 58mm; /* 58mm receipt width - exact size */
             margin: 0 auto;
         }
         .receipt-container {
             width: 100%;
-            max-width: 80mm;
+            max-width: 58mm;
             background: white;
         }
         .receipt-header {
             text-align: center;
-            padding: 10px 0;
-            border-bottom: 2px dashed #015425;
-            margin-bottom: 10px;
+            padding: 6px 0;
+            border-bottom: 1px dashed #015425;
+            margin-bottom: 6px;
             background: linear-gradient(135deg, #f0f9f4 0%, #e6f7f0 100%);
         }
         .logo-container {
-            margin-bottom: 8px;
+            margin-bottom: 4px;
         }
         .logo-container img {
-            max-width: 100px;
+            max-width: 60px;
             height: auto;
             background: white;
-            padding: 5px;
-            border-radius: 6px;
+            padding: 3px;
+            border-radius: 4px;
             display: block;
             margin: 0 auto;
         }
         .receipt-header h1 {
-            font-size: 14px;
+            font-size: 11px;
             font-weight: bold;
-            margin: 0 0 3px 0;
+            margin: 0 0 2px 0;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             color: #015425;
         }
         .receipt-header p {
-            font-size: 9px;
-            margin: 2px 0;
+            font-size: 7px;
+            margin: 1px 0;
             color: #027a3a;
         }
         .receipt-title {
             text-align: center;
-            font-size: 12px;
+            font-size: 9px;
             font-weight: bold;
-            margin: 8px 0;
+            margin: 5px 0;
             text-transform: uppercase;
-            padding: 5px 0;
-            border-top: 2px solid #015425;
-            border-bottom: 2px solid #015425;
+            padding: 3px 0;
+            border-top: 1px solid #015425;
+            border-bottom: 1px solid #015425;
             background: linear-gradient(135deg, #015425 0%, #027a3a 100%);
             color: white;
         }
         .welfare-number {
             text-align: center;
-            padding: 8px;
+            padding: 5px;
             background: #015425;
             color: #fff;
             font-family: 'Courier New', monospace;
-            font-size: 12px;
-            font-weight: bold;
-            letter-spacing: 2px;
-            margin: 10px 0;
-            border: 2px solid #015425;
-            border-radius: 6px;
-        }
-        .receipt-section {
-            margin: 8px 0;
-            padding: 5px 0;
-        }
-        .section-label {
             font-size: 10px;
             font-weight: bold;
+            letter-spacing: 1px;
+            margin: 6px 0;
+            border: 1px solid #015425;
+            border-radius: 4px;
+        }
+        .receipt-section {
+            margin: 5px 0;
+            padding: 3px 0;
+        }
+        .section-label {
+            font-size: 8px;
+            font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 4px;
-            border-bottom: 2px solid #015425;
-            padding-bottom: 2px;
+            margin-bottom: 3px;
+            border-bottom: 1px solid #015425;
+            padding-bottom: 1px;
             color: #015425;
         }
         .receipt-line {
             display: flex;
             justify-content: space-between;
-            padding: 3px 0;
-            font-size: 10px;
+            padding: 2px 0;
+            font-size: 8px;
             border-bottom: 1px dotted #ddd;
         }
         .receipt-line:last-child {
@@ -120,64 +120,66 @@
         .line-label {
             font-weight: 600;
             flex-shrink: 0;
-            width: 35%;
+            width: 40%;
             text-align: left;
             color: #027a3a;
+            font-size: 7px;
         }
         .line-value {
             flex: 1;
             text-align: right;
             word-break: break-word;
             color: #111827;
+            font-size: 8px;
         }
         .amount-box {
             text-align: center;
-            padding: 12px;
+            padding: 8px;
             background: linear-gradient(135deg, #f0f9f4 0%, #e6f7f0 100%);
-            border: 2px solid #015425;
-            border-radius: 6px;
-            margin: 12px 0;
+            border: 1px solid #015425;
+            border-radius: 4px;
+            margin: 8px 0;
         }
         .amount-label {
-            font-size: 9px;
+            font-size: 7px;
             font-weight: bold;
             text-transform: uppercase;
             color: #015425;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
         .amount-value {
-            font-size: 18px;
+            font-size: 14px;
             font-weight: bold;
             color: #015425;
             font-family: 'Courier New', monospace;
         }
         .receipt-block {
-            margin: 6px 0;
-            padding: 5px;
+            margin: 4px 0;
+            padding: 3px;
             background: linear-gradient(135deg, #f0f9f4 0%, #e6f7f0 100%);
             border: 1px solid #015425;
-            border-radius: 4px;
+            border-radius: 3px;
         }
         .block-label {
-            font-size: 9px;
+            font-size: 7px;
             font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
             color: #015425;
         }
         .block-value {
-            font-size: 10px;
+            font-size: 8px;
             word-break: break-word;
             color: #111827;
         }
         .status-badge {
             display: inline-block;
-            padding: 2px 6px;
+            padding: 1px 4px;
             border: 1px solid #000;
-            font-size: 9px;
+            font-size: 7px;
             font-weight: bold;
             text-transform: uppercase;
-            border-radius: 4px;
+            border-radius: 3px;
         }
         .status-approved, .status-completed, .status-disbursed {
             background: #015425;
@@ -196,36 +198,37 @@
         }
         .receipt-divider {
             text-align: center;
-            margin: 8px 0;
-            padding: 5px 0;
-            border-top: 2px dashed #015425;
-            border-bottom: 2px dashed #015425;
+            margin: 5px 0;
+            padding: 3px 0;
+            border-top: 1px dashed #015425;
+            border-bottom: 1px dashed #015425;
             color: #015425;
             font-weight: bold;
+            font-size: 7px;
         }
         .receipt-footer {
             text-align: center;
-            margin-top: 15px;
-            padding-top: 10px;
-            border-top: 2px dashed #015425;
-            font-size: 8px;
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 1px dashed #015425;
+            font-size: 6px;
             color: #6b7280;
             background: linear-gradient(135deg, #f0f9f4 0%, #e6f7f0 100%);
         }
         .receipt-footer p {
-            margin: 3px 0;
-            line-height: 1.4;
+            margin: 2px 0;
+            line-height: 1.3;
         }
         .barcode {
             text-align: center;
             font-family: 'Courier New', monospace;
-            font-size: 14px;
+            font-size: 10px;
             font-weight: bold;
-            letter-spacing: 1px;
-            padding: 8px;
-            margin: 8px 0;
-            border: 2px solid #015425;
-            border-radius: 6px;
+            letter-spacing: 0.5px;
+            padding: 5px;
+            margin: 5px 0;
+            border: 1px solid #015425;
+            border-radius: 4px;
             background: white;
             color: #015425;
         }
