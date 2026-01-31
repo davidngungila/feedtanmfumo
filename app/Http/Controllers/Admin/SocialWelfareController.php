@@ -429,8 +429,8 @@ class SocialWelfareController extends Controller
         ];
 
         // 58mm receipt size: 58mm = 164.41 points (1mm = 2.83465 points)
-        // Use string format for DomPDF compatibility
-        $receiptSize = '164.41,1000'; // 58mm width, 1000 points height
+        // Pass as array directly to DomPDF
+        $receiptSize = [164.41, 1000]; // 58mm width, 1000 points height
 
         return PdfHelper::downloadPdf('admin.welfare.pdf', [
             'welfare' => $welfare,

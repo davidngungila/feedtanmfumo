@@ -13,28 +13,32 @@
             }
         }
         @page {
-            margin: 0;
-            size: 58mm auto; /* 58mm receipt width - exact size */
+            margin: 0 !important;
+            padding: 0 !important;
+            size: 164.41pt 1000pt; /* 58mm width (164.41 points), 1000 points height */
         }
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
+        html, body {
+            width: 164.41pt; /* Exactly 58mm in points */
+            max-width: 164.41pt;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
         body {
             font-family: 'Arial', 'Courier New', monospace;
-            margin: 0;
-            padding: 8px;
             background: #ffffff;
             color: #000000;
             line-height: 1.2;
             font-size: 9px;
-            max-width: 58mm; /* 58mm receipt width - exact size */
-            margin: 0 auto;
+            padding: 8px;
         }
         .receipt-container {
             width: 100%;
-            max-width: 58mm;
+            max-width: 100%;
             background: white;
         }
         .receipt-header {
