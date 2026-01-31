@@ -250,6 +250,38 @@ class SmsSendController extends Controller
             $sheet5->getColumnDimension($col)->setAutoSize(true);
         }
 
+        // Sheet 6: Birthday Data
+        $sheet6 = $spreadsheet->createSheet();
+        $sheet6->setTitle('Birthday');
+        $sheet6->setCellValue('A1', 'Full Name');
+        $sheet6->setCellValue('B1', 'Phone Number');
+        $sheet6->setCellValue('C1', 'Date of Birth');
+        $sheet6->setCellValue('D1', 'SWF Member');
+        $sheet6->setCellValue('E1', 'SWF Number');
+        $sheet6->setCellValue('F1', 'SMS Consent');
+        $sheet6->setCellValue('G1', 'Preferred Language');
+        $sheet6->getStyle('A1:G1')->applyFromArray($headerStyle);
+
+        $sampleData6 = [
+            ['John M. Peter', '255712345678', '1998-05-14', 'No', '', 'Yes', 'sw'],
+            ['Jane Smith', '255723456789', '1990-12-25', 'Yes', 'SWF-23456', 'Yes', 'sw'],
+            ['Michael Johnson', '255734567890', '1985-03-10', 'No', '', 'Yes', 'en'],
+        ];
+        $row = 2;
+        foreach ($sampleData6 as $data) {
+            $sheet6->setCellValue('A'.$row, $data[0]);
+            $sheet6->setCellValue('B'.$row, $data[1]);
+            $sheet6->setCellValue('C'.$row, $data[2]);
+            $sheet6->setCellValue('D'.$row, $data[3]);
+            $sheet6->setCellValue('E'.$row, $data[4]);
+            $sheet6->setCellValue('F'.$row, $data[5]);
+            $sheet6->setCellValue('G'.$row, $data[6]);
+            $row++;
+        }
+        foreach (range('A', 'G') as $col) {
+            $sheet6->getColumnDimension($col)->setAutoSize(true);
+        }
+
         // Set first sheet as active
         $spreadsheet->setActiveSheetIndex(0);
 

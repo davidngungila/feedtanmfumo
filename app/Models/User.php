@@ -84,6 +84,11 @@ class User extends Authenticatable
         'reviewer_comments',
         'editing_requested_at',
         'editing_requested_by',
+        'swf_member',
+        'swf_number',
+        'sms_consent',
+        'preferred_language',
+        'last_birthday_sms_date',
     ];
 
     /**
@@ -123,6 +128,9 @@ class User extends Authenticatable
             'membership_application_completed_steps' => 'array',
             'editing_requested' => 'boolean',
             'editing_requested_at' => 'datetime',
+            'swf_member' => 'boolean',
+            'sms_consent' => 'boolean',
+            'last_birthday_sms_date' => 'date',
         ];
     }
 
@@ -164,6 +172,30 @@ class User extends Authenticatable
     public function socialWelfares()
     {
         return $this->hasMany(SocialWelfare::class);
+    }
+
+    /**
+     * Check if user is a SWF Fund member
+     */
+    public function isSwfMember(): bool
+    {
+        // Check if user has swf_member flag set
+        if ($this->swf_member) {
+            return true;
+        }
+
+        // Check if user has active social welfare records
+        return $this->socialWelfares()
+            ->whereIn('status', ['approved', 'disbursed', 'completed'])
+            ->exists();
+    }
+
+    /**
+     * Check if user has given SMS consent
+     */
+    public function hasSmsConsent(): bool
+    {
+        return $this->sms_consent ?? true; // Default to true if not set
     }
 
     /**

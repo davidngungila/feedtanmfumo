@@ -24,3 +24,12 @@ Schedule::command('backup:database --encrypt')
             );
         }
     });
+
+// Schedule daily birthday SMS sending (runs at 8:00 AM)
+Schedule::command('sms:send-birthday')
+    ->dailyAt('08:00')
+    ->timezone(config('app.timezone', 'Africa/Dar_es_Salaam'))
+    ->withoutOverlapping()
+    ->onFailure(function () {
+        Log::error('Birthday SMS scheduled task failed at '.now()->format('Y-m-d H:i:s'));
+    });
