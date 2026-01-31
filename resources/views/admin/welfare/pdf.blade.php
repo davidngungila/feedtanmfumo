@@ -43,9 +43,9 @@
         }
         .receipt-header {
             text-align: center;
-            padding: 6px 0;
+            padding: 4px 0;
             border-bottom: 1px dashed #015425;
-            margin-bottom: 6px;
+            margin-bottom: 3px;
             background: linear-gradient(135deg, #f0f9f4 0%, #e6f7f0 100%);
         }
         .logo-container {
@@ -77,9 +77,9 @@
             text-align: center;
             font-size: 9px;
             font-weight: bold;
-            margin: 5px 0;
+            margin: 3px 0;
             text-transform: uppercase;
-            padding: 3px 0;
+            padding: 2px 0;
             border-top: 1px solid #015425;
             border-bottom: 1px solid #015425;
             background: linear-gradient(135deg, #015425 0%, #027a3a 100%);
@@ -87,20 +87,20 @@
         }
         .welfare-number {
             text-align: center;
-            padding: 5px;
+            padding: 4px;
             background: #015425;
             color: #fff;
             font-family: 'Courier New', monospace;
             font-size: 10px;
             font-weight: bold;
             letter-spacing: 1px;
-            margin: 6px 0;
+            margin: 3px 0;
             border: 1px solid #015425;
             border-radius: 4px;
         }
         .receipt-section {
-            margin: 5px 0;
-            padding: 3px 0;
+            margin: 3px 0;
+            padding: 2px 0;
         }
         .section-label {
             font-size: 8px;
@@ -114,9 +114,10 @@
         .receipt-line {
             display: flex;
             justify-content: space-between;
-            padding: 2px 0;
+            padding: 1px 0;
             font-size: 8px;
             border-bottom: 1px dotted #ddd;
+            margin-bottom: 1px;
         }
         .receipt-line:last-child {
             border-bottom: none;
@@ -138,11 +139,11 @@
         }
         .amount-box {
             text-align: center;
-            padding: 8px;
+            padding: 6px;
             background: linear-gradient(135deg, #f0f9f4 0%, #e6f7f0 100%);
             border: 1px solid #015425;
             border-radius: 4px;
-            margin: 8px 0;
+            margin: 4px 0;
         }
         .amount-label {
             font-size: 7px;
@@ -158,8 +159,8 @@
             font-family: 'Courier New', monospace;
         }
         .receipt-block {
-            margin: 4px 0;
-            padding: 3px;
+            margin: 2px 0;
+            padding: 2px;
             background: linear-gradient(135deg, #f0f9f4 0%, #e6f7f0 100%);
             border: 1px solid #015425;
             border-radius: 3px;
@@ -202,8 +203,8 @@
         }
         .receipt-divider {
             text-align: center;
-            margin: 5px 0;
-            padding: 3px 0;
+            margin: 3px 0;
+            padding: 2px 0;
             border-top: 1px dashed #015425;
             border-bottom: 1px dashed #015425;
             color: #015425;
@@ -212,8 +213,8 @@
         }
         .receipt-footer {
             text-align: center;
-            margin-top: 8px;
-            padding-top: 6px;
+            margin-top: 4px;
+            padding-top: 4px;
             border-top: 1px dashed #015425;
             font-size: 6px;
             color: #6b7280;
@@ -229,12 +230,35 @@
             font-size: 10px;
             font-weight: bold;
             letter-spacing: 0.5px;
-            padding: 5px;
-            margin: 5px 0;
+            padding: 4px;
+            margin: 3px 0;
             border: 1px solid #015425;
             border-radius: 4px;
             background: white;
             color: #015425;
+        }
+        .qr-code-section {
+            text-align: center;
+            margin: 4px 0;
+            padding: 3px 0;
+        }
+        .qr-code-container {
+            display: inline-block;
+            padding: 3px;
+            background: white;
+            border: 1px solid #015425;
+            border-radius: 3px;
+        }
+        .qr-code-container img {
+            width: 60px;
+            height: 60px;
+            display: block;
+        }
+        .qr-code-label {
+            font-size: 7px;
+            color: #015425;
+            margin-top: 2px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -364,6 +388,16 @@
         <div class="barcode">
             {{ $welfare->welfare_number }}
         </div>
+
+        <!-- QR Code -->
+        @if(isset($qrCodeUrl) && $qrCodeUrl)
+        <div class="qr-code-section">
+            <div class="qr-code-container">
+                <img src="{{ $qrCodeUrl }}" alt="QR Code">
+                <div class="qr-code-label">SCAN TO VERIFY</div>
+            </div>
+        </div>
+        @endif
 
         <!-- Footer -->
         <div class="receipt-footer">

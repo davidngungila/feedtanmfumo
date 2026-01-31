@@ -428,6 +428,17 @@ class SocialWelfareController extends Controller
             'phone' => '+255622239304',
         ];
 
+        // Generate QR code data
+        $qrData = [
+            'type' => 'welfare',
+            'welfare_number' => $welfare->welfare_number,
+            'member_id' => $welfare->user->membership_code ?? $welfare->user->id,
+            'amount' => $welfare->amount,
+            'date' => $welfare->transaction_date->format('Y-m-d'),
+            'status' => $welfare->status,
+        ];
+        $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=100x100&data='.urlencode(json_encode($qrData));
+
         // 58mm receipt size: 58mm = 164.41 points (1mm = 2.83465 points)
         // DomPDF format: [x, y, width, height] in points
         // x=0, y=0, width=164.41 (58mm), height=841.89 (A4 height for auto)
@@ -438,6 +449,7 @@ class SocialWelfareController extends Controller
             'organizationInfo' => $organizationInfo,
             'documentTitle' => 'Social Welfare Record',
             'documentSubtitle' => ucfirst($welfare->type) . ' - ' . ($welfare->benefit_type_name ?? 'Record'),
+            'qrCodeUrl' => $qrCodeUrl,
         ], 'welfare-'.$welfare->welfare_number.'-'.date('Y-m-d-His').'.pdf', $receiptSize, 'portrait');
     }
 }
