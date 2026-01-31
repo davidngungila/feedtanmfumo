@@ -43,35 +43,23 @@
         }
         .receipt-header {
             text-align: center;
-            padding: 4px 0;
+            padding: 0;
             border-bottom: 1px dashed #015425;
             margin-bottom: 3px;
-            background: linear-gradient(135deg, #f0f9f4 0%, #e6f7f0 100%);
+            background: white;
         }
         .logo-container {
-            margin-bottom: 4px;
+            margin: 0;
+            padding: 0;
+            width: 100%;
         }
         .logo-container img {
-            max-width: 60px;
+            width: 100%;
+            max-width: 100%;
             height: auto;
-            background: white;
-            padding: 3px;
-            border-radius: 4px;
             display: block;
-            margin: 0 auto;
-        }
-        .receipt-header h1 {
-            font-size: 11px;
-            font-weight: bold;
-            margin: 0 0 2px 0;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: #015425;
-        }
-        .receipt-header p {
-            font-size: 7px;
-            margin: 1px 0;
-            color: #027a3a;
+            margin: 0;
+            padding: 0;
         }
         .receipt-title {
             text-align: center;
@@ -215,6 +203,7 @@
             text-align: center;
             margin-top: 4px;
             padding-top: 4px;
+            padding-bottom: 15px;
             border-top: 1px dashed #015425;
             font-size: 6px;
             color: #6b7280;
@@ -268,12 +257,13 @@
         <div class="receipt-header">
             @if(isset($headerBase64) && $headerBase64)
             <div class="logo-container">
-                <img src="{{ $headerBase64 }}" alt="FeedTan CMG">
+                <img src="{{ $headerBase64 }}" alt="FeedTan CMG Header">
+            </div>
+            @else
+            <div class="logo-container">
+                <img src="{{ asset('header-mfumo.png') }}" alt="FeedTan CMG Header">
             </div>
             @endif
-            <h1>FeedTan CMG</h1>
-            <p>FeedTan Community Microfinance Group</p>
-            <p>Welfare Receipt</p>
         </div>
 
         <!-- Welfare Number -->
