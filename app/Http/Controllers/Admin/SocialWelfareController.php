@@ -803,6 +803,10 @@ class SocialWelfareController extends Controller
                     ->whereBetween('transaction_date', [$monthStart, $monthEnd])
                     ->where('status', 'rejected')
                     ->count(),
+                'pending' => SocialWelfare::where('type', 'benefit')
+                    ->whereBetween('transaction_date', [$monthStart, $monthEnd])
+                    ->where('status', 'pending')
+                    ->count(),
             ];
         }
 
