@@ -46,8 +46,14 @@ class PdfHelper
             ->setOption('isRemoteEnabled', true);
 
         // Handle custom paper size
-        if (is_array($paperSize) && count($paperSize) >= 2) {
-            // Custom size: [width, height] in points
+        if (is_array($paperSize)) {
+            // DomPDF expects [x, y, width, height] format for custom sizes
+            // If array has 2 elements, assume it's [width, height] and convert to [0, 0, width, height]
+            // If array has 4 elements, use as-is [x, y, width, height]
+            if (count($paperSize) === 2) {
+                // Convert [width, height] to [0, 0, width, height]
+                $paperSize = [0, 0, $paperSize[0], $paperSize[1]];
+            }
             // Pass array directly to DomPDF - it accepts float[] format
             $pdf->setPaper($paperSize, $orientation);
         } elseif (is_string($paperSize) && str_contains($paperSize, ',')) {

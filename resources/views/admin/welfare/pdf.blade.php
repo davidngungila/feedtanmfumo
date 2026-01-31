@@ -15,7 +15,7 @@
         @page {
             margin: 0 !important;
             padding: 0 !important;
-            size: 164.41pt 1000pt; /* 58mm width (164.41 points), 1000 points height */
+            size: 164.41pt auto; /* 58mm width (164.41 points), auto height */
         }
         * {
             box-sizing: border-box;
