@@ -491,10 +491,10 @@
                 </svg>
             </button>
             <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
-                <a href="{{ route('admin.welfare.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Fund Status Report</a>
-                <a href="{{ route('admin.welfare.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Claim Analysis</a>
-                <a href="{{ route('admin.welfare.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Beneficiary Reports</a>
-                <a href="{{ route('admin.welfare.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Utilization Statistics</a>
+                <a href="{{ route('admin.welfare.reports.fund-status') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Fund Status Report</a>
+                <a href="{{ route('admin.welfare.reports.claim-analysis') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Claim Analysis</a>
+                <a href="{{ route('admin.welfare.reports.beneficiary') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Beneficiary Reports</a>
+                <a href="{{ route('admin.welfare.reports.utilization') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Utilization Statistics</a>
             </div>
         </div>
     </div>
