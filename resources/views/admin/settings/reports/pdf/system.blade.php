@@ -131,23 +131,157 @@
         </div>
     </div>
 
-    <!-- System Summary Stats -->
-    <div class="stats">
-        <div class="stats-row">
-            <div class="stats-cell stats-label">Total Users:</div>
-            <div class="stats-cell"><strong>{{ number_format($stats['total_users']) }}</strong></div>
-            <div class="stats-cell stats-label">Active Users:</div>
-            <div class="stats-cell"><strong>{{ number_format($stats['active_users']) }}</strong></div>
+    <!-- System Information -->
+    <div class="section">
+        <div class="section-header">System Information</div>
+        <div class="section-content">
+            <div class="stats">
+                <div class="stats-row">
+                    <div class="stats-cell stats-label">Laravel Version:</div>
+                    <div class="stats-cell"><strong>{{ $systemInfo['laravel_version'] }}</strong></div>
+                    <div class="stats-cell stats-label">PHP Version:</div>
+                    <div class="stats-cell"><strong>{{ $systemInfo['php_version'] }}</strong></div>
+                </div>
+                <div class="stats-row">
+                    <div class="stats-cell stats-label">Environment:</div>
+                    <div class="stats-cell"><strong>{{ ucfirst($systemInfo['environment']) }}</strong></div>
+                    <div class="stats-cell stats-label">Database Driver:</div>
+                    <div class="stats-cell"><strong>{{ ucfirst($systemInfo['database_driver']) }}</strong></div>
+                </div>
+                <div class="stats-row">
+                    <div class="stats-cell stats-label">Timezone:</div>
+                    <div class="stats-cell"><strong>{{ $systemInfo['timezone'] }}</strong></div>
+                    <div class="stats-cell stats-label">Server Time:</div>
+                    <div class="stats-cell"><strong>{{ $systemInfo['server_time'] }}</strong></div>
+                </div>
+            </div>
         </div>
-        <div class="stats-row">
-            <div class="stats-cell stats-label">Total Logins:</div>
-            <div class="stats-cell"><strong>{{ number_format($stats['total_logins']) }}</strong></div>
-            <div class="stats-cell stats-label">Audit Logs:</div>
-            <div class="stats-cell"><strong>{{ number_format($stats['total_audit_logs']) }}</strong></div>
+    </div>
+
+    <!-- User Statistics -->
+    <div class="section">
+        <div class="section-header">User Statistics</div>
+        <div class="section-content">
+            <div class="stats">
+                <div class="stats-row">
+                    <div class="stats-cell stats-label">Total Users:</div>
+                    <div class="stats-cell"><strong>{{ number_format($userStats['total_users']) }}</strong></div>
+                    <div class="stats-cell stats-label">Active Users:</div>
+                    <div class="stats-cell"><strong>{{ number_format($userStats['active_users']) }}</strong></div>
+                </div>
+                <div class="stats-row">
+                    <div class="stats-cell stats-label">Members:</div>
+                    <div class="stats-cell"><strong>{{ number_format($userStats['members']) }}</strong></div>
+                    <div class="stats-cell stats-label">Administrators:</div>
+                    <div class="stats-cell"><strong>{{ number_format($userStats['admins']) }}</strong></div>
+                </div>
+                <div class="stats-row">
+                    <div class="stats-cell stats-label">New Users Today:</div>
+                    <div class="stats-cell"><strong>{{ number_format($userStats['new_users_today']) }}</strong></div>
+                    <div class="stats-cell stats-label">New Users This Week:</div>
+                    <div class="stats-cell"><strong>{{ number_format($userStats['new_users_this_week']) }}</strong></div>
+                </div>
+                <div class="stats-row">
+                    <div class="stats-cell stats-label">New Users This Month:</div>
+                    <div class="stats-cell"><strong>{{ number_format($userStats['new_users_this_month']) }}</strong></div>
+                </div>
+            </div>
         </div>
-        <div class="stats-row">
-            <div class="stats-cell stats-label">Activity Logs:</div>
-            <div class="stats-cell"><strong>{{ number_format($stats['total_activity_logs']) }}</strong></div>
+    </div>
+
+    <!-- Login Statistics -->
+    <div class="section">
+        <div class="section-header">Login Statistics</div>
+        <div class="section-content">
+            <div class="stats">
+                <div class="stats-row">
+                    <div class="stats-cell stats-label">Total Logins:</div>
+                    <div class="stats-cell"><strong>{{ number_format($loginStats['total_logins']) }}</strong></div>
+                    <div class="stats-cell stats-label">Logins Today:</div>
+                    <div class="stats-cell"><strong>{{ number_format($loginStats['logins_today']) }}</strong></div>
+                </div>
+                <div class="stats-row">
+                    <div class="stats-cell stats-label">Logins This Week:</div>
+                    <div class="stats-cell"><strong>{{ number_format($loginStats['logins_this_week']) }}</strong></div>
+                    <div class="stats-cell stats-label">Logins This Month:</div>
+                    <div class="stats-cell"><strong>{{ number_format($loginStats['logins_this_month']) }}</strong></div>
+                </div>
+                <div class="stats-row">
+                    <div class="stats-cell stats-label">Active Sessions:</div>
+                    <div class="stats-cell"><strong>{{ number_format($loginStats['active_sessions']) }}</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Database Statistics -->
+    <div class="section">
+        <div class="section-header">Database Statistics</div>
+        <div class="section-content">
+            <div class="stats">
+                <div class="stats-row">
+                    <div class="stats-cell stats-label">Total Loans:</div>
+                    <div class="stats-cell"><strong>{{ number_format($dbStats['total_loans']) }}</strong></div>
+                    <div class="stats-cell stats-label">Savings Accounts:</div>
+                    <div class="stats-cell"><strong>{{ number_format($dbStats['total_savings_accounts']) }}</strong></div>
+                </div>
+                <div class="stats-row">
+                    <div class="stats-cell stats-label">Investments:</div>
+                    <div class="stats-cell"><strong>{{ number_format($dbStats['total_investments']) }}</strong></div>
+                    <div class="stats-cell stats-label">Transactions:</div>
+                    <div class="stats-cell"><strong>{{ number_format($dbStats['total_transactions']) }}</strong></div>
+                </div>
+                <div class="stats-row">
+                    <div class="stats-cell stats-label">Welfare Records:</div>
+                    <div class="stats-cell"><strong>{{ number_format($dbStats['total_welfare_records']) }}</strong></div>
+                    <div class="stats-cell stats-label">Issues:</div>
+                    <div class="stats-cell"><strong>{{ number_format($dbStats['total_issues']) }}</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audit & Activity Statistics -->
+    <div class="section">
+        <div class="section-header">Audit & Activity Statistics</div>
+        <div class="section-content">
+            <div class="stats">
+                <div class="stats-row">
+                    <div class="stats-cell stats-label">Total Audit Logs:</div>
+                    <div class="stats-cell"><strong>{{ number_format($auditStats['total_audit_logs']) }}</strong></div>
+                    <div class="stats-cell stats-label">Audit Logs Today:</div>
+                    <div class="stats-cell"><strong>{{ number_format($auditStats['audit_logs_today']) }}</strong></div>
+                </div>
+                <div class="stats-row">
+                    <div class="stats-cell stats-label">Audit Logs This Week:</div>
+                    <div class="stats-cell"><strong>{{ number_format($auditStats['audit_logs_this_week']) }}</strong></div>
+                    <div class="stats-cell stats-label">Total Activity Logs:</div>
+                    <div class="stats-cell"><strong>{{ number_format($auditStats['total_activity_logs']) }}</strong></div>
+                </div>
+                <div class="stats-row">
+                    <div class="stats-cell stats-label">Activity Logs Today:</div>
+                    <div class="stats-cell"><strong>{{ number_format($auditStats['activity_logs_today']) }}</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Statistics -->
+    <div class="section">
+        <div class="section-header">Error Statistics</div>
+        <div class="section-content">
+            <div class="stats">
+                <div class="stats-row">
+                    <div class="stats-cell stats-label">Total Errors:</div>
+                    <div class="stats-cell"><strong>{{ number_format($errorStats['total_errors']) }}</strong></div>
+                    <div class="stats-cell stats-label">Errors Today:</div>
+                    <div class="stats-cell"><strong>{{ number_format($errorStats['errors_today']) }}</strong></div>
+                </div>
+                <div class="stats-row">
+                    <div class="stats-cell stats-label">Errors This Week:</div>
+                    <div class="stats-cell"><strong>{{ number_format($errorStats['errors_this_week']) }}</strong></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -213,6 +347,35 @@
     </div>
     @endif
 
+    <!-- Recent Activities -->
+    @if(isset($recentActivities) && $recentActivities->count() > 0)
+    <div class="section">
+        <div class="section-header">Recent System Activities</div>
+        <div class="section-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Description</th>
+                        <th>Date & Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($recentActivities as $activity)
+                    <tr>
+                        <td>{{ $activity->user_name ?? 'System' }}</td>
+                        <td>{{ ucfirst($activity->action ?? 'N/A') }}</td>
+                        <td>{{ Str::limit($activity->description ?? 'N/A', 50) }}</td>
+                        <td>{{ $activity->created_at ? \Carbon\Carbon::parse($activity->created_at)->format('Y-m-d H:i') : 'N/A' }}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
     <div class="footer">
         <p>FeedTan Community Microfinance Group - System Reports</p>
         <p>Report generated on {{ now()->format('F d, Y \a\t H:i:s') }}</p>
@@ -220,4 +383,3 @@
     </div>
 </body>
 </html>
-

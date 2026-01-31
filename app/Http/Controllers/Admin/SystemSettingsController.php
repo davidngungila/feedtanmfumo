@@ -784,7 +784,93 @@ class SystemSettingsController extends Controller
 
     public function systemReports()
     {
-        return view('admin.settings.reports.system');
+        // User Statistics
+        $userStats = [
+            'total_users' => User::count(),
+            'active_users' => User::where('status', 'active')->count(),
+            'inactive_users' => User::where('status', 'inactive')->count(),
+            'pending_users' => User::where('status', 'pending')->count(),
+            'members' => User::whereHas('roles', function ($q) {
+                $q->where('slug', 'member');
+            })->count(),
+            'admins' => User::whereHas('roles', function ($q) {
+                $q->where('slug', 'admin');
+            })->count(),
+            'new_users_today' => User::whereDate('created_at', today())->count(),
+            'new_users_this_week' => User::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+            'new_users_this_month' => User::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count(),
+        ];
+
+        // Login Statistics
+        $loginStats = [
+            'total_logins' => LoginSession::count(),
+            'logins_today' => LoginSession::whereDate('login_at', today())->count(),
+            'logins_this_week' => LoginSession::whereBetween('login_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+            'logins_this_month' => LoginSession::whereMonth('login_at', now()->month)->whereYear('login_at', now()->year)->count(),
+            'active_sessions' => LoginSession::whereNull('logout_at')->count(),
+        ];
+
+        // Audit & Activity Statistics
+        $auditStats = [
+            'total_audit_logs' => AuditLog::count(),
+            'audit_logs_today' => AuditLog::whereDate('created_at', today())->count(),
+            'audit_logs_this_week' => AuditLog::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+            'total_activity_logs' => ActivityLog::count(),
+            'activity_logs_today' => ActivityLog::whereDate('created_at', today())->count(),
+        ];
+
+        // System Information
+        $systemInfo = [
+            'laravel_version' => app()->version(),
+            'php_version' => PHP_VERSION,
+            'environment' => app()->environment(),
+            'server_time' => now()->format('Y-m-d H:i:s'),
+            'timezone' => config('app.timezone'),
+            'database_driver' => config('database.default'),
+        ];
+
+        // Database Statistics
+        $dbStats = [
+            'total_loans' => \App\Models\Loan::count(),
+            'total_savings_accounts' => \App\Models\SavingsAccount::count(),
+            'total_investments' => \App\Models\Investment::count(),
+            'total_transactions' => \App\Models\Transaction::count(),
+            'total_welfare_records' => \App\Models\SocialWelfare::count(),
+            'total_issues' => \App\Models\Issue::count(),
+        ];
+
+        // Recent Activities
+        $recentLogins = LoginSession::with('user')
+            ->orderBy('login_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        $recentAudits = AuditLog::orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        $recentActivities = ActivityLog::orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        // Error Statistics
+        $errorStats = [
+            'total_errors' => DB::table('failed_jobs')->count(),
+            'errors_today' => DB::table('failed_jobs')->whereDate('failed_at', today())->count(),
+            'errors_this_week' => DB::table('failed_jobs')->whereBetween('failed_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+        ];
+
+        return view('admin.settings.reports.system', compact(
+            'userStats',
+            'loginStats',
+            'auditStats',
+            'systemInfo',
+            'dbStats',
+            'recentLogins',
+            'recentAudits',
+            'recentActivities',
+            'errorStats'
+        ));
     }
 
     public function usageStatistics()
@@ -814,14 +900,62 @@ class SystemSettingsController extends Controller
 
     public function exportSystemReportsPdf()
     {
-        $stats = [
+        // User Statistics
+        $userStats = [
             'total_users' => User::count(),
             'active_users' => User::where('status', 'active')->count(),
-            'total_logins' => LoginSession::count(),
-            'total_audit_logs' => AuditLog::count(),
-            'total_activity_logs' => ActivityLog::count(),
+            'inactive_users' => User::where('status', 'inactive')->count(),
+            'pending_users' => User::where('status', 'pending')->count(),
+            'members' => User::whereHas('roles', function ($q) {
+                $q->where('slug', 'member');
+            })->count(),
+            'admins' => User::whereHas('roles', function ($q) {
+                $q->where('slug', 'admin');
+            })->count(),
+            'new_users_today' => User::whereDate('created_at', today())->count(),
+            'new_users_this_week' => User::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+            'new_users_this_month' => User::whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count(),
         ];
 
+        // Login Statistics
+        $loginStats = [
+            'total_logins' => LoginSession::count(),
+            'logins_today' => LoginSession::whereDate('login_at', today())->count(),
+            'logins_this_week' => LoginSession::whereBetween('login_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+            'logins_this_month' => LoginSession::whereMonth('login_at', now()->month)->whereYear('login_at', now()->year)->count(),
+            'active_sessions' => LoginSession::whereNull('logout_at')->count(),
+        ];
+
+        // Audit & Activity Statistics
+        $auditStats = [
+            'total_audit_logs' => AuditLog::count(),
+            'audit_logs_today' => AuditLog::whereDate('created_at', today())->count(),
+            'audit_logs_this_week' => AuditLog::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+            'total_activity_logs' => ActivityLog::count(),
+            'activity_logs_today' => ActivityLog::whereDate('created_at', today())->count(),
+        ];
+
+        // System Information
+        $systemInfo = [
+            'laravel_version' => app()->version(),
+            'php_version' => PHP_VERSION,
+            'environment' => app()->environment(),
+            'server_time' => now()->format('Y-m-d H:i:s'),
+            'timezone' => config('app.timezone'),
+            'database_driver' => config('database.default'),
+        ];
+
+        // Database Statistics
+        $dbStats = [
+            'total_loans' => \App\Models\Loan::count(),
+            'total_savings_accounts' => \App\Models\SavingsAccount::count(),
+            'total_investments' => \App\Models\Investment::count(),
+            'total_transactions' => \App\Models\Transaction::count(),
+            'total_welfare_records' => \App\Models\SocialWelfare::count(),
+            'total_issues' => \App\Models\Issue::count(),
+        ];
+
+        // Recent Activities
         $recentLogins = LoginSession::with('user')
             ->orderBy('login_at', 'desc')
             ->limit(20)
@@ -831,10 +965,27 @@ class SystemSettingsController extends Controller
             ->limit(20)
             ->get();
 
+        $recentActivities = ActivityLog::orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get();
+
+        // Error Statistics
+        $errorStats = [
+            'total_errors' => DB::table('failed_jobs')->count(),
+            'errors_today' => DB::table('failed_jobs')->whereDate('failed_at', today())->count(),
+            'errors_this_week' => DB::table('failed_jobs')->whereBetween('failed_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+        ];
+
         return PdfHelper::downloadPdf('admin.settings.reports.pdf.system', [
-            'stats' => $stats,
+            'userStats' => $userStats,
+            'loginStats' => $loginStats,
+            'auditStats' => $auditStats,
+            'systemInfo' => $systemInfo,
+            'dbStats' => $dbStats,
             'recentLogins' => $recentLogins,
             'recentAudits' => $recentAudits,
+            'recentActivities' => $recentActivities,
+            'errorStats' => $errorStats,
             'documentTitle' => 'System Reports',
         ], 'system-reports-'.date('Y-m-d-His').'.pdf');
     }
