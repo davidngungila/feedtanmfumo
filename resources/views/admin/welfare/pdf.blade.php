@@ -15,7 +15,7 @@
         @page {
             margin: 0 !important;
             padding: 0 !important;
-            size: 164.41pt auto; /* 58mm width (164.41 points), auto height */
+            size: 170pt auto; /* ~60mm width (170 points), auto height */
         }
         * {
             box-sizing: border-box;
@@ -23,8 +23,8 @@
             padding: 0;
         }
         html, body {
-            width: 164.41pt; /* Exactly 58mm in points */
-            max-width: 164.41pt;
+            width: 170pt; /* ~60mm in points */
+            max-width: 170pt;
             margin: 0 !important;
             padding: 0 !important;
         }
@@ -34,13 +34,15 @@
             color: #000000;
             line-height: 1.2;
             font-size: 9px;
-            padding: 8px 4px;
+            padding: 8px 4px 8px 4px;
+            padding-right: 8px; /* Add space on right side */
         }
         .receipt-container {
             width: 100%;
             max-width: 100%;
             background: white;
-            padding: 0 3px;
+            padding: 0 3px 0 3px;
+            padding-right: 6px; /* Add extra space on right side after content */
         }
         .receipt-header {
             text-align: center;

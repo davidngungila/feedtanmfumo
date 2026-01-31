@@ -439,10 +439,10 @@ class SocialWelfareController extends Controller
         ];
         $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=100x100&data='.urlencode(json_encode($qrData));
 
-        // 58mm receipt size: 58mm = 164.41 points (1mm = 2.83465 points)
+        // ~60mm receipt size: 60mm = 170 points (1mm = 2.83465 points)
         // DomPDF format: [x, y, width, height] in points
-        // x=0, y=0, width=164.41 (58mm), height=841.89 (A4 height for auto)
-        $receiptSize = [0, 0, 164.41, 841.89]; // 58mm width, auto height
+        // x=0, y=0, width=170 (~60mm), height=841.89 (A4 height for auto)
+        $receiptSize = [0, 0, 170, 841.89]; // ~60mm width, auto height
 
         return PdfHelper::downloadPdf('admin.welfare.pdf', [
             'welfare' => $welfare,
