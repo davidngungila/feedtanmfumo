@@ -142,6 +142,7 @@
         @else
         <div class="title">SMS Communication Logs Report</div>
         @endif
+        <div class="serial-number">Serial No: FCMGSMSLR-{{ date('Ymd') }}-{{ str_pad(1, 4, '0', STR_PAD_LEFT) }}</div>
         <div class="header-info">
             Generated: {{ now()->format('Y-m-d H:i:s') }}<br>
             @if(!empty($filters))

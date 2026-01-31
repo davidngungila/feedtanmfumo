@@ -21,12 +21,14 @@
             text-align: center;
             width: 100%;
         }
-        .header-image {
-            width: 100%;
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 0 auto 15px auto;
+        .logo-box {
+            display: inline-block;
+            background: #015425;
+            color: white;
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 14pt;
+            margin-bottom: 10px;
         }
         .title {
             font-size: 18pt;
@@ -176,18 +178,20 @@
     <div class="header">
         <div style="text-align: center; margin-bottom: 15px;">
             @if(isset($headerBase64) && $headerBase64)
-            <img src="{{ $headerBase64 }}" alt="FeedTan Header" class="header-image">
+            <img src="{{ $headerBase64 }}" alt="FeedTan Header" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0 auto;">
             @else
-            <div style="background: #015425; color: white; padding: 8px 12px; font-weight: bold; font-size: 14pt; margin: 0 auto 10px auto; display: inline-block;">FD</div>
+            <div class="logo-box" style="margin: 0 auto 10px auto;">FD</div>
             @endif
         </div>
-        <div class="title">{{ $documentTitle ?? 'Transaction Receipt' }}</div>
-        @if(isset($documentSubtitle))
-        <div style="font-size: 10pt; color: #666; margin-top: -5px; margin-bottom: 10px;">{{ $documentSubtitle }}</div>
+        @if(isset($documentTitle))
+        <div class="title">{{ $documentTitle }}</div>
+        @else
+        <div class="title">Transaction Receipt</div>
         @endif
-        <div class="serial-number">Receipt No: {{ $transaction->transaction_number }}</div>
+        <div class="serial-number">Serial No: FCMGTR-{{ date('Ymd') }}-{{ str_pad($transaction->id, 4, '0', STR_PAD_LEFT) }}</div>
         <div class="header-info">
-            Date: {{ $transaction->transaction_date->format('F d, Y') }} | Time: {{ $transaction->created_at->format('H:i:s') }}
+            Generated: {{ now()->format('Y-m-d H:i:s') }}<br>
+            Receipt No: {{ $transaction->transaction_number }} | Date: {{ $transaction->transaction_date->format('F d, Y') }}
         </div>
     </div>
 
