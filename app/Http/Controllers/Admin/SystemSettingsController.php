@@ -21,6 +21,7 @@ use App\Models\Webhook;
 use App\Models\CustomField;
 use App\Models\Module;
 use App\Models\SystemVersion;
+use App\Helpers\PdfHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
@@ -809,6 +810,107 @@ class SystemSettingsController extends Controller
             ->limit(50)
             ->get();
         return view('admin.settings.reports.errors', compact('errors'));
+    }
+
+    public function exportSystemReportsPdf()
+    {
+        $stats = [
+            'total_users' => User::count(),
+            'active_users' => User::where('status', 'active')->count(),
+            'total_logins' => LoginSession::count(),
+            'total_audit_logs' => AuditLog::count(),
+            'total_activity_logs' => ActivityLog::count(),
+        ];
+
+        $recentLogins = LoginSession::with('user')
+            ->orderBy('login_at', 'desc')
+            ->limit(20)
+            ->get();
+
+        $recentAudits = AuditLog::orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get();
+
+        return PdfHelper::downloadPdf('admin.settings.reports.pdf.system', [
+            'stats' => $stats,
+            'recentLogins' => $recentLogins,
+            'recentAudits' => $recentAudits,
+            'documentTitle' => 'System Reports',
+        ], 'system-reports-'.date('Y-m-d-His').'.pdf');
+    }
+
+    public function exportUsageStatisticsPdf()
+    {
+        $stats = [
+            'total_users' => User::count(),
+            'active_users' => User::where('status', 'active')->count(),
+            'total_logins_today' => LoginSession::whereDate('login_at', today())->count(),
+            'total_audit_logs' => AuditLog::count(),
+            'total_logins_this_week' => LoginSession::whereBetween('login_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+            'total_logins_this_month' => LoginSession::whereMonth('login_at', now()->month)->whereYear('login_at', now()->year)->count(),
+        ];
+
+        $dailyLogins = LoginSession::select(DB::raw('DATE(login_at) as date'), DB::raw('COUNT(*) as count'))
+            ->whereBetween('login_at', [now()->subDays(30), now()])
+            ->groupBy('date')
+            ->orderBy('date', 'desc')
+            ->get();
+
+        $userActivity = User::select('users.id', 'users.name', 'users.email', DB::raw('COUNT(login_sessions.id) as login_count'))
+            ->leftJoin('login_sessions', 'users.id', '=', 'login_sessions.user_id')
+            ->groupBy('users.id', 'users.name', 'users.email')
+            ->orderBy('login_count', 'desc')
+            ->limit(20)
+            ->get();
+
+        return PdfHelper::downloadPdf('admin.settings.reports.pdf.usage', [
+            'stats' => $stats,
+            'dailyLogins' => $dailyLogins,
+            'userActivity' => $userActivity,
+            'documentTitle' => 'Usage Statistics Report',
+        ], 'usage-statistics-'.date('Y-m-d-His').'.pdf');
+    }
+
+    public function exportPerformanceMonitoringPdf()
+    {
+        $stats = [
+            'total_requests' => DB::table('activity_logs')->where('created_at', '>=', now()->subDay())->count(),
+            'avg_response_time' => 120, // This would come from actual monitoring
+            'database_queries' => 45, // This would come from query logging
+            'memory_usage' => memory_get_usage(true) / 1024 / 1024, // MB
+            'peak_memory' => memory_get_peak_usage(true) / 1024 / 1024, // MB
+        ];
+
+        $recentActivities = ActivityLog::orderBy('created_at', 'desc')
+            ->limit(30)
+            ->get();
+
+        return PdfHelper::downloadPdf('admin.settings.reports.pdf.performance', [
+            'stats' => $stats,
+            'recentActivities' => $recentActivities,
+            'documentTitle' => 'Performance Monitoring Report',
+        ], 'performance-monitoring-'.date('Y-m-d-His').'.pdf');
+    }
+
+    public function exportErrorReportsPdf()
+    {
+        $errors = DB::table('failed_jobs')
+            ->orderBy('failed_at', 'desc')
+            ->limit(100)
+            ->get();
+
+        $stats = [
+            'total_errors' => DB::table('failed_jobs')->count(),
+            'errors_today' => DB::table('failed_jobs')->whereDate('failed_at', today())->count(),
+            'errors_this_week' => DB::table('failed_jobs')->whereBetween('failed_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+            'errors_this_month' => DB::table('failed_jobs')->whereMonth('failed_at', now()->month)->whereYear('failed_at', now()->year)->count(),
+        ];
+
+        return PdfHelper::downloadPdf('admin.settings.reports.pdf.errors', [
+            'errors' => $errors,
+            'stats' => $stats,
+            'documentTitle' => 'Error Reports',
+        ], 'error-reports-'.date('Y-m-d-His').'.pdf');
     }
 
     // ============================================

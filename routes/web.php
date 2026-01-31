@@ -428,9 +428,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
         // Reports & Monitoring
         Route::get('system-reports', [SystemSettingsController::class, 'systemReports'])->name('system-reports');
+        Route::get('system-reports/pdf', [SystemSettingsController::class, 'exportSystemReportsPdf'])->name('system-reports.pdf');
         Route::get('usage-statistics', [SystemSettingsController::class, 'usageStatistics'])->name('usage-statistics');
+        Route::get('usage-statistics/pdf', [SystemSettingsController::class, 'exportUsageStatisticsPdf'])->name('usage-statistics.pdf');
         Route::get('performance-monitoring', [SystemSettingsController::class, 'performanceMonitoring'])->name('performance-monitoring');
+        Route::get('performance-monitoring/pdf', [SystemSettingsController::class, 'exportPerformanceMonitoringPdf'])->name('performance-monitoring.pdf');
         Route::get('error-reports', [SystemSettingsController::class, 'errorReports'])->name('error-reports');
+        Route::get('error-reports/pdf', [SystemSettingsController::class, 'exportErrorReportsPdf'])->name('error-reports.pdf');
 
         // Bonus Features
         Route::get('custom-fields', [SystemSettingsController::class, 'customFields'])->name('custom-fields');
