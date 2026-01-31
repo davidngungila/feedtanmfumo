@@ -147,6 +147,81 @@
         </div>
     </div>
 
+    <!-- Errors by Queue -->
+    @if(isset($errorsByQueue) && $errorsByQueue->count() > 0)
+    <div class="section">
+        <div class="section-header">Error Breakdown by Queue</div>
+        <div class="section-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Queue</th>
+                        <th style="text-align: right;">Error Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($errorsByQueue as $queue)
+                    <tr>
+                        <td>{{ $queue->queue ?? 'default' }}</td>
+                        <td style="text-align: right;"><strong>{{ number_format($queue->count) }}</strong></td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
+    <!-- Daily Error Trend -->
+    @if(isset($dailyErrorTrend) && $dailyErrorTrend->count() > 0)
+    <div class="section">
+        <div class="section-header">Daily Error Trend (Last 30 Days)</div>
+        <div class="section-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th style="text-align: right;">Error Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($dailyErrorTrend as $day)
+                    <tr>
+                        <td>{{ \Carbon\Carbon::parse($day->date)->format('M d, Y') }}</td>
+                        <td style="text-align: right;"><strong>{{ number_format($day->count) }}</strong></td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
+    <!-- Most Common Exceptions -->
+    @if(isset($commonExceptions) && $commonExceptions->count() > 0)
+    <div class="section">
+        <div class="section-header">Most Common Exceptions (Last 30 Days)</div>
+        <div class="section-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Exception</th>
+                        <th style="text-align: right;">Occurrences</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($commonExceptions as $exception)
+                    <tr>
+                        <td style="font-size: 7pt; font-family: 'Courier New', monospace;">{{ Str::limit($exception->exception ?? 'N/A', 70) }}</td>
+                        <td style="text-align: right;"><strong>{{ number_format($exception->count) }}</strong></td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
     <!-- Error Details -->
     @if($errors->count() > 0)
     <div class="section">
@@ -162,7 +237,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($errors as $error)
+                    @foreach($errors->take(50) as $error)
                     <tr>
                         <td style="font-family: 'Courier New', monospace;">#{{ $error->id }}</td>
                         <td>{{ $error->queue ?? 'default' }}</td>

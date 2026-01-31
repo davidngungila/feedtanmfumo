@@ -131,25 +131,118 @@
         </div>
     </div>
 
-    <!-- Performance Summary Stats -->
+    <!-- Performance Metrics -->
     <div class="stats">
         <div class="stats-row">
-            <div class="stats-cell stats-label">Total Requests (24h):</div>
-            <div class="stats-cell"><strong>{{ number_format($stats['total_requests']) }}</strong></div>
-            <div class="stats-cell stats-label">Avg Response Time:</div>
-            <div class="stats-cell"><strong>{{ number_format($stats['avg_response_time'], 2) }} ms</strong></div>
-        </div>
-        <div class="stats-row">
-            <div class="stats-cell stats-label">Database Queries:</div>
-            <div class="stats-cell"><strong>{{ number_format($stats['database_queries']) }}</strong></div>
             <div class="stats-cell stats-label">Memory Usage:</div>
-            <div class="stats-cell"><strong>{{ number_format($stats['memory_usage'], 2) }} MB</strong></div>
+            <div class="stats-cell"><strong>{{ number_format($performanceMetrics['memory_usage'], 2) }} MB</strong></div>
+            <div class="stats-cell stats-label">Peak Memory:</div>
+            <div class="stats-cell"><strong>{{ number_format($performanceMetrics['peak_memory'], 2) }} MB</strong></div>
         </div>
         <div class="stats-row">
-            <div class="stats-cell stats-label">Peak Memory:</div>
-            <div class="stats-cell"><strong>{{ number_format($stats['peak_memory'], 2) }} MB</strong></div>
+            <div class="stats-cell stats-label">Memory Limit:</div>
+            <div class="stats-cell"><strong>{{ $performanceMetrics['memory_limit'] }}</strong></div>
+            <div class="stats-cell stats-label">Max Execution Time:</div>
+            <div class="stats-cell"><strong>{{ $performanceMetrics['max_execution_time'] }}s</strong></div>
+        </div>
+        <div class="stats-row">
+            <div class="stats-cell stats-label">PHP Version:</div>
+            <div class="stats-cell"><strong>{{ $performanceMetrics['php_version'] }}</strong></div>
+            <div class="stats-cell stats-label">Laravel Version:</div>
+            <div class="stats-cell"><strong>{{ $performanceMetrics['laravel_version'] }}</strong></div>
         </div>
     </div>
+
+    <!-- Activity Statistics -->
+    <div class="stats">
+        <div class="stats-row">
+            <div class="stats-cell stats-label">Activities Today:</div>
+            <div class="stats-cell"><strong>{{ number_format($dbStats['total_activities_today']) }}</strong></div>
+            <div class="stats-cell stats-label">Activities This Week:</div>
+            <div class="stats-cell"><strong>{{ number_format($dbStats['total_activities_this_week']) }}</strong></div>
+        </div>
+        <div class="stats-row">
+            <div class="stats-cell stats-label">Activities This Month:</div>
+            <div class="stats-cell"><strong>{{ number_format($dbStats['total_activities_this_month']) }}</strong></div>
+        </div>
+    </div>
+
+    <!-- Activity by Type -->
+    @if(isset($activityByType) && $activityByType->count() > 0)
+    <div class="section">
+        <div class="section-header">Activity Breakdown by Type (Last 30 Days)</div>
+        <div class="section-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Action Type</th>
+                        <th style="text-align: right;">Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($activityByType as $activity)
+                    <tr>
+                        <td>{{ ucfirst($activity->action ?? 'N/A') }}</td>
+                        <td style="text-align: right;"><strong>{{ number_format($activity->count) }}</strong></td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
+    <!-- Activity by User -->
+    @if(isset($activityByUser) && $activityByUser->count() > 0)
+    <div class="section">
+        <div class="section-header">Top Active Users (Last 30 Days)</div>
+        <div class="section-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>User Name</th>
+                        <th style="text-align: right;">Activity Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($activityByUser as $index => $user)
+                    <tr>
+                        <td>#{{ $index + 1 }}</td>
+                        <td><strong>{{ $user->user_name }}</strong></td>
+                        <td style="text-align: right;"><strong>{{ number_format($user->count) }}</strong></td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
+
+    <!-- Daily Activity Trend -->
+    @if(isset($dailyActivityTrend) && $dailyActivityTrend->count() > 0)
+    <div class="section">
+        <div class="section-header">Daily Activity Trend (Last 30 Days)</div>
+        <div class="section-content">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th style="text-align: right;">Activity Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($dailyActivityTrend as $day)
+                    <tr>
+                        <td>{{ \Carbon\Carbon::parse($day->date)->format('M d, Y') }}</td>
+                        <td style="text-align: right;"><strong>{{ number_format($day->count) }}</strong></td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
+    @endif
 
     <!-- Recent Activities -->
     @if($recentActivities->count() > 0)
