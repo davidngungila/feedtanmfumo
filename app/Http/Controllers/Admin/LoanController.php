@@ -182,6 +182,25 @@ class LoanController extends Controller
         return view('admin.loans.show', compact('loan'));
     }
 
+    public function exportPdf(Loan $loan)
+    {
+        $loan->load(['user', 'approver', 'transactions']);
+        
+        $organizationInfo = [
+            'name' => 'FeedTan Community Microfinance Group',
+            'address' => 'P.O.Box 7744, Ushirika Sokoine Road, Moshi, Kilimanjaro, Tanzania',
+            'email' => 'feedtan15@gmail.com',
+            'phone' => '+255622239304',
+        ];
+
+        return \App\Helpers\PdfHelper::downloadPdf('admin.loans.pdf', [
+            'loan' => $loan,
+            'organizationInfo' => $organizationInfo,
+            'documentTitle' => 'Loan Application Document',
+            'documentSubtitle' => 'Loan Number: ' . $loan->loan_number,
+        ], 'loan-'.$loan->loan_number.'-'.date('Y-m-d-His').'.pdf');
+    }
+
     public function edit(Loan $loan)
     {
         $users = User::where('role', 'user')->get();
