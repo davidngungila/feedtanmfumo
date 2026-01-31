@@ -301,33 +301,31 @@
     @endif
 
     <!-- Guarantor Information -->
-    @if($loan->guarantor_name || $loan->guarantor_phone || $loan->guarantor_email)
+    @if($loan->guarantor)
     <div class="section">
         <div class="section-header">Guarantor Information</div>
         <div class="section-content">
             <table>
-                @if($loan->guarantor_name)
                 <tr>
                     <th style="width: 30%;">Guarantor Name</th>
-                    <td><strong>{{ $loan->guarantor_name }}</strong></td>
+                    <td><strong>{{ $loan->guarantor->name }}</strong></td>
+                </tr>
+                @if($loan->guarantor->membership_code)
+                <tr>
+                    <th>Member Code</th>
+                    <td><strong>{{ $loan->guarantor->membership_code }}</strong></td>
                 </tr>
                 @endif
-                @if($loan->guarantor_phone)
+                @if($loan->guarantor->phone)
                 <tr>
                     <th>Phone</th>
-                    <td>{{ $loan->guarantor_phone }}</td>
+                    <td>{{ $loan->guarantor->phone }}</td>
                 </tr>
                 @endif
-                @if($loan->guarantor_email)
+                @if($loan->guarantor->email)
                 <tr>
                     <th>Email</th>
-                    <td>{{ $loan->guarantor_email }}</td>
-                </tr>
-                @endif
-                @if($loan->guarantor_address)
-                <tr>
-                    <th>Address</th>
-                    <td>{{ $loan->guarantor_address }}</td>
+                    <td>{{ $loan->guarantor->email }}</td>
                 </tr>
                 @endif
             </table>

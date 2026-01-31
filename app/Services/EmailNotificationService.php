@@ -199,6 +199,82 @@ class EmailNotificationService
     }
 
     /**
+     * Send loan application notification
+     */
+    public function sendLoanApplicationNotification(User $user, array $loanDetails): bool
+    {
+        try {
+            $this->reloadMailConfig();
+            $orgInfo = $this->getOrganizationInfo();
+            $address = $this->getFormattedAddress();
+            
+            $subject = "Loan Application Submitted - {$orgInfo['name']}";
+            $message = $this->formatLoanApplicationEmail($user, $loanDetails, $address);
+            
+            Mail::raw($message, function ($mail) use ($user, $subject, $orgInfo) {
+                $mail->to($user->email, $user->name)
+                     ->subject($subject)
+                     ->from($orgInfo['from_email'], $orgInfo['from_name']);
+            });
+            
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Failed to send loan application email: '.$e->getMessage());
+
+            return false;
+        }
+    }
+
+    /**
+     * Format loan application email
+     */
+    protected function formatLoanApplicationEmail(User $user, array $loanDetails, string $address): string
+    {
+        $amount = number_format($loanDetails['principal_amount'] ?? 0, 0);
+        $loanNumber = $loanDetails['loan_number'] ?? 'N/A';
+        $interestRate = $loanDetails['interest_rate'] ?? 0;
+        $term = $loanDetails['term_months'] ?? 0;
+        $totalAmount = number_format($loanDetails['total_amount'] ?? 0, 0);
+        
+        return "Dear {$user->name},
+
+Thank you for submitting your loan application to {$this->getOrganizationInfo()['name']}.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LOAN APPLICATION DETAILS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Loan Number:        {$loanNumber}
+Principal Amount:   {$amount} TZS
+Interest Rate:      {$interestRate}% per annum
+Loan Term:          {$term} months
+Total Amount:       {$totalAmount} TZS
+Purpose:            ".($loanDetails['purpose'] ?? 'N/A')."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+NEXT STEPS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Your loan application has been received and is now pending review by our loan committee.
+
+We will review your application and notify you of the decision within 3-5 business days.
+
+If you have any questions, please contact us at:
+Email: {$this->getOrganizationInfo()['email']}
+Phone: {$this->getOrganizationInfo()['phone']}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Thank you for choosing {$this->getOrganizationInfo()['name']}.
+
+Best regards,
+{$this->getOrganizationInfo()['name']}
+{$address}";
+    }
+
+    /**
      * Send payment reminder notification
      */
     public function sendPaymentReminderNotification(User $user, array $paymentDetails): bool

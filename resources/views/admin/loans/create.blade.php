@@ -254,53 +254,44 @@
                         <h2 class="text-xl font-bold text-[#015425]">Guarantor Information</h2>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Guarantor Name
+                                Select Guarantor Member <span class="text-gray-500">(Optional)</span>
                             </label>
-                            <input type="text" name="guarantor_name" id="guarantor_name"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
-                                placeholder="Full name">
-                            @error('guarantor_name')
+                            <select name="guarantor_id" id="guarantor_id" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition">
+                                <option value="">-- Select a member by member code --</option>
+                                @foreach($members ?? [] as $member)
+                                    <option value="{{ $member->id }}" 
+                                        data-code="{{ $member->membership_code }}"
+                                        data-email="{{ $member->email }}"
+                                        data-phone="{{ $member->phone ?? 'N/A' }}">
+                                        {{ $member->membership_code }} - {{ $member->name }} ({{ $member->email }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('guarantor_id')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
+                            <p class="text-xs text-gray-500 mt-1">Select a member from the list to act as guarantor. Only members with membership codes are available.</p>
                         </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Guarantor Phone
-                            </label>
-                            <input type="text" name="guarantor_phone" id="guarantor_phone"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
-                                placeholder="+255...">
-                            @error('guarantor_phone')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Guarantor Email
-                            </label>
-                            <input type="email" name="guarantor_email" id="guarantor_email"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
-                                placeholder="email@example.com">
-                            @error('guarantor_email')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Guarantor Address
-                            </label>
-                            <textarea name="guarantor_address" id="guarantor_address" rows="2"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
-                                placeholder="Physical address"></textarea>
-                            @error('guarantor_address')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
+                        <div id="guarantor-details" class="hidden bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <p class="text-xs text-gray-600 mb-1">Member Code</p>
+                                    <p class="text-sm font-medium text-gray-900" id="guarantor-code">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-600 mb-1">Email</p>
+                                    <p class="text-sm font-medium text-gray-900" id="guarantor-email">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-600 mb-1">Phone</p>
+                                    <p class="text-sm font-medium text-gray-900" id="guarantor-phone">-</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -575,7 +566,7 @@
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                 </svg>
-                                Create Loan Application
+                                Submit Application
                             </div>
                         </button>
                         <a href="{{ route('admin.loans.index') }}" class="block w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition text-center font-medium">
@@ -611,6 +602,27 @@ document.addEventListener('DOMContentLoaded', function() {
             memberDetails.classList.add('hidden');
         }
     });
+
+    // Guarantor selection handler
+    const guarantorSelect = document.getElementById('guarantor_id');
+    const guarantorDetails = document.getElementById('guarantor-details');
+    const guarantorCode = document.getElementById('guarantor-code');
+    const guarantorEmail = document.getElementById('guarantor-email');
+    const guarantorPhone = document.getElementById('guarantor-phone');
+
+    if (guarantorSelect) {
+        guarantorSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption.value) {
+                guarantorCode.textContent = selectedOption.dataset.code || '-';
+                guarantorEmail.textContent = selectedOption.dataset.email || '-';
+                guarantorPhone.textContent = selectedOption.dataset.phone || '-';
+                guarantorDetails.classList.remove('hidden');
+            } else {
+                guarantorDetails.classList.add('hidden');
+            }
+        });
+    }
 
     // Loan calculator
     function calculateLoan() {

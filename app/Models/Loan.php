@@ -14,6 +14,7 @@ class Loan extends Model
     protected $fillable = [
         'ulid',
         'user_id',
+        'guarantor_id',
         'loan_number',
         'principal_amount',
         'interest_rate',
@@ -70,6 +71,11 @@ class Loan extends Model
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function guarantor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'guarantor_id');
     }
 
     public function transactions(): HasMany

@@ -295,7 +295,7 @@
             @endif
 
             <!-- Guarantor Information -->
-            @if($loan->guarantor_name || $loan->guarantor_phone || $loan->guarantor_email)
+            @if($loan->guarantor)
             <div class="bg-white rounded-lg shadow-md p-6">
                 <div class="flex items-center mb-4">
                     <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
@@ -307,33 +307,37 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @if($loan->guarantor_name)
                     <div>
                         <p class="text-xs text-gray-600 mb-1">Name</p>
-                        <p class="text-sm font-semibold text-gray-900">{{ $loan->guarantor_name }}</p>
+                        <p class="text-sm font-semibold text-gray-900">{{ $loan->guarantor->name }}</p>
+                    </div>
+
+                    @if($loan->guarantor->membership_code)
+                    <div>
+                        <p class="text-xs text-gray-600 mb-1">Member Code</p>
+                        <p class="text-sm font-semibold text-[#015425]">{{ $loan->guarantor->membership_code }}</p>
                     </div>
                     @endif
 
-                    @if($loan->guarantor_phone)
+                    @if($loan->guarantor->phone)
                     <div>
                         <p class="text-xs text-gray-600 mb-1">Phone</p>
-                        <p class="text-sm text-gray-700">{{ $loan->guarantor_phone }}</p>
+                        <p class="text-sm text-gray-700">{{ $loan->guarantor->phone }}</p>
                     </div>
                     @endif
 
-                    @if($loan->guarantor_email)
+                    @if($loan->guarantor->email)
                     <div>
                         <p class="text-xs text-gray-600 mb-1">Email</p>
-                        <p class="text-sm text-gray-700">{{ $loan->guarantor_email }}</p>
+                        <p class="text-sm text-gray-700">{{ $loan->guarantor->email }}</p>
                     </div>
                     @endif
 
-                    @if($loan->guarantor_address)
-                    <div class="md:col-span-2">
-                        <p class="text-xs text-gray-600 mb-1">Address</p>
-                        <p class="text-sm text-gray-700">{{ $loan->guarantor_address }}</p>
+                    <div class="md:col-span-2 pt-4 border-t">
+                        <a href="{{ route('admin.users.show', $loan->guarantor) }}" class="text-sm text-[#015425] hover:underline font-medium">
+                            View Guarantor Profile →
+                        </a>
                     </div>
-                    @endif
                 </div>
             </div>
             @endif

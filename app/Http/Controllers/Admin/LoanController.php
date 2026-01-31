@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Loan;
 use App\Models\User;
+use App\Helpers\NotificationHelper;
+use App\Services\EmailNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -85,10 +87,7 @@ class LoanController extends Controller
             'loan_type' => 'nullable|string|max:255',
             'collateral_description' => 'nullable|string',
             'collateral_value' => 'nullable|numeric|min:0',
-            'guarantor_name' => 'nullable|string|max:255',
-            'guarantor_phone' => 'nullable|string|max:20',
-            'guarantor_email' => 'nullable|email|max:255',
-            'guarantor_address' => 'nullable|string',
+            'guarantor_id' => 'nullable|exists:users,id',
             'business_plan' => 'nullable|string',
             'repayment_source' => 'nullable|string',
             'additional_notes' => 'nullable|string',
@@ -128,10 +127,7 @@ class LoanController extends Controller
             'loan_type' => $validated['loan_type'] ?? null,
             'collateral_description' => $validated['collateral_description'] ?? null,
             'collateral_value' => $validated['collateral_value'] ?? null,
-            'guarantor_name' => $validated['guarantor_name'] ?? null,
-            'guarantor_phone' => $validated['guarantor_phone'] ?? null,
-            'guarantor_email' => $validated['guarantor_email'] ?? null,
-            'guarantor_address' => $validated['guarantor_address'] ?? null,
+            'guarantor_id' => $validated['guarantor_id'] ?? null,
             'business_plan' => $validated['business_plan'] ?? null,
             'repayment_source' => $validated['repayment_source'] ?? null,
             'additional_notes' => $validated['additional_notes'] ?? null,
@@ -172,8 +168,45 @@ class LoanController extends Controller
         }
 
         $loan = Loan::create($loanData);
+        $loan->load(['user', 'guarantor']);
 
-        return redirect()->route('admin.loans.show', $loan)->with('success', 'Loan application created successfully with all documents. It is now pending approval.');
+        // Send notification to applicant
+        NotificationHelper::create(
+            $loan->user,
+            'loan',
+            'Loan Application Submitted',
+            "Your loan application (Loan Number: {$loan->loan_number}) has been submitted successfully and is pending approval.",
+            'document',
+            'blue',
+            route('admin.loans.show', $loan)
+        );
+
+        // Send notification to admins
+        NotificationHelper::createForAdmins(
+            'loan',
+            'New Loan Application',
+            "A new loan application has been submitted by {$loan->user->name} (Loan Number: {$loan->loan_number}).",
+            'bell',
+            'green',
+            route('admin.loans.show', $loan)
+        );
+
+        // Send email notification to applicant
+        try {
+            $emailService = app(EmailNotificationService::class);
+            $emailService->sendLoanApplicationNotification($loan->user, [
+                'loan_number' => $loan->loan_number,
+                'principal_amount' => $loan->principal_amount,
+                'interest_rate' => $loan->interest_rate,
+                'term_months' => $loan->term_months,
+                'total_amount' => $loan->total_amount,
+                'purpose' => $loan->purpose,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Failed to send loan application email: '.$e->getMessage());
+        }
+
+        return redirect()->route('admin.loans.show', $loan)->with('success', 'Loan application submitted successfully! Notifications have been sent.');
     }
 
     public function show(Loan $loan)
@@ -184,7 +217,7 @@ class LoanController extends Controller
 
     public function exportPdf(Loan $loan)
     {
-        $loan->load(['user', 'approver', 'transactions']);
+        $loan->load(['user', 'guarantor', 'approver', 'transactions']);
         
         $organizationInfo = [
             'name' => 'FeedTan Community Microfinance Group',
