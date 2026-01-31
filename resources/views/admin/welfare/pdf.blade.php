@@ -34,18 +34,21 @@
             color: #000000;
             line-height: 1.2;
             font-size: 9px;
-            padding: 10px 8px;
+            padding: 8px 4px;
         }
         .receipt-container {
             width: 100%;
             max-width: 100%;
             background: white;
+            padding: 0 3px;
         }
         .receipt-header {
             text-align: center;
-            padding: 2px 0;
-            border-bottom: none;
-            margin-bottom: 4px;
+            padding: 0;
+            border-bottom: 1px dashed #015425;
+            margin-bottom: 3px;
+            margin-left: -3px;
+            margin-right: -3px;
             background: white;
         }
         .logo-container {
@@ -67,46 +70,48 @@
             font-weight: bold;
             margin: 3px 0;
             text-transform: uppercase;
-            padding: 4px 0;
-            border-top: none;
-            border-bottom: none;
+            padding: 2px 0;
+            border-top: 1px solid #015425;
+            border-bottom: 1px solid #015425;
             background: linear-gradient(135deg, #015425 0%, #027a3a 100%);
             color: white;
         }
         .welfare-number {
             text-align: center;
-            padding: 6px 4px;
+            padding: 4px;
             background: #015425;
             color: #fff;
             font-family: 'Courier New', monospace;
             font-size: 10px;
             font-weight: bold;
             letter-spacing: 1px;
-            margin: 4px 0;
-            border: none;
+            margin: 3px 0;
+            border: 1px solid #015425;
             border-radius: 4px;
         }
         .receipt-section {
-            margin: 4px 0;
-            padding: 3px 0;
+            margin: 3px 0;
+            padding: 2px 0;
         }
         .section-label {
             font-size: 8px;
             font-weight: bold;
             text-transform: uppercase;
-            margin-bottom: 4px;
-            border-bottom: none;
-            padding-bottom: 2px;
-            padding-top: 2px;
+            margin-bottom: 3px;
+            border-bottom: 1px solid #015425;
+            padding-bottom: 1px;
             color: #015425;
         }
         .receipt-line {
             display: flex;
             justify-content: space-between;
-            padding: 2px 0;
+            padding: 1px 0;
             font-size: 8px;
-            border-bottom: none;
+            border-bottom: 1px dotted #ddd;
             margin-bottom: 1px;
+        }
+        .receipt-line:last-child {
+            border-bottom: none;
         }
         .line-label {
             font-weight: 600;
@@ -125,11 +130,11 @@
         }
         .amount-box {
             text-align: center;
-            padding: 8px 6px;
+            padding: 6px;
             background: linear-gradient(135deg, #f0f9f4 0%, #e6f7f0 100%);
-            border: none;
+            border: 1px solid #015425;
             border-radius: 4px;
-            margin: 5px 0;
+            margin: 4px 0;
         }
         .amount-label {
             font-size: 7px;
@@ -145,10 +150,10 @@
             font-family: 'Courier New', monospace;
         }
         .receipt-block {
-            margin: 3px 0;
-            padding: 4px;
+            margin: 2px 0;
+            padding: 2px;
             background: linear-gradient(135deg, #f0f9f4 0%, #e6f7f0 100%);
-            border: none;
+            border: 1px solid #015425;
             border-radius: 3px;
         }
         .block-label {
@@ -165,8 +170,8 @@
         }
         .status-badge {
             display: inline-block;
-            padding: 2px 6px;
-            border: none;
+            padding: 1px 4px;
+            border: 1px solid #000;
             font-size: 7px;
             font-weight: bold;
             text-transform: uppercase;
@@ -189,20 +194,20 @@
         }
         .receipt-divider {
             text-align: center;
-            margin: 4px 0;
-            padding: 3px 0;
-            border-top: none;
-            border-bottom: none;
+            margin: 3px 0;
+            padding: 2px 0;
+            border-top: 1px dashed #015425;
+            border-bottom: 1px dashed #015425;
             color: #015425;
             font-weight: bold;
             font-size: 7px;
         }
         .receipt-footer {
             text-align: center;
-            margin-top: 6px;
-            padding-top: 6px;
+            margin-top: 4px;
+            padding-top: 4px;
             padding-bottom: 15px;
-            border-top: none;
+            border-top: 1px dashed #015425;
             font-size: 6px;
             color: #6b7280;
             background: linear-gradient(135deg, #f0f9f4 0%, #e6f7f0 100%);
@@ -217,9 +222,9 @@
             font-size: 10px;
             font-weight: bold;
             letter-spacing: 0.5px;
-            padding: 6px 4px;
-            margin: 4px 0;
-            border: none;
+            padding: 4px;
+            margin: 3px 0;
+            border: 1px solid #015425;
             border-radius: 4px;
             background: white;
             color: #015425;
@@ -231,9 +236,9 @@
         }
         .qr-code-container {
             display: inline-block;
-            padding: 5px;
+            padding: 3px;
             background: white;
-            border: none;
+            border: 1px solid #015425;
             border-radius: 3px;
         }
         .qr-code-container img {
