@@ -2,429 +2,374 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Welfare Record - {{ $welfare->welfare_number }}</title>
+    <title>Welfare Receipt - {{ $welfare->welfare_number }}</title>
     <style>
+        @media print {
+            body { margin: 0; padding: 0; }
+            .no-print { display: none !important; }
+            @page {
+                margin: 0;
+                size: 80mm auto; /* Standard receipt printer */
+            }
+        }
         @page {
-            margin: 5mm 8mm;
-            size: 112mm auto;
-            width: 112mm;
+            margin: 0;
+            size: 80mm auto; /* Default to 80mm receipt width */
         }
         * {
-            max-width: 112mm;
             box-sizing: border-box;
-        }
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 8pt;
-            line-height: 1.3;
-            color: #333;
-            width: 112mm;
             margin: 0;
             padding: 0;
         }
-        .header {
-            border-bottom: 2px solid #015425;
-            padding-bottom: 10px;
-            margin-bottom: 10px;
-            text-align: center;
-            width: 100%;
-        }
-        .header-image {
-            width: 100%;
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 0 auto 15px auto;
-        }
-        .title {
-            font-size: 14pt;
-            font-weight: bold;
-            color: #015425;
-            margin: 10px 0 8px 0;
-        }
-        .serial-number {
-            text-align: center;
-            font-size: 8pt;
-            color: #666;
-            margin-bottom: 15px;
-            font-family: 'Courier New', monospace;
-        }
-        .header-info {
-            font-size: 10pt;
-            color: #666;
-            margin-top: 8px;
-        }
-        .stats {
-            display: table;
-            width: 100%;
-            margin: 10px 0;
-            border-collapse: collapse;
-        }
-        .stats-row {
-            display: table-row;
-        }
-        .stats-cell {
-            display: table-cell;
-            padding: 8px;
-            border: 1px solid #ddd;
-            background: #f9f9f9;
-            font-size: 8pt;
-        }
-        .stats-label {
-            font-weight: bold;
-            color: #015425;
-        }
-        .section {
-            margin: 10px 0;
-            page-break-inside: avoid;
-        }
-        .section-header {
-            background: #015425;
-            color: white;
-            padding: 8px 12px;
-            font-weight: bold;
-            font-size: 10pt;
-            margin-bottom: 8px;
-        }
-        .section-content {
-            padding: 8px 0;
-        }
-        .info-table {
-            width: 100%;
-            border-collapse: collapse;
+        body {
+            font-family: 'Arial', 'Courier New', monospace;
             margin: 0;
+            padding: 10px;
+            background: #ffffff;
+            color: #000000;
+            line-height: 1.3;
+            font-size: 11px;
+            max-width: 80mm; /* Standard receipt width */
+            margin: 0 auto;
+        }
+        .receipt-container {
+            width: 100%;
+            max-width: 80mm;
             background: white;
         }
-        .info-table tr {
-            border-bottom: 1px solid #e5e7eb;
+        .receipt-header {
+            text-align: center;
+            padding: 10px 0;
+            border-bottom: 2px dashed #015425;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #f0f9f4 0%, #e6f7f0 100%);
         }
-        .info-table tr:last-child {
+        .logo-container {
+            margin-bottom: 8px;
+        }
+        .logo-container img {
+            max-width: 100px;
+            height: auto;
+            background: white;
+            padding: 5px;
+            border-radius: 6px;
+            display: block;
+            margin: 0 auto;
+        }
+        .receipt-header h1 {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 0 0 3px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #015425;
+        }
+        .receipt-header p {
+            font-size: 9px;
+            margin: 2px 0;
+            color: #027a3a;
+        }
+        .receipt-title {
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 8px 0;
+            text-transform: uppercase;
+            padding: 5px 0;
+            border-top: 2px solid #015425;
+            border-bottom: 2px solid #015425;
+            background: linear-gradient(135deg, #015425 0%, #027a3a 100%);
+            color: white;
+        }
+        .welfare-number {
+            text-align: center;
+            padding: 8px;
+            background: #015425;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin: 10px 0;
+            border: 2px solid #015425;
+            border-radius: 6px;
+        }
+        .receipt-section {
+            margin: 8px 0;
+            padding: 5px 0;
+        }
+        .section-label {
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            border-bottom: 2px solid #015425;
+            padding-bottom: 2px;
+            color: #015425;
+        }
+        .receipt-line {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            font-size: 10px;
+            border-bottom: 1px dotted #ddd;
+        }
+        .receipt-line:last-child {
             border-bottom: none;
         }
-        .info-table td {
-            padding: 5px 8px;
-            vertical-align: top;
-            font-size: 8.5pt;
-        }
-        .info-table td:first-child {
+        .line-label {
             font-weight: 600;
+            flex-shrink: 0;
             width: 35%;
-            color: #374151;
-            background: #f9fafb;
-            border-right: 1px solid #e5e7eb;
+            text-align: left;
+            color: #027a3a;
         }
-        .info-table td:last-child {
-            color: #1a1a1a;
+        .line-value {
+            flex: 1;
+            text-align: right;
+            word-break: break-word;
+            color: #111827;
         }
         .amount-box {
-            background: #f0f9ff;
-            border: 2px solid #015425;
-            border-radius: 4px;
-            padding: 10px;
             text-align: center;
-            margin: 15px 0;
+            padding: 12px;
+            background: linear-gradient(135deg, #f0f9f4 0%, #e6f7f0 100%);
+            border: 2px solid #015425;
+            border-radius: 6px;
+            margin: 12px 0;
         }
         .amount-label {
-            font-size: 9pt;
-            color: #666;
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #015425;
             margin-bottom: 5px;
         }
         .amount-value {
-            font-size: 18pt;
+            font-size: 18px;
             font-weight: bold;
             color: #015425;
             font-family: 'Courier New', monospace;
         }
-        .status-badge {
-            padding: 3px 8px;
-            border-radius: 8px;
-            font-size: 8pt;
+        .receipt-block {
+            margin: 6px 0;
+            padding: 5px;
+            background: linear-gradient(135deg, #f0f9f4 0%, #e6f7f0 100%);
+            border: 1px solid #015425;
+            border-radius: 4px;
+        }
+        .block-label {
+            font-size: 9px;
             font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 3px;
+            color: #015425;
+        }
+        .block-value {
+            font-size: 10px;
+            word-break: break-word;
+            color: #111827;
+        }
+        .status-badge {
             display: inline-block;
+            padding: 2px 6px;
+            border: 1px solid #000;
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 4px;
         }
         .status-approved, .status-completed, .status-disbursed {
-            background: #d4edda;
-            color: #155724;
+            background: #015425;
+            color: #fff;
+            border-color: #015425;
         }
         .status-pending {
-            background: #fff3cd;
-            color: #856404;
+            background: #fbbf24;
+            color: #000;
+            border-color: #fbbf24;
         }
         .status-rejected {
-            background: #f8d7da;
-            color: #721c24;
+            background: #ef4444;
+            color: #fff;
+            border-color: #ef4444;
         }
-        .footer {
-            margin-top: 20px;
-            padding-top: 10px;
-            border-top: 1px solid #ddd;
-            font-size: 7pt;
-            color: #666;
+        .receipt-divider {
             text-align: center;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 10px 0;
-            font-size: 8pt;
-        }
-        th {
-            background: #015425;
-            color: white;
-            padding: 8px 6px;
-            text-align: left;
+            margin: 8px 0;
+            padding: 5px 0;
+            border-top: 2px dashed #015425;
+            border-bottom: 2px dashed #015425;
+            color: #015425;
             font-weight: bold;
-            border: 1px solid #015425;
         }
-        td {
-            padding: 6px;
-            border: 1px solid #ddd;
-            vertical-align: top;
+        .receipt-footer {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 2px dashed #015425;
+            font-size: 8px;
+            color: #6b7280;
+            background: linear-gradient(135deg, #f0f9f4 0%, #e6f7f0 100%);
         }
-        tr:nth-child(even) {
-            background: #f9f9f9;
+        .receipt-footer p {
+            margin: 3px 0;
+            line-height: 1.4;
+        }
+        .barcode {
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            padding: 8px;
+            margin: 8px 0;
+            border: 2px solid #015425;
+            border-radius: 6px;
+            background: white;
+            color: #015425;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div style="text-align: center; margin-bottom: 15px;">
+    <div class="receipt-container">
+        <!-- Header -->
+        <div class="receipt-header">
             @if(isset($headerBase64) && $headerBase64)
-            <img src="{{ $headerBase64 }}" alt="FeedTan Header" class="header-image">
-            @else
-            <div style="background: #015425; color: white; padding: 8px 12px; font-weight: bold; font-size: 14pt; margin: 0 auto 10px auto; display: inline-block;">FD</div>
+            <div class="logo-container">
+                <img src="{{ $headerBase64 }}" alt="FeedTan CMG">
+            </div>
             @endif
+            <h1>FeedTan CMG</h1>
+            <p>FeedTan Community Microfinance Group</p>
+            <p>Welfare Receipt</p>
         </div>
-        <div class="title">{{ $documentTitle ?? 'Social Welfare Record' }}</div>
-        @if(isset($documentSubtitle))
-        <div style="font-size: 10pt; color: #666; margin-top: -5px; margin-bottom: 10px;">{{ $documentSubtitle }}</div>
-        @endif
-        <div class="serial-number">Welfare Number: {{ $welfare->welfare_number }}</div>
-        <div class="header-info">
-            Generated: {{ $generatedAt ?? now()->format('Y-m-d H:i:s') }}
+
+        <!-- Welfare Number -->
+        <div class="welfare-number">
+            {{ $welfare->welfare_number }}
         </div>
-    </div>
 
-    <!-- Amount Box -->
-    <div class="amount-box">
-        <div class="amount-label">{{ ucfirst($welfare->type) }} Amount</div>
-        <div class="amount-value">{{ number_format($welfare->amount, 2) }} TZS</div>
-    </div>
-
-    <!-- Welfare Summary Stats -->
-    <div class="stats">
-        <div class="stats-row">
-            <div class="stats-cell stats-label">Welfare Number:</div>
-            <div class="stats-cell"><strong style="font-family: 'Courier New', monospace; font-size: 11pt;">{{ $welfare->welfare_number }}</strong></div>
-            <div class="stats-cell stats-label">Type:</div>
-            <div class="stats-cell"><strong>{{ ucfirst($welfare->type) }}</strong></div>
+        <!-- Amount Box -->
+        <div class="amount-box">
+            <div class="amount-label">{{ ucfirst($welfare->type) }} Amount</div>
+            <div class="amount-value">{{ number_format($welfare->amount, 2) }} TZS</div>
         </div>
-    </div>
 
-    <div class="stats">
-        <div class="stats-row">
-            <div class="stats-cell stats-label">Status:</div>
-            <div class="stats-cell">
-                <span class="status-badge status-{{ $welfare->status }}">
-                    {{ strtoupper($welfare->status) }}
+        <!-- Welfare Details -->
+        <div class="receipt-section">
+            <div class="section-label">WELFARE DETAILS</div>
+            <div class="receipt-line">
+                <span class="line-label">Type:</span>
+                <span class="line-value">{{ ucfirst($welfare->type) }}</span>
+            </div>
+            @if($welfare->benefit_type)
+            <div class="receipt-line">
+                <span class="line-label">Benefit Type:</span>
+                <span class="line-value">{{ $welfare->benefit_type_name }}</span>
+            </div>
+            @endif
+            <div class="receipt-line">
+                <span class="line-label">Status:</span>
+                <span class="line-value">
+                    <span class="status-badge status-{{ $welfare->status }}">{{ strtoupper($welfare->status) }}</span>
                 </span>
             </div>
-            <div class="stats-cell stats-label">Transaction Date:</div>
-            <div class="stats-cell"><strong>{{ $welfare->transaction_date->format('F d, Y') }}</strong></div>
+            <div class="receipt-line">
+                <span class="line-label">Date:</span>
+                <span class="line-value">{{ $welfare->transaction_date->format('M j, Y') }}</span>
+            </div>
+            @if($welfare->approval_date)
+            <div class="receipt-line">
+                <span class="line-label">Approved:</span>
+                <span class="line-value">{{ $welfare->approval_date->format('M j, Y') }}</span>
+            </div>
+            @endif
+            @if($welfare->disbursement_date)
+            <div class="receipt-line">
+                <span class="line-label">Disbursed:</span>
+                <span class="line-value">{{ $welfare->disbursement_date->format('M j, Y') }}</span>
+            </div>
+            @endif
         </div>
-    </div>
 
-    @if($welfare->benefit_type)
-    <div class="stats">
-        <div class="stats-row">
-            <div class="stats-cell stats-label">Benefit Type:</div>
-            <div class="stats-cell"><strong>{{ $welfare->benefit_type_name }}</strong></div>
+        <div class="receipt-divider">--------------------------------</div>
+
+        <!-- Member Information -->
+        <div class="receipt-section">
+            <div class="section-label">MEMBER INFO</div>
+            <div class="receipt-line">
+                <span class="line-label">Name:</span>
+                <span class="line-value">{{ strtoupper($welfare->user->name) }}</span>
+            </div>
+            <div class="receipt-line">
+                <span class="line-label">Member ID:</span>
+                <span class="line-value" style="font-family: 'Courier New', monospace;">{{ $welfare->user->membership_code ?? 'N/A' }}</span>
+            </div>
+            <div class="receipt-line">
+                <span class="line-label">Email:</span>
+                <span class="line-value">{{ $welfare->user->email }}</span>
+            </div>
+            <div class="receipt-line">
+                <span class="line-label">Phone:</span>
+                <span class="line-value" style="font-family: 'Courier New', monospace;">{{ $welfare->user->phone ?? 'N/A' }}</span>
+            </div>
         </div>
-    </div>
-    @endif
 
-    <!-- Member Information -->
-    <div class="section">
-        <div class="section-header">Member Information</div>
-        <div class="section-content">
-            <table class="info-table">
-                <tr>
-                    <td>Member Name</td>
-                    <td><strong>{{ strtoupper($welfare->user->name) }}</strong></td>
-                </tr>
-                <tr>
-                    <td>Membership Code</td>
-                    <td style="font-family: 'Courier New', monospace; font-weight: bold;">{{ $welfare->user->membership_code ?? 'N/A' }}</td>
-                </tr>
-                <tr>
-                    <td>Email Address</td>
-                    <td>{{ $welfare->user->email }}</td>
-                </tr>
-                <tr>
-                    <td>Phone Number</td>
-                    <td style="font-family: 'Courier New', monospace;">{{ $welfare->user->phone ?? 'N/A' }}</td>
-                </tr>
-            </table>
+        @if($welfare->description)
+        <div class="receipt-section">
+            <div class="section-label">DESCRIPTION</div>
+            <div class="receipt-block">
+                <div class="block-value">{{ $welfare->description }}</div>
+            </div>
         </div>
-    </div>
+        @endif
 
-    <!-- Welfare Record Details -->
-    <div class="section">
-        <div class="section-header">Welfare Record Details</div>
-        <div class="section-content">
-            <table class="info-table">
-                <tr>
-                    <td>Welfare Number</td>
-                    <td style="font-family: 'Courier New', monospace; font-weight: bold;">{{ $welfare->welfare_number }}</td>
-                </tr>
-                <tr>
-                    <td>Type</td>
-                    <td><strong>{{ ucfirst($welfare->type) }}</strong></td>
-                </tr>
-                @if($welfare->benefit_type)
-                <tr>
-                    <td>Benefit Type</td>
-                    <td><strong>{{ $welfare->benefit_type_name }}</strong></td>
-                </tr>
-                @endif
-                <tr>
-                    <td>Amount</td>
-                    <td><strong style="font-size: 11pt; color: #015425;">{{ number_format($welfare->amount, 2) }} TZS</strong></td>
-                </tr>
-                <tr>
-                    <td>Transaction Date</td>
-                    <td><strong>{{ $welfare->transaction_date->format('F d, Y') }}</strong></td>
-                </tr>
-                <tr>
-                    <td>Status</td>
-                    <td>
-                        <span class="status-badge status-{{ $welfare->status }}">
-                            {{ strtoupper($welfare->status) }}
-                        </span>
-                    </td>
-                </tr>
-                @if($welfare->approval_date)
-                <tr>
-                    <td>Approval Date</td>
-                    <td style="font-family: 'Courier New', monospace;">{{ $welfare->approval_date->format('F d, Y') }}</td>
-                </tr>
-                @endif
-                @if($welfare->disbursement_date)
-                <tr>
-                    <td>Disbursement Date</td>
-                    <td style="font-family: 'Courier New', monospace;">{{ $welfare->disbursement_date->format('F d, Y') }}</td>
-                </tr>
-                @endif
-                @if($welfare->description)
-                <tr>
-                    <td>Description</td>
-                    <td>{{ $welfare->description }}</td>
-                </tr>
-                @endif
-                @if($welfare->eligibility_notes)
-                <tr>
-                    <td>Eligibility Notes</td>
-                    <td>{{ $welfare->eligibility_notes }}</td>
-                </tr>
-                @endif
-                @if($welfare->rejection_reason)
-                <tr>
-                    <td>Rejection Reason</td>
-                    <td style="color: #721c24;">{{ $welfare->rejection_reason }}</td>
-                </tr>
-                @endif
-            </table>
+        @if($welfare->eligibility_notes)
+        <div class="receipt-section">
+            <div class="section-label">ELIGIBILITY NOTES</div>
+            <div class="receipt-block">
+                <div class="block-value">{{ $welfare->eligibility_notes }}</div>
+            </div>
         </div>
-    </div>
+        @endif
 
-    <!-- Approval Information -->
-    @if($welfare->approver)
-    <div class="section">
-        <div class="section-header">Approval Information</div>
-        <div class="section-content">
-            <table class="info-table">
-                <tr>
-                    <td>Approved By</td>
-                    <td><strong>{{ $welfare->approver->name }}</strong></td>
-                </tr>
-                @if($welfare->approval_date)
-                <tr>
-                    <td>Approval Date</td>
-                    <td style="font-family: 'Courier New', monospace;">{{ $welfare->approval_date->format('F d, Y H:i:s') }}</td>
-                </tr>
-                @endif
-            </table>
+        @if($welfare->rejection_reason)
+        <div class="receipt-section">
+            <div class="section-label">REJECTION REASON</div>
+            <div class="receipt-block">
+                <div class="block-value" style="color: #ef4444;">{{ $welfare->rejection_reason }}</div>
+            </div>
         </div>
-    </div>
-    @endif
+        @endif
 
-    <!-- Transaction History -->
-    @if($welfare->transactions && $welfare->transactions->count() > 0)
-    <div class="section">
-        <div class="section-header">Transaction History</div>
-        <div class="section-content">
-            <table>
-                <tr>
-                    <th>Transaction #</th>
-                    <th>Type</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                </tr>
-                @foreach($welfare->transactions as $transaction)
-                <tr>
-                    <td style="font-family: 'Courier New', monospace;">{{ $transaction->transaction_number }}</td>
-                    <td>{{ ucfirst(str_replace('_', ' ', $transaction->transaction_type)) }}</td>
-                    <td><strong>{{ number_format($transaction->amount, 2) }} TZS</strong></td>
-                    <td style="font-family: 'Courier New', monospace;">{{ $transaction->transaction_date->format('Y-m-d') }}</td>
-                    <td>
-                        <span class="status-badge status-{{ $transaction->status }}">
-                            {{ strtoupper($transaction->status) }}
-                        </span>
-                    </td>
-                </tr>
-                @endforeach
-            </table>
+        @if($welfare->approver)
+        <div class="receipt-section">
+            <div class="section-label">APPROVAL INFO</div>
+            <div class="receipt-line">
+                <span class="line-label">Approved By:</span>
+                <span class="line-value">{{ $welfare->approver->name }}</span>
+            </div>
         </div>
-    </div>
-    @endif
+        @endif
 
-    <!-- Organization Information -->
-    <div class="section">
-        <div class="section-header">Organization Information</div>
-        <div class="section-content">
-            <table class="info-table">
-                <tr>
-                    <td>Organization Name</td>
-                    <td><strong>{{ $organizationInfo['name'] }}</strong></td>
-                </tr>
-                <tr>
-                    <td>Address</td>
-                    <td>{{ $organizationInfo['address'] }}</td>
-                </tr>
-                <tr>
-                    <td>Email</td>
-                    <td>{{ $organizationInfo['email'] }}</td>
-                </tr>
-                <tr>
-                    <td>Phone</td>
-                    <td style="font-family: 'Courier New', monospace;">{{ $organizationInfo['phone'] }}</td>
-                </tr>
-            </table>
+        <!-- Barcode -->
+        <div class="barcode">
+            {{ $welfare->welfare_number }}
         </div>
-    </div>
 
-    <div class="footer">
-        <p><strong>{{ $organizationInfo['name'] }}</strong></p>
-        <p>{{ $organizationInfo['address'] }}</p>
-        <p>Email: {{ $organizationInfo['email'] }} | Phone: {{ $organizationInfo['phone'] }}</p>
-        <p style="margin-top: 10px; font-size: 7pt; color: #999; font-style: italic;">
-            This is a computer-generated document. Welfare Number: {{ $welfare->welfare_number }}
-        </p>
-        <p style="font-size: 7pt; color: #999;">
-            Generated on {{ ($generatedAt ? \Carbon\Carbon::parse($generatedAt) : now())->format('F d, Y \a\t H:i:s') }}
-        </p>
+        <!-- Footer -->
+        <div class="receipt-footer">
+            <p>--------------------------------</p>
+            <p><strong>KEEP THIS RECEIPT</strong></p>
+            <p>{{ $organizationInfo['name'] }}</p>
+            <p>{{ $organizationInfo['address'] }}</p>
+            <p>Email: {{ $organizationInfo['email'] }}</p>
+            <p>Phone: {{ $organizationInfo['phone'] }}</p>
+            <p>Generated: {{ ($generatedAt ? \Carbon\Carbon::parse($generatedAt) : now())->format('M j, Y g:i A') }}</p>
+            <p>Copyright {{ date('Y') }} FeedTan CMG</p>
+            <p>--------------------------------</p>
+        </div>
     </div>
 </body>
 </html>
-

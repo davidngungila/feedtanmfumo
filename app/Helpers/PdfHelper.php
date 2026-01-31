@@ -45,12 +45,15 @@ class PdfHelper
             ->setOption('isHtml5ParserEnabled', true)
             ->setOption('isRemoteEnabled', true);
 
-        // Handle custom paper size array format
+        // Handle custom paper size
         if (is_array($paperSize) && count($paperSize) >= 2) {
             // Custom size: [width, height] in points
             // Convert to string format that DomPDF understands: "width,height"
             $paperSizeString = $paperSize[0].','.$paperSize[1];
             $pdf->setPaper($paperSizeString, $orientation);
+        } elseif (is_string($paperSize) && str_contains($paperSize, ',')) {
+            // Already in string format "width,height"
+            $pdf->setPaper($paperSize, $orientation);
         } else {
             // Standard size: string like 'a4', 'letter', etc.
             $pdf->setPaper($paperSize, $orientation);
