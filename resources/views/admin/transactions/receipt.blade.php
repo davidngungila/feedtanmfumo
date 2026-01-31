@@ -429,15 +429,9 @@
     </div>
 
     <div class="footer">
-        <p><strong>{{ $organizationInfo['name'] }}</strong></p>
-        <p>{{ $organizationInfo['address'] }}</p>
-        <p>Email: {{ $organizationInfo['email'] }} | Phone: {{ $organizationInfo['phone'] }}</p>
-        <p style="margin-top: 10px; font-size: 7pt; color: #999; font-style: italic;">
-            This is a computer-generated receipt. Receipt No: {{ $transaction->transaction_number }}
-        </p>
-        <p style="font-size: 7pt; color: #999;">
-            Generated on {{ ($generatedAt ? \Carbon\Carbon::parse($generatedAt) : now())->format('F d, Y \a\t H:i:s') }}
-        </p>
+        <p>FeedTan Community Microfinance Group - Transaction Receipt</p>
+        <p>Report generated on {{ now()->format('F d, Y \a\t H:i:s') }}</p>
+        <p>Serial No: FCMGTR-{{ date('Ymd') }}-{{ str_pad($transaction->id, 4, '0', STR_PAD_LEFT) }}</p>
     </div>
 </body>
 </html>

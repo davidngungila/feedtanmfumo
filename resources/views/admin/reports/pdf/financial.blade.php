@@ -302,8 +302,8 @@
 
     <div class="footer">
         <p>FeedTan Community Microfinance Group - Financial Report</p>
-        <p>Report generated on {{ ($generatedAt ? \Carbon\Carbon::parse($generatedAt) : now())->format('F d, Y \a\t H:i:s') }}</p>
-        <p>Serial No: FCMGFR{{ date('dmy') }}{{ str_pad(rand(1000, 9999), 4, '0', STR_PAD_LEFT) }}</p>
+        <p>Report generated on {{ now()->format('F d, Y \a\t H:i:s') }}</p>
+        <p>Serial No: FCMGFR-{{ date('Ymd') }}-{{ str_pad(1, 4, '0', STR_PAD_LEFT) }}</p>
     </div>
 </body>
 </html>
