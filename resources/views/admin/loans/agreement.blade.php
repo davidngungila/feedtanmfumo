@@ -138,7 +138,7 @@
     <div class="title">LOAN AGREEMENT</div>
 
     <div class="serial-number">
-        Serial Number: FCMGLA{{ date('Ymd') }}{{ str_pad($loan->id, 4, '0', STR_PAD_LEFT) }}
+        Serial Number: FCMGLA{{ $loan->application_date->format('Ymd') }}{{ str_pad($loan->id, 4, '0', STR_PAD_LEFT) }}
     </div>
 
     <div class="agreement-intro">
