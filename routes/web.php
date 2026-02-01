@@ -161,6 +161,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::resource('loans', LoanController::class);
     Route::get('loans/{loan}/pdf', [LoanController::class, 'exportPdf'])->name('loans.pdf');
+    Route::get('loans/{loan}/agreement', [LoanController::class, 'generateAgreement'])->name('loans.agreement');
 
     // Loan SMS Reminders
     Route::prefix('loans')->name('loans.')->group(function () {

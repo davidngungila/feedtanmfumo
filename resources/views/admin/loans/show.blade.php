@@ -24,6 +24,14 @@
                 <p class="text-white text-opacity-90 text-sm sm:text-base">Loan Number: <strong>{{ $loan->loan_number }}</strong></p>
             </div>
             <div class="mt-4 md:mt-0 md:ml-auto flex flex-wrap gap-3 justify-end">
+                <a href="{{ route('admin.loans.agreement', $loan) }}" target="_blank" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition font-medium shadow-md">
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Generate Agreement
+                    </div>
+                </a>
                 <a href="{{ route('admin.loans.pdf', $loan) }}" target="_blank" class="inline-flex items-center px-6 py-3 bg-red-600 text-white rounded-md hover:bg-red-700 transition font-medium shadow-md">
                     <div class="flex items-center">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -234,6 +234,41 @@ class LoanController extends Controller
         ], 'loan-'.$loan->loan_number.'-'.date('Y-m-d-His').'.pdf');
     }
 
+    public function generateAgreement(Loan $loan)
+    {
+        $loan->load(['user', 'guarantor', 'approver']);
+        
+        // Get organization officers (you may want to store these in settings or database)
+        // For now, using placeholders that can be configured
+        $chairpersonName = \App\Models\Setting::get('chairperson_name') ?? 'Kanti Ambrose Kimario';
+        $secretaryName = \App\Models\Setting::get('secretary_name') ?? 'Emmanuel Elioth Lulandala';
+        
+        // Calculate monthly payment
+        $monthlyPayment = $loan->term_months > 0 ? $loan->total_amount / $loan->term_months : 0;
+        
+        // Calculate monthly interest rate
+        $monthlyInterestRate = $loan->interest_rate / 12;
+        
+        // Calculate start and end dates
+        $startDate = $loan->disbursement_date 
+            ? $loan->disbursement_date 
+            : ($loan->approval_date ? $loan->approval_date->copy()->addDays(7) : $loan->application_date->copy()->addDays(7));
+        
+        $endDate = $loan->maturity_date 
+            ? $loan->maturity_date 
+            : $loan->application_date->copy()->addMonths($loan->term_months);
+
+        return \App\Helpers\PdfHelper::downloadPdf('admin.loans.agreement', [
+            'loan' => $loan,
+            'chairpersonName' => $chairpersonName,
+            'secretaryName' => $secretaryName,
+            'monthlyPayment' => $monthlyPayment,
+            'monthlyInterestRate' => $monthlyInterestRate,
+            'startDate' => $startDate,
+            'endDate' => $endDate,
+        ], 'loan-agreement-'.$loan->loan_number.'-'.date('Y-m-d-His').'.pdf');
+    }
+
     public function edit(Loan $loan)
     {
         $users = User::where('role', 'user')->get();
