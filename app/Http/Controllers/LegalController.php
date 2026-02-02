@@ -20,3 +20,4 @@ class LegalController extends Controller
         return view('legal.privacy');
     }
 }
+

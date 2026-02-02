@@ -46,15 +46,16 @@
         }
         .logo-container {
             margin-bottom: 8px;
+            width: 100%;
+            padding: 0;
         }
         .logo-container img {
-            max-width: 100px;
+            width: 100%;
+            max-width: 100%;
             height: auto;
-            background: white;
-            padding: 5px;
-            border-radius: 6px;
             display: block;
             margin: 0 auto;
+            object-fit: contain;
         }
         .receipt-header h1 {
             font-size: 14px;

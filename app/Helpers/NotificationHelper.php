@@ -48,3 +48,4 @@ class NotificationHelper
         self::createForUsers($admins->all(), $type, $title, $message, $icon, $color, $link, $data);
     }
 }
+
