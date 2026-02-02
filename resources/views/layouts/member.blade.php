@@ -47,7 +47,8 @@
         <header class="bg-gradient-to-r from-[#015425] to-[#027a3a] shadow-lg fixed top-0 left-0 right-0 z-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center h-16 gap-4">
-                    <div class="flex items-center flex-shrink-0">
+                    <div class="flex items-center flex-1 justify-between">
+                        <div class="flex items-center flex-shrink-0">
                         <!-- Mobile Menu Button -->
                         <button type="button" id="mobile-menu-button" class="md:hidden mr-3 p-2 text-white hover:bg-white hover:bg-opacity-20 hover:text-[#015425] rounded-md transition focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#015425]">
                             <svg id="mobile-menu-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -142,6 +143,11 @@
                     </nav>
                     
                     <div class="flex items-center space-x-3 sm:space-x-4 flex-shrink-0 ml-auto">
+                        <!-- Quick Action Buttons -->
+                        <div class="hidden sm:flex items-center space-x-2">
+                            @include('components.quick-action-buttons', ['isMemberLayout' => true])
+                        </div>
+                        
                         <!-- Notifications with Hover -->
                         <div class="relative notification-container">
                             <button id="notification-button" class="relative p-2 text-white hover:bg-white hover:bg-opacity-20 hover:text-[#015425] rounded-full transition focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#015425]">
