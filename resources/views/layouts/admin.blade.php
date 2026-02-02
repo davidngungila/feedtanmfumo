@@ -83,6 +83,9 @@
                         <h2 class="text-xl lg:text-2xl font-bold text-[#015425]">@yield('page-title', 'Admin Dashboard')</h2>
                     </div>
                     <div class="flex items-center space-x-4">
+                        <!-- Language Switcher -->
+                        @include('components.language-switcher')
+                        
                         <!-- Notifications -->
                         <div id="notification-container" class="relative">
                             <button id="notification-button" class="relative p-2 text-gray-600 hover:text-[#015425] hover:bg-gray-100 rounded-full transition focus:outline-none focus:ring-2 focus:ring-[#015425] focus:ring-offset-2">

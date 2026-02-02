@@ -1,0 +1,72 @@
+<?php
+
+return [
+    // Navigation
+    'dashboard' => 'Dashibodi',
+    'loans' => 'Mikopo',
+    'savings' => 'Akiba',
+    'investments' => 'Uwekezaji',
+    'welfare' => 'Ustawi',
+    'reports' => 'Ripoti',
+    'settings' => 'Mipangilio',
+    'users' => 'Watumiaji',
+    'memberships' => 'Uanachama',
+    'issues' => 'Masuala',
+    'shares' => 'Hisa',
+    'formulas' => 'Fomula',
+
+    // Common Actions
+    'view' => 'Angalia',
+    'edit' => 'Hariri',
+    'delete' => 'Futa',
+    'create' => 'Tengeneza',
+    'save' => 'Hifadhi',
+    'cancel' => 'Ghairi',
+    'submit' => 'Wasilisha',
+    'back' => 'Rudi',
+    'next' => 'Ifuatayo',
+    'previous' => 'Iliyotangulia',
+    'search' => 'Tafuta',
+    'filter' => 'Chuja',
+    'export' => 'Hamisha',
+    'print' => 'Chapisha',
+    'download' => 'Pakua',
+    'upload' => 'Pakia',
+    'approve' => 'Idhinisha',
+    'reject' => 'Kataa',
+    'pending' => 'Inasubiri',
+    'approved' => 'Imeidhinishwa',
+    'rejected' => 'Imekataliwa',
+    'active' => 'Inaendelea',
+    'inactive' => 'Haijaendelea',
+
+    // Common Labels
+    'name' => 'Jina',
+    'email' => 'Barua pepe',
+    'phone' => 'Simu',
+    'address' => 'Anwani',
+    'date' => 'Tarehe',
+    'amount' => 'Kiasi',
+    'status' => 'Hali',
+    'actions' => 'Vitendo',
+    'description' => 'Maelezo',
+    'notes' => 'Maelezo',
+    'created_at' => 'Imetengenezwa',
+    'updated_at' => 'Imehakikiwa',
+
+    // Messages
+    'welcome' => 'Karibu',
+    'welcome_message' => 'Karibu FeedTan Digital!',
+    'loading_message' => 'Mfumo unaanza, tafadhali subiri...',
+    'no_data' => 'Hakuna data inayopatikana',
+    'success' => 'Mafanikio',
+    'error' => 'Hitilafu',
+    'warning' => 'Onyo',
+    'info' => 'Taarifa',
+
+    // Language
+    'language' => 'Lugha',
+    'english' => 'Kiingereza',
+    'swahili' => 'Kiswahili',
+    'switch_language' => 'Badilisha Lugha',
+];

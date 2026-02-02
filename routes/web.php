@@ -26,6 +26,7 @@ use App\Http\Controllers\Member\MembershipController;
 use App\Http\Controllers\Member\ProfileController as MemberProfileController;
 use App\Http\Controllers\Member\SavingsController as MemberSavingsController;
 use App\Http\Controllers\Member\WelfareController as MemberWelfareController;
+use App\Http\Controllers\LanguageController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +34,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return redirect()->route('login');
 })->name('welcome');
+
+// Language Switcher
+Route::get('/language/{locale}', [LanguageController::class, 'switchLanguage'])->name('language.switch');
 
 // Legal pages (public)
 Route::get('/terms', [\App\Http\Controllers\LegalController::class, 'terms'])->name('terms');
