@@ -397,7 +397,7 @@
             </table>
             <div style="text-align: center; margin-top: 20px;">
                 @if(isset($stampBase64) && $stampBase64)
-                <img src="{{ $stampBase64 }}" alt="Office Stamp" style="max-width: 120px; height: auto; display: block; margin: 0 auto;">
+                <img src="{{ $stampBase64 }}" alt="Office Stamp" style="max-width: 200px; width: 200px; height: auto; display: block; margin: 0 auto;">
                 @else
                 <p>__________________________</p>
                 <p style="font-size: 8pt;">Office Stamp</p>
