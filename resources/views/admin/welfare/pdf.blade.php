@@ -24,7 +24,7 @@
         body {
             font-family: 'Arial', 'Courier New', monospace;
             margin: 0;
-            padding: 10px;
+            padding: 8px 4px;
             background: #ffffff;
             color: #000000;
             line-height: 1.3;
@@ -36,6 +36,7 @@
             width: 100%;
             max-width: 80mm;
             background: white;
+            padding: 0 3px;
         }
         .receipt-header {
             text-align: center;
