@@ -258,6 +258,9 @@ class LoanController extends Controller
             ? $loan->maturity_date 
             : $loan->application_date->copy()->addMonths($loan->term_months);
 
+        // Get header image as base64
+        $headerBase64 = \App\Helpers\PdfHelper::getHeaderImageBase64();
+
         return \App\Helpers\PdfHelper::downloadPdf('admin.loans.agreement', [
             'loan' => $loan,
             'chairpersonName' => $chairpersonName,
@@ -266,6 +269,7 @@ class LoanController extends Controller
             'monthlyInterestRate' => $monthlyInterestRate,
             'startDate' => $startDate,
             'endDate' => $endDate,
+            'headerBase64' => $headerBase64,
         ], 'loan-agreement-'.$loan->loan_number.'-'.date('Y-m-d-His').'.pdf');
     }
 
