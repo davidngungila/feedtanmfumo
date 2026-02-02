@@ -720,5 +720,8 @@
     </style>
     
     @stack('scripts')
+    
+    <!-- Quick Contact Widget -->
+    @include('components.quick-contact-widget')
 </body>
 </html>

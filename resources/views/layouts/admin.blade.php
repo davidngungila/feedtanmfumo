@@ -528,5 +528,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
     @stack('scripts')
+    
+    <!-- Quick Contact Widget -->
+    @include('components.quick-contact-widget')
 </body>
 </html>
