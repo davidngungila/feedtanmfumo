@@ -222,6 +222,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Membership Management
     Route::get('memberships', [\App\Http\Controllers\Admin\MembershipController::class, 'index'])->name('memberships.index');
     Route::get('memberships/{user}', [\App\Http\Controllers\Admin\MembershipController::class, 'show'])->name('memberships.show');
+    Route::get('memberships/{user}/pdf', [\App\Http\Controllers\Admin\MembershipController::class, 'exportPdf'])->name('memberships.pdf');
     Route::post('memberships/{user}/approve', [\App\Http\Controllers\Admin\MembershipController::class, 'approve'])->name('memberships.approve');
     Route::post('memberships/{user}/reject', [\App\Http\Controllers\Admin\MembershipController::class, 'reject'])->name('memberships.reject');
     Route::post('memberships/{user}/suspend', [\App\Http\Controllers\Admin\MembershipController::class, 'suspend'])->name('memberships.suspend');

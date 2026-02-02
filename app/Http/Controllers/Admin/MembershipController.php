@@ -64,6 +64,27 @@ class MembershipController extends Controller
     }
 
     /**
+     * Export membership application as PDF
+     */
+    public function exportPdf(User $user)
+    {
+        $user->load('membershipType', 'membershipApprovedBy', 'editingRequestedBy');
+        
+        // Get header image as base64
+        $headerBase64 = \App\Helpers\PdfHelper::getHeaderImageBase64();
+        
+        // Generate serial number
+        $serialNumber = 'FCMGMA'.date('dmy').str_pad($user->id, 4, '0', STR_PAD_LEFT);
+
+        return \App\Helpers\PdfHelper::downloadPdf('member.membership.pdf', [
+            'user' => $user,
+            'headerBase64' => $headerBase64,
+            'documentTitle' => 'Membership Application Document',
+            'serialNumber' => $serialNumber,
+        ], 'membership-'.($user->membership_code ?? $user->id).'-'.date('Y-m-d-His').'.pdf');
+    }
+
+    /**
      * Approve membership application
      */
     public function approve(Request $request, User $user)
