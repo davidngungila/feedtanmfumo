@@ -54,9 +54,9 @@
         width: 30px;
         height: 30px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #2563eb 0%, #7c3aed 50%, #3b82f6 100%);
+        background: linear-gradient(135deg, #015425 0%, #027a3a 50%, #16a34a 100%);
         animation: pulse 1.4s ease-in-out infinite;
-        box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
+        box-shadow: 0 0 20px rgba(1, 84, 37, 0.4);
     }
     
     .loading-dot.dot-1 {
@@ -79,12 +79,12 @@
         0%, 100% {
             transform: scale(1);
             opacity: 1;
-            box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
+            box-shadow: 0 0 20px rgba(1, 84, 37, 0.4);
         }
         50% {
             transform: scale(1.2);
             opacity: 0.7;
-            box-shadow: 0 0 30px rgba(37, 99, 235, 0.6);
+            box-shadow: 0 0 30px rgba(1, 84, 37, 0.6);
         }
     }
     
@@ -97,7 +97,7 @@
     .loading-title {
         font-size: 28px;
         font-weight: bold;
-        color: #2563eb;
+        color: #015425;
         margin: 0;
         font-family: 'Quicksand', sans-serif;
     }
