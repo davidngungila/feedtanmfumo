@@ -260,6 +260,14 @@ class LoanController extends Controller
 
         // Get header image as base64
         $headerBase64 = \App\Helpers\PdfHelper::getHeaderImageBase64();
+        
+        // Get stamp image as base64
+        $stampBase64 = null;
+        $stampPath = public_path('stamp.png');
+        if (file_exists($stampPath)) {
+            $stampData = file_get_contents($stampPath);
+            $stampBase64 = 'data:image/png;base64,'.base64_encode($stampData);
+        }
 
         return \App\Helpers\PdfHelper::downloadPdf('admin.loans.agreement', [
             'loan' => $loan,
@@ -270,6 +278,7 @@ class LoanController extends Controller
             'startDate' => $startDate,
             'endDate' => $endDate,
             'headerBase64' => $headerBase64,
+            'stampBase64' => $stampBase64,
         ], 'loan-agreement-'.$loan->loan_number.'-'.date('Y-m-d-His').'.pdf');
     }
 
