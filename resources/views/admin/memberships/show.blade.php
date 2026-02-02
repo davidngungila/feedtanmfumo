@@ -121,49 +121,272 @@
                 <p class="text-gray-900">{{ number_format($user->capital_contribution ?? 0) }} TZS</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Bank Account</label>
-                <p class="text-gray-900">{{ $user->bank_account_number ?? 'N/A' }}</p>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Capital Outstanding</label>
+                <p class="text-gray-900">{{ number_format($user->capital_outstanding ?? 0) }} TZS</p>
             </div>
         </div>
     </div>
 
-    <!-- Documents -->
-    @if($user->passport_picture_path || $user->nida_picture_path || $user->application_letter_path || $user->payment_slip_path)
+    <!-- Employment Information -->
     <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-bold text-[#015425] mb-6">Uploaded Documents</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            @if($user->passport_picture_path)
+        <h2 class="text-xl font-bold text-[#015425] mb-6">Employment Information</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Passport Picture</label>
-                <a href="{{ Storage::url($user->passport_picture_path) }}" target="_blank" class="text-[#015425] hover:underline">View Document</a>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Occupation / Profession</label>
+                <p class="text-gray-900">{{ $user->occupation ?? 'N/A' }}</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Employer / Organization</label>
+                <p class="text-gray-900">{{ $user->employer ?? 'N/A' }}</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Monthly Income</label>
+                <p class="text-gray-900 font-semibold text-[#015425]">
+                    @if($user->monthly_income)
+                        {{ number_format($user->monthly_income) }} TZS
+                    @else
+                        N/A
+                    @endif
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bank Information -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-[#015425] mb-6">Bank Account Information</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Bank Name</label>
+                <p class="text-gray-900">{{ $user->bank_name ?? 'N/A' }}</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Bank Branch</label>
+                <p class="text-gray-900">{{ $user->bank_branch ?? 'N/A' }}</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Account Number</label>
+                <p class="text-gray-900 font-mono font-semibold">{{ $user->bank_account_number ?? 'N/A' }}</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Payment Reference Number</label>
+                <p class="text-gray-900 font-mono">{{ $user->payment_reference_number ?? 'N/A' }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Information -->
+    @if($user->short_bibliography || $user->introduced_by || $user->statement_preference)
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-[#015425] mb-6">Additional Information & Preferences</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            @if($user->statement_preference)
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Statement Preference</label>
+                <p class="text-gray-900">{{ ucfirst($user->statement_preference) }}</p>
             </div>
             @endif
-            @if($user->nida_picture_path)
+            @if($user->introduced_by)
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">NIDA Picture</label>
-                <a href="{{ Storage::url($user->nida_picture_path) }}" target="_blank" class="text-[#015425] hover:underline">View Document</a>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Introduced By</label>
+                <p class="text-gray-900">{{ $user->introduced_by }}</p>
             </div>
             @endif
-            @if($user->application_letter_path)
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Application Letter</label>
-                <a href="{{ Storage::url($user->application_letter_path) }}" target="_blank" class="text-[#015425] hover:underline">View Document</a>
-            </div>
-            @endif
-            @if($user->payment_slip_path)
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Payment Slip</label>
-                <a href="{{ Storage::url($user->payment_slip_path) }}" target="_blank" class="text-[#015425] hover:underline">View Document</a>
+            @if($user->short_bibliography)
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Short Biography</label>
+                <p class="text-gray-900 text-justify">{{ $user->short_bibliography }}</p>
             </div>
             @endif
         </div>
     </div>
     @endif
 
+    <!-- Beneficiaries Information -->
+    @if($user->beneficiaries_info && count($user->beneficiaries_info) > 0)
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-[#015425] mb-6">Beneficiaries Information</h2>
+        <div class="space-y-4">
+            @foreach($user->beneficiaries_info as $index => $beneficiary)
+            <div class="border border-gray-200 rounded-lg p-4">
+                <h3 class="text-lg font-semibold text-[#015425] mb-3">Beneficiary {{ $index + 1 }}</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <p class="text-gray-900">{{ $beneficiary['name'] ?? 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Relationship</label>
+                        <p class="text-gray-900">{{ ucfirst($beneficiary['relationship'] ?? 'N/A') }}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Allocation Percentage</label>
+                        <p class="text-gray-900 font-semibold text-[#015425]">{{ $beneficiary['allocation'] ?? 0 }}%</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Contact Information</label>
+                        <p class="text-gray-900 font-mono">{{ $beneficiary['contact'] ?? 'N/A' }}</p>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    <!-- Group Registration Information -->
+    @if($user->is_group_registered)
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-[#015425] mb-6">Group Registration Information</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Group Registered</label>
+                <p class="text-gray-900">
+                    <span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Yes</span>
+                </p>
+            </div>
+            @if($user->group_name)
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Group Name</label>
+                <p class="text-gray-900 font-semibold">{{ $user->group_name }}</p>
+            </div>
+            @endif
+            @if($user->group_leaders)
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Group Leaders</label>
+                <p class="text-gray-900">{{ $user->group_leaders }}</p>
+            </div>
+            @endif
+            @if($user->group_bank_account)
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Group Bank Account</label>
+                <p class="text-gray-900 font-mono">{{ $user->group_bank_account }}</p>
+            </div>
+            @endif
+            @if($user->group_contacts)
+            <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Group Contact Information</label>
+                <p class="text-gray-900">{{ $user->group_contacts }}</p>
+            </div>
+            @endif
+        </div>
+    </div>
+    @endif
+
+    <!-- Documents -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-[#015425] mb-6">Uploaded Documents</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Passport Picture</label>
+                    <p class="text-xs text-gray-500">
+                        @if($user->passport_picture_path)
+                            <span class="text-green-600 font-medium">✓ Uploaded</span>
+                        @else
+                            <span class="text-red-600 font-medium">✗ Not Uploaded</span>
+                        @endif
+                    </p>
+                </div>
+                @if($user->passport_picture_path)
+                <a href="{{ Storage::url($user->passport_picture_path) }}" target="_blank" class="text-[#015425] hover:text-[#027a3a] transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                </a>
+                @endif
+            </div>
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">NIDA Picture</label>
+                    <p class="text-xs text-gray-500">
+                        @if($user->nida_picture_path)
+                            <span class="text-green-600 font-medium">✓ Uploaded</span>
+                        @else
+                            <span class="text-red-600 font-medium">✗ Not Uploaded</span>
+                        @endif
+                    </p>
+                </div>
+                @if($user->nida_picture_path)
+                <a href="{{ Storage::url($user->nida_picture_path) }}" target="_blank" class="text-[#015425] hover:text-[#027a3a] transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                </a>
+                @endif
+            </div>
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Application Letter</label>
+                    <p class="text-xs text-gray-500">
+                        @if($user->application_letter_path)
+                            <span class="text-green-600 font-medium">✓ Uploaded</span>
+                        @else
+                            <span class="text-red-600 font-medium">✗ Not Uploaded</span>
+                        @endif
+                    </p>
+                </div>
+                @if($user->application_letter_path)
+                <a href="{{ Storage::url($user->application_letter_path) }}" target="_blank" class="text-[#015425] hover:text-[#027a3a] transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                </a>
+                @endif
+            </div>
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Payment Slip</label>
+                    <p class="text-xs text-gray-500">
+                        @if($user->payment_slip_path)
+                            <span class="text-green-600 font-medium">✓ Uploaded</span>
+                        @else
+                            <span class="text-red-600 font-medium">✗ Not Uploaded</span>
+                        @endif
+                    </p>
+                </div>
+                @if($user->payment_slip_path)
+                <a href="{{ Storage::url($user->payment_slip_path) }}" target="_blank" class="text-[#015425] hover:text-[#027a3a] transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                </a>
+                @endif
+            </div>
+            @if($user->standing_order_path)
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Standing Order</label>
+                    <p class="text-xs text-gray-500">
+                        <span class="text-green-600 font-medium">✓ Uploaded</span>
+                    </p>
+                </div>
+                <a href="{{ Storage::url($user->standing_order_path) }}" target="_blank" class="text-[#015425] hover:text-[#027a3a] transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                </a>
+            </div>
+            @endif
+        </div>
+    </div>
+
     <!-- Action Buttons -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-[#015425] mb-4">Actions</h2>
+        <div class="flex flex-wrap gap-3 mb-6">
+            <a href="{{ route('admin.memberships.pdf', $user) }}" target="_blank" class="inline-flex items-center px-6 py-3 bg-red-600 text-white rounded-md hover:bg-red-700 transition font-medium shadow-md">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Export PDF
+            </a>
+        </div>
+    </div>
+
     @if($user->membership_status === 'pending')
     <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-bold text-[#015425] mb-6">Actions</h2>
+        <h2 class="text-xl font-bold text-[#015425] mb-6">Membership Actions</h2>
         
         <!-- Approve Form -->
         <form method="POST" action="{{ route('admin.memberships.approve', $user) }}" class="mb-6 border-b border-gray-200 pb-6">
