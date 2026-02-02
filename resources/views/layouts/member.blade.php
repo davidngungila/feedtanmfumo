@@ -143,11 +143,6 @@
                     </nav>
                     
                     <div class="flex items-center space-x-3 sm:space-x-4 flex-shrink-0 ml-auto">
-                        <!-- Quick Action Buttons -->
-                        <div class="hidden sm:flex items-center space-x-2">
-                            @include('components.quick-action-buttons', ['isMemberLayout' => true])
-                        </div>
-                        
                         <!-- Notifications with Hover -->
                         <div class="relative notification-container">
                             <button id="notification-button" class="relative p-2 text-white hover:bg-white hover:bg-opacity-20 hover:text-[#015425] rounded-full transition focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#015425]">
