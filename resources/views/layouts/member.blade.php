@@ -146,7 +146,9 @@
                     
                     <div class="flex items-center space-x-3 sm:space-x-4 flex-shrink-0 ml-auto">
                         <!-- Language Switcher -->
-                        @include('components.language-switcher')
+                        <div class="hidden md:block">
+                            @include('components.language-switcher')
+                        </div>
                         
                         <!-- Notifications with Hover -->
                         <div class="relative notification-container">

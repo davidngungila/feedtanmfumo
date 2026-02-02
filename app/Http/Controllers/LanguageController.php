@@ -11,10 +11,10 @@ class LanguageController extends Controller
     /**
      * Switch application language
      */
-    public function switchLanguage(Request $request, string $locale)
+    public function switchLanguage(Request $request, string $locale): \Illuminate\Http\RedirectResponse
     {
         // Validate locale
-        if (! in_array($locale, ['en', 'sw'])) {
+        if (!in_array($locale, ['en', 'sw'])) {
             $locale = 'en';
         }
 
@@ -30,7 +30,6 @@ class LanguageController extends Controller
             $user->update(['preferences' => $preferences]);
         }
 
-        // Redirect back to previous page
         return redirect()->back();
     }
 }

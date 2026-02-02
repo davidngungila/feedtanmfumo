@@ -12,25 +12,26 @@ class SetLocale
 {
     /**
      * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
         // Get locale from session, user preferences, or default
         $locale = Session::get('locale');
 
-        if (! $locale && auth()->check()) {
-            $preferences = auth()->user()->preferences ?? [];
+        // If no session locale, check user preferences
+        if (!$locale && auth()->check()) {
+            $user = auth()->user();
+            $preferences = $user->preferences ?? [];
             $locale = $preferences['language'] ?? null;
         }
 
-        if (! $locale) {
-            $locale = \App\Models\Setting::get('language') ?? config('app.locale', 'en');
+        // Fallback to config default
+        if (!$locale) {
+            $locale = config('app.locale', 'en');
         }
 
         // Validate locale
-        if (! in_array($locale, ['en', 'sw'])) {
+        if (!in_array($locale, ['en', 'sw'])) {
             $locale = 'en';
         }
 

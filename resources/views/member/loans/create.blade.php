@@ -20,8 +20,8 @@
     </div>
 
     <form action="{{ route('member.loans.store') }}" method="POST" id="loan-form" enctype="multipart/form-data">
-        @csrf
-        
+            @csrf
+            
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Main Form Section -->
             <div class="lg:col-span-2 space-y-6">
@@ -53,7 +53,7 @@
                             </div>
                             @endif
                             @if(Auth::user()->membership_code)
-                            <div>
+                <div>
                                 <p class="text-xs text-gray-600 mb-1">Membership Code</p>
                                 <p class="text-sm font-semibold text-[#015425]">{{ Auth::user()->membership_code }}</p>
                             </div>
@@ -71,10 +71,10 @@
                             </svg>
                         </div>
                         <h2 class="text-xl font-bold text-[#015425]">Loan Details</h2>
-                    </div>
+                </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Loan Type
                             </label>
@@ -89,7 +89,7 @@
                                 <option value="Asset Financing">Asset Financing</option>
                                 <option value="Home Improvement">Home Improvement</option>
                                 <option value="Other">Other</option>
-                            </select>
+                        </select>
                             @error('loan_type')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
@@ -138,17 +138,17 @@
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                             <p class="text-xs text-gray-500 mt-1">Repayment period in months (1-120 months)</p>
-                        </div>
+                    </div>
 
-                        <div>
+                    <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Payment Frequency <span class="text-red-500">*</span>
                             </label>
                             <select name="payment_frequency" id="payment_frequency" required 
                                 class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition">
                                 <option value="">-- Select frequency --</option>
-                                <option value="weekly">Weekly</option>
-                                <option value="bi-weekly">Bi-weekly</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="bi-weekly">Bi-weekly</option>
                                 <option value="monthly" selected>Monthly</option>
                             </select>
                             @error('payment_frequency')
@@ -262,7 +262,7 @@
                                         {{ $member->membership_code }} - {{ $member->name }} ({{ $member->email }})
                                     </option>
                                 @endforeach
-                            </select>
+                        </select>
                             @error('guarantor_id')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
@@ -549,9 +549,9 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                             <span class="text-gray-600">Loan number will be auto-generated</span>
-                        </div>
                     </div>
                 </div>
+            </div>
 
                 <!-- Action Buttons -->
                 <div class="bg-white rounded-lg shadow-md p-6">
@@ -561,18 +561,18 @@
                                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                 </svg>
-                                Submit Application
+                    Submit Application
                             </div>
-                        </button>
+                </button>
                         <a href="{{ route('member.loans.index') }}" class="block w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition text-center font-medium">
-                            Cancel
-                        </a>
+                    Cancel
+                </a>
                     </div>
                 </div>
             </div>
-        </div>
-    </form>
-</div>
+            </div>
+        </form>
+    </div>
 
 @push('scripts')
 <script>

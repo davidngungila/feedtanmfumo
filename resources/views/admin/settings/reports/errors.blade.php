@@ -7,7 +7,7 @@
     <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-6 text-white">
         <div class="flex justify-between items-center">
             <div>
-                <h1 class="text-2xl sm:text-3xl font-bold mb-2">Error Reports</h1>
+        <h1 class="text-2xl sm:text-3xl font-bold mb-2">Error Reports</h1>
                 <p class="text-white text-opacity-90">Comprehensive system error tracking and analysis</p>
             </div>
             <a href="{{ route('admin.system-settings.error-reports.pdf') }}" target="_blank" class="bg-white text-[#015425] px-4 py-2 rounded-md font-semibold hover:bg-gray-100 transition flex items-center gap-2">
