@@ -426,10 +426,6 @@
         <div class="receipt-footer">
             <p>--------------------------------</p>
             <p><strong>KEEP THIS RECEIPT</strong></p>
-            <p>{{ $organizationInfo['name'] }}</p>
-            <p>{{ $organizationInfo['address'] }}</p>
-            <p>Email: {{ $organizationInfo['email'] }}</p>
-            <p>Phone: {{ $organizationInfo['phone'] }}</p>
             <p>Generated: {{ ($generatedAt ? \Carbon\Carbon::parse($generatedAt) : now())->format('M j, Y g:i A') }}</p>
             <p>Copyright {{ date('Y') }} FeedTan CMG</p>
             <p>--------------------------------</p>
