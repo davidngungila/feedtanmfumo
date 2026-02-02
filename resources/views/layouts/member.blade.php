@@ -42,6 +42,8 @@
     @stack('styles')
 </head>
 <body class="bg-gray-50">
+    <!-- Loading Screen -->
+    @include('components.loading-screen')
     <div class="min-h-screen flex flex-col">
         <!-- Header with Green Background -->
         <header class="bg-gradient-to-r from-[#015425] to-[#027a3a] shadow-lg fixed top-0 left-0 right-0 z-50">
