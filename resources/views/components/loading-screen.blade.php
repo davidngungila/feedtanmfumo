@@ -7,8 +7,8 @@
             <div class="loading-dot dot-4"></div>
         </div>
         <div class="loading-text">
-            <h1 class="loading-title">{{ __('common.welcome_message') }}</h1>
-            <p class="loading-subtitle">{{ __('common.loading_message') }}</p>
+            <h1 class="loading-title">Welcome to FeedTan Digital!</h1>
+            <p class="loading-subtitle">The system is starting, please wait...</p>
         </div>
     </div>
 </div>
