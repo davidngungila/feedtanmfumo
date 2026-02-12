@@ -7,6 +7,7 @@ use App\Models\PaymentConfirmation;
 use App\Models\SavingsAccount;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -252,6 +253,7 @@ class PaymentConfirmationController extends Controller
                     'headers' => $headers,
                     'column_mapping' => $columnMapping,
                 ]);
+
                 return redirect()->route('admin.payment-confirmations.upload')
                     ->with('error', 'Member ID column not found. Please check your column mapping.');
             }
@@ -261,6 +263,7 @@ class PaymentConfirmationController extends Controller
                     'headers' => $headers,
                     'column_mapping' => $columnMapping,
                 ]);
+
                 return redirect()->route('admin.payment-confirmations.upload')
                     ->with('error', 'Amount column not found. Please check your column mapping.');
             }
@@ -357,45 +360,72 @@ class PaymentConfirmationController extends Controller
 
                 // Create payment confirmation record (without distribution - member will fill it)
                 try {
+                    // Ensure amount is properly formatted as decimal
+                    $amount = round((float) $amount, 2);
+
                     $data = [
                         'user_id' => $user?->id,
                         'member_id' => $memberId,
                         'member_name' => $memberName,
                         'member_type' => $memberType,
                         'amount_to_pay' => $amount,
-                        'deposit_balance' => $depositBalance,
+                        'deposit_balance' => round((float) $depositBalance, 2),
                         'member_email' => $user?->email ?? '',
                         'notes' => 'Imported from Excel sheet',
+                        // Initialize distribution fields to 0
+                        'swf_contribution' => 0,
+                        're_deposit' => 0,
+                        'fia_investment' => 0,
+                        'capital_contribution' => 0,
+                        'loan_repayment' => 0,
                     ];
 
                     Log::debug('Creating payment confirmation', [
                         'row' => $i,
+                        'member_id' => $memberId,
+                        'amount' => $amount,
                         'data' => $data,
                     ]);
 
+                    // Use DB transaction to ensure data integrity
+                    DB::beginTransaction();
+
                     $paymentConfirmation = PaymentConfirmation::create($data);
 
-                    // Refresh the model to ensure it's saved
-                    $paymentConfirmation->refresh();
+                    // Verify immediately
+                    if (! $paymentConfirmation || ! $paymentConfirmation->id) {
+                        DB::rollBack();
+                        throw new \Exception('Failed to create payment confirmation - no ID returned');
+                    }
 
-                    // Verify the record was created
-                    if ($paymentConfirmation && $paymentConfirmation->id) {
-                        $results['success']++;
-                        Log::info('Payment confirmation created successfully', [
+                    // Commit the transaction
+                    DB::commit();
+
+                    // Verify the record exists in database
+                    $savedRecord = PaymentConfirmation::find($paymentConfirmation->id);
+                    if (! $savedRecord) {
+                        $results['failed']++;
+                        $results['errors'][] = "Row {$i}: Record created but not found in database for member ID '{$memberId}'";
+                        Log::error('Payment confirmation not found after creation', [
                             'row' => $i,
                             'member_id' => $memberId,
                             'payment_confirmation_id' => $paymentConfirmation->id,
                         ]);
-                    } else {
-                        $results['failed']++;
-                        $results['errors'][] = "Row {$i}: Failed to create payment confirmation for member ID '{$memberId}'";
-                        Log::error('Payment confirmation creation failed - no ID returned', [
-                            'row' => $i,
-                            'member_id' => $memberId,
-                            'data' => $data,
-                        ]);
+
+                        continue;
                     }
+
+                    $results['success']++;
+                    Log::info('Payment confirmation created successfully', [
+                        'row' => $i,
+                        'member_id' => $memberId,
+                        'amount' => $amount,
+                        'payment_confirmation_id' => $paymentConfirmation->id,
+                    ]);
                 } catch (\Illuminate\Database\QueryException $e) {
+                    if (DB::transactionLevel() > 0) {
+                        DB::rollBack();
+                    }
                     $results['failed']++;
                     $errorMsg = $e->getMessage();
                     $results['errors'][] = "Row {$i}: Database error - ".$errorMsg;
@@ -405,8 +435,12 @@ class PaymentConfirmationController extends Controller
                         'error' => $errorMsg,
                         'sql' => $e->getSql() ?? 'N/A',
                         'bindings' => $e->getBindings() ?? [],
+                        'trace' => $e->getTraceAsString(),
                     ]);
                 } catch (\Exception $e) {
+                    if (DB::transactionLevel() > 0) {
+                        DB::rollBack();
+                    }
                     $results['failed']++;
                     $errorMsg = $e->getMessage();
                     $results['errors'][] = "Row {$i}: Error creating record - ".$errorMsg;
@@ -426,10 +460,19 @@ class PaymentConfirmationController extends Controller
                 'failed' => $results['failed'],
             ]);
 
-            // Verify records were actually saved (check last 5 minutes to avoid conflicts)
+            // Verify records were actually saved (check last 10 minutes to avoid conflicts)
             $savedCount = PaymentConfirmation::where('notes', 'Imported from Excel sheet')
-                ->where('created_at', '>=', now()->subMinutes(5))
+                ->where('created_at', '>=', now()->subMinutes(10))
                 ->count();
+
+            // Also get total count for reference
+            $totalInDb = PaymentConfirmation::count();
+
+            Log::info('Payment confirmation import verification', [
+                'success_count' => $results['success'],
+                'saved_count' => $savedCount,
+                'total_in_db' => $totalInDb,
+            ]);
 
             // Build success message
             $message = "✅ Import completed successfully!\n\n";
@@ -438,10 +481,12 @@ class PaymentConfirmationController extends Controller
             $message .= "• Successfully imported: {$results['success']}\n";
             $message .= "• Failed: {$results['failed']}\n";
 
-            if ($savedCount > 0) {
+            if ($savedCount >= $results['success']) {
                 $message .= "\n✅ Verified: {$savedCount} record(s) successfully saved to database.";
+            } elseif ($results['success'] > 0 && $savedCount > 0) {
+                $message .= "\n✅ Verified: {$savedCount} record(s) saved to database (some may have been created earlier).";
             } elseif ($results['success'] > 0) {
-                $message .= "\n⚠️ Note: {$results['success']} records were created, but verification found {$savedCount} records. This may be normal if records were created earlier today.";
+                $message .= "\n⚠️ Warning: {$results['success']} records were reported as created, but verification found {$savedCount} records. Please check the logs.";
             }
 
             if (! empty($results['errors']) && $results['failed'] > 0) {
