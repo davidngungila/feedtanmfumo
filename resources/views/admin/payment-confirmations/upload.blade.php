@@ -660,6 +660,32 @@ document.addEventListener('DOMContentLoaded', function() {
         return null;
     }
 
+    // Function to keep session alive
+    let keepAliveInterval = null;
+    function startSessionKeepAlive() {
+        keepAliveInterval = setInterval(async () => {
+            try {
+                await fetch('{{ route("admin.payment-confirmations.keep-alive") }}', {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    },
+                    credentials: 'same-origin'
+                });
+            } catch (error) {
+                console.error('Session keep-alive error:', error);
+            }
+        }, 30000); // Ping every 30 seconds
+    }
+
+    function stopSessionKeepAlive() {
+        if (keepAliveInterval) {
+            clearInterval(keepAliveInterval);
+            keepAliveInterval = null;
+        }
+    }
+
     uploadForm.addEventListener('submit', async function(e) {
         e.preventDefault(); // Prevent default submission
         
@@ -725,6 +751,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('form-sheet-index').value = sheetIndex;
         document.getElementById('form-column-mapping').value = JSON.stringify(columnMapping);
         
+        // Start session keep-alive
+        startSessionKeepAlive();
+        
         // Start progress animation
         if (uploadSplashScreen) {
             let progress = 0;
@@ -769,10 +798,42 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Submit the form programmatically after a short delay
-        setTimeout(() => {
-            this.submit();
-        }, 300);
+        // Submit via AJAX/Fetch instead of regular form submission
+        const formData = new FormData(uploadForm);
+        
+        try {
+            const response = await fetch('{{ route("admin.payment-confirmations.process-upload") }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': newToken,
+                },
+                credentials: 'same-origin'
+            });
+
+            // Stop keep-alive
+            stopSessionKeepAlive();
+
+            if (response.redirected) {
+                // Redirect to the response URL (which will show success/error message)
+                window.location.href = response.url;
+            } else {
+                const result = await response.text();
+                // If it's HTML (error page), redirect to show it
+                if (result.includes('419') || result.includes('Page Expired')) {
+                    alert('Session expired. Please refresh the page and try again.');
+                    window.location.reload();
+                } else {
+                    window.location.href = '{{ route("admin.payment-confirmations.index") }}';
+                }
+            }
+        } catch (error) {
+            stopSessionKeepAlive();
+            console.error('Upload error:', error);
+            if (uploadSplashScreen) uploadSplashScreen.style.display = 'none';
+            alert('An error occurred during upload. Please try again.');
+        }
         
         return false;
     });

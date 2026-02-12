@@ -600,4 +600,19 @@ class PaymentConfirmationController extends Controller
 
         return (float) $cleaned;
     }
+
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:payment_confirmations,id',
+        ]);
+
+        $ids = $request->input('ids');
+        $deleted = PaymentConfirmation::whereIn('id', $ids)->delete();
+
+        return redirect()
+            ->route('admin.payment-confirmations.index')
+            ->with('success', "Successfully deleted {$deleted} payment confirmation(s).");
+    }
 }

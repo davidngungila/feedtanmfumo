@@ -158,12 +158,36 @@
     </div>
     @endif
 
+    <!-- Bulk Actions -->
+    @if($paymentConfirmations->count() > 0)
+    <div class="bg-white rounded-lg shadow-md p-4 mb-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+                <label class="flex items-center cursor-pointer">
+                    <input type="checkbox" id="select-all" class="rounded border-gray-300 text-[#015425] focus:ring-[#015425]">
+                    <span class="ml-2 text-sm font-medium text-gray-700">Select All</span>
+                </label>
+                <span id="selected-count" class="text-sm text-gray-600">0 selected</span>
+            </div>
+            <button id="bulk-delete-btn" disabled class="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                </svg>
+                Delete Selected
+            </button>
+        </div>
+    </div>
+    @endif
+
     <!-- Payment Confirmations Table -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <input type="checkbox" id="select-all-header" class="rounded border-gray-300 text-[#015425] focus:ring-[#015425]">
+                        </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member ID</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount to Pay</th>
@@ -176,6 +200,9 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($paymentConfirmations as $confirmation)
                         <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4">
+                                <input type="checkbox" name="selected_ids[]" value="{{ $confirmation->id }}" class="row-checkbox rounded border-gray-300 text-[#015425] focus:ring-[#015425]">
+                            </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm font-medium text-gray-900">{{ $confirmation->member_name }}</div>
                                 <div class="text-sm text-gray-500">{{ $confirmation->member_email ?: 'No email' }}</div>
@@ -222,7 +249,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-4 text-center">
+                            <td colspan="8" class="px-6 py-4 text-center">
                                 <div class="py-8">
                                     <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -241,5 +268,97 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('select-all');
+    const selectAllHeader = document.getElementById('select-all-header');
+    const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+    const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
+    const selectedCountSpan = document.getElementById('selected-count');
+
+    function updateSelectedCount() {
+        const selected = document.querySelectorAll('.row-checkbox:checked');
+        const count = selected.length;
+        selectedCountSpan.textContent = count + ' selected';
+        bulkDeleteBtn.disabled = count === 0;
+        
+        // Update select all checkboxes
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = count === rowCheckboxes.length && rowCheckboxes.length > 0;
+        }
+        if (selectAllHeader) {
+            selectAllHeader.checked = count === rowCheckboxes.length && rowCheckboxes.length > 0;
+        }
+    }
+
+    function selectAll(checked) {
+        rowCheckboxes.forEach(checkbox => {
+            checkbox.checked = checked;
+        });
+        updateSelectedCount();
+    }
+
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function() {
+            selectAll(this.checked);
+        });
+    }
+
+    if (selectAllHeader) {
+        selectAllHeader.addEventListener('change', function() {
+            selectAll(this.checked);
+        });
+    }
+
+    rowCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateSelectedCount);
+    });
+
+    if (bulkDeleteBtn) {
+        bulkDeleteBtn.addEventListener('click', function() {
+            const selected = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => cb.value);
+            
+            if (selected.length === 0) {
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to delete ${selected.length} payment confirmation(s)? This action cannot be undone.`)) {
+                return;
+            }
+
+            // Disable button and show loading
+            bulkDeleteBtn.disabled = true;
+            bulkDeleteBtn.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Deleting...';
+
+            // Submit bulk delete
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ route("admin.payment-confirmations.bulk-delete") }}';
+            
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = '{{ csrf_token() }}';
+            form.appendChild(csrfInput);
+
+            selected.forEach(id => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'ids[]';
+                input.value = id;
+                form.appendChild(input);
+            });
+
+            document.body.appendChild(form);
+            form.submit();
+        });
+    }
+
+    updateSelectedCount();
+});
+</script>
+@endpush
 @endsection
 

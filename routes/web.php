@@ -457,10 +457,17 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('payment-confirmations', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'index'])->name('payment-confirmations.index');
     Route::get('payment-confirmations/upload', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'upload'])->name('payment-confirmations.upload');
     Route::post('payment-confirmations/preview-excel', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'previewExcel'])->name('payment-confirmations.preview-excel');
-    Route::get('payment-confirmations/refresh-csrf', function() {
+    Route::get('payment-confirmations/refresh-csrf', function () {
         return response()->json(['token' => csrf_token()]);
     })->name('payment-confirmations.refresh-csrf');
+    Route::get('payment-confirmations/keep-alive', function () {
+        // Touch session to keep it alive
+        session()->put('last_activity', now());
+
+        return response()->json(['success' => true, 'token' => csrf_token()]);
+    })->name('payment-confirmations.keep-alive');
     Route::post('payment-confirmations/process-upload', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'processUpload'])->name('payment-confirmations.process-upload');
+    Route::post('payment-confirmations/bulk-delete', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'bulkDelete'])->name('payment-confirmations.bulk-delete');
     Route::get('payment-confirmations/download-sample', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'downloadSample'])->name('payment-confirmations.download-sample');
     Route::get('payment-confirmations/{paymentConfirmation}', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'show'])->name('payment-confirmations.show');
 
