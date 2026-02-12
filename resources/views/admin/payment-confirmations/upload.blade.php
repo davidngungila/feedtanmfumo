@@ -351,14 +351,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!file) {
             e.preventDefault();
             alert('Please select an Excel file.');
-            return;
+            return false;
         }
 
         const sheetIndex = sheetSelect.value;
         if (!sheetIndex) {
             e.preventDefault();
             alert('Please select a sheet.');
-            return;
+            return false;
         }
 
         const memberIdColumn = mapMemberId.value;
@@ -369,10 +369,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!memberIdColumn || !amountColumn) {
             e.preventDefault();
             alert('Please map all required columns (Member ID and Amount).');
-            return;
+            return false;
         }
 
-        // Set hidden form values
+        // Set hidden form values BEFORE showing splash screen
         const formExcelFile = document.getElementById('form-excel-file');
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
@@ -388,11 +388,12 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('form-sheet-index').value = sheetIndex;
         document.getElementById('form-column-mapping').value = JSON.stringify(columnMapping);
         
-        // Debug logging
+        // Verify form data is set
         console.log('Form submission data:', {
             file: file.name,
-            sheetIndex: sheetIndex,
-            columnMapping: columnMapping
+            fileSet: formExcelFile.files.length > 0,
+            sheetIndex: document.getElementById('form-sheet-index').value,
+            columnMapping: document.getElementById('form-column-mapping').value
         });
 
         // Show splash screen
@@ -402,48 +403,55 @@ document.addEventListener('DOMContentLoaded', function() {
         const uploadMessage = document.getElementById('uploadMessage');
         const uploadStatus = document.getElementById('uploadStatus');
         
-        uploadSplashScreen.style.display = 'flex';
-        
-        // Simulate progress
-        let progress = 0;
-        const progressInterval = setInterval(() => {
-            progress += 2;
-            if (progress <= 90) {
-                uploadProgress.textContent = progress + '%';
-                uploadProgressBar.style.width = progress + '%';
-                
-                // Update status messages
-                if (progress < 20) {
-                    uploadStatus.textContent = 'Validating file...';
-                } else if (progress < 40) {
-                    uploadStatus.textContent = 'Reading Excel data...';
-                } else if (progress < 60) {
-                    uploadStatus.textContent = 'Processing rows...';
-                } else if (progress < 80) {
-                    uploadStatus.textContent = 'Saving to database...';
-                } else {
-                    uploadStatus.textContent = 'Finalizing...';
+        if (uploadSplashScreen) {
+            uploadSplashScreen.style.display = 'flex';
+            
+            // Simulate progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 2;
+                if (progress <= 90) {
+                    if (uploadProgress) uploadProgress.textContent = progress + '%';
+                    if (uploadProgressBar) uploadProgressBar.style.width = progress + '%';
+                    
+                    // Update status messages
+                    if (uploadStatus) {
+                        if (progress < 20) {
+                            uploadStatus.textContent = 'Validating file...';
+                        } else if (progress < 40) {
+                            uploadStatus.textContent = 'Reading Excel data...';
+                        } else if (progress < 60) {
+                            uploadStatus.textContent = 'Processing rows...';
+                        } else if (progress < 80) {
+                            uploadStatus.textContent = 'Saving to database...';
+                        } else {
+                            uploadStatus.textContent = 'Finalizing...';
+                        }
+                    }
                 }
-            }
-        }, 100);
-        
-        // Store interval to clear it later
-        window.uploadProgressInterval = progressInterval;
+            }, 100);
+            
+            // Store interval to clear it later
+            window.uploadProgressInterval = progressInterval;
+        }
         
         // Show loading overlay
         const submitBtn = this.querySelector('button[type="submit"]');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing... Please wait...';
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Processing... Please wait...';
+        }
         
         // Disable form inputs to prevent double submission
         this.querySelectorAll('input, select, button').forEach(el => {
-            if (el !== submitBtn) {
+            if (el !== submitBtn && el !== formExcelFile) {
                 el.disabled = true;
             }
         });
 
-        // Allow form to submit normally - it will redirect after processing
+        // Allow form to submit normally - don't prevent default
         // The splash screen will remain visible until page redirects
+        return true;
     });
     
     // Complete progress when page is about to unload (after form submission)

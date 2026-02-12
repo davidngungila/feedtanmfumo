@@ -142,8 +142,15 @@ class PaymentConfirmationController extends Controller
 
         $request->validate([
             'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
-            'sheet_index' => 'required|string',
+            'sheet_index' => 'required',
             'column_mapping' => 'required|string',
+        ], [
+            'excel_file.required' => 'Please select an Excel file to upload.',
+            'excel_file.file' => 'The uploaded file is not valid.',
+            'excel_file.mimes' => 'The file must be an Excel file (.xlsx, .xls, or .csv).',
+            'excel_file.max' => 'The file size must not exceed 10MB.',
+            'sheet_index.required' => 'Please select a sheet from the Excel file.',
+            'column_mapping.required' => 'Column mapping is required. Please map the columns.',
         ]);
 
         try {
