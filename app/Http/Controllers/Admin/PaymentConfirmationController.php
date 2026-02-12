@@ -280,30 +280,84 @@ class PaymentConfirmationController extends Controller
 
                 // Create payment confirmation record (without distribution - member will fill it)
                 try {
-                    PaymentConfirmation::create([
+                    $data = [
                         'user_id' => $user?->id,
                         'member_id' => $memberId,
                         'member_name' => $memberName,
                         'member_type' => $memberType,
                         'amount_to_pay' => $amount,
                         'deposit_balance' => $depositBalance,
-                        'member_email' => $user?->email ?? '',
+                        'member_email' => $user?->email,
                         'notes' => 'Imported from Excel sheet',
+                    ];
+
+                    Log::debug('Creating payment confirmation', [
+                        'row' => $i,
+                        'data' => $data,
                     ]);
 
-                    $results['success']++;
+                    $paymentConfirmation = PaymentConfirmation::create($data);
+
+                    // Verify the record was created
+                    if ($paymentConfirmation && $paymentConfirmation->id) {
+                        $results['success']++;
+                        Log::info('Payment confirmation created successfully', [
+                            'row' => $i,
+                            'member_id' => $memberId,
+                            'payment_confirmation_id' => $paymentConfirmation->id,
+                        ]);
+                    } else {
+                        $results['failed']++;
+                        $results['errors'][] = "Row {$i}: Failed to create payment confirmation for member ID '{$memberId}'";
+                        Log::error('Payment confirmation creation failed - no ID returned', [
+                            'row' => $i,
+                            'member_id' => $memberId,
+                            'data' => $data,
+                        ]);
+                    }
+                } catch (\Illuminate\Database\QueryException $e) {
+                    $results['failed']++;
+                    $errorMsg = $e->getMessage();
+                    $results['errors'][] = "Row {$i}: Database error - ".$errorMsg;
+                    Log::error('Payment confirmation import database error', [
+                        'row' => $i,
+                        'member_id' => $memberId,
+                        'error' => $errorMsg,
+                        'sql' => $e->getSql() ?? 'N/A',
+                        'bindings' => $e->getBindings() ?? [],
+                    ]);
                 } catch (\Exception $e) {
                     $results['failed']++;
-                    $results['errors'][] = "Row {$i}: Error creating record - ".$e->getMessage();
+                    $errorMsg = $e->getMessage();
+                    $results['errors'][] = "Row {$i}: Error creating record - ".$errorMsg;
                     Log::error('Payment confirmation import error', [
                         'row' => $i,
                         'member_id' => $memberId,
-                        'error' => $e->getMessage(),
+                        'error' => $errorMsg,
+                        'trace' => $e->getTraceAsString(),
                     ]);
                 }
             }
 
+            // Log final results
+            Log::info('Payment confirmation import completed', [
+                'total' => $results['total'],
+                'success' => $results['success'],
+                'failed' => $results['failed'],
+            ]);
+
+            // Verify records were actually saved
+            $savedCount = PaymentConfirmation::where('notes', 'Imported from Excel sheet')
+                ->whereDate('created_at', today())
+                ->count();
+
             $message = "Import completed. Success: {$results['success']}, Failed: {$results['failed']} out of {$results['total']} total.";
+
+            if ($savedCount > 0) {
+                $message .= "\n\n✅ Verified: {$savedCount} record(s) successfully saved to database.";
+            } else {
+                $message .= "\n\n⚠️ Warning: No records found in database. Please check the error logs.";
+            }
 
             if (! empty($results['errors'])) {
                 $message .= "\n\nErrors:\n".implode("\n", array_slice($results['errors'], 0, 20));
