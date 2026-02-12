@@ -118,6 +118,18 @@ class PaymentConfirmationController extends Controller
             'capital_contribution' => 'nullable|numeric|min:0',
             'loan_repayment' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string|max:1000',
+            'payment_method' => 'required|in:bank,mobile',
+            'mobile_provider' => 'required_if:payment_method,mobile|in:mpesa,halotel',
+            'mobile_number' => 'required_if:payment_method,mobile|string|max:20',
+            'bank_account_number' => 'required_if:payment_method,bank|string|max:50',
+            'bank_account_confirmation' => 'required_if:payment_method,bank|string|max:50|same:bank_account_number',
+        ], [
+            'payment_method.required' => 'Please select a payment method.',
+            'mobile_provider.required_if' => 'Please select a mobile money provider.',
+            'mobile_number.required_if' => 'Please enter your mobile number.',
+            'bank_account_number.required_if' => 'Please enter your bank account number.',
+            'bank_account_confirmation.required_if' => 'Please confirm your bank account number.',
+            'bank_account_confirmation.same' => 'Bank account numbers do not match.',
         ]);
 
         if ($validator->fails()) {
@@ -219,6 +231,11 @@ class PaymentConfirmationController extends Controller
             'loan_repayment' => $loanRepayment,
             'member_email' => $request->input('member_email'),
             'notes' => $request->input('notes'),
+            'payment_method' => $request->input('payment_method'),
+            'mobile_provider' => $request->input('mobile_provider'),
+            'mobile_number' => $request->input('mobile_number'),
+            'bank_account_number' => $request->input('bank_account_number'),
+            'bank_account_confirmation' => $request->input('bank_account_confirmation'),
         ]);
 
         // Send email notification

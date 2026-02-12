@@ -22,6 +22,11 @@ class PaymentConfirmation extends Model
         'loan_repayment',
         'member_email',
         'notes',
+        'payment_method',
+        'mobile_provider',
+        'mobile_number',
+        'bank_account_number',
+        'bank_account_confirmation',
     ];
 
     protected function casts(): array
