@@ -261,23 +261,6 @@
                 <div class="text-sm mb-2">Member Information</div>
                 <div class="text-2xl font-bold mb-1" id="memberName"></div>
                 <div class="text-sm opacity-90" id="memberDetails"></div>
-                <div class="mt-3 pt-3 border-t border-white/20">
-                    <div class="text-sm opacity-90">Deposit Balance</div>
-                    <div class="text-3xl font-bold" id="depositBalance"></div>
-                </div>
-            </div>
-
-            <!-- Zero Balance Message -->
-            <div id="zeroBalanceMessage" style="display: none;">
-                <div class="notification success">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                    </svg>
-                    <div>
-                        <div class="font-semibold">Thank you for your interest!</div>
-                        <div class="text-sm">Your deposit balance is zero. You can make a deposit now to proceed with payment confirmation.</div>
-                    </div>
-                </div>
             </div>
 
             <!-- Payment Form -->
@@ -297,7 +280,6 @@
                         min="0.01"
                         required
                     >
-                    <div class="text-xs text-gray-600 mt-1">Maximum: <span id="maxAmount">0.00</span></div>
                     <div id="amount_to_pay_error" class="error-message"></div>
                 </div>
 
@@ -586,7 +568,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const submitBtn = document.getElementById('submitBtn');
 
     let memberData = null;
-    let maxDepositBalance = 0;
 
     // Lookup member
     lookupBtn.addEventListener('click', async function() {
@@ -613,15 +594,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (data.success) {
                 memberData = data.member;
-                maxDepositBalance = parseFloat(memberData.deposit_balance_raw);
                 
                 // Handle user_id (may be null for unregistered members)
                 document.getElementById('user_id').value = memberData.id || '';
                 document.getElementById('member_id_hidden').value = memberData.member_id;
                 document.getElementById('memberName').textContent = memberData.name;
                 document.getElementById('memberDetails').textContent = `${memberData.member_id} - ${memberData.member_type}`;
-                document.getElementById('depositBalance').textContent = `TZS ${memberData.deposit_balance}`;
-                document.getElementById('maxAmount').textContent = `TZS ${memberData.deposit_balance}`;
                 document.getElementById('member_email').value = memberData.email || '';
                 
                 // If there's an existing payment confirmation with amount_to_pay, pre-fill it
@@ -631,14 +609,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 lookupSection.style.display = 'none';
                 memberInfo.style.display = 'block';
-
-                if (maxDepositBalance > 0) {
-                    paymentForm.style.display = 'block';
-                    zeroBalanceMessage.style.display = 'none';
-                } else {
-                    paymentForm.style.display = 'none';
-                    zeroBalanceMessage.style.display = 'block';
-                }
+                paymentForm.style.display = 'block';
                 
                 // Update total if amount_to_pay was pre-filled
                 if (memberData.amount_to_pay) {
@@ -799,10 +770,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const amount = parseFloat(this.value) || 0;
         const errorElement = document.getElementById('amount_to_pay_error');
         
-        if (amount > maxDepositBalance) {
-            errorElement.textContent = `Amount cannot exceed deposit balance of TZS ${maxDepositBalance.toFixed(2)}`;
-            this.style.borderColor = '#dc2626';
-        } else if (amount <= 0) {
+        if (amount <= 0) {
             errorElement.textContent = 'Amount must be greater than 0';
             this.style.borderColor = '#dc2626';
         } else {

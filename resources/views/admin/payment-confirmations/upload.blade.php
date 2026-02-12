@@ -202,6 +202,21 @@
     </div>
 </div>
 
+<!-- Upload Splash Screen -->
+<div id="uploadSplashScreen" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" style="display: none;">
+    <div class="bg-white rounded-lg p-8 max-w-md w-full mx-4 text-center">
+        <div class="mb-6">
+            <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-[#015425]"></div>
+        </div>
+        <div class="text-4xl font-bold text-[#015425] mb-2" id="uploadProgress">0%</div>
+        <div class="text-lg text-gray-700 mb-4" id="uploadMessage">Processing your upload...</div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-[#015425] h-2 rounded-full transition-all duration-300" id="uploadProgressBar" style="width: 0%"></div>
+        </div>
+        <div class="text-sm text-gray-500 mt-4" id="uploadStatus">Preparing to upload...</div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -380,6 +395,41 @@ document.addEventListener('DOMContentLoaded', function() {
             columnMapping: columnMapping
         });
 
+        // Show splash screen
+        const uploadSplashScreen = document.getElementById('uploadSplashScreen');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const uploadProgressBar = document.getElementById('uploadProgressBar');
+        const uploadMessage = document.getElementById('uploadMessage');
+        const uploadStatus = document.getElementById('uploadStatus');
+        
+        uploadSplashScreen.style.display = 'flex';
+        
+        // Simulate progress
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            progress += 2;
+            if (progress <= 90) {
+                uploadProgress.textContent = progress + '%';
+                uploadProgressBar.style.width = progress + '%';
+                
+                // Update status messages
+                if (progress < 20) {
+                    uploadStatus.textContent = 'Validating file...';
+                } else if (progress < 40) {
+                    uploadStatus.textContent = 'Reading Excel data...';
+                } else if (progress < 60) {
+                    uploadStatus.textContent = 'Processing rows...';
+                } else if (progress < 80) {
+                    uploadStatus.textContent = 'Saving to database...';
+                } else {
+                    uploadStatus.textContent = 'Finalizing...';
+                }
+            }
+        }, 100);
+        
+        // Store interval to clear it later
+        window.uploadProgressInterval = progressInterval;
+        
         // Show loading overlay
         const submitBtn = this.querySelector('button[type="submit"]');
         submitBtn.disabled = true;
@@ -393,6 +443,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Allow form to submit normally - it will redirect after processing
+        // The splash screen will remain visible until page redirects
+    });
+    
+    // Complete progress when page is about to unload (after form submission)
+    window.addEventListener('beforeunload', function() {
+        if (window.uploadProgressInterval) {
+            clearInterval(window.uploadProgressInterval);
+        }
+        const uploadProgress = document.getElementById('uploadProgress');
+        const uploadProgressBar = document.getElementById('uploadProgressBar');
+        const uploadStatus = document.getElementById('uploadStatus');
+        if (uploadProgress) {
+            uploadProgress.textContent = '100%';
+            uploadProgressBar.style.width = '100%';
+            uploadStatus.textContent = 'Upload complete! Redirecting...';
+        }
     });
 });
 </script>
