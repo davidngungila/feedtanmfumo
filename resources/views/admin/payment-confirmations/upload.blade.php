@@ -801,6 +801,14 @@ document.addEventListener('DOMContentLoaded', function() {
         // Submit via AJAX/Fetch instead of regular form submission
         const formData = new FormData(uploadForm);
         
+        // Verify file is included
+        if (!formData.has('excel_file') || !formExcelFile.files.length) {
+            stopSessionKeepAlive();
+            if (uploadSplashScreen) uploadSplashScreen.style.display = 'none';
+            alert('File is missing. Please select a file and try again.');
+            return false;
+        }
+        
         try {
             const response = await fetch('{{ route("admin.payment-confirmations.process-upload") }}', {
                 method: 'POST',
@@ -809,30 +817,49 @@ document.addEventListener('DOMContentLoaded', function() {
                     'X-Requested-With': 'XMLHttpRequest',
                     'X-CSRF-TOKEN': newToken,
                 },
-                credentials: 'same-origin'
+                credentials: 'same-origin',
+                redirect: 'follow' // Follow redirects
             });
 
             // Stop keep-alive
             stopSessionKeepAlive();
 
-            if (response.redirected) {
-                // Redirect to the response URL (which will show success/error message)
-                window.location.href = response.url;
+            // Check response status
+            if (response.ok || response.redirected) {
+                // Get the final URL after redirects
+                const finalUrl = response.url || response.headers.get('Location') || '{{ route("admin.payment-confirmations.index") }}';
+                
+                // Complete progress
+                if (uploadProgress) uploadProgress.textContent = '100%';
+                if (uploadProgressBar) uploadProgressBar.style.width = '100%';
+                if (uploadStatus) uploadStatus.textContent = 'Upload complete! Redirecting...';
+                
+                // Wait a moment then redirect
+                setTimeout(() => {
+                    window.location.href = finalUrl;
+                }, 500);
             } else {
+                // Handle error response
                 const result = await response.text();
-                // If it's HTML (error page), redirect to show it
+                stopSessionKeepAlive();
+                if (uploadSplashScreen) uploadSplashScreen.style.display = 'none';
+                
                 if (result.includes('419') || result.includes('Page Expired')) {
                     alert('Session expired. Please refresh the page and try again.');
                     window.location.reload();
                 } else {
-                    window.location.href = '{{ route("admin.payment-confirmations.index") }}';
+                    // Try to extract error message from HTML
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(result, 'text/html');
+                    const errorMsg = doc.querySelector('.bg-red-50, .alert-danger, .error')?.textContent?.trim() || 'An error occurred during upload.';
+                    alert(errorMsg);
                 }
             }
         } catch (error) {
             stopSessionKeepAlive();
             console.error('Upload error:', error);
             if (uploadSplashScreen) uploadSplashScreen.style.display = 'none';
-            alert('An error occurred during upload. Please try again.');
+            alert('An error occurred during upload: ' + error.message);
         }
         
         return false;

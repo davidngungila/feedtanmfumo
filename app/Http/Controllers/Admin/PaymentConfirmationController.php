@@ -291,83 +291,92 @@ class PaymentConfirmationController extends Controller
                 'member_type_index' => $memberTypeIndex,
             ]);
 
-            // Process data rows (skip header)
-            for ($i = 1; $i < count($rows); $i++) {
-                $row = $rows[$i];
+            // Use a single transaction for all inserts
+            DB::beginTransaction();
 
-                // Skip empty rows
-                if (empty(array_filter($row))) {
-                    continue;
-                }
+            try {
+                // Process data rows (skip header)
+                for ($i = 1; $i < count($rows); $i++) {
+                    $row = $rows[$i];
 
-                $results['total']++;
+                    // Skip empty rows
+                    if (empty(array_filter($row))) {
+                        continue;
+                    }
 
-                $memberId = trim((string) ($row[$memberIdIndex] ?? ''));
-                $amount = $this->parseAmount($row[$amountIndex] ?? 0);
+                    $results['total']++;
 
-                if (empty($memberId)) {
-                    $results['failed']++;
-                    $results['errors'][] = "Row {$i}: Member ID is missing";
+                    $memberId = trim((string) ($row[$memberIdIndex] ?? ''));
+                    $amount = $this->parseAmount($row[$amountIndex] ?? 0);
 
-                    continue;
-                }
+                    if (empty($memberId)) {
+                        $results['failed']++;
+                        $results['errors'][] = "Row {$i}: Member ID is missing";
 
-                if ($amount <= 0) {
-                    $results['failed']++;
-                    $results['errors'][] = "Row {$i}: Invalid amount";
+                        continue;
+                    }
 
-                    continue;
-                }
+                    if ($amount <= 0) {
+                        $results['failed']++;
+                        $results['errors'][] = "Row {$i}: Invalid amount";
 
-                // Try to find user (optional - don't fail if not found)
-                $user = User::where('member_number', $memberId)
-                    ->orWhere('membership_code', $memberId)
-                    ->first();
+                        continue;
+                    }
 
-                // Extract member name from Excel or use user name
-                $memberName = '';
-                if ($memberNameIndex !== null && isset($row[$memberNameIndex])) {
-                    $memberName = trim((string) $row[$memberNameIndex]);
-                }
-                if (empty($memberName) && $user) {
-                    $memberName = $user->name;
-                }
-                if (empty($memberName)) {
-                    $memberName = "Member {$memberId}";
-                }
+                    // Try to find user (optional - don't fail if not found)
+                    $user = User::where('member_number', $memberId)
+                        ->orWhere('membership_code', $memberId)
+                        ->first();
 
-                // Extract member type from Excel or use user type
-                $memberType = null;
-                if ($memberTypeIndex !== null && isset($row[$memberTypeIndex])) {
-                    $memberType = trim((string) $row[$memberTypeIndex]);
-                }
-                if (empty($memberType) && $user) {
-                    $memberType = $user->membershipType?->name;
-                }
+                    // Extract member name from Excel or use user name
+                    $memberName = '';
+                    if ($memberNameIndex !== null && isset($row[$memberNameIndex])) {
+                        $memberName = trim((string) $row[$memberNameIndex]);
+                    }
+                    if (empty($memberName) && $user) {
+                        $memberName = $user->name;
+                    }
+                    if (empty($memberName)) {
+                        $memberName = "Member {$memberId}";
+                    }
 
-                // Get deposit balance (0 if no user)
-                $depositBalance = 0;
-                if ($user) {
-                    $depositBalance = SavingsAccount::where('user_id', $user->id)
-                        ->where('status', 'active')
-                        ->sum('balance') ?? 0;
-                }
+                    // Extract member type from Excel or use user type
+                    $memberType = null;
+                    if ($memberTypeIndex !== null && isset($row[$memberTypeIndex])) {
+                        $memberType = trim((string) $row[$memberTypeIndex]);
+                    }
+                    if (empty($memberType) && $user) {
+                        $memberType = $user->membershipType?->name;
+                    }
 
-                // Check if payment confirmation already exists for this member ID and amount
-                $existing = PaymentConfirmation::where('member_id', $memberId)
-                    ->where('amount_to_pay', $amount)
-                    ->whereDate('created_at', today())
-                    ->first();
+                    // Get deposit balance (0 if no user)
+                    $depositBalance = 0;
+                    if ($user) {
+                        $depositBalance = SavingsAccount::where('user_id', $user->id)
+                            ->where('status', 'active')
+                            ->sum('balance') ?? 0;
+                    }
 
-                if ($existing) {
-                    $results['failed']++;
-                    $results['errors'][] = "Row {$i}: Payment confirmation already exists for member ID '{$memberId}' with amount {$amount}";
+                    // Check if payment confirmation already exists for this member ID and amount
+                    // Check outside transaction to avoid locking issues
+                    $existing = PaymentConfirmation::where('member_id', $memberId)
+                        ->where('amount_to_pay', $amount)
+                        ->whereDate('created_at', today())
+                        ->first();
 
-                    continue;
-                }
+                    if ($existing) {
+                        $results['failed']++;
+                        $results['errors'][] = "Row {$i}: Payment confirmation already exists for member ID '{$memberId}' with amount {$amount}";
+                        Log::info('Skipping duplicate payment confirmation', [
+                            'row' => $i,
+                            'member_id' => $memberId,
+                            'amount' => $amount,
+                        ]);
 
-                // Create payment confirmation record (without distribution - member will fill it)
-                try {
+                        continue;
+                    }
+
+                    // Create payment confirmation record (without distribution - member will fill it)
                     // Ensure amount is properly formatted as decimal
                     $amount = round((float) $amount, 2);
 
@@ -395,32 +404,11 @@ class PaymentConfirmationController extends Controller
                         'data' => $data,
                     ]);
 
-                    // Use DB transaction to ensure data integrity
-                    DB::beginTransaction();
-
                     $paymentConfirmation = PaymentConfirmation::create($data);
 
                     // Verify immediately
                     if (! $paymentConfirmation || ! $paymentConfirmation->id) {
-                        DB::rollBack();
-                        throw new \Exception('Failed to create payment confirmation - no ID returned');
-                    }
-
-                    // Commit the transaction
-                    DB::commit();
-
-                    // Verify the record exists in database
-                    $savedRecord = PaymentConfirmation::find($paymentConfirmation->id);
-                    if (! $savedRecord) {
-                        $results['failed']++;
-                        $results['errors'][] = "Row {$i}: Record created but not found in database for member ID '{$memberId}'";
-                        Log::error('Payment confirmation not found after creation', [
-                            'row' => $i,
-                            'member_id' => $memberId,
-                            'payment_confirmation_id' => $paymentConfirmation->id,
-                        ]);
-
-                        continue;
+                        throw new \Exception("Row {$i}: Failed to create payment confirmation - no ID returned for member ID '{$memberId}'");
                     }
 
                     $results['success']++;
@@ -430,35 +418,34 @@ class PaymentConfirmationController extends Controller
                         'amount' => $amount,
                         'payment_confirmation_id' => $paymentConfirmation->id,
                     ]);
-                } catch (\Illuminate\Database\QueryException $e) {
-                    if (DB::transactionLevel() > 0) {
-                        DB::rollBack();
-                    }
-                    $results['failed']++;
-                    $errorMsg = $e->getMessage();
-                    $results['errors'][] = "Row {$i}: Database error - ".$errorMsg;
-                    Log::error('Payment confirmation import database error', [
-                        'row' => $i,
-                        'member_id' => $memberId,
-                        'error' => $errorMsg,
-                        'sql' => $e->getSql() ?? 'N/A',
-                        'bindings' => $e->getBindings() ?? [],
-                        'trace' => $e->getTraceAsString(),
-                    ]);
-                } catch (\Exception $e) {
-                    if (DB::transactionLevel() > 0) {
-                        DB::rollBack();
-                    }
-                    $results['failed']++;
-                    $errorMsg = $e->getMessage();
-                    $results['errors'][] = "Row {$i}: Error creating record - ".$errorMsg;
-                    Log::error('Payment confirmation import error', [
-                        'row' => $i,
-                        'member_id' => $memberId,
-                        'error' => $errorMsg,
-                        'trace' => $e->getTraceAsString(),
-                    ]);
                 }
+
+                // Commit all inserts at once
+                DB::commit();
+                Log::info('All payment confirmations committed to database', [
+                    'success_count' => $results['success'],
+                ]);
+
+            } catch (\Illuminate\Database\QueryException $e) {
+                DB::rollBack();
+                $results['failed']++;
+                $errorMsg = $e->getMessage();
+                $results['errors'][] = 'Database error: '.$errorMsg;
+                Log::error('Payment confirmation import database error', [
+                    'error' => $errorMsg,
+                    'sql' => $e->getSql() ?? 'N/A',
+                    'bindings' => $e->getBindings() ?? [],
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                $results['failed']++;
+                $errorMsg = $e->getMessage();
+                $results['errors'][] = 'Error: '.$errorMsg;
+                Log::error('Payment confirmation import error', [
+                    'error' => $errorMsg,
+                    'trace' => $e->getTraceAsString(),
+                ]);
             }
 
             // Log final results
