@@ -19,7 +19,8 @@ class PaymentConfirmationController extends Controller
 {
     public function index(Request $request)
     {
-        $query = PaymentConfirmation::with(['user'])->latest();
+        // Start with base query - don't use with('user') as it might cause issues with null user_id
+        $query = PaymentConfirmation::query()->latest();
 
         // Search filter
         if ($request->filled('search')) {
@@ -41,10 +42,13 @@ class PaymentConfirmationController extends Controller
 
         $paymentConfirmations = $query->paginate(20);
 
-        // Debug: Log the count
+        // Debug: Log the count and verify data exists
+        $totalInDb = PaymentConfirmation::count();
         Log::info('Payment confirmations query result', [
+            'total_in_database' => $totalInDb,
             'total_found' => $paymentConfirmations->total(),
             'current_page_count' => $paymentConfirmations->count(),
+            'has_records' => $totalInDb > 0,
         ]);
 
         $stats = [
