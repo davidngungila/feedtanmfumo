@@ -170,8 +170,9 @@ class PaymentConfirmationController extends Controller
 
             $spreadsheet = IOFactory::load($file->getRealPath());
 
-            // Get selected sheet
-            $sheetIndex = (int) $request->input('sheet_index', 0);
+            // Get selected sheet - handle both string and integer
+            $sheetIndexInput = $request->input('sheet_index');
+            $sheetIndex = is_numeric($sheetIndexInput) ? (int) $sheetIndexInput : 0;
             $sheetNames = $spreadsheet->getSheetNames();
 
             Log::info('Sheet information', [
