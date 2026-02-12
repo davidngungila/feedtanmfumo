@@ -735,21 +735,46 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
 
-        // Set hidden form values
+        // Set hidden form values BEFORE creating FormData
         const formExcelFile = document.getElementById('form-excel-file');
+        const formSheetIndex = document.getElementById('form-sheet-index');
+        const formColumnMapping = document.getElementById('form-column-mapping');
+        
+        // Set file
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
         formExcelFile.files = dataTransfer.files;
         
+        // Set sheet index
+        if (!sheetIndex || sheetIndex === '') {
+            stopSessionKeepAlive();
+            if (uploadSplashScreen) uploadSplashScreen.style.display = 'none';
+            alert('Please select a sheet from the Excel file.');
+            return false;
+        }
+        formSheetIndex.value = sheetIndex;
+        
+        // Set column mapping
         const columnMapping = {
             member_id: memberIdColumn,
             amount: amountColumn,
             member_name: memberNameColumn,
             member_type: memberTypeColumn
         };
+        formColumnMapping.value = JSON.stringify(columnMapping);
         
-        document.getElementById('form-sheet-index').value = sheetIndex;
-        document.getElementById('form-column-mapping').value = JSON.stringify(columnMapping);
+        // Verify all required fields are set
+        if (!formSheetIndex.value || !formColumnMapping.value || !formExcelFile.files.length) {
+            stopSessionKeepAlive();
+            if (uploadSplashScreen) uploadSplashScreen.style.display = 'none';
+            alert('Missing required form data. Please try again.');
+            console.error('Form data check:', {
+                sheet_index: formSheetIndex.value,
+                column_mapping: formColumnMapping.value,
+                file: formExcelFile.files.length
+            });
+            return false;
+        }
         
         // Start session keep-alive
         startSessionKeepAlive();
@@ -801,13 +826,41 @@ document.addEventListener('DOMContentLoaded', function() {
         // Submit via AJAX/Fetch instead of regular form submission
         const formData = new FormData(uploadForm);
         
-        // Verify file is included
+        // Verify all required fields are in FormData
         if (!formData.has('excel_file') || !formExcelFile.files.length) {
             stopSessionKeepAlive();
             if (uploadSplashScreen) uploadSplashScreen.style.display = 'none';
             alert('File is missing. Please select a file and try again.');
             return false;
         }
+        
+        if (!formData.has('sheet_index') || !formData.get('sheet_index')) {
+            stopSessionKeepAlive();
+            if (uploadSplashScreen) uploadSplashScreen.style.display = 'none';
+            alert('Sheet index is missing. Please select a sheet and try again.');
+            console.error('FormData check:', {
+                has_sheet_index: formData.has('sheet_index'),
+                sheet_index_value: formData.get('sheet_index'),
+                form_sheet_index_value: formSheetIndex.value
+            });
+            return false;
+        }
+        
+        if (!formData.has('column_mapping') || !formData.get('column_mapping')) {
+            stopSessionKeepAlive();
+            if (uploadSplashScreen) uploadSplashScreen.style.display = 'none';
+            alert('Column mapping is missing. Please map the columns and try again.');
+            return false;
+        }
+        
+        // Log form data for debugging (without file content)
+        console.log('Submitting form data:', {
+            has_excel_file: formData.has('excel_file'),
+            file_name: formExcelFile.files[0]?.name,
+            sheet_index: formData.get('sheet_index'),
+            column_mapping: formData.get('column_mapping'),
+            has_csrf: formData.has('_token')
+        });
         
         try {
             const response = await fetch('{{ route("admin.payment-confirmations.process-upload") }}', {
