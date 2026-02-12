@@ -19,7 +19,7 @@ class PaymentConfirmationController extends Controller
 {
     public function index(Request $request)
     {
-        $query = PaymentConfirmation::with('user')->latest();
+        $query = PaymentConfirmation::with(['user'])->latest();
 
         // Search filter
         if ($request->filled('search')) {
@@ -41,9 +41,15 @@ class PaymentConfirmationController extends Controller
 
         $paymentConfirmations = $query->paginate(20);
 
+        // Debug: Log the count
+        Log::info('Payment confirmations query result', [
+            'total_found' => $paymentConfirmations->total(),
+            'current_page_count' => $paymentConfirmations->count(),
+        ]);
+
         $stats = [
             'total' => PaymentConfirmation::count(),
-            'total_amount' => PaymentConfirmation::sum('amount_to_pay'),
+            'total_amount' => PaymentConfirmation::sum('amount_to_pay') ?? 0,
             'today' => PaymentConfirmation::whereDate('created_at', today())->count(),
             'this_month' => PaymentConfirmation::whereMonth('created_at', now()->month)
                 ->whereYear('created_at', now()->year)

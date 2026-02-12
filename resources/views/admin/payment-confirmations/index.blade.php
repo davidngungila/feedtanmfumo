@@ -131,6 +131,16 @@
         </form>
     </div>
 
+    <!-- Debug Info (if needed) -->
+    @if(config('app.debug'))
+    <div class="bg-blue-50 border border-blue-200 rounded-md p-4 text-sm">
+        <p><strong>Debug Info:</strong></p>
+        <p>Total Records in DB: {{ $stats['total'] }}</p>
+        <p>Records on this page: {{ $paymentConfirmations->count() }}</p>
+        <p>Total pages: {{ $paymentConfirmations->lastPage() }}</p>
+    </div>
+    @endif
+
     <!-- Payment Confirmations Table -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <div class="overflow-x-auto">
@@ -149,21 +159,24 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($paymentConfirmations as $confirmation)
                         <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-4">
                                 <div class="text-sm font-medium text-gray-900">{{ $confirmation->member_name }}</div>
-                                <div class="text-sm text-gray-500">{{ $confirmation->member_email }}</div>
+                                <div class="text-sm text-gray-500">{{ $confirmation->member_email ?: 'No email' }}</div>
+                                @if(!$confirmation->user_id)
+                                    <div class="text-xs text-yellow-600 mt-1">⚠️ Not registered</div>
+                                @endif
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ $confirmation->member_id }}</div>
+                            <td class="px-6 py-4">
+                                <div class="text-sm font-semibold text-gray-900">{{ $confirmation->member_id }}</div>
                                 <div class="text-sm text-gray-500">{{ $confirmation->member_type ?? 'N/A' }}</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-4">
                                 <div class="text-sm font-semibold text-[#015425]">TZS {{ number_format($confirmation->amount_to_pay, 2) }}</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">TZS {{ number_format($confirmation->deposit_balance, 2) }}</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-4">
                                 @if($confirmation->total_distribution > 0)
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
                                         Completed
@@ -174,19 +187,32 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td class="px-6 py-4 text-sm text-gray-500">
                                 {{ $confirmation->created_at->format('M d, Y') }}
+                                <div class="text-xs text-gray-400">{{ $confirmation->created_at->format('h:i A') }}</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <a href="{{ route('admin.payment-confirmations.show', $confirmation) }}" class="text-[#015425] hover:text-[#027a3a]">
-                                    View
-                                </a>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="{{ route('admin.payment-confirmations.show', $confirmation) }}" class="inline-flex items-center px-3 py-1.5 bg-[#015425] text-white rounded-md hover:bg-[#027a3a] transition text-xs font-medium shadow-sm">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                        View Submission
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500">
-                                No payment confirmations found.
+                            <td colspan="7" class="px-6 py-4 text-center">
+                                <div class="py-8">
+                                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <p class="text-sm font-medium text-gray-900 mb-1">No payment confirmations found</p>
+                                    <p class="text-sm text-gray-500">Upload an Excel sheet to import payment confirmations</p>
+                                </div>
                             </td>
                         </tr>
                     @endforelse

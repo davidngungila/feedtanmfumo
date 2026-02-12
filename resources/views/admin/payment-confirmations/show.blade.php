@@ -36,8 +36,27 @@
                 </div>
                 <div>
                     <label class="text-sm font-medium text-gray-500">Email</label>
-                    <p class="text-lg text-gray-900">{{ $paymentConfirmation->member_email }}</p>
+                    <p class="text-lg text-gray-900">{{ $paymentConfirmation->member_email ?: 'Not provided' }}</p>
                 </div>
+                @if($paymentConfirmation->user_id)
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Registered User</label>
+                    <p class="text-lg text-gray-900">
+                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded text-sm">Yes</span>
+                        @if($paymentConfirmation->user)
+                            <a href="{{ route('admin.users.show', $paymentConfirmation->user) }}" class="text-[#015425] hover:underline ml-2">View User Profile</a>
+                        @endif
+                    </p>
+                </div>
+                @else
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Registered User</label>
+                    <p class="text-lg text-gray-900">
+                        <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-sm">Not Registered</span>
+                        <span class="text-sm text-gray-500 ml-2">Member not yet registered in system</span>
+                    </p>
+                </div>
+                @endif
             </div>
         </div>
 
