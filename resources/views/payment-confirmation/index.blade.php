@@ -756,13 +756,65 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function validatePaymentMethod() {
         const errorElement = document.getElementById('payment_method_error');
+        
         if (!paymentMethodBank.checked && !paymentMethodMobile.checked) {
             errorElement.textContent = 'Please select a payment method';
             return false;
-        } else {
-            errorElement.textContent = '';
-            return true;
         }
+        
+        errorElement.textContent = '';
+        
+        // Validate bank fields if bank is selected
+        if (paymentMethodBank.checked) {
+            const accountNumber = bankAccountNumber.value.trim();
+            const confirmation = bankAccountConfirmation.value.trim();
+            
+            if (!accountNumber) {
+                showError('bank_account_number_error', 'Bank account number is required');
+                return false;
+            }
+            
+            if (!confirmation) {
+                showError('bank_account_confirmation_error', 'Please confirm your bank account number');
+                return false;
+            }
+            
+            if (accountNumber !== confirmation) {
+                showError('bank_account_confirmation_error', 'Bank account numbers do not match');
+                return false;
+            }
+            
+            // Clear errors if valid
+            clearError('bank_account_number_error');
+            clearError('bank_account_confirmation_error');
+        }
+        
+        // Validate mobile fields if mobile is selected
+        if (paymentMethodMobile.checked) {
+            const provider = mobileProvider.value;
+            const mobile = mobileNumber.value.trim();
+            
+            if (!provider) {
+                showError('mobile_provider_error', 'Please select a mobile money provider');
+                return false;
+            }
+            
+            if (!mobile) {
+                showError('mobile_number_error', 'Mobile number is required');
+                return false;
+            }
+            
+            if (!/^[0-9]{9,12}$/.test(mobile)) {
+                showError('mobile_number_error', 'Please enter a valid mobile number (9-12 digits)');
+                return false;
+            }
+            
+            // Clear errors if valid
+            clearError('mobile_provider_error');
+            clearError('mobile_number_error');
+        }
+        
+        return true;
     }
 
     // Validate amount to pay
@@ -829,25 +881,45 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Check payment method
         const paymentMethodValid = validatePaymentMethod();
-        let paymentDetailsValid = false;
-        
-        if (paymentMethodBank.checked) {
-            const accountNumber = bankAccountNumber.value.trim();
-            const confirmation = bankAccountConfirmation.value.trim();
-            paymentDetailsValid = accountNumber && confirmation && accountNumber === confirmation;
-        } else if (paymentMethodMobile.checked) {
-            const provider = mobileProvider.value;
-            const mobile = mobileNumber.value.trim();
-            paymentDetailsValid = provider && mobile && /^[0-9]{9,12}$/.test(mobile);
-        }
         
         // Enable submit only if all validations pass
-        submitBtn.disabled = !(distributionValid && paymentMethodValid && paymentDetailsValid);
+        submitBtn.disabled = !(distributionValid && paymentMethodValid);
     }
 
     // Form submission
     document.getElementById('paymentForm').addEventListener('submit', async function(e) {
         e.preventDefault();
+
+        // Clear all previous errors
+        document.querySelectorAll('.error-message').forEach(el => {
+            el.textContent = '';
+        });
+
+        // Validate form before submission
+        const amountToPay = parseFloat(document.getElementById('amount_to_pay').value) || 0;
+        const swf = parseFloat(document.getElementById('swf_contribution').value) || 0;
+        const reDeposit = parseFloat(document.getElementById('re_deposit').value) || 0;
+        const fia = parseFloat(document.getElementById('fia_investment').value) || 0;
+        const capital = parseFloat(document.getElementById('capital_contribution').value) || 0;
+        const loan = parseFloat(document.getElementById('loan_repayment').value) || 0;
+        const total = swf + reDeposit + fia + capital + loan;
+        const difference = Math.abs(amountToPay - total);
+        
+        // Validate distribution
+        if (difference >= 0.01 || amountToPay <= 0) {
+            alert('Total distribution must equal the amount to be paid.');
+            return;
+        }
+        
+        // Validate payment method
+        if (!validatePaymentMethod()) {
+            // Scroll to first error
+            const firstError = document.querySelector('.error-message:not(:empty)');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return;
+        }
 
         // Show splash screen
         splashScreen.classList.add('active');
@@ -866,17 +938,44 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Get payment method data
         const paymentMethod = document.querySelector('input[name="payment_method"]:checked')?.value;
+        if (!paymentMethod) {
+            clearInterval(interval);
+            splashScreen.classList.remove('active');
+            showError('payment_method_error', 'Please select a payment method');
+            return;
+        }
+        
         data.payment_method = paymentMethod;
         
         if (paymentMethod === 'bank') {
-            data.bank_account_number = bankAccountNumber.value.trim();
-            data.bank_account_confirmation = bankAccountConfirmation.value.trim();
+            const accountNumber = bankAccountNumber.value.trim();
+            const confirmation = bankAccountConfirmation.value.trim();
+            
+            if (!accountNumber || !confirmation || accountNumber !== confirmation) {
+                clearInterval(interval);
+                splashScreen.classList.remove('active');
+                showError('bank_account_confirmation_error', 'Bank account numbers do not match');
+                return;
+            }
+            
+            data.bank_account_number = accountNumber;
+            data.bank_account_confirmation = confirmation;
             // Clear mobile fields
             data.mobile_provider = '';
             data.mobile_number = '';
         } else if (paymentMethod === 'mobile') {
-            data.mobile_provider = mobileProvider.value;
-            data.mobile_number = mobileNumber.value.trim();
+            const provider = mobileProvider.value;
+            const mobile = mobileNumber.value.trim();
+            
+            if (!provider || !mobile || !/^[0-9]{9,12}$/.test(mobile)) {
+                clearInterval(interval);
+                splashScreen.classList.remove('active');
+                showError('mobile_number_error', 'Please enter a valid mobile number');
+                return;
+            }
+            
+            data.mobile_provider = provider;
+            data.mobile_number = mobile;
             // Clear bank fields
             data.bank_account_number = '';
             data.bank_account_confirmation = '';
@@ -908,15 +1007,61 @@ document.addEventListener('DOMContentLoaded', function() {
 
             setTimeout(() => {
                 splashScreen.classList.remove('active');
+                
                 if (result.success) {
                     successModal.classList.add('active');
                 } else {
-                    alert(result.message || 'An error occurred. Please try again.');
+                    // Handle validation errors
+                    if (response.status === 422 && result.errors) {
+                        // Clear all previous errors
+                        document.querySelectorAll('.error-message').forEach(el => {
+                            el.textContent = '';
+                        });
+                        
+                        // Display field-specific errors
+                        Object.keys(result.errors).forEach(field => {
+                            const errorMessages = result.errors[field];
+                            const errorMessage = Array.isArray(errorMessages) ? errorMessages[0] : errorMessages;
+                            
+                            // Map field names to error element IDs
+                            const fieldMap = {
+                                'payment_method': 'payment_method_error',
+                                'bank_account_number': 'bank_account_number_error',
+                                'bank_account_confirmation': 'bank_account_confirmation_error',
+                                'mobile_provider': 'mobile_provider_error',
+                                'mobile_number': 'mobile_number_error',
+                                'member_email': 'member_email_error',
+                                'amount_to_pay': 'amount_to_pay_error',
+                                'swf_contribution': 'swf_contribution_error',
+                                're_deposit': 're_deposit_error',
+                                'fia_investment': 'fia_investment_error',
+                                'capital_contribution': 'capital_contribution_error',
+                                'loan_repayment': 'loan_repayment_error',
+                            };
+                            
+                            const errorElementId = fieldMap[field];
+                            if (errorElementId) {
+                                showError(errorElementId, errorMessage);
+                            } else {
+                                // Show general error if field not mapped
+                                alert(errorMessage);
+                            }
+                        });
+                        
+                        // Scroll to first error
+                        const firstError = document.querySelector('.error-message:not(:empty)');
+                        if (firstError) {
+                            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    } else {
+                        alert(result.message || 'An error occurred. Please try again.');
+                    }
                 }
             }, 500);
         } catch (error) {
             clearInterval(interval);
             splashScreen.classList.remove('active');
+            console.error('Submission error:', error);
             alert('An error occurred. Please try again.');
         }
     });
