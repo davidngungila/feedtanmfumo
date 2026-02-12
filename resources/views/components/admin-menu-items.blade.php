@@ -20,6 +20,7 @@
     $isActiveSettings = request()->routeIs(['admin.settings.*', 'admin.system-settings.*']);
     $isActiveShares = request()->routeIs(['admin.shares.*']);
     $isActiveFormulas = request()->routeIs(['admin.formulas.*']);
+    $isActivePaymentConfirmations = request()->routeIs(['admin.payment-confirmations.*']);
 @endphp
 
 <!-- Dashboard -->
@@ -338,6 +339,25 @@
                 <a href="{{ route('admin.reports.savings') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Interest Accrued Report</a>
             </div>
         </div>
+    </div>
+</div>
+@endif
+
+@if($isDepositOfficer || $isAccountant || $canViewAll)
+<!-- Interest Payment Management -->
+<div class="dropdown-container" data-menu="payment-confirmations">
+    <button class="dropdown-toggle flex items-center justify-between w-full px-4 py-3 rounded-md hover:bg-[#013019] transition {{ $isActivePaymentConfirmations ? 'bg-[#013019]' : '' }}">
+        <div class="flex items-center">
+            <span class="text-lg mr-3">💳</span>
+            <span>Interest Payment</span>
+        </div>
+        <svg class="w-4 h-4 dropdown-arrow transition-transform {{ $isActivePaymentConfirmations ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+    </button>
+    <div class="dropdown-menu pl-4 mt-1 space-y-1 {{ $isActivePaymentConfirmations ? '' : 'hidden' }}">
+        <a href="{{ route('admin.payment-confirmations.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">All Payment Confirmations</a>
+        <a href="{{ route('admin.payment-confirmations.upload') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">Upload Excel Sheet</a>
     </div>
 </div>
 @endif

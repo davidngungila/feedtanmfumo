@@ -38,6 +38,11 @@ Route::get('/', function () {
 Route::get('/terms', [\App\Http\Controllers\LegalController::class, 'terms'])->name('terms');
 Route::get('/privacy', [\App\Http\Controllers\LegalController::class, 'privacy'])->name('privacy');
 
+// Payment Confirmation (public)
+Route::get('/payment-confirmation', [\App\Http\Controllers\PaymentConfirmationController::class, 'index'])->name('payment-confirmation.index');
+Route::post('/payment-confirmation/lookup', [\App\Http\Controllers\PaymentConfirmationController::class, 'lookupMember'])->name('payment-confirmation.lookup');
+Route::post('/payment-confirmation', [\App\Http\Controllers\PaymentConfirmationController::class, 'store'])->name('payment-confirmation.store');
+
 // Authentication routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
@@ -447,6 +452,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::put('theme-appearance', [SystemSettingsController::class, 'updateThemeAppearance'])->name('theme-appearance.update');
         Route::get('license-management', [SystemSettingsController::class, 'licenseManagement'])->name('license-management');
     });
+
+    // Payment Confirmations (Interest Payment Management)
+    Route::get('payment-confirmations', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'index'])->name('payment-confirmations.index');
+    Route::get('payment-confirmations/{paymentConfirmation}', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'show'])->name('payment-confirmations.show');
+    Route::get('payment-confirmations/upload', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'upload'])->name('payment-confirmations.upload');
+    Route::post('payment-confirmations/preview-excel', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'previewExcel'])->name('payment-confirmations.preview-excel');
+    Route::post('payment-confirmations/process-upload', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'processUpload'])->name('payment-confirmations.process-upload');
+    Route::get('payment-confirmations/download-sample', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'downloadSample'])->name('payment-confirmations.download-sample');
 
     // Shares Management
     Route::get('shares', [ShareController::class, 'index'])->name('shares.index');

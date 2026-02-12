@@ -18,37 +18,37 @@ class EmailNotificationService
     {
         try {
             $settings = Setting::getByGroup('communication');
-            
+
             if (isset($settings['mail_mailer']) && $settings['mail_mailer']->value) {
                 Config::set('mail.default', $settings['mail_mailer']->value);
             }
-            
+
             if (isset($settings['mail_host']) && $settings['mail_host']->value) {
                 Config::set('mail.mailers.smtp.host', $settings['mail_host']->value);
             }
-            
+
             if (isset($settings['mail_port'])) {
                 Config::set('mail.mailers.smtp.port', $settings['mail_port']->value ?? 587);
             }
-            
+
             if (isset($settings['mail_username']) && $settings['mail_username']->value) {
                 Config::set('mail.mailers.smtp.username', $settings['mail_username']->value);
             }
-            
+
             if (isset($settings['mail_password']) && $settings['mail_password']->value) {
                 Config::set('mail.mailers.smtp.password', $settings['mail_password']->value);
             }
-            
+
             if (isset($settings['mail_encryption']) && $settings['mail_encryption']->value) {
                 Config::set('mail.mailers.smtp.encryption', $settings['mail_encryption']->value);
             } else {
                 Config::set('mail.mailers.smtp.encryption', 'tls');
             }
-            
+
             if (isset($settings['mail_from_address']) && $settings['mail_from_address']->value) {
                 Config::set('mail.from.address', $settings['mail_from_address']->value);
             }
-            
+
             if (isset($settings['mail_from_name']) && $settings['mail_from_name']->value) {
                 Config::set('mail.from.name', $settings['mail_from_name']->value);
             }
@@ -63,12 +63,12 @@ class EmailNotificationService
     public function getOrganizationInfo(): array
     {
         $settings = Setting::getByGroup('communication');
-        
+
         // Use primary email if available, otherwise fallback to mail_from_address
         $primaryEmail = $settings['mail_primary_email']->value ?? null;
         $fallbackEmail = $settings['mail_from_address']->value ?? config('mail.from.address');
         $fromEmail = $primaryEmail ?: $fallbackEmail;
-        
+
         // Get additional emails
         $additionalEmails = [];
         if (isset($settings['mail_additional_emails']) && $settings['mail_additional_emails']->value) {
@@ -77,7 +77,7 @@ class EmailNotificationService
                 return filter_var($email, FILTER_VALIDATE_EMAIL);
             });
         }
-        
+
         return [
             'name' => $settings['organization_name']->value ?? 'FeedTan Community Microfinance Group',
             'po_box' => $settings['organization_po_box']->value ?? 'P.O.Box 7744',
@@ -111,16 +111,16 @@ class EmailNotificationService
             $this->reloadMailConfig();
             $orgInfo = $this->getOrganizationInfo();
             $address = $this->getFormattedAddress();
-            
+
             $subject = "Login OTP Code - {$orgInfo['name']}";
             $htmlBody = $this->formatOtpEmail($user, $otpCode, $address, $orgInfo);
-            
+
             Mail::html($htmlBody, function ($mail) use ($user, $subject, $orgInfo) {
                 $mail->to($user->email, $user->name)
-                     ->subject($subject)
-                     ->from($orgInfo['from_email'], $orgInfo['from_name']);
+                    ->subject($subject)
+                    ->from($orgInfo['from_email'], $orgInfo['from_name']);
             });
-            
+
             Log::info("OTP email sent to {$user->email} for user ID {$user->id}.");
 
             return true;
@@ -153,16 +153,16 @@ class EmailNotificationService
             $this->reloadMailConfig();
             $orgInfo = $this->getOrganizationInfo();
             $address = $this->getFormattedAddress();
-            
+
             $subject = "Loan Application Approved - {$orgInfo['name']}";
             $message = $this->formatLoanApprovalEmail($user, $loanDetails, $address);
-            
+
             Mail::raw($message, function ($mail) use ($user, $subject, $orgInfo) {
                 $mail->to($user->email, $user->name)
-                     ->subject($subject)
-                     ->from($orgInfo['from_email'], $orgInfo['from_name']);
+                    ->subject($subject)
+                    ->from($orgInfo['from_email'], $orgInfo['from_name']);
             });
-            
+
             return true;
         } catch (\Exception $e) {
             Log::error('Failed to send loan approval email: '.$e->getMessage());
@@ -180,16 +180,16 @@ class EmailNotificationService
             $this->reloadMailConfig();
             $orgInfo = $this->getOrganizationInfo();
             $address = $this->getFormattedAddress();
-            
+
             $subject = "Loan Disbursed - {$orgInfo['name']}";
             $message = $this->formatLoanDisbursementEmail($user, $loanDetails, $address);
-            
+
             Mail::raw($message, function ($mail) use ($user, $subject, $orgInfo) {
                 $mail->to($user->email, $user->name)
-                     ->subject($subject)
-                     ->from($orgInfo['from_email'], $orgInfo['from_name']);
+                    ->subject($subject)
+                    ->from($orgInfo['from_email'], $orgInfo['from_name']);
             });
-            
+
             return true;
         } catch (\Exception $e) {
             Log::error('Failed to send loan disbursement email: '.$e->getMessage());
@@ -207,16 +207,16 @@ class EmailNotificationService
             $this->reloadMailConfig();
             $orgInfo = $this->getOrganizationInfo();
             $address = $this->getFormattedAddress();
-            
+
             $subject = "Loan Application Submitted - {$orgInfo['name']}";
             $message = $this->formatLoanApplicationEmail($user, $loanDetails, $address);
-            
+
             Mail::raw($message, function ($mail) use ($user, $subject, $orgInfo) {
                 $mail->to($user->email, $user->name)
-                     ->subject($subject)
-                     ->from($orgInfo['from_email'], $orgInfo['from_name']);
+                    ->subject($subject)
+                    ->from($orgInfo['from_email'], $orgInfo['from_name']);
             });
-            
+
             return true;
         } catch (\Exception $e) {
             Log::error('Failed to send loan application email: '.$e->getMessage());
@@ -235,7 +235,7 @@ class EmailNotificationService
         $interestRate = $loanDetails['interest_rate'] ?? 0;
         $term = $loanDetails['term_months'] ?? 0;
         $totalAmount = number_format($loanDetails['total_amount'] ?? 0, 0);
-        
+
         return "Dear {$user->name},
 
 Thank you for submitting your loan application to {$this->getOrganizationInfo()['name']}.
@@ -283,16 +283,16 @@ Best regards,
             $this->reloadMailConfig();
             $orgInfo = $this->getOrganizationInfo();
             $address = $this->getFormattedAddress();
-            
+
             $subject = "Payment Reminder - {$orgInfo['name']}";
             $message = $this->formatPaymentReminderEmail($user, $paymentDetails, $address);
-            
+
             Mail::raw($message, function ($mail) use ($user, $subject, $orgInfo) {
                 $mail->to($user->email, $user->name)
-                     ->subject($subject)
-                     ->from($orgInfo['from_email'], $orgInfo['from_name']);
+                    ->subject($subject)
+                    ->from($orgInfo['from_email'], $orgInfo['from_name']);
             });
-            
+
             return true;
         } catch (\Exception $e) {
             Log::error('Failed to send payment reminder email: '.$e->getMessage());
@@ -310,23 +310,23 @@ Best regards,
             $this->reloadMailConfig();
             $orgInfo = $this->getOrganizationInfo();
             $address = $this->getFormattedAddress();
-            
+
             $subjects = [
                 'created' => "Savings Account Opened - {$orgInfo['name']}",
                 'deposit' => "Deposit Confirmation - {$orgInfo['name']}",
                 'withdrawal' => "Withdrawal Confirmation - {$orgInfo['name']}",
                 'interest' => "Interest Posted - {$orgInfo['name']}",
             ];
-            
+
             $subject = $subjects[$event] ?? "Savings Account Update - {$orgInfo['name']}";
             $message = $this->formatSavingsAccountEmail($user, $event, $accountDetails, $address);
-            
+
             Mail::raw($message, function ($mail) use ($user, $subject, $orgInfo) {
                 $mail->to($user->email, $user->name)
-                     ->subject($subject)
-                     ->from($orgInfo['from_email'], $orgInfo['from_name']);
+                    ->subject($subject)
+                    ->from($orgInfo['from_email'], $orgInfo['from_name']);
             });
-            
+
             return true;
         } catch (\Exception $e) {
             Log::error('Failed to send savings account email: '.$e->getMessage());
@@ -343,40 +343,40 @@ Best regards,
         try {
             $this->reloadMailConfig();
             $orgInfo = $this->getOrganizationInfo();
-            
+
             $subjects = [
                 'created' => "Investment Enrollment Confirmed - {$orgInfo['name']}",
                 'matured' => "Investment Matured - {$orgInfo['name']}",
                 'profit' => "Profit Distribution - {$orgInfo['name']}",
                 'topup' => "Investment Top-up Confirmed - {$orgInfo['name']}",
             ];
-            
+
             $messages = [
                 'created' => 'Uwekezaji wako umeandikishwa kwa mafanikio.',
                 'matured' => 'Hongera! Uwekezaji wako umekamilika.',
                 'profit' => 'Faida imegawanywa kwenye akaunti yako ya uwekezaji.',
                 'topup' => 'Ongezeko la uwekezaji wako limetekelezwa kwa mafanikio.',
             ];
-            
+
             $icons = [
                 'created' => '✅',
                 'matured' => '🎉',
                 'profit' => '💰',
                 'topup' => '📈',
             ];
-            
+
             $cardTitles = [
                 'created' => 'Uwekezaji Umeandikishwa',
                 'matured' => 'Uwekezaji Umekamilika',
                 'profit' => 'Faida Imegawanywa',
                 'topup' => 'Ongezeko la Uwekezaji',
             ];
-            
+
             $subject = $subjects[$event] ?? "Investment Update - {$orgInfo['name']}";
             $mainMessage = $messages[$event] ?? 'Uwekezaji wako umesasishwa.';
-            
+
             $details = $this->formatInvestmentDetails($event, $investmentDetails);
-            
+
             $htmlBody = View::make('emails.investment', [
                 'name' => $user->name,
                 'mainMessage' => $mainMessage,
@@ -385,12 +385,12 @@ Best regards,
                 'cardTitle' => $cardTitles[$event] ?? 'Uwekezaji Wako',
                 'organizationInfo' => $orgInfo,
             ])->render();
-            
+
             Mail::html($htmlBody, function ($mail) use ($user, $subject, $orgInfo) {
                 $mail->to($user->email, $user->name)
-                     ->subject($subject)
-                     ->from($orgInfo['from_email'], $orgInfo['from_name']);
-                
+                    ->subject($subject)
+                    ->from($orgInfo['from_email'], $orgInfo['from_name']);
+
                 // Add additional emails as CC if configured
                 if (! empty($orgInfo['additional_emails'])) {
                     foreach ($orgInfo['additional_emails'] as $additionalEmail) {
@@ -398,7 +398,7 @@ Best regards,
                     }
                 }
             });
-            
+
             Log::info("Investment email sent to {$user->email} for user ID {$user->id}.");
 
             return true;
@@ -408,14 +408,14 @@ Best regards,
             return false;
         }
     }
-    
+
     /**
      * Format investment details for email
      */
     protected function formatInvestmentDetails(string $event, array $investmentDetails): array
     {
         $details = [];
-        
+
         switch ($event) {
             case 'created':
                 $details['Namba ya Uwekezaji'] = $investmentDetails['investment_number'] ?? 'N/A';
@@ -446,7 +446,7 @@ Best regards,
             default:
                 $details['Namba ya Uwekezaji'] = $investmentDetails['investment_number'] ?? 'N/A';
         }
-        
+
         return $details;
     }
 
@@ -458,9 +458,9 @@ Best regards,
         try {
             $this->reloadMailConfig();
             $orgInfo = $this->getOrganizationInfo();
-            
+
             $subject = "Deposit Statement for {$user->name} - {$period}";
-            
+
             // Format period date
             try {
                 $periodDate = \Carbon\Carbon::parse($period);
@@ -468,7 +468,7 @@ Best regards,
             } catch (\Exception $e) {
                 $formattedPeriod = $period; // Use as-is if parsing fails
             }
-            
+
             // Use the statement email template
             $htmlBody = View::make('emails.statement', [
                 'name' => $user->name,
@@ -477,12 +477,12 @@ Best regards,
                 'periodStart' => $periodStart ?? 'Machi 2025',
                 'organizationInfo' => $orgInfo,
             ])->render();
-            
+
             Mail::html($htmlBody, function ($mail) use ($user, $subject, $orgInfo) {
                 $mail->to($user->email, $user->name)
-                     ->subject($subject)
-                     ->from($orgInfo['from_email'], $orgInfo['from_name'] ?? 'FeedTan CMG-Deposit Statement');
-                
+                    ->subject($subject)
+                    ->from($orgInfo['from_email'], $orgInfo['from_name'] ?? 'FeedTan CMG-Deposit Statement');
+
                 // Add additional emails as CC if configured
                 if (! empty($orgInfo['additional_emails'])) {
                     foreach ($orgInfo['additional_emails'] as $additionalEmail) {
@@ -490,7 +490,7 @@ Best regards,
                     }
                 }
             });
-            
+
             Log::info("Deposit statement email sent to {$user->email} for user ID {$user->id}.");
 
             return true;
@@ -509,36 +509,36 @@ Best regards,
         try {
             $this->reloadMailConfig();
             $orgInfo = $this->getOrganizationInfo();
-            
+
             $subjects = [
                 'contribution' => "Welfare Contribution Received - {$orgInfo['name']}",
                 'claim_approved' => "Welfare Claim Approved - {$orgInfo['name']}",
                 'claim_disbursed' => "Welfare Benefit Disbursed - {$orgInfo['name']}",
             ];
-            
+
             $messages = [
                 'contribution' => 'Mchango wako wa ustawi umepokelewa kwa mafanikio.',
                 'claim_approved' => 'Ombi lako la ustawi limeidhinishwa.',
                 'claim_disbursed' => 'Faida ya ustawi imetolewa kwenye akaunti yako.',
             ];
-            
+
             $icons = [
                 'contribution' => '💳',
                 'claim_approved' => '✅',
                 'claim_disbursed' => '💰',
             ];
-            
+
             $cardTitles = [
                 'contribution' => 'Mchango Umeripokelewa',
                 'claim_approved' => 'Ombi Limeidhinishwa',
                 'claim_disbursed' => 'Faida Imetolewa',
             ];
-            
+
             $subject = $subjects[$event] ?? "Welfare Update - {$orgInfo['name']}";
             $mainMessage = $messages[$event] ?? 'Hali ya ustawi yako imesasishwa.';
-            
+
             $details = $this->formatWelfareDetails($event, $welfareDetails);
-            
+
             $htmlBody = View::make('emails.welfare', [
                 'name' => $user->name,
                 'mainMessage' => $mainMessage,
@@ -547,12 +547,12 @@ Best regards,
                 'cardTitle' => $cardTitles[$event] ?? 'Ustawi wa Jamii',
                 'organizationInfo' => $orgInfo,
             ])->render();
-            
+
             Mail::html($htmlBody, function ($mail) use ($user, $subject, $orgInfo) {
                 $mail->to($user->email, $user->name)
-                     ->subject($subject)
-                     ->from($orgInfo['from_email'], $orgInfo['from_name']);
-                
+                    ->subject($subject)
+                    ->from($orgInfo['from_email'], $orgInfo['from_name']);
+
                 // Add additional emails as CC if configured
                 if (! empty($orgInfo['additional_emails'])) {
                     foreach ($orgInfo['additional_emails'] as $additionalEmail) {
@@ -560,7 +560,7 @@ Best regards,
                     }
                 }
             });
-            
+
             Log::info("Welfare email sent to {$user->email} for user ID {$user->id}.");
 
             return true;
@@ -570,14 +570,14 @@ Best regards,
             return false;
         }
     }
-    
+
     /**
      * Format welfare details for email
      */
     protected function formatWelfareDetails(string $event, array $welfareDetails): array
     {
         $details = [];
-        
+
         switch ($event) {
             case 'contribution':
                 $details['Kiasi cha Mchango'] = number_format($welfareDetails['amount'] ?? 0, 0).' TZS';
@@ -599,7 +599,7 @@ Best regards,
             default:
                 $details['Hali'] = 'Imehakikishwa';
         }
-        
+
         return $details;
     }
 
@@ -613,7 +613,7 @@ Best regards,
         $interestRate = $loanDetails['interest_rate'] ?? 0;
         $term = $loanDetails['term_months'] ?? 0;
         $monthlyPayment = number_format($loanDetails['monthly_payment'] ?? 0, 0);
-        
+
         return "Dear {$user->name},
 
 We are pleased to inform you that your loan application has been APPROVED.
@@ -667,7 +667,7 @@ Best regards,
         $loanNumber = $loanDetails['loan_number'] ?? 'N/A';
         $disbursementDate = $loanDetails['disbursement_date'] ?? date('Y-m-d');
         $accountNumber = $loanDetails['account_number'] ?? 'N/A';
-        
+
         return "Dear {$user->name},
 
 Your loan has been successfully disbursed to your account.
@@ -709,11 +709,11 @@ Best regards,
         $dueDate = $paymentDetails['due_date'] ?? 'N/A';
         $loanNumber = $paymentDetails['loan_number'] ?? 'N/A';
         $daysOverdue = $paymentDetails['days_overdue'] ?? 0;
-        
-        $overdueText = $daysOverdue > 0 
+
+        $overdueText = $daysOverdue > 0
             ? "\n⚠️  This payment is {$daysOverdue} day(s) OVERDUE. Please make payment immediately to avoid penalties."
             : '';
-        
+
         return "Dear {$user->name},
 
 This is a reminder that you have an upcoming loan payment.
@@ -753,7 +753,7 @@ Best regards,
     {
         $accountNumber = $accountDetails['account_number'] ?? 'N/A';
         $accountType = $accountDetails['account_type'] ?? 'N/A';
-        
+
         $messages = [
             'created' => "Your {$accountType} savings account has been successfully opened.",
             'deposit' => 'Your deposit has been successfully processed.',
@@ -770,7 +770,7 @@ Best regards,
             'interest' => "Account Number:     {$accountNumber}\nInterest Amount:    ".number_format($accountDetails['interest_amount'] ?? 0, 0)." TZS\nNew Balance:        ".number_format($accountDetails['new_balance'] ?? 0, 0)." TZS\nInterest Period:    ".($accountDetails['period'] ?? 'N/A'),
             default => "Account Number:     {$accountNumber}",
         };
-        
+
         return "Dear {$user->name},
 
 {$mainMessage}
@@ -797,7 +797,7 @@ Best regards,
     {
         $investmentNumber = $investmentDetails['investment_number'] ?? 'N/A';
         $planType = $investmentDetails['plan_type'] ?? 'N/A';
-        
+
         $messages = [
             'created' => "Your {$planType} investment has been successfully enrolled.",
             'matured' => 'Congratulations! Your investment has matured.',
@@ -814,7 +814,7 @@ Best regards,
             'topup' => "Investment Number:  {$investmentNumber}\nTop-up Amount:      ".number_format($investmentDetails['topup_amount'] ?? 0, 0)." TZS\nNew Principal:      ".number_format($investmentDetails['new_principal'] ?? 0, 0)." TZS\nTransaction Date:   ".($investmentDetails['transaction_date'] ?? date('Y-m-d')),
             default => "Investment Number:  {$investmentNumber}",
         };
-        
+
         return "Dear {$user->name},
 
 {$mainMessage}
@@ -853,7 +853,7 @@ Best regards,
             'claim_disbursed' => 'Claim Type:         '.($welfareDetails['claim_type'] ?? 'N/A')."\nDisbursed Amount:   ".number_format($welfareDetails['disbursed_amount'] ?? 0, 0)." TZS\nDisbursement Date:  ".($welfareDetails['disbursement_date'] ?? date('Y-m-d'))."\nTransaction Ref:    ".($welfareDetails['transaction_ref'] ?? 'N/A'),
             default => '',
         };
-        
+
         return "Dear {$user->name},
 
 {$mainMessage}
@@ -881,18 +881,18 @@ Best regards,
         try {
             $this->reloadMailConfig();
             $orgInfo = $this->getOrganizationInfo();
-            
+
             $subject = "Welcome to {$orgInfo['name']} - Your Account Credentials";
             $htmlBody = $this->formatWelcomeEmail($user, $plainPassword, $orgInfo);
-            
+
             Mail::html($htmlBody, function ($mail) use ($user, $subject, $orgInfo) {
                 $mail->to($user->email, $user->name)
-                     ->subject($subject)
-                     ->from($orgInfo['from_email'], $orgInfo['from_name']);
+                    ->subject($subject)
+                    ->from($orgInfo['from_email'], $orgInfo['from_name']);
             });
-            
+
             Log::info("Welcome email sent to {$user->email} for user ID {$user->id}.");
-            
+
             return true;
         } catch (\Exception $e) {
             Log::error("Failed to send welcome email to {$user->email}: ".$e->getMessage());
@@ -910,12 +910,12 @@ Best regards,
         $loginUrl = route('login');
 
         return View::make('emails.welcome', [
-                'name' => $user->name,
+            'name' => $user->name,
             'email' => $user->email,
             'password' => $plainPassword,
             'loginUrl' => $loginUrl,
-                'organizationInfo' => $orgInfo,
-            ])->render();
+            'organizationInfo' => $orgInfo,
+        ])->render();
     }
 
     /**
@@ -926,14 +926,14 @@ Best regards,
         try {
             $this->reloadMailConfig();
             $orgInfo = $this->getOrganizationInfo();
-            
+
             $subject = "Thank You for Your Membership Application - {$orgInfo['name']}";
             $htmlBody = $this->formatMembershipSubmissionEmail($user, $orgInfo);
-            
+
             Mail::html($htmlBody, function ($mail) use ($user, $subject, $orgInfo) {
                 $mail->to($user->email, $user->name)
-                     ->subject($subject)
-                     ->from($orgInfo['from_email'], $orgInfo['from_name']);
+                    ->subject($subject)
+                    ->from($orgInfo['from_email'], $orgInfo['from_name']);
             });
 
             Log::info("Membership submission email sent to {$user->email} for user ID {$user->id}.");
@@ -955,10 +955,55 @@ Best regards,
         $dashboardUrl = route('member.dashboard');
 
         return View::make('emails.membership-submission', [
-                'name' => $user->name,
+            'name' => $user->name,
             'membershipCode' => $user->membership_code ?? 'Pending',
             'dashboardUrl' => $dashboardUrl,
-                'organizationInfo' => $orgInfo,
-            ])->render();
+            'organizationInfo' => $orgInfo,
+        ])->render();
+    }
+
+    /**
+     * Send payment confirmation email
+     */
+    public function sendPaymentConfirmationEmail(\App\Models\PaymentConfirmation $paymentConfirmation): bool
+    {
+        try {
+            $this->reloadMailConfig();
+            $orgInfo = $this->getOrganizationInfo();
+
+            $subject = "Payment Confirmation - {$orgInfo['name']}";
+            $htmlBody = $this->formatPaymentConfirmationEmail($paymentConfirmation, $orgInfo);
+
+            Mail::html($htmlBody, function ($mail) use ($paymentConfirmation, $subject, $orgInfo) {
+                $mail->to($paymentConfirmation->member_email, $paymentConfirmation->member_name)
+                    ->subject($subject)
+                    ->from($orgInfo['from_email'], $orgInfo['from_name']);
+
+                // Add CC emails
+                $mail->cc('sigfridngereza@gmail.com');
+                $mail->cc('elulandala@gmail.com');
+                $mail->cc('witneysam21@gmail.com');
+            });
+
+            Log::info("Payment confirmation email sent to {$paymentConfirmation->member_email} for payment confirmation ID {$paymentConfirmation->id}.");
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error("Failed to send payment confirmation email to {$paymentConfirmation->member_email}: ".$e->getMessage());
+            Log::error('Stack trace: '.$e->getTraceAsString());
+
+            return false;
+        }
+    }
+
+    /**
+     * Format payment confirmation email message (HTML)
+     */
+    protected function formatPaymentConfirmationEmail(\App\Models\PaymentConfirmation $paymentConfirmation, array $orgInfo): string
+    {
+        return View::make('emails.payment-confirmation', [
+            'paymentConfirmation' => $paymentConfirmation,
+            'organizationInfo' => $orgInfo,
+        ])->render();
     }
 }
