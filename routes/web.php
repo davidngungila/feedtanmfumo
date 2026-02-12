@@ -457,6 +457,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('payment-confirmations', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'index'])->name('payment-confirmations.index');
     Route::get('payment-confirmations/upload', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'upload'])->name('payment-confirmations.upload');
     Route::post('payment-confirmations/preview-excel', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'previewExcel'])->name('payment-confirmations.preview-excel');
+    Route::get('payment-confirmations/refresh-csrf', function() {
+        return response()->json(['token' => csrf_token()]);
+    })->name('payment-confirmations.refresh-csrf');
     Route::post('payment-confirmations/process-upload', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'processUpload'])->name('payment-confirmations.process-upload');
     Route::get('payment-confirmations/download-sample', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'downloadSample'])->name('payment-confirmations.download-sample');
     Route::get('payment-confirmations/{paymentConfirmation}', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'show'])->name('payment-confirmations.show');

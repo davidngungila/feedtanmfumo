@@ -623,17 +623,54 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    uploadForm.addEventListener('submit', function(e) {
+    // Function to refresh CSRF token
+    async function refreshCsrfToken() {
+        try {
+            const response = await fetch('{{ route("admin.payment-confirmations.refresh-csrf") }}', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                },
+                credentials: 'same-origin'
+            });
+            
+            const data = await response.json();
+            
+            if (data.token) {
+                const newToken = data.token;
+                
+                // Update form token
+                const formToken = uploadForm.querySelector('input[name="_token"]');
+                if (formToken) {
+                    formToken.value = newToken;
+                }
+                
+                // Update meta tag if exists
+                const metaTag = document.querySelector('meta[name="csrf-token"]');
+                if (metaTag) {
+                    metaTag.setAttribute('content', newToken);
+                }
+                
+                return newToken;
+            }
+        } catch (error) {
+            console.error('Error refreshing CSRF token:', error);
+        }
+        return null;
+    }
+
+    uploadForm.addEventListener('submit', async function(e) {
+        e.preventDefault(); // Prevent default submission
+        
         const file = excelFileInput.files[0];
         if (!file) {
-            e.preventDefault();
             alert('Please select an Excel file.');
             return false;
         }
 
         const sheetIndex = sheetSelect.value;
         if (!sheetIndex) {
-            e.preventDefault();
             alert('Please select a sheet.');
             return false;
         }
@@ -644,12 +681,35 @@ document.addEventListener('DOMContentLoaded', function() {
         const memberTypeColumn = mapMemberType?.value || '';
 
         if (!memberIdColumn || !amountColumn) {
-            e.preventDefault();
             alert('Please map all required columns (Member ID and Amount).');
             return false;
         }
 
-        // Set hidden form values BEFORE showing splash screen
+        // Get splash screen elements
+        const uploadSplashScreen = document.getElementById('uploadSplashScreen');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const uploadProgressBar = document.getElementById('uploadProgressBar');
+        const uploadMessage = document.getElementById('uploadMessage');
+        const uploadStatus = document.getElementById('uploadStatus');
+        
+        // Show splash screen first
+        if (uploadSplashScreen) {
+            uploadSplashScreen.style.display = 'flex';
+            if (uploadStatus) {
+                uploadStatus.textContent = 'Refreshing session...';
+            }
+        }
+
+        // Refresh CSRF token before submission
+        const newToken = await refreshCsrfToken();
+        
+        if (!newToken) {
+            if (uploadSplashScreen) uploadSplashScreen.style.display = 'none';
+            alert('Failed to refresh session. Please refresh the page and try again.');
+            return false;
+        }
+
+        // Set hidden form values
         const formExcelFile = document.getElementById('form-excel-file');
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file);
@@ -665,25 +725,8 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('form-sheet-index').value = sheetIndex;
         document.getElementById('form-column-mapping').value = JSON.stringify(columnMapping);
         
-        // Verify form data is set
-        console.log('Form submission data:', {
-            file: file.name,
-            fileSet: formExcelFile.files.length > 0,
-            sheetIndex: document.getElementById('form-sheet-index').value,
-            columnMapping: document.getElementById('form-column-mapping').value
-        });
-
-        // Show splash screen
-        const uploadSplashScreen = document.getElementById('uploadSplashScreen');
-        const uploadProgress = document.getElementById('uploadProgress');
-        const uploadProgressBar = document.getElementById('uploadProgressBar');
-        const uploadMessage = document.getElementById('uploadMessage');
-        const uploadStatus = document.getElementById('uploadStatus');
-        
+        // Start progress animation
         if (uploadSplashScreen) {
-            uploadSplashScreen.style.display = 'flex';
-            
-            // Simulate progress
             let progress = 0;
             const progressInterval = setInterval(() => {
                 progress += 2;
@@ -726,8 +769,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Allow form to submit normally
-        return true;
+        // Submit the form programmatically after a short delay
+        setTimeout(() => {
+            this.submit();
+        }, 300);
+        
+        return false;
     });
     
     // Complete progress when page is about to unload
