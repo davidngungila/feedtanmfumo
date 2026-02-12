@@ -824,9 +824,45 @@ document.addEventListener('DOMContentLoaded', function() {
             // Stop keep-alive
             stopSessionKeepAlive();
 
-            // Check response status
-            if (response.ok || response.redirected) {
-                // Get the final URL after redirects
+            // Check response status and content type
+            const contentType = response.headers.get('content-type');
+            const isJson = contentType && contentType.includes('application/json');
+            
+            if (isJson) {
+                // Handle JSON response
+                const result = await response.json();
+                stopSessionKeepAlive();
+                
+                if (result.success) {
+                    // Complete progress
+                    if (uploadProgress) uploadProgress.textContent = '100%';
+                    if (uploadProgressBar) uploadProgressBar.style.width = '100%';
+                    if (uploadStatus) uploadStatus.textContent = 'Upload complete! Redirecting...';
+                    
+                    // Wait a moment then redirect
+                    setTimeout(() => {
+                        window.location.href = result.redirect || '{{ route("admin.payment-confirmations.index") }}';
+                    }, 500);
+                } else {
+                    // Show error message
+                    if (uploadSplashScreen) uploadSplashScreen.style.display = 'none';
+                    const errorMsg = result.message || result.error || 'An error occurred during upload.';
+                    alert(errorMsg);
+                    
+                    // Show detailed errors if available
+                    if (result.results && result.results.errors && result.results.errors.length > 0) {
+                        const errorCount = Math.min(5, result.results.errors.length);
+                        const errorDetails = result.results.errors.slice(0, errorCount).join('\n');
+                        console.error('Upload errors:', result.results.errors);
+                        if (errorCount < result.results.errors.length) {
+                            alert(errorMsg + '\n\nFirst ' + errorCount + ' errors:\n' + errorDetails + '\n\n... and ' + (result.results.errors.length - errorCount) + ' more errors. Check console for details.');
+                        } else {
+                            alert(errorMsg + '\n\nErrors:\n' + errorDetails);
+                        }
+                    }
+                }
+            } else if (response.ok || response.redirected) {
+                // Handle HTML redirect response
                 const finalUrl = response.url || response.headers.get('Location') || '{{ route("admin.payment-confirmations.index") }}';
                 
                 // Complete progress
@@ -839,7 +875,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     window.location.href = finalUrl;
                 }, 500);
             } else {
-                // Handle error response
+                // Handle error response (HTML)
                 const result = await response.text();
                 stopSessionKeepAlive();
                 if (uploadSplashScreen) uploadSplashScreen.style.display = 'none';

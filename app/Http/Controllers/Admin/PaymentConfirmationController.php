@@ -159,6 +159,13 @@ class PaymentConfirmationController extends Controller
             if (! $file) {
                 Log::error('No file uploaded');
 
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No file was uploaded.',
+                    ], 400);
+                }
+
                 return redirect()->route('admin.payment-confirmations.upload')
                     ->with('error', 'No file was uploaded.');
             }
@@ -184,6 +191,13 @@ class PaymentConfirmationController extends Controller
             if (! isset($sheetNames[$sheetIndex])) {
                 Log::error('Sheet not found', ['sheet_index' => $sheetIndex, 'available_sheets' => $sheetNames]);
 
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Selected sheet not found.',
+                    ], 400);
+                }
+
                 return redirect()->route('admin.payment-confirmations.upload')
                     ->with('error', 'Selected sheet not found.');
             }
@@ -198,6 +212,13 @@ class PaymentConfirmationController extends Controller
 
             if (empty($rows) || count($rows) < 2) {
                 Log::error('Excel file is empty or has no data rows', ['row_count' => count($rows)]);
+
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Excel file is empty or has no data rows.',
+                    ], 400);
+                }
 
                 return redirect()->route('admin.payment-confirmations.upload')
                     ->with('error', 'Excel file is empty or has no data rows.');
@@ -217,6 +238,13 @@ class PaymentConfirmationController extends Controller
                     'raw' => $columnMappingJson,
                     'parsed' => $columnMapping,
                 ]);
+
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid column mapping. Please ensure Member ID and Amount columns are mapped.',
+                    ], 400);
+                }
 
                 return redirect()->route('admin.payment-confirmations.upload')
                     ->with('error', 'Invalid column mapping. Please ensure Member ID and Amount columns are mapped.');
@@ -262,6 +290,13 @@ class PaymentConfirmationController extends Controller
                     'column_mapping' => $columnMapping,
                 ]);
 
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Member ID column not found. Please check your column mapping.',
+                    ], 400);
+                }
+
                 return redirect()->route('admin.payment-confirmations.upload')
                     ->with('error', 'Member ID column not found. Please check your column mapping.');
             }
@@ -271,6 +306,13 @@ class PaymentConfirmationController extends Controller
                     'headers' => $headers,
                     'column_mapping' => $columnMapping,
                 ]);
+
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Amount column not found. Please check your column mapping.',
+                    ], 400);
+                }
 
                 return redirect()->route('admin.payment-confirmations.upload')
                     ->with('error', 'Amount column not found. Please check your column mapping.');
@@ -493,6 +535,18 @@ class PaymentConfirmationController extends Controller
                 }
             }
 
+            // If AJAX request, return JSON response
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => $results['success'] > 0,
+                    'message' => $message,
+                    'results' => $results,
+                    'redirect' => $results['success'] > 0
+                        ? route('admin.payment-confirmations.index')
+                        : null,
+                ], $results['success'] > 0 ? 200 : 422);
+            }
+
             if ($results['success'] > 0) {
                 // Redirect to index page to show the imported data
                 return redirect()->route('admin.payment-confirmations.index')
@@ -507,8 +561,19 @@ class PaymentConfirmationController extends Controller
         } catch (\Exception $e) {
             Log::error('Payment confirmation import error', [
                 'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
+            // If AJAX request, return JSON response
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error processing Excel file: '.$e->getMessage(),
+                    'error' => $e->getMessage(),
+                ], 500);
+            }
 
             return redirect()->route('admin.payment-confirmations.upload')
                 ->with('error', 'Error processing Excel file: '.$e->getMessage());
