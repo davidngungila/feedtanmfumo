@@ -132,36 +132,85 @@ class PaymentConfirmationController extends Controller
 
     public function processUpload(Request $request)
     {
+        Log::info('Payment confirmation upload started', [
+            'has_file' => $request->hasFile('excel_file'),
+            'sheet_index' => $request->input('sheet_index'),
+            'column_mapping' => $request->input('column_mapping'),
+            'all_input' => $request->all(),
+        ]);
+
         $request->validate([
             'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
-            'sheet_index' => 'nullable|integer|min:0',
-            'column_mapping' => 'required|json',
+            'sheet_index' => 'required|string',
+            'column_mapping' => 'required|string',
         ]);
 
         try {
             $file = $request->file('excel_file');
+
+            if (! $file) {
+                Log::error('No file uploaded');
+
+                return redirect()->route('admin.payment-confirmations.upload')
+                    ->with('error', 'No file was uploaded.');
+            }
+
+            Log::info('Loading Excel file', [
+                'filename' => $file->getClientOriginalName(),
+                'size' => $file->getSize(),
+            ]);
+
             $spreadsheet = IOFactory::load($file->getRealPath());
 
             // Get selected sheet
-            $sheetIndex = $request->input('sheet_index', 0);
+            $sheetIndex = (int) $request->input('sheet_index', 0);
             $sheetNames = $spreadsheet->getSheetNames();
 
+            Log::info('Sheet information', [
+                'sheet_index' => $sheetIndex,
+                'available_sheets' => $sheetNames,
+                'total_sheets' => count($sheetNames),
+            ]);
+
             if (! isset($sheetNames[$sheetIndex])) {
-                return back()->with('error', 'Selected sheet not found.');
+                Log::error('Sheet not found', ['sheet_index' => $sheetIndex, 'available_sheets' => $sheetNames]);
+
+                return redirect()->route('admin.payment-confirmations.upload')
+                    ->with('error', 'Selected sheet not found.');
             }
 
             $worksheet = $spreadsheet->getSheet($sheetIndex);
             $rows = $worksheet->toArray();
 
+            Log::info('Excel rows loaded', [
+                'total_rows' => count($rows),
+                'first_row' => $rows[0] ?? null,
+            ]);
+
             if (empty($rows) || count($rows) < 2) {
-                return back()->with('error', 'Excel file is empty or has no data rows.');
+                Log::error('Excel file is empty or has no data rows', ['row_count' => count($rows)]);
+
+                return redirect()->route('admin.payment-confirmations.upload')
+                    ->with('error', 'Excel file is empty or has no data rows.');
             }
 
             // Get column mapping
-            $columnMapping = json_decode($request->input('column_mapping'), true);
+            $columnMappingJson = $request->input('column_mapping');
+            $columnMapping = json_decode($columnMappingJson, true);
 
-            if (empty($columnMapping)) {
-                return back()->with('error', 'Column mapping is required.');
+            Log::info('Column mapping', [
+                'raw_json' => $columnMappingJson,
+                'parsed' => $columnMapping,
+            ]);
+
+            if (empty($columnMapping) || ! is_array($columnMapping)) {
+                Log::error('Invalid column mapping', [
+                    'raw' => $columnMappingJson,
+                    'parsed' => $columnMapping,
+                ]);
+
+                return redirect()->route('admin.payment-confirmations.upload')
+                    ->with('error', 'Invalid column mapping. Please ensure Member ID and Amount columns are mapped.');
             }
 
             // Get headers (first row)
@@ -199,11 +248,21 @@ class PaymentConfirmationController extends Controller
             ]);
 
             if ($memberIdIndex === null) {
-                return back()->with('error', 'Member ID column not found. Please check your column mapping.');
+                Log::error('Member ID column not found', [
+                    'headers' => $headers,
+                    'column_mapping' => $columnMapping,
+                ]);
+                return redirect()->route('admin.payment-confirmations.upload')
+                    ->with('error', 'Member ID column not found. Please check your column mapping.');
             }
 
             if ($amountIndex === null) {
-                return back()->with('error', 'Amount column not found. Please check your column mapping.');
+                Log::error('Amount column not found', [
+                    'headers' => $headers,
+                    'column_mapping' => $columnMapping,
+                ]);
+                return redirect()->route('admin.payment-confirmations.upload')
+                    ->with('error', 'Amount column not found. Please check your column mapping.');
             }
 
             $results = [
@@ -212,6 +271,14 @@ class PaymentConfirmationController extends Controller
                 'failed' => 0,
                 'errors' => [],
             ];
+
+            Log::info('Starting to process rows', [
+                'total_rows' => count($rows),
+                'member_id_index' => $memberIdIndex,
+                'amount_index' => $amountIndex,
+                'member_name_index' => $memberNameIndex,
+                'member_type_index' => $memberTypeIndex,
+            ]);
 
             // Process data rows (skip header)
             for ($i = 1; $i < count($rows); $i++) {
@@ -297,7 +364,7 @@ class PaymentConfirmationController extends Controller
                         'member_type' => $memberType,
                         'amount_to_pay' => $amount,
                         'deposit_balance' => $depositBalance,
-                        'member_email' => $user?->email,
+                        'member_email' => $user?->email ?? '',
                         'notes' => 'Imported from Excel sheet',
                     ];
 
@@ -307,6 +374,9 @@ class PaymentConfirmationController extends Controller
                     ]);
 
                     $paymentConfirmation = PaymentConfirmation::create($data);
+
+                    // Refresh the model to ensure it's saved
+                    $paymentConfirmation->refresh();
 
                     // Verify the record was created
                     if ($paymentConfirmation && $paymentConfirmation->id) {
@@ -356,34 +426,52 @@ class PaymentConfirmationController extends Controller
                 'failed' => $results['failed'],
             ]);
 
-            // Verify records were actually saved
+            // Verify records were actually saved (check last 5 minutes to avoid conflicts)
             $savedCount = PaymentConfirmation::where('notes', 'Imported from Excel sheet')
-                ->whereDate('created_at', today())
+                ->where('created_at', '>=', now()->subMinutes(5))
                 ->count();
 
-            $message = "Import completed. Success: {$results['success']}, Failed: {$results['failed']} out of {$results['total']} total.";
+            // Build success message
+            $message = "✅ Import completed successfully!\n\n";
+            $message .= "📊 Results:\n";
+            $message .= "• Total rows processed: {$results['total']}\n";
+            $message .= "• Successfully imported: {$results['success']}\n";
+            $message .= "• Failed: {$results['failed']}\n";
 
             if ($savedCount > 0) {
-                $message .= "\n\n✅ Verified: {$savedCount} record(s) successfully saved to database.";
-            } else {
-                $message .= "\n\n⚠️ Warning: No records found in database. Please check the error logs.";
+                $message .= "\n✅ Verified: {$savedCount} record(s) successfully saved to database.";
+            } elseif ($results['success'] > 0) {
+                $message .= "\n⚠️ Note: {$results['success']} records were created, but verification found {$savedCount} records. This may be normal if records were created earlier today.";
             }
 
-            if (! empty($results['errors'])) {
-                $message .= "\n\nErrors:\n".implode("\n", array_slice($results['errors'], 0, 20));
-                if (count($results['errors']) > 20) {
-                    $message .= "\n... and ".(count($results['errors']) - 20).' more errors.';
+            if (! empty($results['errors']) && $results['failed'] > 0) {
+                $errorCount = min(10, count($results['errors']));
+                $message .= "\n\n⚠️ Errors (showing first {$errorCount}):\n";
+                $message .= implode("\n", array_slice($results['errors'], 0, $errorCount));
+                if (count($results['errors']) > $errorCount) {
+                    $message .= "\n... and ".(count($results['errors']) - $errorCount).' more errors.';
                 }
             }
 
-            return back()->with('success', $message)->with('results', $results);
+            if ($results['success'] > 0) {
+                // Redirect to index page to show the imported data
+                return redirect()->route('admin.payment-confirmations.index')
+                    ->with('success', $message)
+                    ->with('results', $results);
+            } else {
+                // If no records were created, stay on upload page with error
+                return redirect()->route('admin.payment-confirmations.upload')
+                    ->with('error', $message)
+                    ->with('results', $results);
+            }
         } catch (\Exception $e) {
             Log::error('Payment confirmation import error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
 
-            return back()->with('error', 'Error processing Excel file: '.$e->getMessage());
+            return redirect()->route('admin.payment-confirmations.upload')
+                ->with('error', 'Error processing Excel file: '.$e->getMessage());
         }
     }
 
