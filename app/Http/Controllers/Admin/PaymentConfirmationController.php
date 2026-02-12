@@ -173,6 +173,21 @@ class PaymentConfirmationController extends Controller
                 'amount to be paid. 2026',
             ]);
 
+            // Try to find member name column (optional)
+            $memberNameIndex = $this->findColumnIndex($headers, [
+                $columnMapping['member_name'] ?? 'members name',
+                'members name',
+                'member name',
+                'name',
+            ]);
+
+            // Try to find member type column (optional)
+            $memberTypeIndex = $this->findColumnIndex($headers, [
+                $columnMapping['member_type'] ?? 'member type',
+                'member type',
+                'type',
+            ]);
+
             if ($memberIdIndex === null) {
                 return back()->with('error', 'Member ID column not found. Please check your column mapping.');
             }
@@ -216,39 +231,49 @@ class PaymentConfirmationController extends Controller
                     continue;
                 }
 
-                // Find user
+                // Try to find user (optional - don't fail if not found)
                 $user = User::where('member_number', $memberId)
                     ->orWhere('membership_code', $memberId)
                     ->first();
 
-                if (! $user) {
-                    $results['failed']++;
-                    $results['errors'][] = "Row {$i}: Member with ID '{$memberId}' not found";
-
-                    continue;
+                // Extract member name from Excel or use user name
+                $memberName = '';
+                if ($memberNameIndex !== null && isset($row[$memberNameIndex])) {
+                    $memberName = trim((string) $row[$memberNameIndex]);
+                }
+                if (empty($memberName) && $user) {
+                    $memberName = $user->name;
+                }
+                if (empty($memberName)) {
+                    $memberName = "Member {$memberId}";
                 }
 
-                // Get deposit balance
-                $depositBalance = SavingsAccount::where('user_id', $user->id)
-                    ->where('status', 'active')
-                    ->sum('balance') ?? 0;
-
-                if ($depositBalance < $amount) {
-                    $results['failed']++;
-                    $results['errors'][] = "Row {$i}: Member '{$user->name}' has insufficient balance (Balance: {$depositBalance}, Required: {$amount})";
-
-                    continue;
+                // Extract member type from Excel or use user type
+                $memberType = null;
+                if ($memberTypeIndex !== null && isset($row[$memberTypeIndex])) {
+                    $memberType = trim((string) $row[$memberTypeIndex]);
+                }
+                if (empty($memberType) && $user) {
+                    $memberType = $user->membershipType?->name;
                 }
 
-                // Check if payment confirmation already exists for this member and amount
-                $existing = PaymentConfirmation::where('user_id', $user->id)
+                // Get deposit balance (0 if no user)
+                $depositBalance = 0;
+                if ($user) {
+                    $depositBalance = SavingsAccount::where('user_id', $user->id)
+                        ->where('status', 'active')
+                        ->sum('balance') ?? 0;
+                }
+
+                // Check if payment confirmation already exists for this member ID and amount
+                $existing = PaymentConfirmation::where('member_id', $memberId)
                     ->where('amount_to_pay', $amount)
                     ->whereDate('created_at', today())
                     ->first();
 
                 if ($existing) {
                     $results['failed']++;
-                    $results['errors'][] = "Row {$i}: Payment confirmation already exists for member '{$user->name}' with amount {$amount}";
+                    $results['errors'][] = "Row {$i}: Payment confirmation already exists for member ID '{$memberId}' with amount {$amount}";
 
                     continue;
                 }
@@ -256,13 +281,13 @@ class PaymentConfirmationController extends Controller
                 // Create payment confirmation record (without distribution - member will fill it)
                 try {
                     PaymentConfirmation::create([
-                        'user_id' => $user->id,
+                        'user_id' => $user?->id,
                         'member_id' => $memberId,
-                        'member_name' => $user->name,
-                        'member_type' => $user->membershipType?->name,
+                        'member_name' => $memberName,
+                        'member_type' => $memberType,
                         'amount_to_pay' => $amount,
                         'deposit_balance' => $depositBalance,
-                        'member_email' => $user->email ?? '',
+                        'member_email' => $user?->email ?? '',
                         'notes' => 'Imported from Excel sheet',
                     ]);
 

@@ -139,6 +139,28 @@
                         <option value="">-- Select column --</option>
                     </select>
                 </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Member Name (Optional)
+                    </label>
+                    <select name="column_mapping[member_name]" 
+                            id="map-member-name"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#015425] focus:ring-[#015425]">
+                        <option value="">-- Select column (optional) --</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Member Type (Optional)
+                    </label>
+                    <select name="column_mapping[member_type]" 
+                            id="map-member-type"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#015425] focus:ring-[#015425]">
+                        <option value="">-- Select column (optional) --</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Preview Table -->
@@ -262,14 +284,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Populate column selects
         const headers = currentSheetData.headers;
-        [mapMemberId, mapAmount].forEach(select => {
-            select.innerHTML = '<option value="">-- Select column --</option>';
-            headers.forEach((header, index) => {
-                const option = document.createElement('option');
-                option.value = header;
-                option.textContent = header;
-                select.appendChild(option);
-            });
+        const mapMemberName = document.getElementById('map-member-name');
+        const mapMemberType = document.getElementById('map-member-type');
+        
+        [mapMemberId, mapAmount, mapMemberName, mapMemberType].forEach(select => {
+            if (select) {
+                const isOptional = select === mapMemberName || select === mapMemberType;
+                select.innerHTML = isOptional ? '<option value="">-- Select column (optional) --</option>' : '<option value="">-- Select column --</option>';
+                headers.forEach((header, index) => {
+                    const option = document.createElement('option');
+                    option.value = header;
+                    option.textContent = header;
+                    select.appendChild(option);
+                });
+            }
         });
 
         // Show preview
@@ -320,10 +348,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const memberIdColumn = mapMemberId.value;
         const amountColumn = mapAmount.value;
+        const memberNameColumn = mapMemberName?.value || '';
+        const memberTypeColumn = mapMemberType?.value || '';
 
         if (!memberIdColumn || !amountColumn) {
             e.preventDefault();
-            alert('Please map all required columns.');
+            alert('Please map all required columns (Member ID and Amount).');
             return;
         }
 
@@ -336,7 +366,9 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('form-sheet-index').value = sheetIndex;
         document.getElementById('form-column-mapping').value = JSON.stringify({
             member_id: memberIdColumn,
-            amount: amountColumn
+            amount: amountColumn,
+            member_name: memberNameColumn,
+            member_type: memberTypeColumn
         });
 
         // Allow form to submit normally
