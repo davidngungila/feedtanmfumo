@@ -455,11 +455,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Payment Confirmations (Interest Payment Management)
     Route::get('payment-confirmations', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'index'])->name('payment-confirmations.index');
-    Route::get('payment-confirmations/{paymentConfirmation}', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'show'])->name('payment-confirmations.show');
     Route::get('payment-confirmations/upload', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'upload'])->name('payment-confirmations.upload');
     Route::post('payment-confirmations/preview-excel', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'previewExcel'])->name('payment-confirmations.preview-excel');
     Route::post('payment-confirmations/process-upload', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'processUpload'])->name('payment-confirmations.process-upload');
     Route::get('payment-confirmations/download-sample', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'downloadSample'])->name('payment-confirmations.download-sample');
+    Route::get('payment-confirmations/{paymentConfirmation}', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'show'])->name('payment-confirmations.show');
 
     // Shares Management
     Route::get('shares', [ShareController::class, 'index'])->name('shares.index');
