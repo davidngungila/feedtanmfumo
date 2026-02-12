@@ -523,13 +523,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 memberData = data.member;
                 maxDepositBalance = parseFloat(memberData.deposit_balance_raw);
                 
-                document.getElementById('user_id').value = memberData.id;
+                // Handle user_id (may be null for unregistered members)
+                document.getElementById('user_id').value = memberData.id || '';
                 document.getElementById('member_id_hidden').value = memberData.member_id;
                 document.getElementById('memberName').textContent = memberData.name;
                 document.getElementById('memberDetails').textContent = `${memberData.member_id} - ${memberData.member_type}`;
                 document.getElementById('depositBalance').textContent = `TZS ${memberData.deposit_balance}`;
                 document.getElementById('maxAmount').textContent = `TZS ${memberData.deposit_balance}`;
                 document.getElementById('member_email').value = memberData.email || '';
+                
+                // If there's an existing payment confirmation with amount_to_pay, pre-fill it
+                if (memberData.amount_to_pay) {
+                    document.getElementById('amount_to_pay').value = memberData.amount_to_pay;
+                }
 
                 lookupSection.style.display = 'none';
                 memberInfo.style.display = 'block';
@@ -540,6 +546,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     paymentForm.style.display = 'none';
                     zeroBalanceMessage.style.display = 'block';
+                }
+                
+                // Update total if amount_to_pay was pre-filled
+                if (memberData.amount_to_pay) {
+                    updateTotal();
                 }
             } else {
                 showError('member_id_error', data.message || 'Member not found');

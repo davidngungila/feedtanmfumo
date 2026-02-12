@@ -33,9 +33,46 @@ class PaymentConfirmationController extends Controller
             ], 422);
         }
 
-        $memberId = $request->input('member_id');
+        $memberId = trim($request->input('member_id'));
 
-        // Try to find member by member_number or membership_code
+        // First, check if there's a PaymentConfirmation record for this member_id
+        // This handles cases where members are imported from Excel but not yet registered
+        $paymentConfirmation = PaymentConfirmation::where('member_id', $memberId)
+            ->latest()
+            ->first();
+
+        if ($paymentConfirmation) {
+            // Found a payment confirmation record - use its data
+            $user = $paymentConfirmation->user;
+
+            // Get deposit balance from user if exists, otherwise use the stored balance
+            $depositBalance = 0;
+            if ($user) {
+                $depositBalance = SavingsAccount::where('user_id', $user->id)
+                    ->where('status', 'active')
+                    ->sum('balance') ?? 0;
+            } else {
+                // Use the stored deposit balance from payment confirmation
+                $depositBalance = $paymentConfirmation->deposit_balance ?? 0;
+            }
+
+            return response()->json([
+                'success' => true,
+                'member' => [
+                    'id' => $user?->id,
+                    'member_id' => $paymentConfirmation->member_id,
+                    'name' => $paymentConfirmation->member_name,
+                    'member_type' => $paymentConfirmation->member_type ?? 'N/A',
+                    'email' => $paymentConfirmation->member_email ?? ($user?->email ?? ''),
+                    'deposit_balance' => number_format($depositBalance, 2),
+                    'deposit_balance_raw' => $depositBalance,
+                    'amount_to_pay' => $paymentConfirmation->amount_to_pay,
+                    'has_existing_confirmation' => true,
+                ],
+            ]);
+        }
+
+        // If no payment confirmation found, try to find user by member_number or membership_code
         $user = User::where('member_number', $memberId)
             ->orWhere('membership_code', $memberId)
             ->first();
@@ -43,7 +80,7 @@ class PaymentConfirmationController extends Controller
         if (! $user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Member not found. Please check your member ID.',
+                'message' => 'Member not found. Please check your member ID or contact the administrator.',
             ], 404);
         }
 
@@ -62,6 +99,7 @@ class PaymentConfirmationController extends Controller
                 'email' => $user->email,
                 'deposit_balance' => number_format($depositBalance, 2),
                 'deposit_balance_raw' => $depositBalance,
+                'has_existing_confirmation' => false,
             ],
         ]);
     }
@@ -69,7 +107,7 @@ class PaymentConfirmationController extends Controller
     public function store(Request $request): \Illuminate\Http\JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'user_id' => 'required|exists:users,id',
+            'user_id' => 'nullable|exists:users,id',
             'member_id' => 'required|string',
             'amount_to_pay' => 'required|numeric|min:0.01',
             'member_email' => 'required|email',
@@ -90,7 +128,19 @@ class PaymentConfirmationController extends Controller
             ], 422);
         }
 
-        $user = User::findOrFail($request->input('user_id'));
+        $userId = $request->input('user_id');
+        $user = $userId ? User::find($userId) : null;
+
+        // If no user, try to find by member_id from PaymentConfirmation
+        if (! $user) {
+            $paymentConfirmation = PaymentConfirmation::where('member_id', $request->input('member_id'))
+                ->latest()
+                ->first();
+
+            if ($paymentConfirmation && $paymentConfirmation->user_id) {
+                $user = User::find($paymentConfirmation->user_id);
+            }
+        }
 
         // Calculate total distribution
         $swfContribution = (float) ($request->input('swf_contribution') ?? 0);
@@ -111,9 +161,20 @@ class PaymentConfirmationController extends Controller
         }
 
         // Get deposit balance
-        $depositBalance = SavingsAccount::where('user_id', $user->id)
-            ->where('status', 'active')
-            ->sum('balance') ?? 0;
+        $depositBalance = 0;
+        if ($user) {
+            $depositBalance = SavingsAccount::where('user_id', $user->id)
+                ->where('status', 'active')
+                ->sum('balance') ?? 0;
+        } else {
+            // If no user, check if there's an existing payment confirmation with balance
+            $existingConfirmation = PaymentConfirmation::where('member_id', $request->input('member_id'))
+                ->latest()
+                ->first();
+            if ($existingConfirmation) {
+                $depositBalance = $existingConfirmation->deposit_balance ?? 0;
+            }
+        }
 
         // Validate that deposit balance is sufficient
         if ($depositBalance < $amountToPay) {
@@ -123,12 +184,31 @@ class PaymentConfirmationController extends Controller
             ], 422);
         }
 
+        // Get member name and type
+        $memberName = $user?->name ?? '';
+        $memberType = $user?->membershipType?->name ?? null;
+
+        // If no user, try to get from existing payment confirmation
+        if (empty($memberName)) {
+            $existingConfirmation = PaymentConfirmation::where('member_id', $request->input('member_id'))
+                ->latest()
+                ->first();
+            if ($existingConfirmation) {
+                $memberName = $existingConfirmation->member_name ?? '';
+                $memberType = $existingConfirmation->member_type ?? null;
+            }
+        }
+
+        if (empty($memberName)) {
+            $memberName = 'Member '.$request->input('member_id');
+        }
+
         // Create payment confirmation
         $paymentConfirmation = PaymentConfirmation::create([
-            'user_id' => $user->id,
+            'user_id' => $user?->id,
             'member_id' => $request->input('member_id'),
-            'member_name' => $user->name,
-            'member_type' => $user->membershipType?->name,
+            'member_name' => $memberName,
+            'member_type' => $memberType,
             'amount_to_pay' => $amountToPay,
             'deposit_balance' => $depositBalance,
             'swf_contribution' => $swfContribution,
