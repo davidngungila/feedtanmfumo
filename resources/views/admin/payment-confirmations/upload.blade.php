@@ -537,6 +537,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     sheetSelect.appendChild(option);
                 });
 
+                // Auto-select first sheet if only one exists
+                if (data.sheets.length === 1) {
+                    sheetSelect.value = '0';
+                    sheetSelect.dispatchEvent(new Event('change'));
+                }
+
                 step2.classList.remove('hidden');
                 updateStepIndicator(2);
                 step2.scrollIntoView({ behavior: 'smooth' });
@@ -696,8 +702,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const sheetIndex = sheetSelect.value;
-        if (!sheetIndex) {
-            alert('Please select a sheet.');
+        if (!sheetIndex || sheetIndex === '' || sheetIndex === null) {
+            alert('Please select a sheet from the Excel file. Go to Step 2 and select a sheet.');
+            // Scroll to sheet select
+            step2.scrollIntoView({ behavior: 'smooth' });
+            return false;
+        }
+        
+        // Validate sheet index is a number
+        const sheetIndexNum = parseInt(sheetIndex);
+        if (isNaN(sheetIndexNum) || sheetIndexNum < 0) {
+            alert('Invalid sheet selection. Please select a sheet again.');
             return false;
         }
 
@@ -745,14 +760,16 @@ document.addEventListener('DOMContentLoaded', function() {
         dataTransfer.items.add(file);
         formExcelFile.files = dataTransfer.files;
         
-        // Set sheet index
-        if (!sheetIndex || sheetIndex === '') {
+        // Set sheet index - use the validated value
+        const validatedSheetIndex = parseInt(sheetIndex);
+        if (isNaN(validatedSheetIndex) || validatedSheetIndex < 0) {
             stopSessionKeepAlive();
             if (uploadSplashScreen) uploadSplashScreen.style.display = 'none';
-            alert('Please select a sheet from the Excel file.');
+            alert('Invalid sheet selection. Please go to Step 2 and select a sheet from the dropdown.');
+            step2.scrollIntoView({ behavior: 'smooth' });
             return false;
         }
-        formSheetIndex.value = sheetIndex;
+        formSheetIndex.value = validatedSheetIndex.toString();
         
         // Set column mapping
         const columnMapping = {
