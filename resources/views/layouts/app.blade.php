@@ -7,7 +7,7 @@
     <meta content="FeedTan Community Microfinance Group" name="author">
     <title>FEEDTAN DIGITAL - FeedTan Community</title>
     <base href="/">
-    <link href="{{ asset('feedtan_logo.png') }}" rel="icon" type="image/png">
+    <link href="{{ asset('feedtan_favicon.png') }}" rel="icon" type="image/png">
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect">

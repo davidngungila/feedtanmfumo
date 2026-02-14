@@ -7,7 +7,7 @@
     <meta content="FEEDTAN DIGITAL Admin - Community Feedback & Microfinance Management Platform" name="description">
     <title>@yield('page-title', 'Admin Dashboard') - FEEDTAN DIGITAL</title>
     <base href="/">
-    <link href="{{ asset('feedtan_logo.png') }}" rel="icon" type="image/png">
+    <link href="{{ asset('feedtan_favicon.png') }}" rel="icon" type="image/png">
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect">
