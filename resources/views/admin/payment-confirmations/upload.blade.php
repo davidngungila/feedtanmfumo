@@ -887,6 +887,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Submit via AJAX/Fetch instead of regular form submission
         const formData = new FormData(uploadForm);
+        
+        // Explicitly append/set values to ensure they are captured correctly
+        formData.set('sheet_index', validatedSheetIndex.toString());
+        formData.set('column_mapping', JSON.stringify(columnMapping));
 
         // Disable form inputs to prevent double submission
         this.querySelectorAll('input, select, button').forEach(el => {
@@ -903,14 +907,13 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
         
-        if (!formData.has('sheet_index') || !formData.get('sheet_index')) {
+        if (!formData.has('sheet_index') || formData.get('sheet_index') === null || formData.get('sheet_index') === '') {
             stopSessionKeepAlive();
             if (uploadSplashScreen) uploadSplashScreen.style.display = 'none';
             alert('Sheet index is missing. Please select a sheet and try again.');
-            console.error('FormData check:', {
+            console.error('FormData check failed:', {
                 has_sheet_index: formData.has('sheet_index'),
-                sheet_index_value: formData.get('sheet_index'),
-                form_sheet_index_value: formSheetIndex.value
+                sheet_index_value: formData.get('sheet_index')
             });
             return false;
         }
