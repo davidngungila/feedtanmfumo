@@ -452,7 +452,11 @@
                             >
                                 <option value="">Chagua Mtandao</option>
                                 <option value="mpesa">M-Pesa</option>
+                                <option value="tigo">Tigo Pesa</option>
+                                <option value="airtel">Airtel Money</option>
                                 <option value="halotel">Halotel</option>
+                                <option value="zantel">Zantel (Ezy Pesa)</option>
+                                <option value="yas">Yas</option>
                             </select>
                             <div id="mobile_provider_error" class="error-message"></div>
                         </div>
@@ -466,7 +470,7 @@
                                 placeholder="Weka namba yako ya simu (mfano: 0712345678)"
                                 maxlength="20"
                             >
-                            <div class="text-xs text-gray-600 mt-1">Weka namba bila kodi ya nchi</div>
+                            <div class="text-xs text-gray-600 mt-1">Weka namba bila kodi ya nchi ongeza Yas</div>
                             <div id="mobile_number_error" class="error-message"></div>
                         </div>
                     </div>
