@@ -15,6 +15,7 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use App\Helpers\PdfHelper;
 
 class PaymentConfirmationController extends Controller
 {
@@ -703,4 +704,126 @@ class PaymentConfirmationController extends Controller
             ->route('admin.payment-confirmations.index')
             ->with('success', "Successfully deleted {$deleted} payment confirmation(s).");
     }
+
+    public function exportExcel(Request $request)
+    {
+        $query = PaymentConfirmation::query()->latest();
+
+        // Apply same filters as index
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('member_id', 'like', "%{$search}%")
+                    ->orWhere('member_name', 'like', "%{$search}%")
+                    ->orWhere('member_email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->input('date_from'));
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->input('date_to'));
+        }
+
+        $confirmations = $query->get();
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Payment Confirmations');
+
+        // Headers
+        $headers = [
+            'ID', 'Date', 'Member ID', 'Member Name', 'Member Type', 'Email',
+            'Amount to Pay', 'SWF', 'Loan', 'Capital', 'Fine', 'FIA', 'Re-deposit',
+            'Net Payment', 'Method', 'Bank Account', 'Mobile Phone', 'Status'
+        ];
+        $sheet->fromArray($headers, null, 'A1');
+
+        // Style headers
+        $headerStyle = [
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => '015425'],
+            ],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+        ];
+        $sheet->getStyle('A1:R1')->applyFromArray($headerStyle);
+
+        // Data
+        $data = [];
+        foreach ($confirmations as $c) {
+            $data[] = [
+                $c->id,
+                $c->created_at->format('Y-m-d H:i'),
+                $c->member_id,
+                $c->member_name,
+                $c->member_type,
+                $c->member_email,
+                $c->amount_to_pay,
+                $c->swf_contribution,
+                $c->loan_repayment,
+                $c->capital_contribution,
+                $c->fine_penalty,
+                $c->fia_investment,
+                $c->re_deposit,
+                $c->cash_amount, // Use the accessor
+                $c->payment_method ?: 'N/A',
+                $c->bank_account_number ?: 'N/A',
+                $c->mobile_number ?: 'N/A',
+                $c->payment_method ? 'Confirmed' : 'Pending'
+            ];
+        }
+        $sheet->fromArray($data, null, 'A2');
+
+        // Auto-size columns
+        foreach (range('A', 'R') as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+
+        $filename = 'payment_confirmations_export_' . date('Ymd_His') . '.xlsx';
+
+        $response = new StreamedResponse(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        });
+
+        $response->headers->set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        $response->headers->set('Content-Disposition', 'attachment;filename="' . $filename . '"');
+        $response->headers->set('Cache-Control', 'max-age=0');
+
+        return $response;
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $query = PaymentConfirmation::query()->latest();
+
+        // Apply same filters as index
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('member_id', 'like', "%{$search}%")
+                    ->orWhere('member_name', 'like', "%{$search}%")
+                    ->orWhere('member_email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->input('date_from'));
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->input('date_to'));
+        }
+
+        $confirmations = $query->get();
+
+        return PdfHelper::downloadPdf('admin.payment-confirmations.reports-pdf', [
+            'confirmations' => $confirmations,
+            'documentTitle' => 'Payment Confirmations Report',
+            'documentSubtitle' => 'Full summary of payouts and distributions',
+        ], 'payment-confirmations-' . date('Y-m-d-His') . '.pdf', 'a4', 'landscape');
+    }
 }
+

@@ -482,6 +482,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('payment-confirmations/process-upload', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'processUpload'])->name('payment-confirmations.process-upload');
     Route::post('payment-confirmations/bulk-delete', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'bulkDelete'])->name('payment-confirmations.bulk-delete');
     Route::get('payment-confirmations/download-sample', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'downloadSample'])->name('payment-confirmations.download-sample');
+    Route::get('payment-confirmations/export-excel', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'exportExcel'])->name('payment-confirmations.export-excel');
+    Route::get('payment-confirmations/export-pdf', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'exportPdf'])->name('payment-confirmations.export-pdf');
     Route::get('payment-confirmations/{paymentConfirmation}', [\App\Http\Controllers\Admin\PaymentConfirmationController::class, 'show'])->name('payment-confirmations.show');
 
     // Shares Management
