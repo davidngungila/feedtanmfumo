@@ -971,13 +971,23 @@ Best regards,
             $this->reloadMailConfig();
             $orgInfo = $this->getOrganizationInfo();
 
-            $subject = "Payment Confirmation - {$orgInfo['name']}";
+            $subject = "Uthibitisho wa Malipo - {$paymentConfirmation->member_name}";
             $htmlBody = $this->formatPaymentConfirmationEmail($paymentConfirmation, $orgInfo);
 
-            Mail::html($htmlBody, function ($mail) use ($paymentConfirmation, $subject, $orgInfo) {
+            // Generate PDF
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.payment-confirmation', [
+                'paymentConfirmation' => $paymentConfirmation,
+                'organizationInfo' => $orgInfo
+            ]);
+            $pdfContent = $pdf->output();
+
+            Mail::html($htmlBody, function ($mail) use ($paymentConfirmation, $subject, $orgInfo, $pdfContent) {
                 $mail->to($paymentConfirmation->member_email, $paymentConfirmation->member_name)
                     ->subject($subject)
-                    ->from($orgInfo['from_email'], $orgInfo['from_name']);
+                    ->from($orgInfo['from_email'], $orgInfo['from_name'])
+                    ->attachData($pdfContent, "Uthibitisho_wa_Malipo_{$paymentConfirmation->member_id}.pdf", [
+                        'mime' => 'application/pdf',
+                    ]);
 
                 // Add CC emails
                 $mail->cc('sigfridngereza@gmail.com');
@@ -985,7 +995,7 @@ Best regards,
                 $mail->cc('witneysam21@gmail.com');
             });
 
-            Log::info("Payment confirmation email sent to {$paymentConfirmation->member_email} for payment confirmation ID {$paymentConfirmation->id}.");
+            Log::info("Payment confirmation email with PDF sent to {$paymentConfirmation->member_email} for payment confirmation ID {$paymentConfirmation->id}.");
 
             return true;
         } catch (\Exception $e) {

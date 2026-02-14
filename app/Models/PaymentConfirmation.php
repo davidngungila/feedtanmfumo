@@ -51,11 +51,16 @@ class PaymentConfirmation extends Model
 
     public function getTotalDistributionAttribute(): float
     {
-        return $this->swf_contribution +
+        return (float) ($this->swf_contribution +
                $this->re_deposit +
                $this->fia_investment +
                $this->capital_contribution +
                $this->fine_penalty +
-               $this->loan_repayment;
+               $this->loan_repayment);
+    }
+
+    public function getCashAmountAttribute(): float
+    {
+        return (float) ($this->amount_to_pay - $this->total_distribution);
     }
 }
