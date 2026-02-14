@@ -974,10 +974,20 @@ Best regards,
             $subject = "Uthibitisho wa Malipo - {$paymentConfirmation->member_name}";
             $htmlBody = $this->formatPaymentConfirmationEmail($paymentConfirmation, $orgInfo);
 
+            // Convert header image to base64 for PDF
+            $headerImagePath = public_path('header-mfumo.png');
+            $headerBase64 = '';
+            if (file_exists($headerImagePath)) {
+                $type = pathinfo($headerImagePath, PATHINFO_EXTENSION);
+                $data = file_get_contents($headerImagePath);
+                $headerBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+            }
+
             // Generate PDF
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.payment-confirmation', [
                 'paymentConfirmation' => $paymentConfirmation,
-                'organizationInfo' => $orgInfo
+                'organizationInfo' => $orgInfo,
+                'headerBase64' => $headerBase64
             ]);
             $pdfContent = $pdf->output();
 

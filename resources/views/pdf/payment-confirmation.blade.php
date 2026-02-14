@@ -104,8 +104,12 @@
 </head>
 <body>
     <div class="header">
-        <div style="text-align: center; margin-bottom: 10px;">
-            <div class="logo-box">FEEDTAN DIGITAL</div>
+        <div style="text-align: center; margin-bottom: 15px;">
+            @if(isset($headerBase64) && $headerBase64)
+                <img src="{{ $headerBase64 }}" alt="FeedTan Header" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0 auto;">
+            @else
+                <div class="logo-box">FEEDTAN DIGITAL</div>
+            @endif
         </div>
         <div class="title">UTHIBITISHO WA MALIPO (PAYMENT CONFIRMATION)</div>
         <div class="serial-number">Serial No: FCMG-PC-{{ str_pad($paymentConfirmation->id, 6, '0', STR_PAD_LEFT) }}</div>
