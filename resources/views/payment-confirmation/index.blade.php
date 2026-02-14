@@ -221,6 +221,14 @@
         color: #991b1b;
         border: 1px solid #fca5a5;
     }
+
+    .cursor-not-allowed {
+        cursor: not-allowed;
+    }
+
+    .bg-gray-50 {
+        background-color: #f9fafb !important;
+    }
 </style>
 @endpush
 
@@ -293,45 +301,33 @@
                     <div class="text-lg font-bold mb-3 text-red-800 border-b border-red-200 pb-2">Madeni unayo daiwa</div>
                     
                     <!-- SWF -->
-                    <div class="distribution-item">
-                        <label class="flex items-center gap-2 mb-2 cursor-pointer">
-                            <input type="checkbox" id="enable_swf" class="w-4 h-4 text-[#015425]">
-                            <span class="font-semibold">Social Welfare (SWF)</span>
-                        </label>
-                        <input type="number" id="swf_contribution" name="swf_contribution" class="input-field" placeholder="0.00" step="0.01" min="0" disabled>
+                    <div class="distribution-item bg-white/50">
+                        <label class="block text-sm font-semibold mb-1 text-red-700">Social Welfare (SWF)</label>
+                        <input type="number" id="swf_contribution" name="swf_contribution" class="input-field bg-gray-50 cursor-not-allowed font-bold" placeholder="0.00" step="0.01" min="0" readonly>
                     </div>
 
                     <!-- Loan -->
-                    <div class="distribution-item">
-                        <label class="flex items-center gap-2 mb-2 cursor-pointer">
-                            <input type="checkbox" id="enable_loan" class="w-4 h-4 text-[#015425]">
-                            <span class="font-semibold">Rejesho la Mkopo</span>
-                        </label>
-                        <input type="number" id="loan_repayment" name="loan_repayment" class="input-field" placeholder="0.00" step="0.01" min="0" disabled>
+                    <div class="distribution-item bg-white/50">
+                        <label class="block text-sm font-semibold mb-1 text-red-700">Rejesho la Mkopo</label>
+                        <input type="number" id="loan_repayment" name="loan_repayment" class="input-field bg-gray-50 cursor-not-allowed font-bold" placeholder="0.00" step="0.01" min="0" readonly>
                     </div>
 
                     <!-- Capital -->
-                    <div class="distribution-item">
-                        <label class="flex items-center gap-2 mb-2 cursor-pointer">
-                            <input type="checkbox" id="enable_capital" class="w-4 h-4 text-[#015425]">
-                            <span class="font-semibold">Hisa FeedTan</span>
-                        </label>
-                        <input type="number" id="capital_contribution" name="capital_contribution" class="input-field" placeholder="0.00" step="0.01" min="0" disabled>
+                    <div class="distribution-item bg-white/50">
+                        <label class="block text-sm font-semibold mb-1 text-red-700">Hisa FeedTan</label>
+                        <input type="number" id="capital_contribution" name="capital_contribution" class="input-field bg-gray-50 cursor-not-allowed font-bold" placeholder="0.00" step="0.01" min="0" readonly>
                     </div>
 
                     <!-- Fine -->
-                    <div class="distribution-item">
-                        <label class="flex items-center gap-2 mb-2 cursor-pointer">
-                            <input type="checkbox" id="enable_fine" class="w-4 h-4 text-[#015425]">
-                            <span class="font-semibold">Fine/Penalty</span>
-                        </label>
-                        <input type="number" id="fine_penalty" name="fine_penalty" class="input-field" placeholder="0.00" step="0.01" min="0" disabled>
+                    <div class="distribution-item bg-white/50">
+                        <label class="block text-sm font-semibold mb-1 text-red-700">Fine/Penalty</label>
+                        <input type="number" id="fine_penalty" name="fine_penalty" class="input-field bg-gray-50 cursor-not-allowed font-bold" placeholder="0.00" step="0.01" min="0" readonly>
                     </div>
 
                     <!-- Total Deductions Display -->
-                    <div class="flex justify-between items-center font-bold text-red-800 mt-2">
+                    <div class="flex justify-between items-center font-bold text-red-800 mt-2 px-1">
                         <span>Jumla ya Madeni:</span>
-                        <span id="totalDeductions">0.00</span>
+                        <span id="totalDeductions" class="text-xl">TZS 0.00</span>
                     </div>
                 </div>
 
@@ -583,15 +579,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Pre-fill distribution fields if available
                 const fields = [
-                    { key: 'swf_contribution', id: 'swf_contribution', check: 'enable_swf' },
-                    { key: 're_deposit', id: 're_deposit', check: 'enable_re_deposit' },
-                    { key: 'fia_investment', id: 'fia_investment', check: 'enable_fia' },
-                    { key: 'capital_contribution', id: 'capital_contribution', check: 'enable_capital' },
-                    { key: 'loan_repayment', id: 'loan_repayment', check: 'enable_loan' },
-                    { key: 'fine_penalty', id: 'fine_penalty', check: 'enable_fine' }
+                    { key: 'swf_contribution', id: 'swf_contribution' },
+                    { key: 'capital_contribution', id: 'capital_contribution' },
+                    { key: 'loan_repayment', id: 'loan_repayment' },
+                    { key: 'fine_penalty', id: 'fine_penalty' }
                 ];
 
                 fields.forEach(field => {
+                    const value = parseFloat(memberData[field.key]) || 0;
+                    const input = document.getElementById(field.id);
+                    input.value = value;
+                });
+
+                // Pre-fill Allocation fields
+                const allocationFields = [
+                    { key: 're_deposit', id: 're_deposit', check: 'enable_re_deposit' },
+                    { key: 'fia_investment', id: 'fia_investment', check: 'enable_fia' }
+                ];
+
+                allocationFields.forEach(field => {
                     const value = parseFloat(memberData[field.key]) || 0;
                     if (value > 0) {
                         document.getElementById(field.check).checked = true;
@@ -599,7 +605,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         input.disabled = false;
                         input.value = value;
                         
-                        // Handle FIA type special case if needed
                         if (field.key === 'fia_investment' && memberData.fia_type) {
                             const fiaSelect = document.getElementById('fia_type');
                             fiaSelect.disabled = false;
@@ -625,14 +630,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Enable/disable distribution inputs
-    ['swf', 're_deposit', 'fia', 'capital', 'loan', 'fine'].forEach(type => {
+    // Enable/disable allocation inputs
+    ['re_deposit', 'fia'].forEach(type => {
         const checkbox = document.getElementById(`enable_${type}`);
-        const input = document.getElementById(type === 'swf' ? 'swf_contribution' : 
-                                               type === 're_deposit' ? 're_deposit' :
-                                               type === 'fia' ? 'fia_investment' :
-                                               type === 'capital' ? 'capital_contribution' : 
-                                               type === 'loan' ? 'loan_repayment' : 'fine_penalty');
+        const input = document.getElementById(type === 're_deposit' ? 're_deposit' : 'fia_investment');
         const select = type === 'fia' ? document.getElementById('fia_type') : null;
 
         checkbox.addEventListener('change', function() {
