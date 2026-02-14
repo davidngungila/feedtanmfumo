@@ -472,16 +472,6 @@
                     </div>
                 </div>
 
-                <div class="mt-4">
-                    <label for="notes" class="input-label">Maelezo ya Ziada (Hiari)</label>
-                    <textarea 
-                        id="notes" 
-                        name="notes" 
-                        class="input-field" 
-                        rows="3"
-                        placeholder="Andika maelezo yoyote ya ziada..."
-                    ></textarea>
-                </div>
 
                 <button 
                     type="submit" 
