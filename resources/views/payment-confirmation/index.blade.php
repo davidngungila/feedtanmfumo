@@ -260,7 +260,7 @@
             <div class="balance-display text-center">
                 <!-- <div class="text-sm mb-2">Taarifa za Mwanachama</div> -->
                 <div class="text-2xl font-bold mb-1" id="memberName"></div>
-                <!-- <div class="text-sm opacity-90" id="memberDetails"></div> -->
+                <div class="text-sm opacity-90" id="memberDetails"></div>
                 <div class="mt-4 pt-4 border-t border-white/20">
                     <div class="text-sm opacity-90 uppercase tracking-wide">Hongera Gawio lako ni</div>
                     <div class="text-4xl font-extrabold mt-1">TZS <span id="gawioAmount">0.00</span></div>
@@ -621,7 +621,7 @@ document.addEventListener('DOMContentLoaded', function() {
             showError('member_id_error', 'An error occurred. Please try again.');
         } finally {
             lookupBtn.disabled = false;
-            lookupBtn.textContent = 'Lookup Member';
+            lookupBtn.textContent = 'Tafuta Mwanachama';
         }
     });
 
