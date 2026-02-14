@@ -220,6 +220,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('users/roles', [UserController::class, 'roles'])->name('users.roles');
     Route::put('users/roles/{role}', [UserController::class, 'updateRolePermissions'])->name('users.roles.update');
     Route::post('users/bulk-password-reset', [UserController::class, 'bulkPasswordReset'])->name('users.bulk-password-reset');
+    Route::post('users/bulk-status-update', [UserController::class, 'bulkStatusUpdate'])->name('users.bulk-status-update');
     Route::post('users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('users.reset-password');
     Route::get('users/directory', [UserController::class, 'directory'])->name('users.directory');
     Route::get('users/profiles', [UserController::class, 'profiles'])->name('users.profiles');

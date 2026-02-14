@@ -908,6 +908,33 @@ class UserController extends Controller
     }
 
     /**
+     * Update multiple users status in bulk
+     */
+    public function bulkStatusUpdate(Request $request)
+    {
+        $validated = $request->validate([
+            'user_ids' => 'required|array',
+            'user_ids.*' => 'exists:users,id',
+            'status' => 'required|in:active,inactive,pending,suspended',
+            'reason' => 'nullable|string|max:255',
+        ]);
+
+        $users = User::whereIn('id', $validated['user_ids'])->get();
+        $updatedCount = 0;
+
+        foreach ($users as $user) {
+            $user->update([
+                'status' => $validated['status'],
+                'status_reason' => $validated['reason'] ?? $user->status_reason,
+                'status_changed_at' => now(),
+            ]);
+            $updatedCount++;
+        }
+
+        return back()->with('success', "Successfully updated status for {$updatedCount} members.");
+    }
+
+    /**
      * Bulk Generate New Passwords and send to email
      */
     public function bulkPasswordReset(Request $request)

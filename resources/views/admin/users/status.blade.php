@@ -87,12 +87,46 @@
         </form>
     </div>
 
+    <!-- Bulk Actions Bar -->
+    <div id="bulkActionsBar" class="hidden bg-[#f0fdf4] border border-[#dcfce7] rounded-lg p-4 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center">
+            <span class="text-sm font-medium text-gray-700 mr-4"><span id="selectedCount">0</span> members selected</span>
+            <button type="button" id="clearSelection" class="text-sm text-red-600 hover:underline">Clear Selection</button>
+        </div>
+        
+        <form id="bulkUpdateForm" method="POST" action="{{ route('admin.users.bulk-status-update') }}" class="flex flex-wrap items-center gap-3">
+            @csrf
+            <div id="selectedIdsContainer"></div>
+            
+            <div class="flex items-center gap-2">
+                <label class="text-sm font-medium text-gray-700">Set Status:</label>
+                <select name="status" required class="text-sm border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="pending">Pending</option>
+                    <option value="suspended">Suspended</option>
+                </select>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <input type="text" name="reason" placeholder="Reason (optional)" class="text-sm border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425] w-64">
+            </div>
+
+            <button type="submit" class="px-4 py-2 bg-[#015425] text-white text-sm font-bold rounded hover:bg-[#013019] transition">
+                Apply to Selected
+            </button>
+        </form>
+    </div>
+
     <!-- Status Table -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
+                        <th class="px-4 py-3 text-left">
+                            <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-[#015425] focus:ring-[#015425]">
+                        </th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Current Status</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status Since</th>
@@ -103,6 +137,9 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($users as $user)
                         <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-4 whitespace-nowrap">
+                                <input type="checkbox" name="user_ids[]" value="{{ $user->id }}" class="user-checkbox rounded border-gray-300 text-[#015425] focus:ring-[#015425]">
+                            </td>
                             <td class="px-4 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#015425] to-[#027a3a] flex items-center justify-center text-white font-semibold text-sm mr-3">
@@ -151,7 +188,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                            <td colspan="7" class="px-4 py-8 text-center text-gray-500">
                                 No members found
                             </td>
                         </tr>
@@ -167,5 +204,68 @@
         @endif
     </div>
 </div>
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.user-checkbox');
+    const bulkBar = document.getElementById('bulkActionsBar');
+    const selectedCountSpan = document.getElementById('selectedCount');
+    const clearSelection = document.getElementById('clearSelection');
+    const bulkUpdateForm = document.getElementById('bulkUpdateForm');
+    const selectedIdsContainer = document.getElementById('selectedIdsContainer');
+
+    function updateBulkBar() {
+        const checked = document.querySelectorAll('.user-checkbox:checked');
+        const count = checked.length;
+        
+        selectedCountSpan.textContent = count;
+        
+        if (count > 0) {
+            bulkBar.classList.remove('hidden');
+        } else {
+            bulkBar.classList.add('hidden');
+        }
+        
+        // Update hidden inputs for form
+        selectedIdsContainer.innerHTML = '';
+        checked.forEach(cb => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'user_ids[]';
+            input.value = cb.value;
+            selectedIdsContainer.appendChild(input);
+        });
+    }
+
+    selectAll.addEventListener('change', function() {
+        checkboxes.forEach(cb => cb.checked = this.checked);
+        updateBulkBar();
+    });
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            if (!this.checked) selectAll.checked = false;
+            if (document.querySelectorAll('.user-checkbox:checked').length === checkboxes.length) selectAll.checked = true;
+            updateBulkBar();
+        });
+    });
+
+    clearSelection.addEventListener('click', function() {
+        checkboxes.forEach(cb => cb.checked = false);
+        selectAll.checked = false;
+        updateBulkBar();
+    });
+
+    bulkUpdateForm.addEventListener('submit', function(e) {
+        const count = document.querySelectorAll('.user-checkbox:checked').length;
+        const status = this.querySelector('select[name="status"]').value;
+        if (!confirm(`Are you sure you want to change status to "${status}" for ${count} members?`)) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+@endpush
 @endsection
 
