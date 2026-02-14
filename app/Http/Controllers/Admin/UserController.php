@@ -775,9 +775,10 @@ class UserController extends Controller
                     }
 
                     // Check if user exists
-                    if (User::where('email', $mappedData['email'])->exists()) {
+                    $existingUser = User::where('email', $mappedData['email'])->first();
+                    if ($existingUser) {
                         $results['failed']++;
-                        $results['errors'][] = "Row " . ($index + 2) . ": User with email {$mappedData['email']} already exists.";
+                        $results['errors'][] = "Row " . ($index + 2) . ": User with email {$mappedData['email']} already exists (Member: {$existingUser->name}).";
                         continue;
                     }
 
@@ -797,14 +798,22 @@ class UserController extends Controller
                     // Generate Password if not provided
                     $password = Str::random(10);
                     
+                    // Sanitize Marital Status
+                    $validMaritalStatuses = ['single', 'married', 'divorced', 'widowed'];
+                    $maritalStatus = strtolower(trim($mappedData['marital_status'] ?? 'single'));
+                    if (!in_array($maritalStatus, $validMaritalStatuses)) {
+                        // If it contains "group" or is unrecognized, default to single or keep it null if we preferred
+                        $maritalStatus = 'single';
+                    }
+
                     // Prepare User Data
                     $userData = [
-                        'name' => $mappedData['name'],
-                        'email' => $mappedData['email'],
+                        'name' => trim($mappedData['name']),
+                        'email' => trim($mappedData['email']),
                         'password' => Hash::make($password),
                         'role' => 'user',
                         'status' => strtolower($mappedData['status'] ?? 'pending') === 'active' ? 'active' : 'pending',
-                        'phone' => $mappedData['phone'] ?? null,
+                        'phone' => trim($mappedData['phone'] ?? ''),
                         'gender' => strtolower(substr($mappedData['gender'] ?? 'male', 0, 1)) === 'f' ? 'female' : 'male',
                         'membership_code' => $mappedData['membership_code'] ?? null,
                         'address' => $mappedData['address'] ?? null,
@@ -818,7 +827,7 @@ class UserController extends Controller
                         'bank_account_number' => $mappedData['bank_account'] ?? null,
                         'date_of_birth' => !empty($mappedData['date_of_birth']) ? date('Y-m-d', strtotime($mappedData['date_of_birth'])) : null,
                         'national_id' => $mappedData['national_id'] ?? null,
-                        'marital_status' => strtolower($mappedData['marital_status'] ?? 'single'),
+                        'marital_status' => $maritalStatus,
                         'member_number' => 'MEM-' . strtoupper(Str::random(8)),
                         'application_date' => now(),
                     ];
