@@ -82,6 +82,35 @@
             </table>
         </div>
 
+        <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #015425;">
+            <h2 style="margin-top: 0; color: #015425;">Payment Method Details</h2>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 8px 0; font-weight: bold; width: 40%;">Method:</td>
+                    <td style="padding: 8px 0;">{{ $paymentConfirmation->payment_method === 'bank' ? 'Bank Transfer' : 'Mobile Money' }}</td>
+                </tr>
+                @if($paymentConfirmation->payment_method === 'bank')
+                <tr>
+                    <td style="padding: 8px 0; font-weight: bold;">Bank Account Number:</td>
+                    <td style="padding: 8px 0;">{{ $paymentConfirmation->bank_account_number }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; font-weight: bold;">Confirmation:</td>
+                    <td style="padding: 8px 0;">{{ $paymentConfirmation->bank_account_confirmation }}</td>
+                </tr>
+                @elseif($paymentConfirmation->payment_method === 'mobile')
+                <tr>
+                    <td style="padding: 8px 0; font-weight: bold;">Provider:</td>
+                    <td style="padding: 8px 0;">{{ ucfirst($paymentConfirmation->mobile_provider) }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; font-weight: bold;">Mobile Number:</td>
+                    <td style="padding: 8px 0;">{{ $paymentConfirmation->mobile_number }}</td>
+                </tr>
+                @endif
+            </table>
+        </div>
+
         @if($paymentConfirmation->notes)
         <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
             <strong>Notes:</strong>
