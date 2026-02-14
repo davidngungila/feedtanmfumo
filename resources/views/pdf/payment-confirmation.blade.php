@@ -192,11 +192,11 @@
         </tbody>
     </table>
 
-    @if($paymentConfirmation->cash_amount > 0)
-    <div class="section-header">Njia ya Malipo ya Cash</div>
+    @if($paymentConfirmation->payment_method)
+    <div class="section-header">Maelezo ya Malipo (Payment Method)</div>
     <table class="summary-table">
         <tr>
-            <td>Njia ya Malipo</td>
+            <td>Njia iliyotumika</td>
             <td>{{ $paymentConfirmation->payment_method === 'bank' ? 'Benki (Bank Transfer)' : 'Simu ya Mkononi (Mobile Money)' }}</td>
         </tr>
         @if($paymentConfirmation->payment_method === 'bank')
@@ -206,7 +206,7 @@
         </tr>
         @else
         <tr>
-            <td>Mtandao wa Simu</td>
+            <td>Mtandao</td>
             <td>{{ ucfirst($paymentConfirmation->mobile_provider) }}</td>
         </tr>
         <tr>
