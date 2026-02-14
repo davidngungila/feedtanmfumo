@@ -256,6 +256,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('issues/tracking', [IssueController::class, 'tracking'])->name('issues.tracking');
     Route::get('issues/resolution-status', [IssueController::class, 'resolutionStatus'])->name('issues.resolution-status');
     Route::get('issues/categories', [IssueController::class, 'categories'])->name('issues.categories');
+    Route::post('issues/bulk-update', [IssueController::class, 'bulkUpdate'])->name('issues.bulk-update');
     Route::resource('issues', IssueController::class);
 
     // Reports

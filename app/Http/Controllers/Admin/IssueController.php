@@ -48,7 +48,11 @@ class IssueController extends Controller
             'high_priority' => Issue::where('priority', 'high')->orWhere('priority', 'urgent')->count(),
         ];
 
-        return view('admin.issues.index', compact('issues', 'stats'));
+        $staff = User::where('role', '!=', 'user')->orWhereHas('roles', function($q) {
+            $q->where('slug', '!=', 'member');
+        })->get();
+
+        return view('admin.issues.index', compact('issues', 'stats', 'staff'));
     }
 
     public function create()
@@ -330,5 +334,45 @@ class IssueController extends Controller
         ];
 
         return view('admin.issues.categories', compact('issues', 'categories', 'selectedCategory', 'statsByCategory', 'overallStats'));
+    }
+    /**
+     * Update multiple issues in bulk
+     */
+    public function bulkUpdate(Request $request)
+    {
+        $validated = $request->validate([
+            'issue_ids' => 'required|array',
+            'issue_ids.*' => 'exists:issues,id',
+            'action' => 'required|in:status,priority,assign',
+            'status' => 'required_if:action,status|nullable|in:pending,in_progress,resolved,closed,rejected',
+            'priority' => 'required_if:action,priority|nullable|in:low,medium,high,urgent',
+            'assigned_to' => 'required_if:action,assign|nullable|exists:users,id',
+        ]);
+
+        $issues = Issue::whereIn('id', $validated['issue_ids'])->get();
+        $updatedCount = 0;
+
+        foreach ($issues as $issue) {
+            $data = [];
+            
+            if ($validated['action'] === 'status') {
+                $data['status'] = $validated['status'];
+                if ($validated['status'] === 'resolved' && !$issue->resolved_at) {
+                    $data['resolved_at'] = now();
+                    $data['resolved_by'] = auth()->id();
+                }
+            } elseif ($validated['action'] === 'priority') {
+                $data['priority'] = $validated['priority'];
+            } elseif ($validated['action'] === 'assign') {
+                $data['assigned_to'] = $validated['assigned_to'];
+            }
+
+            if (!empty($data)) {
+                $issue->update($data);
+                $updatedCount++;
+            }
+        }
+
+        return back()->with('success', "{$updatedCount} issues updated successfully.");
     }
 }

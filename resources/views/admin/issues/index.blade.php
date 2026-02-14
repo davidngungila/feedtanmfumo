@@ -102,12 +102,68 @@
         </a>
     </div>
 
+    <!-- Bulk Actions (Hidden by default, shown when items selected) -->
+    <div id="bulkActionsBar" class="hidden bg-[#f0fdf4] border border-[#dcfce7] rounded-lg p-4 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center">
+            <span class="text-sm font-medium text-gray-700 mr-4"><span id="selectedCount">0</span> issues selected</span>
+            <button type="button" id="clearSelection" class="text-sm text-red-600 hover:underline">Clear Selection</button>
+        </div>
+        
+        <form id="bulkUpdateForm" method="POST" action="{{ route('admin.issues.bulk-update') }}" class="flex flex-wrap items-center gap-3">
+            @csrf
+            <div id="selectedIdsContainer"></div>
+            
+            <select name="action" id="bulkActionType" class="text-sm border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                <option value="">Choose Bulk Action...</option>
+                <option value="status">Update Status</option>
+                <option value="priority">Update Priority</option>
+                <option value="assign">Assign To</option>
+            </select>
+
+            <!-- Action Sub-options (Dynamic) -->
+            <div id="bulkStatusWrapper" class="hidden">
+                <select name="status" class="text-sm border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                    <option value="pending">Pending</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="resolved">Resolved</option>
+                    <option value="closed">Closed</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+
+            <div id="bulkPriorityWrapper" class="hidden">
+                <select name="priority" class="text-sm border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
+                </select>
+            </div>
+
+            <div id="bulkAssignWrapper" class="hidden">
+                <select name="assigned_to" class="text-sm border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                    <option value="">Select Staff...</option>
+                    @foreach($staff as $member)
+                        <option value="{{ $member->id }}">{{ $member->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <button type="submit" class="px-4 py-2 bg-[#015425] text-white text-sm font-bold rounded hover:bg-[#013019] transition">
+                Apply to Selected
+            </button>
+        </form>
+    </div>
+
     <!-- Issues Table -->
     <div class="bg-white rounded-lg shadow-md overflow-hidden">
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
+                        <th class="px-4 py-3 text-left">
+                            <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-[#015425] focus:ring-[#015425]">
+                        </th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Issue #</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Member</th>
@@ -121,6 +177,9 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($issues as $issue)
                         <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3">
+                                <input type="checkbox" name="issue_ids[]" value="{{ $issue->id }}" class="issue-checkbox rounded border-gray-300 text-[#015425] focus:ring-[#015425]">
+                            </td>
                             <td class="px-4 py-3 text-sm font-medium">{{ $issue->issue_number }}</td>
                             <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ \Illuminate\Support\Str::limit($issue->title, 40) }}</td>
                             <td class="px-4 py-3 text-sm">{{ $issue->user->name }}</td>
@@ -151,7 +210,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-4 py-8 text-center text-gray-500">No issues found</td>
+                            <td colspan="9" class="px-4 py-8 text-center text-gray-500">No issues found</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -162,5 +221,88 @@
         </div>
     </div>
 </div>
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.issue-checkbox');
+    const bulkBar = document.getElementById('bulkActionsBar');
+    const selectedCountSpan = document.getElementById('selectedCount');
+    const clearSelection = document.getElementById('clearSelection');
+    const bulkActionType = document.getElementById('bulkActionType');
+    const bulkStatusWrapper = document.getElementById('bulkStatusWrapper');
+    const bulkPriorityWrapper = document.getElementById('bulkPriorityWrapper');
+    const bulkAssignWrapper = document.getElementById('bulkAssignWrapper');
+    const bulkUpdateForm = document.getElementById('bulkUpdateForm');
+    const selectedIdsContainer = document.getElementById('selectedIdsContainer');
+
+    function updateBulkBar() {
+        const checked = document.querySelectorAll('.issue-checkbox:checked');
+        const count = checked.length;
+        
+        selectedCountSpan.textContent = count;
+        
+        if (count > 0) {
+            bulkBar.classList.remove('hidden');
+        } else {
+            bulkBar.classList.add('hidden');
+        }
+        
+        // Update hidden inputs for form
+        selectedIdsContainer.innerHTML = '';
+        checked.forEach(cb => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'issue_ids[]';
+            input.value = cb.value;
+            selectedIdsContainer.appendChild(input);
+        });
+    }
+
+    selectAll.addEventListener('change', function() {
+        checkboxes.forEach(cb => cb.checked = this.checked);
+        updateBulkBar();
+    });
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            if (!this.checked) selectAll.checked = false;
+            if (document.querySelectorAll('.issue-checkbox:checked').length === checkboxes.length) selectAll.checked = true;
+            updateBulkBar();
+        });
+    });
+
+    clearSelection.addEventListener('click', function() {
+        checkboxes.forEach(cb => cb.checked = false);
+        selectAll.checked = false;
+        updateBulkBar();
+    });
+
+    bulkActionType.addEventListener('change', function() {
+        const type = this.value;
+        bulkStatusWrapper.classList.add('hidden');
+        bulkPriorityWrapper.classList.add('hidden');
+        bulkAssignWrapper.classList.add('hidden');
+
+        if (type === 'status') bulkStatusWrapper.classList.remove('hidden');
+        if (type === 'priority') bulkPriorityWrapper.classList.remove('hidden');
+        if (type === 'assign') bulkAssignWrapper.classList.remove('hidden');
+    });
+
+    bulkUpdateForm.addEventListener('submit', function(e) {
+        if (!bulkActionType.value) {
+            e.preventDefault();
+            alert('Please select an action type');
+            return;
+        }
+        
+        const count = document.querySelectorAll('.issue-checkbox:checked').length;
+        if (!confirm(`Are you sure you want to update ${count} issues?`)) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+@endpush
 @endsection
 
