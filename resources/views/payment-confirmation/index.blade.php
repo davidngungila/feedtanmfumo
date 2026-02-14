@@ -510,8 +510,8 @@
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
             </svg>
         </div>
-        <h2 class="text-2xl font-bold mb-2">Uthibitisho Umepokelewa!</h2>
-        <p class="text-gray-600 mb-4">Ombi lako la malipo limewasilishwa kikamilifu. Barua pepe imetumwa kwako na kwa wasimamizi.</p>
+        <h2 class="text-2xl font-bold mb-2 text-[#015425]">Uthibitisho Umekamilika!</h2>
+        <p class="text-gray-600 mb-4">Ombi lako limepokelewa na kufanyiwa kazi. Tumekutumia muhtasari wa malipo haya kwenye barua pepe yako (E-mail) kwa ajili ya kumbukumbu zako.</p>
         <button 
             type="button" 
             onclick="location.reload()" 

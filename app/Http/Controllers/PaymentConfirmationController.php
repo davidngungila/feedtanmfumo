@@ -216,13 +216,8 @@ class PaymentConfirmationController extends Controller
             }
         }
 
-        // Validate that deposit balance is sufficient
-        if ($depositBalance < $amountToPay) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Salio la akiba halitoshi. Salio lako ni '.number_format($depositBalance, 2).' lakini unahitaji '.number_format($amountToPay, 2),
-            ], 422);
-        }
+        // Note: We removed the deposit balance check here because this is a distribution of payout/dividend,
+        // it doesn't require the user to have an existing balance in their savings account.
 
         // Get member name and type
         $memberName = $user?->name ?? '';
@@ -276,7 +271,7 @@ class PaymentConfirmationController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Uthibitisho wa malipo umewasilishwa kikamilifu!',
+            'message' => 'Hongera! Uthibitisho wako umetumwa kikamilifu. Tumekutumia barua pepe yenye maelezo ya malipo haya.',
             'payment_confirmation_id' => $paymentConfirmation->id,
         ]);
     }
