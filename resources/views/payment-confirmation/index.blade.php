@@ -522,6 +522,28 @@
     </div>
 </div>
 
+<!-- Error Modal -->
+<div class="success-modal" id="errorModal">
+    <div class="success-modal-content">
+        <div class="mb-4">
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-10 h-10 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+        </div>
+        <h2 class="text-2xl font-bold mb-2 text-gray-800">Taarifa ya Mfumo</h2>
+        <p class="text-gray-600 mb-6" id="errorModalMessage"></p>
+        <button 
+            type="button" 
+            onclick="document.getElementById('errorModal').classList.remove('active')" 
+            class="w-full py-3 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors shadow-lg"
+        >
+            Funga
+        </button>
+    </div>
+</div>
+
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -534,6 +556,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const splashScreen = document.getElementById('splashScreen');
     const splashProgress = document.getElementById('splashProgress');
     const successModal = document.getElementById('successModal');
+    const errorModal = document.getElementById('errorModal');
+    const errorModalMessage = document.getElementById('errorModalMessage');
     const submitBtn = document.getElementById('submitBtn');
 
     let memberData = null;
@@ -936,13 +960,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Validate distribution
         if (amountToPay <= 0) {
-            alert('Kiwango cha malipo lazima kiwe zaidi ya 0.');
+            showModalError('Kiwango cha malipo lazima kiwe zaidi ya 0.');
             return;
         }
 
         const cashValue = parseFloat(document.getElementById('cash_amount').value) || 0;
         if (cashValue < 0) {
-            alert('Umeweka kiasi kikubwa kuliko salio.');
+            showModalError('Umeweka kiasi kikubwa kuliko salio.');
             return;
         }
         
@@ -1105,7 +1129,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                         }
                     } else {
-                        alert(result.message || 'An error occurred. Please try again.');
+                        showModalError(result.message || 'An error occurred. Please try again.');
                     }
                 }
             }, 500);
@@ -1113,9 +1137,14 @@ document.addEventListener('DOMContentLoaded', function() {
             clearInterval(interval);
             splashScreen.classList.remove('active');
             console.error('Submission error:', error);
-            alert(error.message || 'An error occurred. Please try again.');
+            showModalError(error.message || 'An error occurred. Please try again.');
         }
     });
+
+    function showModalError(message) {
+        errorModalMessage.textContent = message;
+        errorModal.classList.add('active');
+    }
 
     function showError(elementId, message) {
         const errorElement = document.getElementById(elementId);
