@@ -11,6 +11,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use App\Models\MembershipType;
 
 class UserController extends Controller
 {
@@ -669,5 +673,228 @@ class UserController extends Controller
         $users = $query->with(['roles', 'loans', 'savingsAccounts'])->latest('updated_at')->paginate(20);
 
         return view('admin.users.activity-logs', compact('users'));
+    }
+
+    public function upload()
+    {
+        return view('admin.users.upload');
+    }
+
+    public function previewExcel(Request $request)
+    {
+        $request->validate([
+            'excel_file' => 'required|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        try {
+            $file = $request->file('excel_file');
+            $spreadsheet = IOFactory::load($file->getRealPath());
+            
+            $sheets = [];
+            foreach ($spreadsheet->getSheetNames() as $index => $name) {
+                $worksheet = $spreadsheet->getSheet($index);
+                $rows = $worksheet->toArray(null, true, true, true);
+                $headers = [];
+                if (!empty($rows)) {
+                    $firstRow = reset($rows);
+                    $headers = array_values(array_filter($firstRow));
+                }
+                
+                $sheets[] = [
+                    'index' => $index,
+                    'name' => $name,
+                    'headers' => $headers,
+                    'preview' => array_slice($rows, 0, 6)
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'sheets' => $sheets,
+                'filename' => $file->getClientOriginalName(),
+                'size' => number_format($file->getSize() / 1024, 2) . ' KB'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Excel preview error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to read Excel file: ' . $e->getMessage()
+            ], 400);
+        }
+    }
+
+    public function processUpload(Request $request)
+    {
+        $request->validate([
+            'excel_file' => 'required|mimes:xlsx,xls,csv|max:10240',
+            'sheet_index' => 'required',
+            'column_mapping' => 'required'
+        ]);
+
+        try {
+            $file = $request->file('excel_file');
+            $spreadsheet = IOFactory::load($file->getRealPath());
+            
+            $sheetIndex = (int)$request->sheet_index;
+            $worksheet = $spreadsheet->getSheet($sheetIndex);
+            $rows = $worksheet->toArray(null, true, true, true);
+            
+            if (count($rows) < 2) {
+                return response()->json(['success' => false, 'message' => 'The selected sheet has no data.'], 400);
+            }
+
+            $columnMapping = json_decode($request->column_mapping, true);
+            $headers = array_shift($rows); // First row is headers
+            
+            $results = [
+                'total' => count($rows),
+                'success' => 0,
+                'failed' => 0,
+                'errors' => []
+            ];
+
+            $membershipTypes = MembershipType::all();
+
+            foreach ($rows as $index => $row) {
+                try {
+                    // Skip empty rows
+                    if (empty(array_filter($row))) continue;
+
+                    $mappedData = [];
+                    foreach ($columnMapping as $dbField => $excelCol) {
+                        if ($excelCol && isset($row[$excelCol])) {
+                            $mappedData[$dbField] = $row[$excelCol];
+                        }
+                    }
+
+                    // Basic Validation
+                    if (empty($mappedData['name']) || empty($mappedData['email'])) {
+                        $results['failed']++;
+                        $results['errors'][] = "Row " . ($index + 2) . ": Name and Email are required.";
+                        continue;
+                    }
+
+                    // Check if user exists
+                    if (User::where('email', $mappedData['email'])->exists()) {
+                        $results['failed']++;
+                        $results['errors'][] = "Row " . ($index + 2) . ": User with email {$mappedData['email']} already exists.";
+                        continue;
+                    }
+
+                    DB::beginTransaction();
+
+                    // Map Membership Type
+                    if (!empty($mappedData['membership_type'])) {
+                        $typeName = trim($mappedData['membership_type']);
+                        $mType = $membershipTypes->first(function($t) use ($typeName) {
+                            return strcasecmp($t->name, $typeName) === 0 || strcasecmp($t->slug, $typeName) === 0;
+                        });
+                        if ($mType) {
+                            $mappedData['membership_type_id'] = $mType->id;
+                        }
+                    }
+
+                    // Generate Password if not provided
+                    $password = Str::random(10);
+                    
+                    // Prepare User Data
+                    $userData = [
+                        'name' => $mappedData['name'],
+                        'email' => $mappedData['email'],
+                        'password' => Hash::make($password),
+                        'role' => 'user',
+                        'status' => strtolower($mappedData['status'] ?? 'pending') === 'active' ? 'active' : 'pending',
+                        'phone' => $mappedData['phone'] ?? null,
+                        'gender' => strtolower(substr($mappedData['gender'] ?? 'male', 0, 1)) === 'f' ? 'female' : 'male',
+                        'membership_code' => $mappedData['membership_code'] ?? null,
+                        'address' => $mappedData['address'] ?? null,
+                        'membership_type_id' => $mappedData['membership_type_id'] ?? null,
+                        'number_of_shares' => (int)($mappedData['number_of_shares'] ?? 0),
+                        'entrance_fee' => (float)($mappedData['entrance_fee'] ?? 0),
+                        'capital_contribution' => (float)($mappedData['capital_contribution'] ?? 0),
+                        'capital_outstanding' => (float)($mappedData['capital_outstanding'] ?? ($mappedData['capital_contribution'] ?? 0)),
+                        'membership_interest_percentage' => (float)($mappedData['interest_percentage'] ?? 0),
+                        'bank_name' => $mappedData['bank_info'] ?? null,
+                        'bank_account_number' => $mappedData['bank_account'] ?? null,
+                        'date_of_birth' => !empty($mappedData['date_of_birth']) ? date('Y-m-d', strtotime($mappedData['date_of_birth'])) : null,
+                        'national_id' => $mappedData['national_id'] ?? null,
+                        'marital_status' => strtolower($mappedData['marital_status'] ?? 'single'),
+                        'member_number' => 'MEM-' . strtoupper(Str::random(8)),
+                        'application_date' => now(),
+                    ];
+
+                    $user = User::create($userData);
+                    
+                    // Assign 'member' role if it exists
+                    $memberRole = Role::where('slug', 'member')->first();
+                    if ($memberRole) {
+                        $user->roles()->sync([$memberRole->id]);
+                    }
+
+                    DB::commit();
+                    $results['success']++;
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    $results['failed']++;
+                    $results['errors'][] = "Row " . ($index + 2) . ": " . $e->getMessage();
+                    Log::error("Bulk import row error: " . $e->getMessage());
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'results' => $results,
+                'message' => "Successfully imported {$results['success']} members."
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Bulk import process error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred during processing: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function downloadSample()
+    {
+        $headers = [
+            'Time', 'Name of Member', 'Members\' email', 'Gender', 'Membership Code', 
+            'Adress of Applicant', 'Type of Membership', 'Number of Shares', 'Entrance Fee', 
+            'Capital Contrbution', 'Capital Outstanding', 'Status of Membership', 'Members\' Address', 
+            'Date', 'Percentage of Membership interest', 'Gender_Word', 'Phone Number', 
+            'Bank & Branch Name', 'Bank Account Number', 'BIRTH DATE', 'NIDA', 'MARITAL STATUS'
+        ];
+
+        $filename = "bulk_member_upload_sample.csv";
+        $handle = fopen('php://output', 'w');
+        
+        header('Content-Type: text/csv');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        
+        fputcsv($handle, $headers);
+        
+        // Add a sample row
+        fputcsv($handle, [
+            now()->format('Y-m-d H:i:s'), 'John Doe', 'john.doe@example.com', 'Male', 'MEM001',
+            '123 Street, City', 'Ordinary', '10', '10000', '50000', '50000', 'Active', '123 Street, City',
+            now()->format('Y-m-d'), '10.5', 'Male', '255712345678', 'NMB Bank', '1234567890', '1990-01-01', '12345-67890-12345-1', 'Single'
+        ]);
+        
+        fclose($handle);
+        exit;
+    }
+
+    private function findColumnIndex($headers, $searchTerms)
+    {
+        foreach ($headers as $index => $header) {
+            $header = strtolower(trim($header));
+            foreach ($searchTerms as $term) {
+                if ($header === strtolower($term) || str_contains($header, strtolower($term))) {
+                    return $index;
+                }
+            }
+        }
+        return false;
     }
 }

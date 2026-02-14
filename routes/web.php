@@ -218,6 +218,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('users/status', [UserController::class, 'status'])->name('users.status');
     Route::get('users/groups', [UserController::class, 'groups'])->name('users.groups');
     Route::get('users/kyc', [UserController::class, 'kyc'])->name('users.kyc');
+    Route::get('users/upload', [UserController::class, 'upload'])->name('users.upload');
+    Route::post('users/process-upload', [UserController::class, 'processUpload'])->name('users.process-upload');
+    Route::post('users/preview-excel', [UserController::class, 'previewExcel'])->name('users.preview-excel');
+    Route::get('users/download-sample', [UserController::class, 'downloadSample'])->name('users.download-sample');
     Route::get('users/history', [UserController::class, 'history'])->name('users.history');
 
     // Officials & Staff
