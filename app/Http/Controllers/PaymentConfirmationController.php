@@ -67,6 +67,13 @@ class PaymentConfirmationController extends Controller
                     'deposit_balance' => number_format($depositBalance, 2),
                     'deposit_balance_raw' => $depositBalance,
                     'amount_to_pay' => $paymentConfirmation->amount_to_pay,
+                    'swf_contribution' => $paymentConfirmation->swf_contribution,
+                    're_deposit' => $paymentConfirmation->re_deposit,
+                    'fia_investment' => $paymentConfirmation->fia_investment,
+                    'fia_type' => $paymentConfirmation->fia_type,
+                    'capital_contribution' => $paymentConfirmation->capital_contribution,
+                    'loan_repayment' => $paymentConfirmation->loan_repayment,
+                    'fine_penalty' => $paymentConfirmation->fine_penalty,
                     'has_existing_confirmation' => true,
                 ],
             ]);
@@ -117,6 +124,7 @@ class PaymentConfirmationController extends Controller
             'fia_type' => 'nullable|in:4_year,6_year',
             'capital_contribution' => 'nullable|numeric|min:0',
             'loan_repayment' => 'nullable|numeric|min:0',
+            'fine_penalty' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string|max:1000',
             'payment_method' => 'required|in:bank,mobile',
             'mobile_provider' => 'required_if:payment_method,mobile|in:mpesa,halotel',
@@ -160,15 +168,16 @@ class PaymentConfirmationController extends Controller
         $fiaInvestment = (float) ($request->input('fia_investment') ?? 0);
         $capitalContribution = (float) ($request->input('capital_contribution') ?? 0);
         $loanRepayment = (float) ($request->input('loan_repayment') ?? 0);
+        $finePenalty = (float) ($request->input('fine_penalty') ?? 0);
 
-        $totalDistribution = $swfContribution + $reDeposit + $fiaInvestment + $capitalContribution + $loanRepayment;
+        $totalDistribution = $swfContribution + $reDeposit + $fiaInvestment + $capitalContribution + $loanRepayment + $finePenalty;
         $amountToPay = (float) $request->input('amount_to_pay');
 
-        // Validate that total distribution equals amount to pay
-        if (abs($totalDistribution - $amountToPay) > 0.01) {
+        // Validate that total distribution does not exceed amount to pay
+        if ($totalDistribution > $amountToPay) {
             return response()->json([
                 'success' => false,
-                'message' => 'Total distribution ('.number_format($totalDistribution, 2).') must equal the amount to be paid ('.number_format($amountToPay, 2).')',
+                'message' => 'Mgawanyo ('.number_format($totalDistribution, 2).') hauwezi kuzidi kiwango cha gawio ('.number_format($amountToPay, 2).')',
             ], 422);
         }
 
@@ -192,7 +201,7 @@ class PaymentConfirmationController extends Controller
         if ($depositBalance < $amountToPay) {
             return response()->json([
                 'success' => false,
-                'message' => 'Insufficient deposit balance. Your balance is '.number_format($depositBalance, 2).' but you need '.number_format($amountToPay, 2),
+                'message' => 'Salio la akiba halitoshi. Salio lako ni '.number_format($depositBalance, 2).' lakini unahitaji '.number_format($amountToPay, 2),
             ], 422);
         }
 
@@ -229,6 +238,7 @@ class PaymentConfirmationController extends Controller
             'fia_type' => $request->input('fia_type'),
             'capital_contribution' => $capitalContribution,
             'loan_repayment' => $loanRepayment,
+            'fine_penalty' => $finePenalty,
             'member_email' => $request->input('member_email'),
             'notes' => $request->input('notes'),
             'payment_method' => $request->input('payment_method'),
@@ -247,7 +257,7 @@ class PaymentConfirmationController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Payment confirmation submitted successfully!',
+            'message' => 'Uthibitisho wa malipo umewasilishwa kikamilifu!',
             'payment_confirmation_id' => $paymentConfirmation->id,
         ]);
     }

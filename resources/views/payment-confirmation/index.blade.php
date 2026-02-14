@@ -228,20 +228,20 @@
 <div class="payment-container">
     <div class="payment-card">
         <div class="text-center mb-6">
-            <h1 class="text-3xl font-bold text-[#015425] mb-2">Payment Confirmation</h1>
-            <p class="text-sm text-gray-600">Confirm your payment distribution from deposit balance</p>
+            <h1 class="text-3xl font-bold text-[#015425] mb-2">Uthibitishaji wa Malipo</h1>
+            <p class="text-sm text-gray-600">Thibitisha mgawanyo wa malipo yako</p>
         </div>
 
         <!-- Member ID Lookup Section -->
         <div id="lookupSection">
             <div class="input-group">
-                <label for="member_id" class="input-label">Member ID</label>
+                <label for="member_id" class="input-label">Namba ya Uanachama (Member ID)</label>
                 <input 
                     type="text" 
                     id="member_id" 
                     name="member_id" 
                     class="input-field" 
-                    placeholder="Enter your Member ID"
+                    placeholder="Weka namba yako ya uanachama"
                     required
                 >
                 <div id="member_id_error" class="error-message"></div>
@@ -251,16 +251,20 @@
                 id="lookupBtn" 
                 class="btn-submit"
             >
-                Lookup Member
+                Tafuta Mwanachama
             </button>
         </div>
 
         <!-- Member Info Display -->
         <div id="memberInfo" style="display: none;">
-            <div class="balance-display">
-                <div class="text-sm mb-2">Member Information</div>
+            <div class="balance-display text-center">
+                <!-- <div class="text-sm mb-2">Taarifa za Mwanachama</div> -->
                 <div class="text-2xl font-bold mb-1" id="memberName"></div>
-                <div class="text-sm opacity-90" id="memberDetails"></div>
+                <!-- <div class="text-sm opacity-90" id="memberDetails"></div> -->
+                <div class="mt-4 pt-4 border-t border-white/20">
+                    <div class="text-sm opacity-90 uppercase tracking-wide">Hongera Gawio lako ni</div>
+                    <div class="text-4xl font-extrabold mt-1">TZS <span id="gawioAmount">0.00</span></div>
+                </div>
             </div>
 
             <!-- Payment Form -->
@@ -268,157 +272,126 @@
                 <input type="hidden" id="user_id" name="user_id">
                 <input type="hidden" id="member_id_hidden" name="member_id">
                 
-                <div class="mb-4">
-                    <label for="amount_to_pay" class="input-label">Amount to be Paid (2026)</label>
-                    <input 
-                        type="number" 
-                        id="amount_to_pay" 
-                        name="amount_to_pay" 
-                        class="input-field" 
-                        placeholder="Enter amount to be paid"
-                        step="0.01"
-                        min="0.01"
-                        required
-                    >
-                    <div id="amount_to_pay_error" class="error-message"></div>
-                </div>
-
-                <div class="mb-4">
-                    <label for="member_email" class="input-label">Your Email Address</label>
+                <!-- Hidden Amount Input as it is displayed in header -->
+                <input type="hidden" id="amount_to_pay" name="amount_to_pay">
+                
+                <div class="mb-6">
+                    <label for="member_email" class="input-label">Barua Pepe (Email)</label>
                     <input 
                         type="email" 
                         id="member_email" 
                         name="member_email" 
                         class="input-field" 
-                        placeholder="Enter your email address"
+                        placeholder="Weka barua pepe yako"
                         required
                     >
                     <div id="member_email_error" class="error-message"></div>
                 </div>
 
-                <div class="mb-4">
-                    <div class="text-lg font-semibold mb-3 text-[#015425]">Payment Distribution</div>
-                    <div class="text-sm text-gray-600 mb-4">Select one or more options. Total must equal Amount to be Paid.</div>
+                <!-- SECTION 1: Madeni unayo daiwa -->
+                <div class="mb-8 p-4 bg-red-50 rounded-lg border border-red-100">
+                    <div class="text-lg font-bold mb-3 text-red-800 border-b border-red-200 pb-2">Madeni unayo daiwa</div>
                     
-                    <!-- SWF Contribution -->
+                    <!-- SWF -->
                     <div class="distribution-item">
                         <label class="flex items-center gap-2 mb-2 cursor-pointer">
                             <input type="checkbox" id="enable_swf" class="w-4 h-4 text-[#015425]">
-                            <span class="font-semibold">Contribute SWF (Social Welfare Fund)</span>
+                            <span class="font-semibold">Social Welfare (SWF)</span>
                         </label>
-                        <input 
-                            type="number" 
-                            id="swf_contribution" 
-                            name="swf_contribution" 
-                            class="input-field" 
-                            placeholder="0.00"
-                            step="0.01"
-                            min="0"
-                            disabled
-                        >
+                        <input type="number" id="swf_contribution" name="swf_contribution" class="input-field" placeholder="0.00" step="0.01" min="0" disabled>
                     </div>
 
-                    <!-- Re-deposit -->
+                    <!-- Loan -->
+                    <div class="distribution-item">
+                        <label class="flex items-center gap-2 mb-2 cursor-pointer">
+                            <input type="checkbox" id="enable_loan" class="w-4 h-4 text-[#015425]">
+                            <span class="font-semibold">Rejesho la Mkopo</span>
+                        </label>
+                        <input type="number" id="loan_repayment" name="loan_repayment" class="input-field" placeholder="0.00" step="0.01" min="0" disabled>
+                    </div>
+
+                    <!-- Capital -->
+                    <div class="distribution-item">
+                        <label class="flex items-center gap-2 mb-2 cursor-pointer">
+                            <input type="checkbox" id="enable_capital" class="w-4 h-4 text-[#015425]">
+                            <span class="font-semibold">Hisa FeedTan</span>
+                        </label>
+                        <input type="number" id="capital_contribution" name="capital_contribution" class="input-field" placeholder="0.00" step="0.01" min="0" disabled>
+                    </div>
+
+                    <!-- Fine -->
+                    <div class="distribution-item">
+                        <label class="flex items-center gap-2 mb-2 cursor-pointer">
+                            <input type="checkbox" id="enable_fine" class="w-4 h-4 text-[#015425]">
+                            <span class="font-semibold">Fine/Penalty</span>
+                        </label>
+                        <input type="number" id="fine_penalty" name="fine_penalty" class="input-field" placeholder="0.00" step="0.01" min="0" disabled>
+                    </div>
+
+                    <!-- Total Deductions Display -->
+                    <div class="flex justify-between items-center font-bold text-red-800 mt-2">
+                        <span>Jumla ya Madeni:</span>
+                        <span id="totalDeductions">0.00</span>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: Kiasi Kilichobaki -->
+                <div class="mb-8 p-4 bg-green-50 rounded-lg border border-green-100 text-center">
+                    <div class="text-sm font-semibold text-green-800 uppercase">Kiasi Kilichobaki</div>
+                    <div class="text-3xl font-bold text-green-900 mt-1" id="remainingBalanceDisplay">TZS 0.00</div>
+                    <div class="text-xs text-green-700 mt-1">Hiki ndicho kiasi unachoweza kugawa hapa chini</div>
+                </div>
+
+                <!-- SECTION 3: Mgawanyo wa Salio -->
+                <div class="mb-4">
+                    <div class="text-lg font-bold mb-3 text-[#015425] border-b border-[#015425]/20 pb-2">Sasa unaweza gawa Kiasi kinachobaki utakavyo</div>
+                    <p class="text-sm text-gray-600 mb-4 bg-blue-50 p-3 rounded border-l-4 border-blue-500">
+                        Tunashauri weka 20%-30% au zaidi kama akiba. Endelea na mgawanyo.
+                    </p>
+
+                    <!-- Akiba (Re-deposit) -->
                     <div class="distribution-item">
                         <label class="flex items-center gap-2 mb-2 cursor-pointer">
                             <input type="checkbox" id="enable_re_deposit" class="w-4 h-4 text-[#015425]">
-                            <span class="font-semibold">Re-deposit Again</span>
+                            <span class="font-semibold">Akiba (Ongeza kwenye Akiba yako)</span>
                         </label>
-                        <input 
-                            type="number" 
-                            id="re_deposit" 
-                            name="re_deposit" 
-                            class="input-field" 
-                            placeholder="0.00"
-                            step="0.01"
-                            min="0"
-                            disabled
-                        >
+                        <input type="number" id="re_deposit" name="re_deposit" class="input-field" placeholder="0.00" step="0.01" min="0" disabled>
                     </div>
 
                     <!-- FIA Investment -->
                     <div class="distribution-item">
                         <label class="flex items-center gap-2 mb-2 cursor-pointer">
                             <input type="checkbox" id="enable_fia" class="w-4 h-4 text-[#015425]">
-                            <span class="font-semibold">Invest in FIA</span>
+                            <span class="font-semibold">Uwekezaji (Vipande FIA)</span>
                         </label>
                         <select id="fia_type" name="fia_type" class="input-field mb-2" disabled>
-                            <option value="">Select FIA Type</option>
-                            <option value="4_year">4 Year Investment</option>
-                            <option value="6_year">6 Year Investment</option>
+                            <option value="">Chagua Aina ya FIA</option>
+                            <option value="4_year">Uwekezaji wa Miaka 4</option>
+                            <option value="6_year">Uwekezaji wa Miaka 6</option>
                         </select>
-                        <input 
-                            type="number" 
-                            id="fia_investment" 
-                            name="fia_investment" 
-                            class="input-field" 
-                            placeholder="0.00"
-                            step="0.01"
-                            min="0"
-                            disabled
-                        >
+                        <input type="number" id="fia_investment" name="fia_investment" class="input-field" placeholder="0.00" step="0.01" min="0" disabled>
                     </div>
 
-                    <!-- Capital Contribution -->
-                    <div class="distribution-item">
-                        <label class="flex items-center gap-2 mb-2 cursor-pointer">
-                            <input type="checkbox" id="enable_capital" class="w-4 h-4 text-[#015425]">
-                            <span class="font-semibold">Contribute Capital (Share)</span>
-                        </label>
-                        <input 
-                            type="number" 
-                            id="capital_contribution" 
-                            name="capital_contribution" 
-                            class="input-field" 
-                            placeholder="0.00"
-                            step="0.01"
-                            min="0"
-                            disabled
-                        >
-                    </div>
-
-                    <!-- Loan Repayment -->
-                    <div class="distribution-item">
-                        <label class="flex items-center gap-2 mb-2 cursor-pointer">
-                            <input type="checkbox" id="enable_loan" class="w-4 h-4 text-[#015425]">
-                            <span class="font-semibold">Loan Repayment</span>
-                        </label>
-                        <input 
-                            type="number" 
-                            id="loan_repayment" 
-                            name="loan_repayment" 
-                            class="input-field" 
-                            placeholder="0.00"
-                            step="0.01"
-                            min="0"
-                            disabled
-                        >
-                    </div>
-                </div>
-
-                <div class="total-display" id="totalDisplay">
-                    <div class="flex justify-between items-center">
-                        <span>Total Distribution:</span>
-                        <span id="totalAmount">0.00</span>
-                    </div>
-                    <div class="flex justify-between items-center mt-2">
-                        <span>Amount to be Paid:</span>
-                        <span id="amountToPayDisplay">0.00</span>
-                    </div>
-                    <div class="flex justify-between items-center mt-2 font-bold text-lg" id="differenceDisplay">
-                        <span>Difference:</span>
-                        <span id="differenceAmount">0.00</span>
+                    <!-- Cash (Remaining) -->
+                    <div class="distribution-item bg-green-100 border-green-300">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-lg text-green-900">Cash (Furahia pesa yako)</span>
+                            <span class="text-xs bg-green-200 text-green-800 px-2 py-1 rounded">Hii itatumwa kwako</span>
+                        </div>
+                        <div class="text-2xl font-bold text-green-800 text-right" id="cashAmountDisplay">TZS 0.00</div>
+                        <input type="hidden" id="cash_amount" name="cash_amount">
+                        <div id="cash_error" class="error-message text-right"></div>
                     </div>
                 </div>
 
                 <!-- Payment Method Section -->
                 <div class="mb-4 mt-6 pt-6 border-t border-gray-200">
-                    <div class="text-lg font-semibold mb-3 text-[#015425]">Payment Method</div>
-                    <div class="text-sm text-gray-600 mb-4">Select how you want to receive payment</div>
+                    <div class="text-lg font-semibold mb-3 text-[#015425]">Njia ya Malipo</div>
+                    <div class="text-sm text-gray-600 mb-4">Chagua njia unayotaka kupokea Cash yako</div>
                     
                     <!-- Payment Method Selection -->
                     <div class="mb-4">
-                        <label class="input-label">Select Payment Method</label>
+                        <label class="input-label">Chagua Njia ya Malipo</label>
                         <div class="flex gap-4">
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input 
@@ -429,7 +402,7 @@
                                     class="w-4 h-4 text-[#015425]"
                                     required
                                 >
-                                <span>Bank Transfer</span>
+                                <span>Benki (Bank Transfer)</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer">
                                 <input 
@@ -440,7 +413,7 @@
                                     class="w-4 h-4 text-[#015425]"
                                     required
                                 >
-                                <span>Mobile Money</span>
+                                <span>Simu ya Mkononi (Mobile Money)</span>
                             </label>
                         </div>
                         <div id="payment_method_error" class="error-message"></div>
@@ -460,13 +433,13 @@
                             <div id="bank_account_number_error" class="error-message"></div>
                         </div>
                         <div class="mb-4">
-                            <label for="bank_account_confirmation" class="input-label">Confirm Bank Account Number</label>
+                            <label for="bank_account_confirmation" class="input-label">Thibitisha Namba ya Akaunti</label>
                             <input 
                                 type="text" 
                                 id="bank_account_confirmation" 
                                 name="bank_account_confirmation" 
                                 class="input-field" 
-                                placeholder="Re-enter your bank account number"
+                                placeholder="Ingiza tena namba ya akaunti"
                             >
                             <div id="bank_account_confirmation_error" class="error-message"></div>
                         </div>
@@ -475,13 +448,13 @@
                     <!-- Mobile Money Fields -->
                     <div id="mobileFields" style="display: none;">
                         <div class="mb-4">
-                            <label for="mobile_provider" class="input-label">Mobile Money Provider</label>
+                            <label for="mobile_provider" class="input-label">Mtandao wa Simu</label>
                             <select 
                                 id="mobile_provider" 
                                 name="mobile_provider" 
                                 class="input-field"
                             >
-                                <option value="">Select Provider</option>
+                                <option value="">Chagua Mtandao</option>
                                 <option value="mpesa">M-Pesa</option>
                                 <option value="halotel">Halotel</option>
                             </select>
@@ -494,23 +467,23 @@
                                 id="mobile_number" 
                                 name="mobile_number" 
                                 class="input-field" 
-                                placeholder="Enter your mobile number (e.g., 0712345678)"
+                                placeholder="Weka namba yako ya simu (mfano: 0712345678)"
                                 maxlength="20"
                             >
-                            <div class="text-xs text-gray-600 mt-1">Enter your mobile number without country code</div>
+                            <div class="text-xs text-gray-600 mt-1">Weka namba bila kodi ya nchi</div>
                             <div id="mobile_number_error" class="error-message"></div>
                         </div>
                     </div>
                 </div>
 
                 <div class="mt-4">
-                    <label for="notes" class="input-label">Notes (Optional)</label>
+                    <label for="notes" class="input-label">Maelezo ya Ziada (Hiari)</label>
                     <textarea 
                         id="notes" 
                         name="notes" 
                         class="input-field" 
                         rows="3"
-                        placeholder="Any additional notes or comments..."
+                        placeholder="Andika maelezo yoyote ya ziada..."
                     ></textarea>
                 </div>
 
@@ -520,7 +493,7 @@
                     class="btn-submit mt-6"
                     disabled
                 >
-                    Submit Payment Confirmation
+                    Thibitisha Malipo
                 </button>
             </form>
         </div>
@@ -530,7 +503,7 @@
 <!-- Splash Screen -->
 <div class="splash-screen" id="splashScreen">
     <div class="splash-progress" id="splashProgress">0%</div>
-    <div class="splash-message" id="splashMessage">Processing your payment confirmation...</div>
+    <div class="splash-message" id="splashMessage">Tunashughulikia ombi lako...</div>
 </div>
 
 <!-- Success Modal -->
@@ -541,14 +514,14 @@
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
             </svg>
         </div>
-        <h2 class="text-2xl font-bold mb-2">Payment Confirmation Successful!</h2>
-        <p class="text-gray-600 mb-4">Your payment confirmation has been submitted successfully. An email has been sent to you and the administrators.</p>
+        <h2 class="text-2xl font-bold mb-2">Uthibitisho Umepokelewa!</h2>
+        <p class="text-gray-600 mb-4">Ombi lako la malipo limewasilishwa kikamilifu. Barua pepe imetumwa kwako na kwa wasimamizi.</p>
         <button 
             type="button" 
             onclick="location.reload()" 
             class="btn-submit"
         >
-            Submit Another Confirmation
+            Wasilisha Nyingine
         </button>
     </div>
 </div>
@@ -605,16 +578,42 @@ document.addEventListener('DOMContentLoaded', function() {
                 // If there's an existing payment confirmation with amount_to_pay, pre-fill it
                 if (memberData.amount_to_pay) {
                     document.getElementById('amount_to_pay').value = memberData.amount_to_pay;
+                    document.getElementById('gawioAmount').textContent = parseFloat(memberData.amount_to_pay).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
                 }
+
+                // Pre-fill distribution fields if available
+                const fields = [
+                    { key: 'swf_contribution', id: 'swf_contribution', check: 'enable_swf' },
+                    { key: 're_deposit', id: 're_deposit', check: 'enable_re_deposit' },
+                    { key: 'fia_investment', id: 'fia_investment', check: 'enable_fia' },
+                    { key: 'capital_contribution', id: 'capital_contribution', check: 'enable_capital' },
+                    { key: 'loan_repayment', id: 'loan_repayment', check: 'enable_loan' },
+                    { key: 'fine_penalty', id: 'fine_penalty', check: 'enable_fine' }
+                ];
+
+                fields.forEach(field => {
+                    const value = parseFloat(memberData[field.key]) || 0;
+                    if (value > 0) {
+                        document.getElementById(field.check).checked = true;
+                        const input = document.getElementById(field.id);
+                        input.disabled = false;
+                        input.value = value;
+                        
+                        // Handle FIA type special case if needed
+                        if (field.key === 'fia_investment' && memberData.fia_type) {
+                            const fiaSelect = document.getElementById('fia_type');
+                            fiaSelect.disabled = false;
+                            fiaSelect.value = memberData.fia_type;
+                        }
+                    }
+                });
 
                 lookupSection.style.display = 'none';
                 memberInfo.style.display = 'block';
                 paymentForm.style.display = 'block';
                 
-                // Update total if amount_to_pay was pre-filled
-                if (memberData.amount_to_pay) {
-                    updateTotal();
-                }
+                // Update total immediately
+                updateTotal();
             } else {
                 showError('member_id_error', data.message || 'Member not found');
             }
@@ -627,12 +626,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Enable/disable distribution inputs
-    ['swf', 're_deposit', 'fia', 'capital', 'loan'].forEach(type => {
+    ['swf', 're_deposit', 'fia', 'capital', 'loan', 'fine'].forEach(type => {
         const checkbox = document.getElementById(`enable_${type}`);
         const input = document.getElementById(type === 'swf' ? 'swf_contribution' : 
                                                type === 're_deposit' ? 're_deposit' :
                                                type === 'fia' ? 'fia_investment' :
-                                               type === 'capital' ? 'capital_contribution' : 'loan_repayment');
+                                               type === 'capital' ? 'capital_contribution' : 
+                                               type === 'loan' ? 'loan_repayment' : 'fine_penalty');
         const select = type === 'fia' ? document.getElementById('fia_type') : null;
 
         checkbox.addEventListener('change', function() {
@@ -647,8 +647,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Update total on input change
-    ['amount_to_pay', 'swf_contribution', 're_deposit', 'fia_investment', 'capital_contribution', 'loan_repayment'].forEach(id => {
-        document.getElementById(id).addEventListener('input', updateTotal);
+    ['amount_to_pay', 'swf_contribution', 're_deposit', 'fia_investment', 'capital_contribution', 'loan_repayment', 'fine_penalty'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', updateTotal);
     });
 
     // Payment method selection handlers
@@ -834,29 +835,41 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateTotal() {
         const amountToPay = parseFloat(document.getElementById('amount_to_pay').value) || 0;
+        
+        // Madeni (Deductions)
         const swf = parseFloat(document.getElementById('swf_contribution').value) || 0;
+        const loan = parseFloat(document.getElementById('loan_repayment').value) || 0;
+        const capital = parseFloat(document.getElementById('capital_contribution').value) || 0;
+        const fine = parseFloat(document.getElementById('fine_penalty').value) || 0;
+        
+        const totalDeductions = swf + loan + capital + fine;
+        document.getElementById('totalDeductions').textContent = `TZS ${totalDeductions.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+
+        // Remaining Balance for user to split
+        const remainingBalance = amountToPay - totalDeductions;
+        document.getElementById('remainingBalanceDisplay').textContent = `TZS ${remainingBalance.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+
+        // Allocation options
         const reDeposit = parseFloat(document.getElementById('re_deposit').value) || 0;
         const fia = parseFloat(document.getElementById('fia_investment').value) || 0;
-        const capital = parseFloat(document.getElementById('capital_contribution').value) || 0;
-        const loan = parseFloat(document.getElementById('loan_repayment').value) || 0;
-
-        const total = swf + reDeposit + fia + capital + loan;
-        const difference = amountToPay - total;
         
-        document.getElementById('amountToPayDisplay').textContent = `TZS ${amountToPay.toFixed(2)}`;
+        // Cash is the remainder of the Remaining Balance (after re-deposit and fia)
+        const cash = remainingBalance - (reDeposit + fia);
+        
+        document.getElementById('cashAmountDisplay').textContent = `TZS ${Math.max(0, cash).toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+        document.getElementById('cash_amount').value = Math.max(0, cash);
 
-        document.getElementById('totalAmount').textContent = `TZS ${total.toFixed(2)}`;
-        document.getElementById('differenceAmount').textContent = `TZS ${Math.abs(difference).toFixed(2)}`;
+        const cashError = document.getElementById('cash_error');
+        const submitBtn = document.getElementById('submitBtn');
 
-        const totalDisplay = document.getElementById('totalDisplay');
-        if (Math.abs(difference) < 0.01) {
-            totalDisplay.classList.remove('invalid');
-            totalDisplay.classList.add('valid');
+        if (cash < -0.01) { // Allowing small float error
+            cashError.textContent = 'Umeweka kiasi kikubwa kuliko salio lililobaki.';
+            submitBtn.disabled = true;
         } else {
-            totalDisplay.classList.remove('valid');
-            totalDisplay.classList.add('invalid');
+            cashError.textContent = '';
+            // Only enable if logic allows (method check called in checkFormValidity)
+            checkFormValidity();
         }
-        checkFormValidity();
     }
 
     function clearError(elementId) {
@@ -867,22 +880,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function checkFormValidity() {
+        // Calculate current values
         const amountToPay = parseFloat(document.getElementById('amount_to_pay').value) || 0;
+        
+        // Madeni
         const swf = parseFloat(document.getElementById('swf_contribution').value) || 0;
+        const loan = parseFloat(document.getElementById('loan_repayment').value) || 0;
+        const capital = parseFloat(document.getElementById('capital_contribution').value) || 0;
+        const fine = parseFloat(document.getElementById('fine_penalty').value) || 0;
+        
+        // Allocated
         const reDeposit = parseFloat(document.getElementById('re_deposit').value) || 0;
         const fia = parseFloat(document.getElementById('fia_investment').value) || 0;
-        const capital = parseFloat(document.getElementById('capital_contribution').value) || 0;
-        const loan = parseFloat(document.getElementById('loan_repayment').value) || 0;
-        const total = swf + reDeposit + fia + capital + loan;
-        const difference = Math.abs(amountToPay - total);
         
-        // Check if distribution matches amount
-        const distributionValid = difference < 0.01 && amountToPay > 0;
+        const totalAllocated = swf + loan + capital + fine + reDeposit + fia;
+        const cashValue = amountToPay - totalAllocated;
+
+        // Valid if cash is non-negative (allowing small float error)
+        const distributionValid = cashValue >= -0.01 && amountToPay > 0;
         
-        // Check payment method
-        const paymentMethodValid = validatePaymentMethod();
+        // Payment method required only if cash > 0
+        let paymentMethodValid = true;
+        if (cashValue > 0.01) {
+            paymentMethodValid = validatePaymentMethod();
+        } else {
+             // If no cash payout, method is valid (not needed)
+             // But we might want to clear errors?
+             // clearError('payment_method_error');
+             paymentMethodValid = true;
+        }
         
-        // Enable submit only if all validations pass
         submitBtn.disabled = !(distributionValid && paymentMethodValid);
     }
 
@@ -902,17 +929,24 @@ document.addEventListener('DOMContentLoaded', function() {
         const fia = parseFloat(document.getElementById('fia_investment').value) || 0;
         const capital = parseFloat(document.getElementById('capital_contribution').value) || 0;
         const loan = parseFloat(document.getElementById('loan_repayment').value) || 0;
-        const total = swf + reDeposit + fia + capital + loan;
+        const fine = parseFloat(document.getElementById('fine_penalty').value) || 0;
+        const total = swf + reDeposit + fia + capital + loan + fine;
         const difference = Math.abs(amountToPay - total);
         
         // Validate distribution
-        if (difference >= 0.01 || amountToPay <= 0) {
-            alert('Total distribution must equal the amount to be paid.');
+        if (amountToPay <= 0) {
+            alert('Kiwango cha malipo lazima kiwe zaidi ya 0.');
+            return;
+        }
+
+        const cashValue = parseFloat(document.getElementById('cash_amount').value) || 0;
+        if (cashValue < 0) {
+            alert('Umeweka kiasi kikubwa kuliko salio.');
             return;
         }
         
-        // Validate payment method
-        if (!validatePaymentMethod()) {
+        // Validate payment method only if receiving cash
+        if (cashValue > 0 && !validatePaymentMethod()) {
             // Scroll to first error
             const firstError = document.querySelector('.error-message:not(:empty)');
             if (firstError) {
@@ -938,16 +972,23 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Get payment method data
         const paymentMethod = document.querySelector('input[name="payment_method"]:checked')?.value;
-        if (!paymentMethod) {
+        
+        if (cashValue > 0 && !paymentMethod) {
             clearInterval(interval);
             splashScreen.classList.remove('active');
-            showError('payment_method_error', 'Please select a payment method');
+            showError('payment_method_error', 'Tafadhali chagua njia ya malipo');
             return;
         }
         
-        data.payment_method = paymentMethod;
+        if (!paymentMethod && cashValue <= 0) {
+             data.payment_method = 'bank'; // Dummy
+             data.bank_account_number = 'N/A';
+             data.bank_account_confirmation = 'N/A';
+        } else {
+             data.payment_method = paymentMethod;
+        }
         
-        if (paymentMethod === 'bank') {
+        if (data.payment_method === 'bank' && cashValue > 0) {
             const accountNumber = bankAccountNumber.value.trim();
             const confirmation = bankAccountConfirmation.value.trim();
             
@@ -987,6 +1028,7 @@ document.addEventListener('DOMContentLoaded', function() {
         data.fia_investment = parseFloat(data.fia_investment) || 0;
         data.capital_contribution = parseFloat(data.capital_contribution) || 0;
         data.loan_repayment = parseFloat(data.loan_repayment) || 0;
+        data.fine_penalty = parseFloat(data.fine_penalty) || 0;
         data.amount_to_pay = parseFloat(data.amount_to_pay);
 
         try {
@@ -1037,6 +1079,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 'fia_investment': 'fia_investment_error',
                                 'capital_contribution': 'capital_contribution_error',
                                 'loan_repayment': 'loan_repayment_error',
+                                'fine_penalty': 'fine_penalty_error',
                             };
                             
                             const errorElementId = fieldMap[field];

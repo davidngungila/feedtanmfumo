@@ -19,6 +19,7 @@ class PaymentConfirmation extends Model
         'fia_investment',
         'fia_type',
         'capital_contribution',
+        'fine_penalty',
         'loan_repayment',
         'member_email',
         'notes',
@@ -38,6 +39,7 @@ class PaymentConfirmation extends Model
             're_deposit' => 'decimal:2',
             'fia_investment' => 'decimal:2',
             'capital_contribution' => 'decimal:2',
+            'fine_penalty' => 'decimal:2',
             'loan_repayment' => 'decimal:2',
         ];
     }
@@ -53,6 +55,7 @@ class PaymentConfirmation extends Model
                $this->re_deposit +
                $this->fia_investment +
                $this->capital_contribution +
+               $this->fine_penalty +
                $this->loan_repayment;
     }
 }

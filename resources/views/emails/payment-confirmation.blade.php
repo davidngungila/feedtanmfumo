@@ -75,6 +75,12 @@
                     <td style="padding: 8px 0; text-align: right;">TZS {{ number_format($paymentConfirmation->loan_repayment, 2) }}</td>
                 </tr>
                 @endif
+                @if($paymentConfirmation->fine_penalty > 0)
+                <tr>
+                    <td style="padding: 8px 0; font-weight: bold;">Fine/Penalty:</td>
+                    <td style="padding: 8px 0; text-align: right;">TZS {{ number_format($paymentConfirmation->fine_penalty, 2) }}</td>
+                </tr>
+                @endif
                 <tr style="border-top: 2px solid #e5e7eb; margin-top: 10px;">
                     <td style="padding: 12px 0; font-weight: bold; font-size: 16px;">Total Distribution:</td>
                     <td style="padding: 12px 0; text-align: right; font-weight: bold; font-size: 16px; color: #015425;">TZS {{ number_format($paymentConfirmation->total_distribution, 2) }}</td>

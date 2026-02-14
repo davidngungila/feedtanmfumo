@@ -284,6 +284,35 @@ class PaymentConfirmationController extends Controller
                 'type',
             ]);
 
+            // Find distribution columns (optional)
+            $swfIndex = $this->findColumnIndex($headers, [
+                $columnMapping['swf_contribution'] ?? 'swf deduction',
+                'swf deduction',
+                'swf',
+                'social welfare',
+            ]);
+
+            $loanIndex = $this->findColumnIndex($headers, [
+                $columnMapping['loan_repayment'] ?? 'loan installment',
+                'loan installment',
+                'loan repayment',
+                'loan',
+            ]);
+
+            $capitalIndex = $this->findColumnIndex($headers, [
+                $columnMapping['capital_contribution'] ?? 'capital contribution',
+                'capital contribution',
+                'capital',
+                'share',
+            ]);
+
+            $fineIndex = $this->findColumnIndex($headers, [
+                $columnMapping['fine_penalty'] ?? 'fine/penalty',
+                'fine/penalty',
+                'fine',
+                'penalty',
+            ]);
+
             if ($memberIdIndex === null) {
                 Log::error('Member ID column not found', [
                     'headers' => $headers,
@@ -331,6 +360,10 @@ class PaymentConfirmationController extends Controller
                 'amount_index' => $amountIndex,
                 'member_name_index' => $memberNameIndex,
                 'member_type_index' => $memberTypeIndex,
+                'swf_index' => $swfIndex,
+                'loan_index' => $loanIndex,
+                'capital_index' => $capitalIndex,
+                'fine_index' => $fineIndex,
             ]);
 
             // Use a single transaction for all inserts
@@ -430,13 +463,16 @@ class PaymentConfirmationController extends Controller
                         'amount_to_pay' => $amount,
                         'deposit_balance' => round((float) $depositBalance, 2),
                         'member_email' => $user?->email ?? '',
+                        'member_email' => $user?->email ?? '',
                         'notes' => 'Imported from Excel sheet',
-                        // Initialize distribution fields to 0
-                        'swf_contribution' => 0,
-                        're_deposit' => 0,
-                        'fia_investment' => 0,
-                        'capital_contribution' => 0,
-                        'loan_repayment' => 0,
+                        
+                        // Populate distribution fields based on Excel mapping
+                        'swf_contribution' => ($swfIndex !== null && isset($row[$swfIndex])) ? $this->parseAmount($row[$swfIndex]) : 0,
+                        're_deposit' => 0, // Calculated by member
+                        'fia_investment' => 0, // Calculated by member
+                        'capital_contribution' => ($capitalIndex !== null && isset($row[$capitalIndex])) ? $this->parseAmount($row[$capitalIndex]) : 0,
+                        'loan_repayment' => ($loanIndex !== null && isset($row[$loanIndex])) ? $this->parseAmount($row[$loanIndex]) : 0,
+                        'fine_penalty' => ($fineIndex !== null && isset($row[$fineIndex])) ? $this->parseAmount($row[$fineIndex]) : 0,
                     ];
 
                     Log::debug('Creating payment confirmation', [
@@ -586,7 +622,7 @@ class PaymentConfirmationController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
 
         // Headers
-        $headers = ['S/N', 'Members Name', 'Member type', 'ID', 'Amount to be paid. 2026'];
+        $headers = ['S/N', 'Members Name', 'Member type', 'ID', 'Amount', 'SWF deduction', 'Loan installment', 'Capital contribution', 'Fine/Penalty', 'Net Payment'];
         $sheet->fromArray($headers, null, 'A1');
 
         // Style headers
@@ -598,18 +634,18 @@ class PaymentConfirmationController extends Controller
             ],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
         ];
-        $sheet->getStyle('A1:E1')->applyFromArray($headerStyle);
+        $sheet->getStyle('A1:J1')->applyFromArray($headerStyle);
 
         // Sample data
         $sampleData = [
-            [1, 'John Doe', 'Ordinary', 'MEM001', 50000],
-            [2, 'Jane Smith', 'Associate', 'MEM002', 75000],
-            [3, 'Bob Johnson', 'Ordinary', 'MEM003', 100000],
+            [1, 'John Doe', 'Ordinary', 'MEM001', 100000, 5000, 10000, 10000, 0, 75000],
+            [2, 'Jane Smith', 'Associate', 'MEM002', 200000, 10000, 20000, 20000, 5000, 145000],
+            [3, 'Bob Johnson', 'Ordinary', 'MEM003', 150000, 7500, 15000, 15000, 0, 112500],
         ];
         $sheet->fromArray($sampleData, null, 'A2');
 
         // Auto-size columns
-        foreach (range('A', 'E') as $col) {
+        foreach (range('A', 'J') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 

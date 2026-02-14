@@ -255,7 +255,7 @@
             
             <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
                 <p class="text-sm text-blue-800">
-                    <strong>Expected columns:</strong> S/N, Members Name, Member type, ID, Amount to be paid. 2026
+                    <strong>Expected columns:</strong> S/N, Members Name, Member type, ID, Amount, SWF deduction, Loan installment, Capital contribution, Fine/Penalty, Net Payment
                 </p>
             </div>
             
@@ -326,7 +326,7 @@
                     <select name="column_mapping[member_name]" 
                             id="map-member-name"
                             class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#015425] focus:ring-[#015425] py-2 px-3">
-                        <option value="">-- Select column (optional) --</option>
+                        <option value="">-- Select column --</option>
                     </select>
                 </div>
                 
@@ -337,7 +337,51 @@
                     <select name="column_mapping[member_type]" 
                             id="map-member-type"
                             class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#015425] focus:ring-[#015425] py-2 px-3">
-                        <option value="">-- Select column (optional) --</option>
+                        <option value="">-- Select column --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        SWF Deduction <span class="text-gray-400">(Optional)</span>
+                    </label>
+                    <select name="column_mapping[swf_contribution]" 
+                            id="map-swf"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#015425] focus:ring-[#015425] py-2 px-3">
+                        <option value="">-- Select column --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Loan Installment <span class="text-gray-400">(Optional)</span>
+                    </label>
+                    <select name="column_mapping[loan_repayment]" 
+                            id="map-loan"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#015425] focus:ring-[#015425] py-2 px-3">
+                        <option value="">-- Select column --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Capital Contribution <span class="text-gray-400">(Optional)</span>
+                    </label>
+                    <select name="column_mapping[capital_contribution]" 
+                            id="map-capital"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#015425] focus:ring-[#015425] py-2 px-3">
+                        <option value="">-- Select column --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Fine/Penalty <span class="text-gray-400">(Optional)</span>
+                    </label>
+                    <select name="column_mapping[fine_penalty]" 
+                            id="map-fine"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-[#015425] focus:ring-[#015425] py-2 px-3">
+                        <option value="">-- Select column --</option>
                     </select>
                 </div>
             </div>
@@ -421,6 +465,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const mapAmount = document.getElementById('map-amount');
     const mapMemberName = document.getElementById('map-member-name');
     const mapMemberType = document.getElementById('map-member-type');
+    const mapSwf = document.getElementById('map-swf');
+    const mapLoan = document.getElementById('map-loan');
+    const mapCapital = document.getElementById('map-capital');
+    const mapFine = document.getElementById('map-fine');
     const previewTableSection = document.getElementById('preview-table-section');
     const previewHeaders = document.getElementById('preview-headers');
     const previewBody = document.getElementById('preview-body');
@@ -571,9 +619,9 @@ document.addEventListener('DOMContentLoaded', function() {
         // Populate column selects
         const headers = currentSheetData.headers;
         
-        [mapMemberId, mapAmount, mapMemberName, mapMemberType].forEach(select => {
+        [mapMemberId, mapAmount, mapMemberName, mapMemberType, mapSwf, mapLoan, mapCapital, mapFine].forEach(select => {
             if (select) {
-                const isOptional = select === mapMemberName || select === mapMemberType;
+                const isOptional = select !== mapMemberId && select !== mapAmount;
                 select.innerHTML = isOptional ? '<option value="">-- Select column (optional) --</option>' : '<option value="">-- Select column --</option>';
                 headers.forEach((header, index) => {
                     const option = document.createElement('option');
@@ -776,7 +824,11 @@ document.addEventListener('DOMContentLoaded', function() {
             member_id: memberIdColumn,
             amount: amountColumn,
             member_name: memberNameColumn,
-            member_type: memberTypeColumn
+            member_type: memberTypeColumn,
+            swf_contribution: mapSwf?.value || '',
+            loan_repayment: mapLoan?.value || '',
+            capital_contribution: mapCapital?.value || '',
+            fine_penalty: mapFine?.value || ''
         };
         formColumnMapping.value = JSON.stringify(columnMapping);
         
