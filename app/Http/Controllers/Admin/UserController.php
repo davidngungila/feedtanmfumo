@@ -894,7 +894,7 @@ class UserController extends Controller
         exit;
     }
 
-    private function findColumnIndex($headers, $searchTerms)
+    public function findColumnIndex($headers, $searchTerms)
     {
         foreach ($headers as $index => $header) {
             $header = strtolower(trim($header));
@@ -905,5 +905,52 @@ class UserController extends Controller
             }
         }
         return false;
+    }
+
+    /**
+     * Bulk Generate New Passwords and send to email
+     */
+    public function bulkPasswordReset(Request $request)
+    {
+        // Only allow admins to do this
+        if (auth()->user()->role !== 'admin' && !auth()->user()->hasRole('admin')) {
+            abort(403);
+        }
+
+        // We target members primarily, or all users if requested
+        $target = $request->input('target', 'members'); // members or all
+        
+        $query = User::query();
+        if ($target === 'members') {
+            $query->where('role', 'user');
+        }
+
+        $users = $query->get();
+        $successCount = 0;
+        $failCount = 0;
+
+        $emailService = app(\App\Services\EmailNotificationService::class);
+
+        foreach ($users as $user) {
+            try {
+                $newPassword = Str::random(10);
+                $user->password = Hash::make($newPassword);
+                $user->save();
+
+                // Send Email
+                $sent = $emailService->sendBulkPasswordNotification($user, $newPassword);
+                
+                if ($sent) {
+                    $successCount++;
+                } else {
+                    $failCount++;
+                }
+            } catch (\Exception $e) {
+                Log::error("Failed to reset password for user {$user->id}: " . $e->getMessage());
+                $failCount++;
+            }
+        }
+
+        return back()->with('success', "Bulk password reset complete. Successfully sent: {$successCount}, Failed: {$failCount}.");
     }
 }

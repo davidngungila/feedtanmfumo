@@ -113,6 +113,17 @@ class PaymentConfirmationController extends Controller
 
     public function store(Request $request): \Illuminate\Http\JsonResponse
     {
+        // Pre-process nullable fields: convert empty strings to null
+        if ($request->has('user_id') && $request->input('user_id') === '') {
+            $request->merge(['user_id' => null]);
+        }
+        if ($request->has('fia_type') && $request->input('fia_type') === '') {
+            $request->merge(['fia_type' => null]);
+        }
+        if ($request->has('mobile_provider') && $request->input('mobile_provider') === '') {
+            $request->merge(['mobile_provider' => null]);
+        }
+
         $validator = Validator::make($request->all(), [
             'user_id' => 'nullable|exists:users,id',
             'member_id' => 'required|string',
@@ -127,10 +138,10 @@ class PaymentConfirmationController extends Controller
             'fine_penalty' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string|max:1000',
             'payment_method' => 'required|in:bank,mobile',
-            'mobile_provider' => 'required_if:payment_method,mobile|in:mpesa,halotel',
-            'mobile_number' => 'required_if:payment_method,mobile|string|max:20',
-            'bank_account_number' => 'required_if:payment_method,bank|string|max:50',
-            'bank_account_confirmation' => 'required_if:payment_method,bank|string|max:50|same:bank_account_number',
+            'mobile_provider' => 'required_if:payment_method,mobile|nullable|in:mpesa,halotel',
+            'mobile_number' => 'required_if:payment_method,mobile|nullable|string|max:20',
+            'bank_account_number' => 'required_if:payment_method,bank|nullable|string|max:50',
+            'bank_account_confirmation' => 'required_if:payment_method,bank|nullable|string|max:50|same:bank_account_number',
         ], [
             'payment_method.required' => 'Please select a payment method.',
             'mobile_provider.required_if' => 'Please select a mobile money provider.',

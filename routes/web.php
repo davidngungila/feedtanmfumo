@@ -56,6 +56,12 @@ Route::post('/otp/resend', [LoginController::class, 'resendOtp'])->name('otp.res
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
 
+// Password Reset Routes
+Route::get('password/reset', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('password/email', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('password/reset/{token}', [App\Http\Controllers\Auth\ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('password/reset', [App\Http\Controllers\Auth\ResetPasswordController::class, 'reset'])->name('password.update');
+
 // Protected routes
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -213,6 +219,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Users - Place specific routes before resource route
     Route::get('users/roles', [UserController::class, 'roles'])->name('users.roles');
     Route::put('users/roles/{role}', [UserController::class, 'updateRolePermissions'])->name('users.roles.update');
+    Route::post('users/bulk-password-reset', [UserController::class, 'bulkPasswordReset'])->name('users.bulk-password-reset');
     Route::get('users/directory', [UserController::class, 'directory'])->name('users.directory');
     Route::get('users/profiles', [UserController::class, 'profiles'])->name('users.profiles');
     Route::get('users/status', [UserController::class, 'status'])->name('users.status');

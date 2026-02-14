@@ -118,6 +118,15 @@
                 </svg>
                 <span class="text-sm font-medium text-gray-700 text-center">KYC</span>
             </a>
+            <form action="{{ route('admin.users.bulk-password-reset') }}" method="POST" class="col-span-1" onsubmit="return confirm('Are you sure you want to reset passwords for ALL members and send them via email?')">
+                @csrf
+                <button type="submit" class="w-full flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-red-50 hover:border-red-200 transition group">
+                    <svg class="w-8 h-8 text-red-600 mb-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                    <span class="text-sm font-medium text-red-700 text-center">Bulk Reset Passwords</span>
+                </button>
+            </form>
         </div>
     </div>
 

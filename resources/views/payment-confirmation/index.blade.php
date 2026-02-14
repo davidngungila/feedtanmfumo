@@ -960,13 +960,11 @@ document.addEventListener('DOMContentLoaded', function() {
         splashScreen.classList.add('active');
         let progress = 0;
         const interval = setInterval(() => {
-            progress += 2;
-            if (progress <= 100) {
+            if (progress < 98) {
+                progress += 2;
                 splashProgress.textContent = progress + '%';
-            } else {
-                clearInterval(interval);
             }
-        }, 50);
+        }, 100);
 
         const formData = new FormData(this);
         const data = Object.fromEntries(formData);
@@ -1037,12 +1035,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': '{{ csrf_token() }}'
                 },
                 body: JSON.stringify(data)
             });
 
-            const result = await response.json();
+            let result;
+            try {
+                result = await response.json();
+            } catch (jsonError) {
+                console.error('JSON parsing error:', jsonError);
+                throw new Error('Server returned an invalid response. Please contact the administrator.');
+            }
 
             // Complete progress
             clearInterval(interval);
@@ -1081,6 +1086,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                 'capital_contribution': 'capital_contribution_error',
                                 'loan_repayment': 'loan_repayment_error',
                                 'fine_penalty': 'fine_penalty_error',
+                                'user_id': 'member_id_error',
+                                'fia_type': 'fia_investment_error',
                             };
                             
                             const errorElementId = fieldMap[field];
@@ -1106,7 +1113,7 @@ document.addEventListener('DOMContentLoaded', function() {
             clearInterval(interval);
             splashScreen.classList.remove('active');
             console.error('Submission error:', error);
-            alert('An error occurred. Please try again.');
+            alert(error.message || 'An error occurred. Please try again.');
         }
     });
 

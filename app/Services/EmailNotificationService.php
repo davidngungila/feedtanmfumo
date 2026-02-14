@@ -1006,4 +1006,57 @@ Best regards,
             'organizationInfo' => $orgInfo,
         ])->render();
     }
+
+    /**
+     * Send bulk generated password notification
+     */
+    public function sendBulkPasswordNotification(User $user, string $password): bool
+    {
+        try {
+            $this->reloadMailConfig();
+            $orgInfo = $this->getOrganizationInfo();
+            $address = $this->getFormattedAddress();
+
+            $subject = "New Account Access - {$orgInfo['name']}";
+            
+            $message = "Dear {$user->name},
+
+Your account has been updated with a new temporary password for access to the FEEDTAN DIGITAL portal.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+LOGIN DETAILS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Email:      {$user->email}
+Password:   {$password}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+NEXT STEPS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Login to your account at: ".url('/login')."
+2. Once logged in, we recommend you change your password in the Profile settings.
+
+If you have any questions, please contact us.
+
+Best regards,
+{$orgInfo['name']}
+{$address}";
+
+            Mail::raw($message, function ($mail) use ($user, $subject, $orgInfo) {
+                $mail->to($user->email, $user->name)
+                    ->subject($subject)
+                    ->from($orgInfo['from_email'], $orgInfo['from_name']);
+            });
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Failed to send bulk password email: '.$e->getMessage());
+
+            return false;
+        }
+    }
 }
+
