@@ -20,6 +20,12 @@
                 </div>
             </div>
             <div class="mt-4 md:mt-0 md:ml-auto flex flex-wrap gap-3 justify-end">
+                <form action="{{ route('admin.users.reset-password', $user) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to reset password for this user and send to their email?')">
+                    @csrf
+                    <button type="submit" class="inline-flex items-center px-6 py-3 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition font-medium shadow-md">
+                        Reset Password
+                    </button>
+                </form>
                 <a href="{{ route('admin.users.edit', $user) }}" class="inline-flex items-center px-6 py-3 bg-white text-[#015425] rounded-md hover:bg-gray-100 transition font-medium shadow-md">
                     Edit User
                 </a>

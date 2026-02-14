@@ -953,4 +953,33 @@ class UserController extends Controller
 
         return back()->with('success', "Bulk password reset complete. Successfully sent: {$successCount}, Failed: {$failCount}.");
     }
+
+    /**
+     * Reset password for a single user and send to email
+     */
+    public function resetPassword(User $user)
+    {
+        // Only allow admins to do this
+        if (auth()->user()->role !== 'admin' && !auth()->user()->hasRole('admin')) {
+            abort(403);
+        }
+
+        try {
+            $newPassword = Str::random(10);
+            $user->password = Hash::make($newPassword);
+            $user->save();
+
+            $emailService = app(\App\Services\EmailNotificationService::class);
+            $sent = $emailService->sendBulkPasswordNotification($user, $newPassword);
+
+            if ($sent) {
+                return back()->with('success', "Password for {$user->name} has been reset and sent to their email.");
+            } else {
+                return back()->with('error', "Password reset but failed to send email to {$user->email}. New password: {$newPassword}");
+            }
+        } catch (\Exception $e) {
+            Log::error("Failed to reset password for user {$user->id}: " . $e->getMessage());
+            return back()->with('error', "An error occurred while resetting the password.");
+        }
+    }
 }
