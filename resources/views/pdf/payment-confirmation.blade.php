@@ -186,7 +186,10 @@
             </tr>
             @endif
             <tr class="amount-row">
-                <td colspan="2" class="text-right">NET PAYMENT (KIASI UNAPOKEA CASH)</td>
+                <td colspan="2" class="text-right">
+                    <strong>Cash (Furahia pesa yako)</strong><br>
+                    <small style="font-weight: normal; font-style: italic;">Hii itatumwa kwako</small>
+                </td>
                 <td class="text-right amount-text">TZS {{ number_format($paymentConfirmation->cash_amount, 2) }}</td>
             </tr>
         </tbody>
