@@ -137,7 +137,7 @@ class PaymentConfirmationController extends Controller
             'loan_repayment' => 'nullable|numeric|min:0',
             'fine_penalty' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string|max:1000',
-            'payment_method' => 'required|in:bank,mobile',
+            'payment_method' => 'nullable|in:bank,mobile',
             'mobile_provider' => 'required_if:payment_method,mobile|nullable|in:mpesa,halotel',
             'mobile_number' => 'required_if:payment_method,mobile|nullable|string|max:20',
             'bank_account_number' => 'required_if:payment_method,bank|nullable|string|max:50',
@@ -189,6 +189,14 @@ class PaymentConfirmationController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Mgawanyo ('.number_format($totalDistribution, 2).') hauwezi kuzidi kiwango cha gawio ('.number_format($amountToPay, 2).')',
+            ], 422);
+        }
+
+        // Validate payment method if there is cash remaining
+        if ($amountToPay > $totalDistribution + 0.01 && empty($request->input('payment_method'))) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tafadhali chagua njia ya malipo kwa ajili ya kupokea kiasi kilichobaki.',
             ], 422);
         }
 

@@ -386,32 +386,32 @@
                     <div class="text-sm text-gray-600 mb-4">Chagua njia unayotaka kupokea Cash yako</div>
                     
                     <!-- Payment Method Selection -->
-                    <div class="mb-4">
-                        <label class="input-label">Chagua Njia ya Malipo</label>
-                        <div class="flex gap-4">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input 
-                                    type="radio" 
-                                    name="payment_method" 
-                                    value="bank" 
-                                    id="payment_method_bank"
-                                    class="w-4 h-4 text-[#015425]"
-                                    required
-                                >
-                                <span>Benki (Bank Transfer)</span>
-                            </label>
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input 
-                                    type="radio" 
-                                    name="payment_method" 
-                                    value="mobile" 
-                                    id="payment_method_mobile"
-                                    class="w-4 h-4 text-[#015425]"
-                                    required
-                                >
-                                <span>Simu ya Mkononi (Mobile Money)</span>
-                            </label>
-                        </div>
+                <div class="flex justify-between items-center mb-2">
+                    <label class="input-label mb-0">Chagua Njia ya Malipo</label>
+                    <button type="button" id="clearPaymentMethod" class="text-xs text-red-600 hover:underline">Clear Selection</button>
+                </div>
+                <div class="flex gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input 
+                            type="radio" 
+                            name="payment_method" 
+                            value="bank" 
+                            id="payment_method_bank"
+                            class="w-4 h-4 text-[#015425]"
+                        >
+                        <span>Benki (Bank Transfer)</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input 
+                            type="radio" 
+                            name="payment_method" 
+                            value="mobile" 
+                            id="payment_method_mobile"
+                            class="w-4 h-4 text-[#015425]"
+                        >
+                        <span>Simu ya Mkononi (Mobile Money)</span>
+                    </label>
+                </div>
                         <div id="payment_method_error" class="error-message"></div>
                     </div>
 
@@ -712,6 +712,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Clear payment method selection
+    document.getElementById('clearPaymentMethod').addEventListener('click', function() {
+        paymentMethodBank.checked = false;
+        paymentMethodMobile.checked = false;
+        bankFields.style.display = 'none';
+        mobileFields.style.display = 'none';
+        
+        // Clear all fields
+        bankAccountNumber.value = '';
+        bankAccountConfirmation.value = '';
+        mobileProvider.value = '';
+        mobileNumber.value = '';
+        
+        // Clear all errors
+        clearError('payment_method_error');
+        clearError('bank_account_number_error');
+        clearError('bank_account_confirmation_error');
+        clearError('mobile_provider_error');
+        clearError('mobile_number_error');
+        
+        checkFormValidity();
+    });
+
     // Validate bank account confirmation matches
     bankAccountConfirmation.addEventListener('input', function() {
         const accountNumber = bankAccountNumber.value.trim();
@@ -782,10 +805,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function validatePaymentMethod() {
         const errorElement = document.getElementById('payment_method_error');
+        const cashValue = parseFloat(document.getElementById('cash_amount').value) || 0;
         
-        if (!paymentMethodBank.checked && !paymentMethodMobile.checked) {
-            errorElement.textContent = 'Please select a payment method';
-            return false;
+        // Only require payment method if cash > 0
+        if (cashValue > 0.01) {
+            if (!paymentMethodBank.checked && !paymentMethodMobile.checked) {
+                errorElement.textContent = 'Please select a payment method for your cash payout';
+                return false;
+            }
+        } else {
+            // Not needed if no cash
+            errorElement.textContent = '';
+            return true;
         }
         
         errorElement.textContent = '';
