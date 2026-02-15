@@ -15,6 +15,13 @@
     --emaoni-primary-dark: #013019;
     --emaoni-gradient-start: #015425;
     --emaoni-gradient-end: #027a3a;
+
+    /* Custom Radius - Premium Rounding */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.5rem;
 }
 
 /* Loader Animation */

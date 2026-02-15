@@ -452,10 +452,7 @@
                             >
                                 <option value="">Chagua Mtandao</option>
                                 <option value="mpesa">M-Pesa</option>
-                                <option value="tigo">Tigo Pesa</option>
-                                <option value="airtel">Airtel Money</option>
-                                <option value="halotel">Halotel</option>
-                                <option value="zantel">Zantel (Ezy Pesa)</option>
+                                <option value="halopesa">HaloPesa</option>
                                 <option value="yas">Yas</option>
                             </select>
                             <div id="mobile_provider_error" class="error-message"></div>

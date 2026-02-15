@@ -122,38 +122,48 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-white rounded-lg shadow-md p-6">
-        <form method="GET" action="{{ route('admin.payment-confirmations.index') }}" class="flex flex-wrap gap-4">
-            <div class="flex-1 min-w-[200px]">
-                <input 
-                    type="text" 
-                    name="search" 
-                    value="{{ request('search') }}"
-                    placeholder="Search by Member ID, Name, or Email..."
-                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-[#015425] focus:ring-[#015425]"
-                >
+    <div class="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+        <form method="GET" action="{{ route('admin.payment-confirmations.index') }}" class="flex flex-wrap items-end gap-4">
+            <div class="flex-1 min-w-[280px]">
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Search Member</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </span>
+                    <input 
+                        type="text" 
+                        name="search" 
+                        value="{{ request('search') }}"
+                        placeholder="Search by Member ID, Name, or Email..."
+                        class="w-full pl-10 rounded-lg border-gray-300 shadow-sm focus:border-[#015425] focus:ring-[#015425] transition-all duration-200"
+                    >
+                </div>
             </div>
             <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">From Date</label>
                 <input 
                     type="date" 
                     name="date_from" 
                     value="{{ request('date_from') }}"
-                    class="rounded-md border-gray-300 shadow-sm focus:border-[#015425] focus:ring-[#015425]"
+                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#015425] focus:ring-[#015425] transition-all duration-200"
                 >
             </div>
             <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">To Date</label>
                 <input 
                     type="date" 
                     name="date_to" 
                     value="{{ request('date_to') }}"
-                    class="rounded-md border-gray-300 shadow-sm focus:border-[#015425] focus:ring-[#015425]"
+                    class="w-full rounded-lg border-gray-300 shadow-sm focus:border-[#015425] focus:ring-[#015425] transition-all duration-200"
                 >
             </div>
-            <div>
-                <button type="submit" class="px-4 py-2 bg-[#015425] text-white rounded-md hover:bg-[#027a3a]">
+            <div class="flex gap-2">
+                <button type="submit" class="px-6 py-2 bg-[#015425] text-white rounded-lg hover:bg-[#027a3a] shadow-sm hover:shadow-md transition-all duration-200 font-medium">
                     Filter
                 </button>
-                <a href="{{ route('admin.payment-confirmations.index') }}" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 ml-2">
+                <a href="{{ route('admin.payment-confirmations.index') }}" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200 font-medium text-center">
                     Clear
                 </a>
             </div>
