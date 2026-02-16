@@ -83,6 +83,7 @@ class MonthlyDepositController extends Controller
                     'user_id' => $user?->id,
                     'member_id' => $memberId,
                     'name' => $row[$map['name']] ?? 'N/A',
+                    'email' => $row[$map['email']] ?? null,
                     'month' => $month,
                     'year' => $year,
                     'savings' => $this->parseAmount($row[$map['savings']] ?? 0),
@@ -92,6 +93,8 @@ class MonthlyDepositController extends Controller
                     'loan_interest' => $this->parseAmount($row[$map['loan_interest']] ?? 0),
                     'fine_penalty' => $this->parseAmount($row[$map['fine_penalty']] ?? 0),
                     'total' => $this->parseAmount($row[$map['total']] ?? 0),
+                    'statement_pdf' => $row[$map['statement_pdf']] ?? null,
+                    'generated_message' => $row[$map['generated_message']] ?? null,
                     'notes' => $row[$map['notes']] ?? null,
                 ]);
             }
@@ -117,8 +120,17 @@ class MonthlyDepositController extends Controller
         $map = [];
         foreach ($header as $index => $col) {
             $col = strtolower(trim($col));
-            if (str_contains($col, 'member id') || $col == 'id' || str_contains($col, 'namba')) $map['member_id'] = $index;
-            if (str_contains($col, 'name') || str_contains($col, 'jina')) $map['name'] = $index;
+            
+            // Member ID / Customer ID
+            if (str_contains($col, 'member id') || str_contains($col, 'customer id') || $col == 'id' || str_contains($col, 'namba')) $map['member_id'] = $index;
+            
+            // Name
+            if (str_contains($col, 'name') || str_contains($col, 'jina') || str_contains($col, 'customer name')) $map['name'] = $index;
+            
+            // Email
+            if (str_contains($col, 'email')) $map['email'] = $index;
+            
+            // Amounts
             if (str_contains($col, 'savings') || str_contains($col, 'akiba')) $map['savings'] = $index;
             if (str_contains($col, 'shares') || str_contains($col, 'hisa')) $map['shares'] = $index;
             if (str_contains($col, 'welfare') || str_contains($col, 'jamii')) $map['welfare'] = $index;
@@ -126,6 +138,12 @@ class MonthlyDepositController extends Controller
             if (str_contains($col, 'loan interest') || str_contains($col, 'riba')) $map['loan_interest'] = $index;
             if (str_contains($col, 'fine') || str_contains($col, 'penalty') || str_contains($col, 'faini')) $map['fine_penalty'] = $index;
             if (str_contains($col, 'total') || str_contains($col, 'jumla')) $map['total'] = $index;
+            
+            // System specific columns
+            if (str_contains($col, 'generated message') || str_contains($col, 'statement generated message')) $map['generated_message'] = $index;
+            if (str_contains($col, 'statement pdf') || str_contains($col, 'pdf')) $map['statement_pdf'] = $index;
+            
+            // Notes
             if (str_contains($col, 'note') || str_contains($col, 'maelezo')) $map['notes'] = $index;
         }
         return $map;

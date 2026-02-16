@@ -12,6 +12,7 @@ class MonthlyDeposit extends Model
         'name',
         'month',
         'year',
+        'email',
         'savings',
         'shares',
         'welfare',
@@ -19,6 +20,8 @@ class MonthlyDeposit extends Model
         'loan_interest',
         'fine_penalty',
         'total',
+        'statement_pdf',
+        'generated_message',
         'notes',
     ];
 
