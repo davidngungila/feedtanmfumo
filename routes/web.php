@@ -90,6 +90,10 @@ Route::middleware('auth')->group(function () {
             Route::resource('welfare', MemberWelfareController::class)->only(['index', 'show', 'create', 'store']);
         });
 
+        // Monthly Deposit Statements
+        Route::get('statements', [\App\Http\Controllers\Member\MonthlyDepositController::class, 'index'])->name('monthly-deposits.index');
+        Route::get('statements/{monthlyDeposit}', [\App\Http\Controllers\Member\MonthlyDepositController::class, 'show'])->name('monthly-deposits.show');
+
         // Issues - available to all members
         Route::resource('issues', MemberIssueController::class)->only(['index', 'show', 'create', 'store']);
 
@@ -356,9 +360,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('sms-provider/{smsProvider}/test', [\App\Http\Controllers\Admin\SmsProviderController::class, 'test'])->name('sms-provider.test');
     Route::post('sms-provider/test-connection', [\App\Http\Controllers\Admin\SmsProviderController::class, 'testConnection'])->name('sms-provider.test-connection');
 
+    // Monthly Deposit Statements
+    Route::get('monthly-deposits', [\App\Http\Controllers\Admin\MonthlyDepositController::class, 'index'])->name('monthly-deposits.index');
+    Route::get('monthly-deposits/create', [\App\Http\Controllers\Admin\MonthlyDepositController::class, 'create'])->name('monthly-deposits.create');
+    Route::post('monthly-deposits', [\App\Http\Controllers\Admin\MonthlyDepositController::class, 'store'])->name('monthly-deposits.store');
+    Route::get('monthly-deposits/{year}/{month}', [\App\Http\Controllers\Admin\MonthlyDepositController::class, 'show'])->name('monthly-deposits.show');
+    Route::delete('monthly-deposits/{year}/{month}', [\App\Http\Controllers\Admin\MonthlyDepositController::class, 'destroy'])->name('monthly-deposits.destroy');
+
     // Advanced System Settings Routes
     Route::prefix('system-settings')->name('system-settings.')->group(function () {
-        // User & Access Management
         Route::get('users', [SystemSettingsController::class, 'users'])->name('users');
         Route::get('roles', [SystemSettingsController::class, 'roles'])->name('roles');
         Route::get('permissions', [SystemSettingsController::class, 'permissions'])->name('permissions');

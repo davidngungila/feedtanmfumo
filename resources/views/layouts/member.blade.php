@@ -93,9 +93,9 @@
                         
                         <!-- Savings Dropdown -->
                         <div class="relative nav-dropdown {{ !$isApproved ? 'opacity-50 cursor-not-allowed' : '' }}">
-                            <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="nav-dropdown-toggle flex items-center px-3 py-2 rounded-md transition {{ request()->routeIs('member.savings.*') ? 'bg-white font-semibold text-[#015425]' : 'bg-[#015425] text-white hover:bg-[#027a3a]' }}" {{ !$isApproved ? 'title="Membership must be approved to access Savings"' : '' }}>
+                            <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="nav-dropdown-toggle flex items-center px-3 py-2 rounded-md transition {{ request()->routeIs('member.savings.*') || request()->routeIs('member.monthly-deposits.*') ? 'bg-white font-semibold text-[#015425]' : 'bg-[#015425] text-white hover:bg-[#027a3a]' }}" {{ !$isApproved ? 'title="Membership must be approved to access Savings"' : '' }}>
                                 Savings
-                                <svg class="w-4 h-4 ml-1 nav-dropdown-arrow transition-transform {{ request()->routeIs('member.savings.*') ? 'text-[#015425]' : 'text-white' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-4 h-4 ml-1 nav-dropdown-arrow transition-transform {{ request()->routeIs('member.savings.*') || request()->routeIs('member.monthly-deposits.*') ? 'text-[#015425]' : 'text-white' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>
@@ -103,6 +103,7 @@
                             <div class="nav-dropdown-menu hidden absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
                                 <a href="{{ route('member.savings.index') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-green-50 hover:text-[#015425] transition">All Accounts</a>
                                 <a href="{{ route('member.savings.create') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-green-50 hover:text-[#015425] transition">Open Account</a>
+                                <a href="{{ route('member.monthly-deposits.index') }}" class="block px-4 py-2 text-sm font-bold text-orange-600 hover:bg-orange-50 transition border-t border-gray-100 mt-1 pt-2">Deposit Statements</a>
                             </div>
                             @endif
                         </div>
@@ -280,7 +281,7 @@
                     
                     <!-- Savings Mobile -->
                     <div class="mobile-dropdown {{ !$isApproved ? 'opacity-50' : '' }} mb-2">
-                        <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="mobile-dropdown-toggle w-full flex items-center justify-between px-3 py-2 rounded-md {{ !$isApproved ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-green-50 hover:text-[#015425]' }} {{ request()->routeIs('member.savings.*') ? 'bg-white text-[#015425] font-semibold' : '' }} transition">
+                        <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="mobile-dropdown-toggle w-full flex items-center justify-between px-3 py-2 rounded-md {{ !$isApproved ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-green-50 hover:text-[#015425]' }} {{ request()->routeIs('member.savings.*') || request()->routeIs('member.monthly-deposits.*') ? 'bg-white text-[#015425] font-semibold' : '' }} transition">
                             <div class="flex items-center">
                                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
@@ -297,6 +298,7 @@
                         <div class="mobile-dropdown-menu hidden pl-4 mt-1 space-y-1">
                             <a href="{{ route('member.savings.index') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition">All Accounts</a>
                             <a href="{{ route('member.savings.create') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition">Open Account</a>
+                            <a href="{{ route('member.monthly-deposits.index') }}" class="block px-3 py-2 rounded-md text-sm font-bold text-orange-600 hover:bg-orange-50 transition border-t border-gray-100 mt-1 pt-1">Deposit Statements</a>
                         </div>
                         @endif
                     </div>

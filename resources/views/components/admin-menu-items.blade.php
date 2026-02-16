@@ -21,6 +21,7 @@
     $isActiveShares = request()->routeIs(['admin.shares.*']);
     $isActiveFormulas = request()->routeIs(['admin.formulas.*']);
     $isActivePaymentConfirmations = request()->routeIs(['admin.payment-confirmations.*']);
+    $isActiveMonthlyDeposits = request()->routeIs(['admin.monthly-deposits.*']);
 @endphp
 
 <!-- Dashboard -->
@@ -358,6 +359,23 @@
     <div class="dropdown-menu pl-4 mt-1 space-y-1 {{ $isActivePaymentConfirmations ? '' : 'hidden' }}">
         <a href="{{ route('admin.payment-confirmations.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">All Payment Confirmations</a>
         <a href="{{ route('admin.payment-confirmations.upload') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">Upload Excel Sheet</a>
+    </div>
+</div>
+
+<!-- Monthly Deposits -->
+<div class="dropdown-container" data-menu="monthly-deposits">
+    <button class="dropdown-toggle flex items-center justify-between w-full px-4 py-3 rounded-md hover:bg-[#013019] transition {{ $isActiveMonthlyDeposits ? 'bg-[#013019]' : '' }}">
+        <div class="flex items-center">
+            <span class="text-lg mr-3">📅</span>
+            <span>Monthly Deposits</span>
+        </div>
+        <svg class="w-4 h-4 dropdown-arrow transition-transform {{ $isActiveMonthlyDeposits ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+    </button>
+    <div class="dropdown-menu pl-4 mt-1 space-y-1 {{ $isActiveMonthlyDeposits ? '' : 'hidden' }}">
+        <a href="{{ route('admin.monthly-deposits.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">Upload History</a>
+        <a href="{{ route('admin.monthly-deposits.create') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">Upload Excel Sheet</a>
     </div>
 </div>
 @endif
