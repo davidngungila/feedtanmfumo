@@ -8,8 +8,8 @@
     <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-4 sm:p-6 text-white">
         <div class="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between">
             <div class="flex-1">
-                <h1 class="text-2xl sm:text-3xl font-bold mb-2">Welcome back, {{ $user->name }}!</h1>
-                <p class="text-sm sm:text-base text-white text-opacity-90">Here's your financial overview</p>
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2">@lang('portal.welcome_back'), {{ $user->name }}!</h1>
+                <p class="text-sm sm:text-base text-white text-opacity-90">@lang('portal.view_history')</p>
                 @if($user->roles->count() > 0)
                     <div class="flex flex-wrap gap-2 mt-3">
                         @foreach($user->roles as $role)
