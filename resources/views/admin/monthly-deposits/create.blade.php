@@ -77,8 +77,8 @@
                     Mapping Instructions
                 </h4>
                 <p class="text-xs text-blue-700 leading-relaxed">
-                    System will automatically detect columns based on names. Supported column headers include:
-                    <span class="font-bold">Customer ID / Member ID, Customer Name, Email Address, Savings, Shares, Welfare, Loan Principal, Loan Interest, Total, Statement generated MESSAGE, and STATEMENT PDF</span>.
+                    System will automatically detect columns based on names. The expected headers for your external system are:
+                    <span class="font-bold">Timestamp, Customer Name, Customer ID, Email Address, Statement Period, TIMESTAMP, Statement generated MESSAGE, and STATEMENT PDF</span>.
                 </p>
             </div>
 
