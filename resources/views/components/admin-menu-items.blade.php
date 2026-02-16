@@ -260,6 +260,10 @@
                 <a href="{{ route('admin.reports.loans') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Portfolio at Risk</a>
             </div>
         </div>
+        <!-- Guarantor Assessments -->
+        <a href="{{ route('admin.guarantor-assessments.index') }}" class="block px-4 py-2 mt-1 rounded-md hover:bg-[#013019] transition text-sm {{ request()->routeIs('admin.guarantor-assessments.*') ? 'bg-[#013019] font-bold' : '' }}">
+            <span>Guarantor Assessments</span>
+        </a>
     </div>
 </div>
 @endif

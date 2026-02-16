@@ -138,6 +138,13 @@ class DashboardController extends Controller
             ]);
         });
 
+        // Guarantor Assessment Statistics
+        $assessments = [
+            'pending' => \App\Models\GuarantorAssessment::where('status', 'pending')->count(),
+            'approved' => \App\Models\GuarantorAssessment::where('status', 'approved')->count(),
+            'total' => \App\Models\GuarantorAssessment::count(),
+        ];
+
         $recentActivities = $recentActivities->sortByDesc('time')->take(10)->values();
 
         // Performance Metrics (Last 6 months)
@@ -202,6 +209,17 @@ class DashboardController extends Controller
                 'title' => $issues['high_priority'] . ' High Priority Issue(s)',
                 'description' => 'Needs attention soon',
                 'action' => route('admin.issues.index', ['priority' => 'high']),
+            ];
+        }
+
+        // Pending guarantor assessments
+        if ($assessments['pending'] > 0) {
+            $alerts[] = [
+                'type' => 'warning',
+                'icon' => 'user-check',
+                'title' => $assessments['pending'] . ' Pending Guarantor Review(s)',
+                'description' => 'Guarantor assessments waiting for approval',
+                'action' => route('admin.guarantor-assessments.index'),
             ];
         }
 
@@ -293,6 +311,7 @@ class DashboardController extends Controller
             'savings', 
             'investments', 
             'welfare',
+            'assessments',
             'recentActivities',
             'performanceMetrics',
             'alerts',

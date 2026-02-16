@@ -82,4 +82,9 @@ class Loan extends Model
     {
         return $this->hasMany(Transaction::class, 'related_id')->where('related_type', 'loan');
     }
+
+    public function guarantorAssessments(): HasMany
+    {
+        return $this->hasMany(GuarantorAssessment::class);
+    }
 }

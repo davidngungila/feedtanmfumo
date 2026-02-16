@@ -43,6 +43,11 @@ Route::get('/payment-confirmation', [\App\Http\Controllers\PaymentConfirmationCo
 Route::post('/payment-confirmation/lookup', [\App\Http\Controllers\PaymentConfirmationController::class, 'lookupMember'])->name('payment-confirmation.lookup');
 Route::post('/payment-confirmation', [\App\Http\Controllers\PaymentConfirmationController::class, 'store'])->name('payment-confirmation.store');
 
+// Guarantor Assessment (publicly accessible via obscure link)
+Route::get('/guarantor-assessment/{loanUlid}', [\App\Http\Controllers\GuarantorAssessmentController::class, 'show'])->name('guarantor-assessment.show');
+Route::post('/guarantor-assessment/{loanUlid}', [\App\Http\Controllers\GuarantorAssessmentController::class, 'store'])->name('guarantor-assessment.store');
+Route::get('/guarantor-assessment/success/{assessmentUlid}', [\App\Http\Controllers\GuarantorAssessmentController::class, 'success'])->name('guarantor-assessment.success');
+
 // Authentication routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
@@ -177,6 +182,13 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('loans', LoanController::class);
     Route::get('loans/{loan}/pdf', [LoanController::class, 'exportPdf'])->name('loans.pdf');
     Route::get('loans/{loan}/agreement', [LoanController::class, 'generateAgreement'])->name('loans.agreement');
+
+    // Guarantor Assessments
+    Route::get('guarantor-assessments', [\App\Http\Controllers\GuarantorAssessmentController::class, 'index'])->name('guarantor-assessments.index');
+    Route::get('guarantor-assessments/{assessment}', [\App\Http\Controllers\GuarantorAssessmentController::class, 'showAdmin'])->name('guarantor-assessments.show');
+    Route::post('guarantor-assessments/{assessment}/approve', [\App\Http\Controllers\GuarantorAssessmentController::class, 'approve'])->name('guarantor-assessments.approve');
+    Route::post('guarantor-assessments/{assessment}/clarify', [\App\Http\Controllers\GuarantorAssessmentController::class, 'requestClarification'])->name('guarantor-assessments.clarify');
+    Route::get('guarantor-assessments/{assessment}/download', [\App\Http\Controllers\GuarantorAssessmentController::class, 'downloadPdf'])->name('guarantor-assessments.download');
 
     // Loan SMS Reminders
     Route::prefix('loans')->name('loans.')->group(function () {
