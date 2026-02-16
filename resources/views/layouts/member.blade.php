@@ -68,7 +68,7 @@
                     <!-- Desktop Navigation -->
                     <nav class="hidden md:flex items-center space-x-2 lg:space-x-3 xl:space-x-4 flex-1 justify-center">
                         <a href="{{ route('member.dashboard') }}" class="px-3 py-2 rounded-md transition {{ request()->routeIs('member.dashboard') ? 'bg-white font-semibold text-[#015425]' : 'bg-[#015425] text-white hover:bg-[#027a3a]' }}">
-                            @lang('portal.dashboard')
+                            Dashboard
                         </a>
                         
                         @php
@@ -78,7 +78,7 @@
                         <!-- Loans Dropdown -->
                         <div class="relative nav-dropdown {{ !$isApproved ? 'opacity-50 cursor-not-allowed' : '' }}">
                             <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="nav-dropdown-toggle flex items-center px-3 py-2 rounded-md transition {{ request()->routeIs('member.loans.*') ? 'bg-white font-semibold text-[#015425]' : 'bg-[#015425] text-white hover:bg-[#027a3a]' }}" {{ !$isApproved ? 'title="Membership must be approved to access Loans"' : '' }}>
-                                @lang('portal.loans')
+                                Loans
                                 <svg class="w-4 h-4 ml-1 nav-dropdown-arrow transition-transform {{ request()->routeIs('member.loans.*') ? 'text-[#015425]' : 'text-white' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
@@ -94,7 +94,7 @@
                         <!-- Savings Dropdown -->
                         <div class="relative nav-dropdown {{ !$isApproved ? 'opacity-50 cursor-not-allowed' : '' }}">
                             <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="nav-dropdown-toggle flex items-center px-3 py-2 rounded-md transition {{ request()->routeIs('member.savings.*') || request()->routeIs('member.monthly-deposits.*') ? 'bg-white font-semibold text-[#015425]' : 'bg-[#015425] text-white hover:bg-[#027a3a]' }}" {{ !$isApproved ? 'title="Membership must be approved to access Savings"' : '' }}>
-                                @lang('portal.savings')
+                                Savings
                                 <svg class="w-4 h-4 ml-1 nav-dropdown-arrow transition-transform {{ request()->routeIs('member.savings.*') || request()->routeIs('member.monthly-deposits.*') ? 'text-[#015425]' : 'text-white' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
@@ -103,7 +103,7 @@
                             <div class="nav-dropdown-menu hidden absolute top-full left-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
                                 <a href="{{ route('member.savings.index') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-green-50 hover:text-[#015425] transition">All Accounts</a>
                                 <a href="{{ route('member.savings.create') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-green-50 hover:text-[#015425] transition">Open Account</a>
-                                <a href="{{ route('member.monthly-deposits.index') }}" class="block px-4 py-2 text-sm font-bold text-orange-600 hover:bg-orange-50 transition border-t border-gray-100 mt-1 pt-2">@lang('portal.statements')</a>
+                                <a href="{{ route('member.monthly-deposits.index') }}" class="block px-4 py-2 text-sm font-bold text-orange-600 hover:bg-orange-50 transition border-t border-gray-100 mt-1 pt-2">Deposit Statements</a>
                             </div>
                             @endif
                         </div>
@@ -111,7 +111,7 @@
                         <!-- Investments Dropdown -->
                         <div class="relative nav-dropdown {{ !$isApproved ? 'opacity-50 cursor-not-allowed' : '' }}">
                             <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="nav-dropdown-toggle flex items-center px-3 py-2 rounded-md transition {{ request()->routeIs('member.investments.*') ? 'bg-white font-semibold text-[#015425]' : 'bg-[#015425] text-white hover:bg-[#027a3a]' }}" {{ !$isApproved ? 'title="Membership must be approved to access Investments"' : '' }}>
-                                @lang('portal.investments')
+                                Investments
                                 <svg class="w-4 h-4 ml-1 nav-dropdown-arrow transition-transform {{ request()->routeIs('member.investments.*') ? 'text-[#015425]' : 'text-white' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
@@ -125,13 +125,13 @@
                         </div>
                         
                         <a href="{{ $isApproved ? route('member.welfare.index') : '#' }}" class="px-3 py-2 rounded-md transition {{ !$isApproved ? 'opacity-50 cursor-not-allowed' : '' }} {{ request()->routeIs('member.welfare.*') ? 'bg-white font-semibold text-[#015425]' : 'bg-[#015425] text-white hover:bg-[#027a3a]' }}" {{ !$isApproved ? 'title="Membership must be approved to access Welfare"' : '' }}>
-                            @lang('portal.welfare')
+                            Welfare
                         </a>
                         
                         <!-- Issues Dropdown -->
                         <div class="relative nav-dropdown {{ !$isApproved ? 'opacity-50 cursor-not-allowed' : '' }}">
                             <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="nav-dropdown-toggle flex items-center px-3 py-2 rounded-md transition {{ request()->routeIs('member.issues.*') ? 'bg-white font-semibold text-[#015425]' : 'bg-[#015425] text-white hover:bg-[#027a3a]' }}" {{ !$isApproved ? 'title="Membership must be approved to access Issues"' : '' }}>
-                                @lang('portal.issues')
+                                Issues
                                 <svg class="w-4 h-4 ml-1 nav-dropdown-arrow transition-transform {{ request()->routeIs('member.issues.*') ? 'text-[#015425]' : 'text-white' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
@@ -146,11 +146,6 @@
                     </nav>
                     
                     <div class="flex items-center space-x-3 sm:space-x-4 flex-shrink-0 ml-auto">
-                        <!-- Language Switcher -->
-                        <div class="hidden sm:flex items-center bg-white bg-opacity-20 rounded-lg p-1 border border-white border-opacity-30">
-                            <a href="{{ route('set-locale', ['locale' => 'en']) }}" class="px-2 py-1 rounded text-xs transition {{ app()->getLocale() == 'en' ? 'bg-white text-[#015425] font-bold' : 'text-white hover:bg-white hover:bg-opacity-10' }}">EN</a>
-                            <a href="{{ route('set-locale', ['locale' => 'sw']) }}" class="px-2 py-1 rounded text-xs transition {{ app()->getLocale() == 'sw' ? 'bg-white text-[#015425] font-bold' : 'text-white hover:bg-white hover:bg-opacity-10' }}">SW</a>
-                        </div>
                         <!-- Notifications with Hover -->
                         <div class="relative notification-container">
                             <button id="notification-button" class="relative p-2 text-white hover:bg-white hover:bg-opacity-20 hover:text-[#015425] rounded-full transition focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-[#015425]">
@@ -202,14 +197,14 @@
                                         <svg class="w-4 h-4 mr-3 text-gray-400 group-hover:text-[#015425] transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                         </svg>
-                                        @lang('portal.my_profile')
+                                        My Profile
                                     </a>
                                     <a href="{{ route('member.profile.settings') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition group">
                                         <svg class="w-4 h-4 mr-3 text-gray-400 group-hover:text-[#015425] transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                         </svg>
-                                        @lang('portal.settings')
+                                        Settings
                                     </a>
                                 </div>
                                 <div class="border-t border-gray-200 py-1">
@@ -219,7 +214,7 @@
                                             <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                                             </svg>
-                                            @lang('portal.logout')
+                                            Logout
                                         </button>
                                     </form>
                                 </div>

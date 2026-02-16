@@ -34,8 +34,6 @@ Route::get('/', function () {
     return redirect()->route('login');
 })->name('welcome');
 
-Route::get('set-locale', [\App\Http\Controllers\LocaleController::class, 'setLocale'])->name('set-locale');
-
 // Legal pages (public)
 Route::get('/terms', [\App\Http\Controllers\LegalController::class, 'terms'])->name('terms');
 Route::get('/privacy', [\App\Http\Controllers\LegalController::class, 'privacy'])->name('privacy');
