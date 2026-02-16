@@ -1,11 +1,29 @@
 @extends('layouts.admin')
 
+@push('scripts')
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+@endpush
+
 @section('page-title')
     Records for {{ date("F", mktime(0, 0, 0, $month, 10)) }} {{ $year }}
 @endsection
 
 @section('content')
-<div class="space-y-6">
+<div x-data="{ 
+    selectedRecord: null,
+    loading: false,
+    async selectRecord(id) {
+        this.loading = true;
+        try {
+            // Simplified for now: just use data from the row or a small object
+            // In a real app, this could be an AJAX call to get fresh data
+            const row = document.querySelector(`[data-id='${id}']`);
+            this.selectedRecord = JSON.parse(row.dataset.info);
+        } finally {
+            this.loading = false;
+        }
+    }
+}" class="space-y-6">
     <div class="flex items-center justify-between">
         <a href="{{ route('admin.monthly-deposits.index') }}" class="text-gray-600 hover:text-gray-900 flex items-center font-medium">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -22,77 +40,135 @@
         </form>
     </div>
 
-    <!-- Data Table -->
-    <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Member ID</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Name</th>
-                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Savings</th>
-                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Shares</th>
-                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Welfare</th>
-                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Loan Prin.</th>
-                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Loan Int.</th>
-                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase">Total</th>
-                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase">Special Msg</th>
-                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase">PDF</th>
-                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase">Linked</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach($deposits as $deposit)
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{{ $deposit->member_id }}</td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-600 truncate max-w-[150px]">{{ $deposit->name }}</td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600">{{ number_format($deposit->savings, 2) }}</td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600">{{ number_format($deposit->shares, 2) }}</td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600">{{ number_format($deposit->welfare, 2) }}</td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600">{{ number_format($deposit->loan_principal, 2) }}</td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-right text-gray-600">{{ number_format($deposit->loan_interest, 2) }}</td>
-                        <td class="px-4 py-3 whitespace-nowrap text-sm text-right font-bold text-[#015425]">{{ number_format($deposit->total, 2) }}</td>
-                        <td class="px-4 py-3 whitespace-nowrap text-center text-xs font-semibold">
-                            @if($deposit->generated_message)
-                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full cursor-help" title="{{ $deposit->generated_message }}">Yes</span>
-                            @else
-                                <span class="text-gray-400">-</span>
-                            @endif
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-center">
-                            @if($deposit->statement_pdf)
-                                <a href="{{ $deposit->statement_pdf }}" target="_blank" class="text-orange-600 hover:text-orange-900">
-                                    <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                </a>
-                            @else
-                                <span class="text-gray-400">-</span>
-                            @endif
-                        </td>
-                        <td class="px-4 py-3 whitespace-nowrap text-center">
-                            @if($deposit->user_id)
-                                <span class="text-green-600" title="Linked to User Account">
-                                    <svg class="w-5 h-5 mx-auto" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                                    </svg>
-                                </span>
-                            @else
-                                <span class="text-gray-300" title="Not linked to any registered user">
-                                    <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
-                                    </svg>
-                                </span>
-                            @endif
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+    <!-- Split Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative">
+        <!-- List View -->
+        <div :class="selectedRecord ? 'lg:col-span-8' : 'lg:col-span-12'" class="transition-all duration-300">
+            <div class="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Member</th>
+                                <th class="px-4 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Total</th>
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Docs</th>
+                                <th class="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @foreach($deposits as $deposit)
+                            @php
+                                $info = $deposit->only(['id', 'member_id', 'name', 'email', 'savings', 'shares', 'welfare', 'loan_principal', 'loan_interest', 'fine_penalty', 'total', 'statement_pdf', 'generated_message', 'notes']);
+                                $info['month_name'] = $deposit->month_name;
+                                $info['record_url'] = route('admin.monthly-deposits.record', $deposit->id);
+                            @endphp
+                            <tr 
+                                data-id="{{ $deposit->id }}" 
+                                data-info='@json($info)'
+                                @click="selectRecord({{ $deposit->id }})"
+                                :class="selectedRecord && selectedRecord.id == {{ $deposit->id }} ? 'bg-green-50 border-l-4 border-l-[#015425]' : 'hover:bg-gray-50'"
+                                class="cursor-pointer transition-all border-l-4 border-l-transparent"
+                            >
+                                <td class="px-4 py-4 whitespace-nowrap">
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-bold text-gray-900">{{ $deposit->name }}</span>
+                                        <span class="text-xs font-mono text-[#015425]">{{ $deposit->member_id }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap text-right">
+                                    <span class="text-sm font-black text-gray-900">{{ number_format($deposit->total, 2) }}</span>
+                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap text-center">
+                                    <div class="flex items-center justify-center gap-2">
+                                        @if($deposit->generated_message)
+                                            <span class="w-2 h-2 bg-blue-500 rounded-full" title="Has Message"></span>
+                                        @endif
+                                        @if($deposit->statement_pdf)
+                                            <span class="w-2 h-2 bg-orange-500 rounded-full" title="Has PDF"></span>
+                                        @endif
+                                        @if($deposit->user_id)
+                                            <span class="w-2 h-2 bg-green-500 rounded-full" title="Linked"></span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="px-4 py-4 whitespace-nowrap text-center">
+                                    <a href="{{ route('admin.monthly-deposits.record', $deposit->id) }}" class="text-xs font-bold text-[#015425] hover:underline" @click.stop>
+                                        Full Details
+                                    </a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
+                    {{ $deposits->links() }}
+                </div>
+            </div>
         </div>
-        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
-            {{ $deposits->links() }}
+
+        <!-- Preview Panel -->
+        <div 
+            x-show="selectedRecord" 
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-x-12"
+            x-transition:enter-end="opacity-100 translate-x-0"
+            class="lg:col-span-4 sticky top-24 h-fit space-y-4 no-print"
+        >
+            <div class="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
+                <div class="p-6 bg-[#015425] text-white flex justify-between items-center">
+                    <h3 class="font-bold uppercase tracking-tight">Quick Preview</h3>
+                    <button @click="selectedRecord = null" class="text-white hover:text-gray-200">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="p-6 space-y-6">
+                    <div>
+                        <p class="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Member</p>
+                        <h4 class="text-xl font-black text-gray-900" x-text="selectedRecord?.name"></h4>
+                        <p class="text-sm font-mono text-[#015425]" x-text="selectedRecord?.member_id"></p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Savings</p>
+                            <p class="text-sm font-bold text-gray-900" x-text="new Intl.NumberFormat().format(selectedRecord?.savings)"></p>
+                        </div>
+                        <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Shares</p>
+                            <p class="text-sm font-bold text-gray-900" x-text="new Intl.NumberFormat().format(selectedRecord?.shares)"></p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-green-50 rounded-xl border border-green-100 flex justify-between items-center">
+                        <span class="text-xs font-black text-[#015425] uppercase tracking-widest">Total</span>
+                        <span class="text-lg font-black text-[#015425]" x-text="new Intl.NumberFormat().format(selectedRecord?.total) + ' TZS'"></span>
+                    </div>
+
+                    <template x-if="selectedRecord?.generated_message">
+                        <div class="p-4 bg-blue-50 rounded-xl border border-blue-100 italic text-xs text-blue-800" x-text="selectedRecord?.generated_message"></div>
+                    </template>
+
+                    <div class="flex flex-col gap-2">
+                        <a :href="selectedRecord?.record_url" class="w-full text-center py-3 bg-[#015425] text-white rounded-xl font-bold hover:bg-[#027a3a] transition-all">
+                            View Full Details
+                        </a>
+                        <template x-if="selectedRecord?.statement_pdf">
+                            <a :href="selectedRecord?.statement_pdf" target="_blank" class="w-full text-center py-3 bg-orange-600 text-white rounded-xl font-bold hover:bg-orange-700 transition-all flex items-center justify-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                </svg>
+                                Official PDF
+                            </a>
+                        </template>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+@endsection
 @endsection

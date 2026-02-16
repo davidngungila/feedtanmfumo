@@ -365,6 +365,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('monthly-deposits/create', [\App\Http\Controllers\Admin\MonthlyDepositController::class, 'create'])->name('monthly-deposits.create');
     Route::post('monthly-deposits', [\App\Http\Controllers\Admin\MonthlyDepositController::class, 'store'])->name('monthly-deposits.store');
     Route::get('monthly-deposits/{year}/{month}', [\App\Http\Controllers\Admin\MonthlyDepositController::class, 'show'])->name('monthly-deposits.show');
+    Route::get('monthly-deposits/record/{monthlyDeposit}', [\App\Http\Controllers\Admin\MonthlyDepositController::class, 'record'])->name('monthly-deposits.record');
     Route::delete('monthly-deposits/{year}/{month}', [\App\Http\Controllers\Admin\MonthlyDepositController::class, 'destroy'])->name('monthly-deposits.destroy');
 
     // Advanced System Settings Routes

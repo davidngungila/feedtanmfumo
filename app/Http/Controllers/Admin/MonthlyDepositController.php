@@ -26,9 +26,14 @@ class MonthlyDepositController extends Controller
     {
         $deposits = MonthlyDeposit::where('year', $year)
             ->where('month', $month)
-            ->paginate(50);
+            ->paginate(100); // Increased pagination for better overview
 
         return view('admin.monthly-deposits.show', compact('deposits', 'year', 'month'));
+    }
+
+    public function record(MonthlyDeposit $monthlyDeposit)
+    {
+        return view('admin.monthly-deposits.record', compact('monthlyDeposit'));
     }
 
     public function create()
