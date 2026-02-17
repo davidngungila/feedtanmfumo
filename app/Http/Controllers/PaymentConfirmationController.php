@@ -144,14 +144,12 @@ class PaymentConfirmationController extends Controller
             'payment_method' => 'nullable|in:bank,mobile',
             'mobile_provider' => 'required_if:payment_method,mobile|nullable|in:halopesa,yas',
             'mobile_number' => 'required_if:payment_method,mobile|nullable|string|max:20',
-            'bank_name' => 'required_if:payment_method,bank|nullable|string|max:100',
-            'bank_account_number' => 'required_if:payment_method,bank|nullable|string|max:50',
+            'bank_name' => 'nullable|string|max:100',
+            'bank_account_number' => 'nullable|string|max:50',
         ], [
             'payment_method.required' => 'Please select a payment method.',
             'mobile_provider.required_if' => 'Please select a mobile money provider.',
             'mobile_number.required_if' => 'Please enter your mobile number.',
-            'bank_name.required_if' => 'Please select or enter your bank name.',
-            'bank_account_number.required_if' => 'Please enter your bank account number.',
         ]);
 
         if ($validator->fails()) {

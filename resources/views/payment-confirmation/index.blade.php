@@ -424,11 +424,7 @@
                             <p class="text-xs text-green-700">Akaunti: <span id="display_bank_account" class="font-bold"></span></p>
                         </div>
 
-                        <!-- Manual Bank Inputs Removed as per user request -->
-                        <div id="noBankInfo" style="display: none;" class="p-3 bg-red-50 rounded-lg border border-red-200 mb-4">
-                            <p class="text-sm font-medium text-red-800 mb-1">Taarifa za Benki Hazijawekwa:</p>
-                            <p class="text-xs text-red-700">Mwanachama huyu hana taarifa za benki kwenye profile yake. Tafadhali wasiliana na ofisi kuongeza taarifa hizi au chagua njia nyingine ya malipo.</p>
-                        </div>
+                        <!-- Bank Details handled automatically -->
 
                         <!-- Keep hidden inputs for form submission -->
                         <input type="hidden" id="bank_account_number" name="bank_account_number">
@@ -631,7 +627,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Bank Info Handling
                 const existingBankInfo = document.getElementById('existingBankInfo');
-                const noBankInfo = document.getElementById('noBankInfo');
                 const displayBankName = document.getElementById('display_bank_name');
                 const displayBankAccount = document.getElementById('display_bank_account');
                 const bankNameHidden = document.getElementById('bank_name_hidden');
@@ -639,14 +634,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (memberData.bank_name && memberData.bank_account_number) {
                     existingBankInfo.style.display = 'block';
-                    noBankInfo.style.display = 'none';
                     displayBankName.textContent = memberData.bank_name;
                     displayBankAccount.textContent = memberData.bank_account_number;
                     bankNameHidden.value = memberData.bank_name;
                     bankAccountNumber.value = memberData.bank_account_number;
                 } else {
                     existingBankInfo.style.display = 'none';
-                    noBankInfo.style.display = 'block';
                     // Reset fields if no data
                     bankNameHidden.value = '';
                     bankAccountNumber.value = '';
@@ -708,10 +701,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     bankNameHidden.value = memberData.bank_name;
                     bankAccountNumber.value = memberData.bank_account_number;
                     document.getElementById('existingBankInfo').style.display = 'block';
-                    document.getElementById('noBankInfo').style.display = 'none';
                 } else {
                     document.getElementById('existingBankInfo').style.display = 'none';
-                    document.getElementById('noBankInfo').style.display = 'block';
                 }
 
                 // Clear mobile fields
@@ -726,7 +717,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 bankAccountNumber.value = '';
                 bankNameHidden.value = '';
                 document.getElementById('existingBankInfo').style.display = 'none';
-                document.getElementById('noBankInfo').style.display = 'none';
                 clearError('bank_account_number_error');
                 clearError('bank_name_error');
             }
@@ -746,7 +736,6 @@ document.addEventListener('DOMContentLoaded', function() {
         bankAccountNumber.value = '';
         bankNameHidden.value = '';
         document.getElementById('existingBankInfo').style.display = 'none';
-        document.getElementById('noBankInfo').style.display = 'none';
         mobileProvider.value = '';
         mobileNumber.value = '';
         
@@ -812,16 +801,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Validate bank fields if bank is selected
         if (paymentMethodBank.checked) {
-            const bankName = bankNameHidden.value;
-            const accountNumber = bankAccountNumber.value ? bankAccountNumber.value.trim() : '';
-            
-            if (!bankName || !accountNumber) {
-                // If no bank info, the error message in #noBankInfo is already visible
-                // But we still need to return false to prevent submission
-                return false;
-            }
-            
-            // Clear errors if valid
+            // No strict validation for bank info as requested by user
             clearError('bank_name_error');
             clearError('bank_account_number_error');
         }
@@ -1025,15 +1005,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (data.payment_method === 'bank' && cashValue > 0) {
             const bankName = bankNameHidden.value;
             const accountNumber = bankAccountNumber.value ? bankAccountNumber.value.trim() : '';
-            if (!bankName || !accountNumber) {
-                clearInterval(interval);
-                splashScreen.classList.remove('active');
-                showModalError('Mwanachama huyu hana taarifa za benki. Tafadhali wasiliana na ofisi au chagua njia nyingine ya malipo.');
-                return;
-            }
             
-            data.bank_name = bankName;
-            data.bank_account_number = accountNumber;
+            data.bank_name = bankName || 'N/A';
+            data.bank_account_number = accountNumber || 'N/A';
             // Clear mobile fields
             data.mobile_provider = '';
             data.mobile_number = '';

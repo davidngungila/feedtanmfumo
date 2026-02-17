@@ -60,7 +60,7 @@
             @endif
         </div>
 
-        <p style="font-size: 15px;">Tumekuambatanishia cheti (PDF document) chenye mchanganuo kamili kwa ajili ya kumbukumbu zako.</p>
+        <p style="font-size: 15px;">Pakua pdf yenye uthibitisho wa malipo iliambatanishwa  katika email hii kwa ajili ya kumbukumbu zako.✔️</p>
 
         <p style="font-size: 14px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 20px;">
             Hii ni barua pepe ya kiotomatiki, tafadhali usijibu. Kama una swali lolote, wasiliana na ofisi ya FEEDTAN.
