@@ -424,44 +424,14 @@
                             <p class="text-xs text-green-700">Akaunti: <span id="display_bank_account" class="font-bold"></span></p>
                         </div>
 
-                        <!-- Manual Bank Inputs -->
-                        <div id="manualBankInputs">
-                            <div class="mb-4">
-                                <label for="bank_name_select" class="input-label">Select Bank</label>
-                                <select 
-                                    id="bank_name_select" 
-                                    class="input-field mb-2"
-                                >
-                                    <option value="">Choose Bank</option>
-                                    <option value="NMB">NMB</option>
-                                    <option value="CRDB">CRDB</option>
-                                    <option value="OTHER">OTHER</option>
-                                </select>
-                                
-                                <div id="custom_bank_field" style="display: none;">
-                                    <label for="bank_name_custom" class="input-label text-sm text-gray-500">Enter Bank Name</label>
-                                    <input 
-                                        type="text" 
-                                        id="bank_name_custom" 
-                                        class="input-field" 
-                                        placeholder="Type your bank name here"
-                                    >
-                                </div>
-                                <div id="bank_name_error" class="error-message"></div>
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="bank_account_number" class="input-label">Bank Account Number</label>
-                                <input
-                                    type="text"
-                                    id="bank_account_number"
-                                    name="bank_account_number"
-                                    class="input-field"
-                                    placeholder="Enter your bank account number"
-                                >
-                                <div id="bank_account_number_error" class="error-message"></div>
-                            </div>
+                        <!-- Manual Bank Inputs Removed as per user request -->
+                        <div id="noBankInfo" style="display: none;" class="p-3 bg-red-50 rounded-lg border border-red-200 mb-4">
+                            <p class="text-sm font-medium text-red-800 mb-1">Taarifa za Benki Hazijawekwa:</p>
+                            <p class="text-xs text-red-700">Mwanachama huyu hana taarifa za benki kwenye profile yake. Tafadhali wasiliana na ofisi kuongeza taarifa hizi au chagua njia nyingine ya malipo.</p>
                         </div>
+
+                        <!-- Keep hidden inputs for form submission -->
+                        <input type="hidden" id="bank_account_number" name="bank_account_number">
 
                         <input type="hidden" name="bank_name" id="bank_name_hidden">
                     </div>
@@ -661,7 +631,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Bank Info Handling
                 const existingBankInfo = document.getElementById('existingBankInfo');
-                const manualBankInputs = document.getElementById('manualBankInputs');
+                const noBankInfo = document.getElementById('noBankInfo');
                 const displayBankName = document.getElementById('display_bank_name');
                 const displayBankAccount = document.getElementById('display_bank_account');
                 const bankNameHidden = document.getElementById('bank_name_hidden');
@@ -669,14 +639,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (memberData.bank_name && memberData.bank_account_number) {
                     existingBankInfo.style.display = 'block';
-                    manualBankInputs.style.display = 'none';
+                    noBankInfo.style.display = 'none';
                     displayBankName.textContent = memberData.bank_name;
                     displayBankAccount.textContent = memberData.bank_account_number;
                     bankNameHidden.value = memberData.bank_name;
                     bankAccountNumber.value = memberData.bank_account_number;
                 } else {
                     existingBankInfo.style.display = 'none';
-                    manualBankInputs.style.display = 'block';
+                    noBankInfo.style.display = 'block';
                     // Reset fields if no data
                     bankNameHidden.value = '';
                     bankAccountNumber.value = '';
@@ -721,9 +691,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const paymentMethodMobile = document.getElementById('payment_method_mobile');
     const bankFields = document.getElementById('bankFields');
     const mobileFields = document.getElementById('mobileFields');
-    const bankNameSelect = document.getElementById('bank_name_select');
-    const customBankField = document.getElementById('custom_bank_field');
-    const bankNameCustom = document.getElementById('bank_name_custom');
     const bankNameHidden = document.getElementById('bank_name_hidden');
     const bankAccountNumber = document.getElementById('bank_account_number');
     const mobileProvider = document.getElementById('mobile_provider');
@@ -741,7 +708,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     bankNameHidden.value = memberData.bank_name;
                     bankAccountNumber.value = memberData.bank_account_number;
                     document.getElementById('existingBankInfo').style.display = 'block';
-                    document.getElementById('manualBankInputs').style.display = 'none';
+                    document.getElementById('noBankInfo').style.display = 'none';
+                } else {
+                    document.getElementById('existingBankInfo').style.display = 'none';
+                    document.getElementById('noBankInfo').style.display = 'block';
                 }
 
                 // Clear mobile fields
@@ -754,12 +724,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 mobileFields.style.display = 'block';
                 // Clear bank fields
                 bankAccountNumber.value = '';
-                bankNameSelect.value = '';
-                bankNameCustom.value = '';
                 bankNameHidden.value = '';
-                customBankField.style.display = 'none';
                 document.getElementById('existingBankInfo').style.display = 'none';
-                document.getElementById('manualBankInputs').style.display = 'block';
+                document.getElementById('noBankInfo').style.display = 'none';
                 clearError('bank_account_number_error');
                 clearError('bank_name_error');
             }
@@ -777,12 +744,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Clear all fields
         bankAccountNumber.value = '';
-        bankNameSelect.value = '';
-        bankNameCustom.value = '';
         bankNameHidden.value = '';
-        customBankField.style.display = 'none';
         document.getElementById('existingBankInfo').style.display = 'none';
-        document.getElementById('manualBankInputs').style.display = 'block';
+        document.getElementById('noBankInfo').style.display = 'none';
         mobileProvider.value = '';
         mobileNumber.value = '';
         
@@ -796,57 +760,7 @@ document.addEventListener('DOMContentLoaded', function() {
         checkFormValidity();
     });
 
-    // Handle bank name selection
-    bankNameSelect.addEventListener('change', function() {
-        if (this.value === 'OTHER') {
-            customBankField.style.display = 'block';
-            bankNameHidden.value = bankNameCustom.value.trim();
-        } else {
-            customBankField.style.display = 'none';
-            bankNameHidden.value = this.value;
-        }
-        
-        const errorElement = document.getElementById('bank_name_error');
-        if (!bankNameHidden.value && paymentMethodBank.checked) {
-            errorElement.textContent = 'Please select or enter your bank name';
-            this.style.borderColor = '#dc2626';
-        } else {
-            errorElement.textContent = '';
-            this.style.borderColor = '';
-        }
-        checkFormValidity();
-    });
-
-    bankNameCustom.addEventListener('input', function() {
-        if (bankNameSelect.value === 'OTHER') {
-            bankNameHidden.value = this.value.trim();
-        }
-        
-        const errorElement = document.getElementById('bank_name_error');
-        if (!bankNameHidden.value && paymentMethodBank.checked) {
-            errorElement.textContent = 'Please enter your bank name';
-            this.style.borderColor = '#dc2626';
-        } else {
-            errorElement.textContent = '';
-            this.style.borderColor = '';
-        }
-        checkFormValidity();
-    });
-
-    // Bank account validation removed check for confirmation
-    bankAccountNumber.addEventListener('input', function() {
-        const accountNumber = this.value.trim();
-        const errorElement = document.getElementById('bank_account_number_error');
-        
-        if (!accountNumber && paymentMethodBank.checked) {
-            errorElement.textContent = 'Bank account number is required';
-            this.style.borderColor = '#dc2626';
-        } else {
-            errorElement.textContent = '';
-            this.style.borderColor = '';
-        }
-        checkFormValidity();
-    });
+    checkFormValidity();
 
     // Validate mobile fields
     mobileProvider.addEventListener('change', function() {
@@ -899,15 +813,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Validate bank fields if bank is selected
         if (paymentMethodBank.checked) {
             const bankName = bankNameHidden.value;
-            const accountNumber = bankAccountNumber.value.trim();
+            const accountNumber = bankAccountNumber.value ? bankAccountNumber.value.trim() : '';
             
-            if (!bankName) {
-                showError('bank_name_error', 'Please select or enter your bank name');
-                return false;
-            }
-            
-            if (!accountNumber) {
-                showError('bank_account_number_error', 'Bank account number is required');
+            if (!bankName || !accountNumber) {
+                // If no bank info, the error message in #noBankInfo is already visible
+                // But we still need to return false to prevent submission
                 return false;
             }
             
@@ -1114,12 +1024,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (data.payment_method === 'bank' && cashValue > 0) {
             const bankName = bankNameHidden.value;
-            const accountNumber = bankAccountNumber.value.trim();
+            const accountNumber = bankAccountNumber.value ? bankAccountNumber.value.trim() : '';
             if (!bankName || !accountNumber) {
                 clearInterval(interval);
                 splashScreen.classList.remove('active');
-                if (!bankName) showError('bank_name_error', 'Bank name is required');
-                if (!accountNumber) showError('bank_account_number_error', 'Bank account number is required');
+                showModalError('Mwanachama huyu hana taarifa za benki. Tafadhali wasiliana na ofisi au chagua njia nyingine ya malipo.');
                 return;
             }
             
