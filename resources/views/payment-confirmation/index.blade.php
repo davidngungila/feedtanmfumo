@@ -428,17 +428,6 @@
                             >
                             <div id="bank_account_number_error" class="error-message"></div>
                         </div>
-                        <div class="mb-4">
-                            <label for="bank_account_confirmation" class="input-label">Thibitisha Namba ya Akaunti</label>
-                            <input 
-                                type="text" 
-                                id="bank_account_confirmation" 
-                                name="bank_account_confirmation" 
-                                class="input-field" 
-                                placeholder="Ingiza tena namba ya akaunti"
-                            >
-                            <div id="bank_account_confirmation_error" class="error-message"></div>
-                        </div>
                     </div>
 
                     <!-- Mobile Money Fields -->
@@ -451,7 +440,6 @@
                                 class="input-field"
                             >
                                 <option value="">Chagua Mtandao</option>
-                                <option value="mpesa">M-Pesa</option>
                                 <option value="halopesa">HaloPesa</option>
                                 <option value="yas">Yas</option>
                             </select>
@@ -674,7 +662,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const bankFields = document.getElementById('bankFields');
     const mobileFields = document.getElementById('mobileFields');
     const bankAccountNumber = document.getElementById('bank_account_number');
-    const bankAccountConfirmation = document.getElementById('bank_account_confirmation');
     const mobileProvider = document.getElementById('mobile_provider');
     const mobileNumber = document.getElementById('mobile_number');
 
@@ -694,9 +681,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 mobileFields.style.display = 'block';
                 // Clear bank fields
                 bankAccountNumber.value = '';
-                bankAccountConfirmation.value = '';
                 clearError('bank_account_number_error');
-                clearError('bank_account_confirmation_error');
             }
             validatePaymentMethod();
             checkFormValidity();
@@ -712,41 +697,21 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Clear all fields
         bankAccountNumber.value = '';
-        bankAccountConfirmation.value = '';
         mobileProvider.value = '';
         mobileNumber.value = '';
         
         // Clear all errors
         clearError('payment_method_error');
         clearError('bank_account_number_error');
-        clearError('bank_account_confirmation_error');
         clearError('mobile_provider_error');
         clearError('mobile_number_error');
         
         checkFormValidity();
     });
 
-    // Validate bank account confirmation matches
-    bankAccountConfirmation.addEventListener('input', function() {
-        const accountNumber = bankAccountNumber.value.trim();
-        const confirmation = this.value.trim();
-        const errorElement = document.getElementById('bank_account_confirmation_error');
-        
-        if (confirmation && accountNumber && confirmation !== accountNumber) {
-            errorElement.textContent = 'Bank account numbers do not match';
-            this.style.borderColor = '#dc2626';
-            bankAccountNumber.style.borderColor = '#dc2626';
-        } else {
-            errorElement.textContent = '';
-            this.style.borderColor = '';
-            bankAccountNumber.style.borderColor = '';
-        }
-        checkFormValidity();
-    });
-
+    // Bank account validation removed check for confirmation
     bankAccountNumber.addEventListener('input', function() {
         const accountNumber = this.value.trim();
-        const confirmation = bankAccountConfirmation.value.trim();
         const errorElement = document.getElementById('bank_account_number_error');
         
         if (!accountNumber && paymentMethodBank.checked) {
@@ -755,11 +720,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             errorElement.textContent = '';
             this.style.borderColor = '';
-        }
-        
-        // Re-validate confirmation if it's already filled
-        if (confirmation) {
-            bankAccountConfirmation.dispatchEvent(new Event('input'));
         }
         checkFormValidity();
     });
@@ -814,27 +774,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Validate bank fields if bank is selected
         if (paymentMethodBank.checked) {
-            const accountNumber = bankAccountNumber.value.trim();
-            const confirmation = bankAccountConfirmation.value.trim();
-            
             if (!accountNumber) {
                 showError('bank_account_number_error', 'Bank account number is required');
                 return false;
             }
             
-            if (!confirmation) {
-                showError('bank_account_confirmation_error', 'Please confirm your bank account number');
-                return false;
-            }
-            
-            if (accountNumber !== confirmation) {
-                showError('bank_account_confirmation_error', 'Bank account numbers do not match');
-                return false;
-            }
-            
             // Clear errors if valid
             clearError('bank_account_number_error');
-            clearError('bank_account_confirmation_error');
         }
         
         // Validate mobile fields if mobile is selected
@@ -1034,18 +980,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         if (data.payment_method === 'bank' && cashValue > 0) {
-            const accountNumber = bankAccountNumber.value.trim();
-            const confirmation = bankAccountConfirmation.value.trim();
-            
-            if (!accountNumber || !confirmation || accountNumber !== confirmation) {
-                clearInterval(interval);
-                splashScreen.classList.remove('active');
-                showError('bank_account_confirmation_error', 'Bank account numbers do not match');
-                return;
+            if (!accountNumber) {
+                showError('bank_account_number_error', 'Bank account number is required');
+                return false;
             }
             
-            data.bank_account_number = accountNumber;
-            data.bank_account_confirmation = confirmation;
+            // Clear errors if valid
+            clearError('bank_account_number_error');
+        }
             // Clear mobile fields
             data.mobile_provider = '';
             data.mobile_number = '';
@@ -1121,7 +1063,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             const fieldMap = {
                                 'payment_method': 'payment_method_error',
                                 'bank_account_number': 'bank_account_number_error',
-                                'bank_account_confirmation': 'bank_account_confirmation_error',
                                 'mobile_provider': 'mobile_provider_error',
                                 'mobile_number': 'mobile_number_error',
                                 'member_email': 'member_email_error',
