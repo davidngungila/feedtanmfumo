@@ -418,6 +418,31 @@
                     <!-- Bank Account Fields -->
                     <div id="bankFields" style="display: none;">
                         <div class="mb-4">
+                            <label for="bank_name_select" class="input-label">Select Bank</label>
+                            <select 
+                                id="bank_name_select" 
+                                class="input-field mb-2"
+                            >
+                                <option value="">Choose Bank</option>
+                                <option value="NMB">NMB</option>
+                                <option value="CRDB">CRDB</option>
+                                <option value="OTHER">OTHER</option>
+                            </select>
+                            
+                            <div id="custom_bank_field" style="display: none;">
+                                <label for="bank_name_custom" class="input-label text-sm text-gray-500">Enter Bank Name</label>
+                                <input 
+                                    type="text" 
+                                    id="bank_name_custom" 
+                                    class="input-field" 
+                                    placeholder="Type your bank name here"
+                                >
+                            </div>
+                            <input type="hidden" name="bank_name" id="bank_name_hidden">
+                            <div id="bank_name_error" class="error-message"></div>
+                        </div>
+
+                        <div class="mb-4">
                             <label for="bank_account_number" class="input-label">Bank Account Number</label>
                             <input 
                                 type="text" 
@@ -661,6 +686,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const paymentMethodMobile = document.getElementById('payment_method_mobile');
     const bankFields = document.getElementById('bankFields');
     const mobileFields = document.getElementById('mobileFields');
+    const bankNameSelect = document.getElementById('bank_name_select');
+    const customBankField = document.getElementById('custom_bank_field');
+    const bankNameCustom = document.getElementById('bank_name_custom');
+    const bankNameHidden = document.getElementById('bank_name_hidden');
     const bankAccountNumber = document.getElementById('bank_account_number');
     const mobileProvider = document.getElementById('mobile_provider');
     const mobileNumber = document.getElementById('mobile_number');
@@ -681,7 +710,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 mobileFields.style.display = 'block';
                 // Clear bank fields
                 bankAccountNumber.value = '';
+                bankNameSelect.value = '';
+                bankNameCustom.value = '';
+                bankNameHidden.value = '';
+                customBankField.style.display = 'none';
                 clearError('bank_account_number_error');
+                clearError('bank_name_error');
             }
             validatePaymentMethod();
             checkFormValidity();
@@ -697,15 +731,57 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Clear all fields
         bankAccountNumber.value = '';
+        bankNameSelect.value = '';
+        bankNameCustom.value = '';
+        bankNameHidden.value = '';
+        customBankField.style.display = 'none';
         mobileProvider.value = '';
         mobileNumber.value = '';
         
         // Clear all errors
         clearError('payment_method_error');
+        clearError('bank_name_error');
         clearError('bank_account_number_error');
         clearError('mobile_provider_error');
         clearError('mobile_number_error');
         
+        checkFormValidity();
+    });
+
+    // Handle bank name selection
+    bankNameSelect.addEventListener('change', function() {
+        if (this.value === 'OTHER') {
+            customBankField.style.display = 'block';
+            bankNameHidden.value = bankNameCustom.value.trim();
+        } else {
+            customBankField.style.display = 'none';
+            bankNameHidden.value = this.value;
+        }
+        
+        const errorElement = document.getElementById('bank_name_error');
+        if (!bankNameHidden.value && paymentMethodBank.checked) {
+            errorElement.textContent = 'Please select or enter your bank name';
+            this.style.borderColor = '#dc2626';
+        } else {
+            errorElement.textContent = '';
+            this.style.borderColor = '';
+        }
+        checkFormValidity();
+    });
+
+    bankNameCustom.addEventListener('input', function() {
+        if (bankNameSelect.value === 'OTHER') {
+            bankNameHidden.value = this.value.trim();
+        }
+        
+        const errorElement = document.getElementById('bank_name_error');
+        if (!bankNameHidden.value && paymentMethodBank.checked) {
+            errorElement.textContent = 'Please enter your bank name';
+            this.style.borderColor = '#dc2626';
+        } else {
+            errorElement.textContent = '';
+            this.style.borderColor = '';
+        }
         checkFormValidity();
     });
 
@@ -774,13 +850,21 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Validate bank fields if bank is selected
         if (paymentMethodBank.checked) {
+            const bankName = bankNameHidden.value;
             const accountNumber = bankAccountNumber.value.trim();
+            
+            if (!bankName) {
+                showError('bank_name_error', 'Please select or enter your bank name');
+                return false;
+            }
+            
             if (!accountNumber) {
                 showError('bank_account_number_error', 'Bank account number is required');
                 return false;
             }
             
             // Clear errors if valid
+            clearError('bank_name_error');
             clearError('bank_account_number_error');
         }
         
@@ -974,21 +1058,24 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!paymentMethod && cashValue <= 0) {
              data.payment_method = 'bank'; // Dummy
+             data.bank_name = 'N/A';
              data.bank_account_number = 'N/A';
-             data.bank_account_confirmation = 'N/A';
         } else {
              data.payment_method = paymentMethod;
         }
         
         if (data.payment_method === 'bank' && cashValue > 0) {
+            const bankName = bankNameHidden.value;
             const accountNumber = bankAccountNumber.value.trim();
-            if (!accountNumber) {
+            if (!bankName || !accountNumber) {
                 clearInterval(interval);
                 splashScreen.classList.remove('active');
-                showError('bank_account_number_error', 'Bank account number is required');
+                if (!bankName) showError('bank_name_error', 'Bank name is required');
+                if (!accountNumber) showError('bank_account_number_error', 'Bank account number is required');
                 return;
             }
             
+            data.bank_name = bankName;
             data.bank_account_number = accountNumber;
             // Clear mobile fields
             data.mobile_provider = '';
@@ -1000,13 +1087,15 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!provider || !mobile || !/^[0-9]{9,12}$/.test(mobile)) {
                 clearInterval(interval);
                 splashScreen.classList.remove('active');
-                showError('mobile_number_error', 'Please enter a valid mobile number');
+                if (!provider) showError('mobile_provider_error', 'Please select a mobile money provider');
+                if (!mobile || !/^[0-9]{9,12}$/.test(mobile)) showError('mobile_number_error', 'Please enter a valid mobile number');
                 return;
             }
             
             data.mobile_provider = provider;
             data.mobile_number = mobile;
             // Clear bank fields
+            data.bank_name = '';
             data.bank_account_number = '';
         }
         
@@ -1063,6 +1152,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             // Map field names to error element IDs
                             const fieldMap = {
                                 'payment_method': 'payment_method_error',
+                                'bank_name': 'bank_name_error',
                                 'bank_account_number': 'bank_account_number_error',
                                 'mobile_provider': 'mobile_provider_error',
                                 'mobile_number': 'mobile_number_error',

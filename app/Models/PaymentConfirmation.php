@@ -24,6 +24,7 @@ class PaymentConfirmation extends Model
         'member_email',
         'notes',
         'payment_method',
+        'bank_name',
         'mobile_provider',
         'mobile_number',
         'bank_account_number',
