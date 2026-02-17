@@ -774,6 +774,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Validate bank fields if bank is selected
         if (paymentMethodBank.checked) {
+            const accountNumber = bankAccountNumber.value.trim();
             if (!accountNumber) {
                 showError('bank_account_number_error', 'Bank account number is required');
                 return false;
@@ -980,14 +981,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         if (data.payment_method === 'bank' && cashValue > 0) {
+            const accountNumber = bankAccountNumber.value.trim();
             if (!accountNumber) {
+                clearInterval(interval);
+                splashScreen.classList.remove('active');
                 showError('bank_account_number_error', 'Bank account number is required');
-                return false;
+                return;
             }
             
-            // Clear errors if valid
-            clearError('bank_account_number_error');
-        }
+            data.bank_account_number = accountNumber;
             // Clear mobile fields
             data.mobile_provider = '';
             data.mobile_number = '';
@@ -1006,7 +1008,6 @@ document.addEventListener('DOMContentLoaded', function() {
             data.mobile_number = mobile;
             // Clear bank fields
             data.bank_account_number = '';
-            data.bank_account_confirmation = '';
         }
         
         // Convert to numbers
