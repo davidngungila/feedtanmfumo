@@ -53,6 +53,7 @@
             <h3 style="margin-top: 0; color: #015425; font-size: 16px;">Maelezo ya Malipo (Payment Method)</h3>
             <p style="margin: 5px 0; font-size: 14px;"><strong>Njia iliyotumika:</strong> {{ $paymentConfirmation->payment_method === 'bank' ? 'Benki (Bank Transfer)' : 'Simu ya Mkononi (Mobile Money)' }}</p>
             @if($paymentConfirmation->payment_method === 'bank')
+                <p style="margin: 5px 0; font-size: 14px;"><strong>Benki:</strong> {{ $paymentConfirmation->bank_name }}</p>
                 <p style="margin: 5px 0; font-size: 14px;"><strong>Akaunti:</strong> {{ $paymentConfirmation->bank_account_number }}</p>
             @else
                 <p style="margin: 5px 0; font-size: 14px;"><strong>Mtandao:</strong> {{ ucfirst($paymentConfirmation->mobile_provider) }} ({{ $paymentConfirmation->mobile_number }})</p>

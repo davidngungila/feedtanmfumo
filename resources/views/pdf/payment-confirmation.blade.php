@@ -204,6 +204,10 @@
         </tr>
         @if($paymentConfirmation->payment_method === 'bank')
         <tr>
+            <td>Jina la Benki</td>
+            <td><strong>{{ strtoupper($paymentConfirmation->bank_name ?? 'N/A') }}</strong></td>
+        </tr>
+        <tr>
             <td>Namba ya Akaunti ya Benki</td>
             <td><strong>{{ $paymentConfirmation->bank_account_number }}</strong></td>
         </tr>
