@@ -74,6 +74,8 @@ class PaymentConfirmationController extends Controller
                     'capital_contribution' => $paymentConfirmation->capital_contribution,
                     'loan_repayment' => $paymentConfirmation->loan_repayment,
                     'fine_penalty' => $paymentConfirmation->fine_penalty,
+                    'bank_name' => $paymentConfirmation->bank_name ?? ($user?->bank_name ?? ''),
+                    'bank_account_number' => $paymentConfirmation->bank_account_number ?? ($user?->bank_account_number ?? ''),
                     'has_existing_confirmation' => true,
                 ],
             ]);
@@ -106,6 +108,8 @@ class PaymentConfirmationController extends Controller
                 'email' => $user->email,
                 'deposit_balance' => number_format($depositBalance, 2),
                 'deposit_balance_raw' => $depositBalance,
+                'bank_name' => $user->bank_name ?? '',
+                'bank_account_number' => $user->bank_account_number ?? '',
                 'has_existing_confirmation' => false,
             ],
         ]);

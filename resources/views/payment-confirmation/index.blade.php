@@ -417,42 +417,53 @@
 
                     <!-- Bank Account Fields -->
                     <div id="bankFields" style="display: none;">
-                        <div class="mb-4">
-                            <label for="bank_name_select" class="input-label">Select Bank</label>
-                            <select 
-                                id="bank_name_select" 
-                                class="input-field mb-2"
-                            >
-                                <option value="">Choose Bank</option>
-                                <option value="NMB">NMB</option>
-                                <option value="CRDB">CRDB</option>
-                                <option value="OTHER">OTHER</option>
-                            </select>
-                            
-                            <div id="custom_bank_field" style="display: none;">
-                                <label for="bank_name_custom" class="input-label text-sm text-gray-500">Enter Bank Name</label>
-                                <input 
-                                    type="text" 
-                                    id="bank_name_custom" 
-                                    class="input-field" 
-                                    placeholder="Type your bank name here"
-                                >
-                            </div>
-                            <input type="hidden" name="bank_name" id="bank_name_hidden">
-                            <div id="bank_name_error" class="error-message"></div>
+                        <!-- Existing Bank Info Display -->
+                        <div id="existingBankInfo" style="display: none;" class="p-3 bg-green-50 rounded-lg border border-green-200 mb-4">
+                            <p class="text-sm font-medium text-green-800 mb-1">Bank Details (Kutoka kwenye Profile):</p>
+                            <p class="text-xs text-green-700">Bank: <span id="display_bank_name" class="font-bold"></span></p>
+                            <p class="text-xs text-green-700">Akaunti: <span id="display_bank_account" class="font-bold"></span></p>
                         </div>
 
-                        <div class="mb-4">
-                            <label for="bank_account_number" class="input-label">Bank Account Number</label>
-                            <input 
-                                type="text" 
-                                id="bank_account_number" 
-                                name="bank_account_number" 
-                                class="input-field" 
-                                placeholder="Enter your bank account number"
-                            >
-                            <div id="bank_account_number_error" class="error-message"></div>
+                        <!-- Manual Bank Inputs -->
+                        <div id="manualBankInputs">
+                            <div class="mb-4">
+                                <label for="bank_name_select" class="input-label">Select Bank</label>
+                                <select 
+                                    id="bank_name_select" 
+                                    class="input-field mb-2"
+                                >
+                                    <option value="">Choose Bank</option>
+                                    <option value="NMB">NMB</option>
+                                    <option value="CRDB">CRDB</option>
+                                    <option value="OTHER">OTHER</option>
+                                </select>
+                                
+                                <div id="custom_bank_field" style="display: none;">
+                                    <label for="bank_name_custom" class="input-label text-sm text-gray-500">Enter Bank Name</label>
+                                    <input 
+                                        type="text" 
+                                        id="bank_name_custom" 
+                                        class="input-field" 
+                                        placeholder="Type your bank name here"
+                                    >
+                                </div>
+                                <div id="bank_name_error" class="error-message"></div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="bank_account_number" class="input-label">Bank Account Number</label>
+                                <input
+                                    type="text"
+                                    id="bank_account_number"
+                                    name="bank_account_number"
+                                    class="input-field"
+                                    placeholder="Enter your bank account number"
+                                >
+                                <div id="bank_account_number_error" class="error-message"></div>
+                            </div>
                         </div>
+
+                        <input type="hidden" name="bank_name" id="bank_name_hidden">
                     </div>
 
                     <!-- Mobile Money Fields -->
@@ -647,6 +658,30 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Update total immediately
                 updateTotal();
+
+                // Bank Info Handling
+                const existingBankInfo = document.getElementById('existingBankInfo');
+                const manualBankInputs = document.getElementById('manualBankInputs');
+                const displayBankName = document.getElementById('display_bank_name');
+                const displayBankAccount = document.getElementById('display_bank_account');
+                const bankNameHidden = document.getElementById('bank_name_hidden');
+                const bankAccountNumber = document.getElementById('bank_account_number');
+
+                if (memberData.bank_name && memberData.bank_account_number) {
+                    existingBankInfo.style.display = 'block';
+                    manualBankInputs.style.display = 'none';
+                    displayBankName.textContent = memberData.bank_name;
+                    displayBankAccount.textContent = memberData.bank_account_number;
+                    bankNameHidden.value = memberData.bank_name;
+                    bankAccountNumber.value = memberData.bank_account_number;
+                } else {
+                    existingBankInfo.style.display = 'none';
+                    manualBankInputs.style.display = 'block';
+                    // Reset fields if no data
+                    bankNameHidden.value = '';
+                    bankAccountNumber.value = '';
+                }
+
             } else {
                 showError('member_id_error', data.message || 'Member not found');
             }
@@ -700,6 +735,15 @@ document.addEventListener('DOMContentLoaded', function() {
             if (this.value === 'bank') {
                 bankFields.style.display = 'block';
                 mobileFields.style.display = 'none';
+                
+                // Re-populate from memberData if we have existing bank info
+                if (memberData && memberData.bank_name && memberData.bank_account_number) {
+                    bankNameHidden.value = memberData.bank_name;
+                    bankAccountNumber.value = memberData.bank_account_number;
+                    document.getElementById('existingBankInfo').style.display = 'block';
+                    document.getElementById('manualBankInputs').style.display = 'none';
+                }
+
                 // Clear mobile fields
                 mobileProvider.value = '';
                 mobileNumber.value = '';
@@ -714,6 +758,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 bankNameCustom.value = '';
                 bankNameHidden.value = '';
                 customBankField.style.display = 'none';
+                document.getElementById('existingBankInfo').style.display = 'none';
+                document.getElementById('manualBankInputs').style.display = 'block';
                 clearError('bank_account_number_error');
                 clearError('bank_name_error');
             }
@@ -735,6 +781,8 @@ document.addEventListener('DOMContentLoaded', function() {
         bankNameCustom.value = '';
         bankNameHidden.value = '';
         customBankField.style.display = 'none';
+        document.getElementById('existingBankInfo').style.display = 'none';
+        document.getElementById('manualBankInputs').style.display = 'block';
         mobileProvider.value = '';
         mobileNumber.value = '';
         

@@ -61,10 +61,6 @@
         </div>
 
         <p style="font-size: 15px;">Tumekuambatanishia cheti (PDF document) chenye mchanganuo kamili kwa ajili ya kumbukumbu zako.</p>
-        
-        <div style="text-align: center; margin: 30px 0;">
-            <a href="{{ url('/') }}" style="background-color: #015425; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">Login to Portal</a>
-        </div>
 
         <p style="font-size: 14px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 20px;">
             Hii ni barua pepe ya kiotomatiki, tafadhali usijibu. Kama una swali lolote, wasiliana na ofisi ya FEEDTAN.
