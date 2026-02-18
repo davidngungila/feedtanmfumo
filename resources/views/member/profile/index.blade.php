@@ -1,211 +1,206 @@
 @extends('layouts.member')
 
-@section('page-title', 'My Profile')
+@section('page-title', 'Digital Identity')
 
 @section('content')
-<div class="max-w-6xl mx-auto space-y-6">
-    @if(session('success'))
-        <div class="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
-            {{ session('success') }}
-        </div>
-    @endif
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-6 sm:p-8 text-white">
-        <div class="flex flex-col md:flex-row items-center md:items-start justify-between">
-            <div class="flex items-center space-x-4 sm:space-x-6 mb-4 md:mb-0">
-                <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white bg-opacity-20 backdrop-blur-sm flex items-center justify-center text-3xl sm:text-4xl font-bold border-4 border-white border-opacity-30">
-                    {{ strtoupper(substr($user->name, 0, 2)) }}
-                </div>
-                <div>
-                    <h1 class="text-2xl sm:text-3xl font-bold mb-2">{{ $user->name }}</h1>
-                    <p class="text-base sm:text-lg text-white text-opacity-90 mb-1">{{ $user->email }}</p>
-                    @if($user->phone)
-                        <p class="text-xs sm:text-sm text-white text-opacity-75">{{ $user->phone }}</p>
+<div class="max-w-6xl mx-auto space-y-8">
+    <!-- Premium Header -->
+    <div class="bg-gradient-to-br from-[#015425] via-[#027a3a] to-[#013019] rounded-[2.5rem] shadow-2xl p-10 sm:p-14 text-white relative overflow-hidden">
+        <div class="absolute -right-24 -top-24 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl"></div>
+        <div class="absolute -left-24 -bottom-24 w-96 h-96 bg-black opacity-10 rounded-full blur-3xl"></div>
+        
+        <div class="relative z-10 flex flex-col md:flex-row items-center gap-10">
+            <div class="relative">
+                <div class="w-32 h-32 md:w-40 md:h-40 rounded-[2.5rem] bg-white/10 backdrop-blur-xl border-4 border-white/20 flex items-center justify-center text-4xl md:text-5xl font-black shadow-2xl overflow-hidden group">
+                    @if($user->avatar)
+                        <img src="{{ asset('storage/' . $user->avatar) }}" class="w-full h-full object-cover">
+                    @else
+                        {{ strtoupper(substr($user->name, 0, 2)) }}
                     @endif
+                    <div class="absolute inset-0 bg-[#015425]/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg>
+                    </div>
                 </div>
             </div>
-            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
-                <a href="{{ route('member.profile.edit') }}" class="px-4 sm:px-6 py-2 bg-white text-[#015425] rounded-md hover:bg-gray-100 transition font-medium text-center text-sm sm:text-base">
-                    Edit Profile
-                </a>
-                <a href="{{ route('member.profile.settings') }}" class="px-4 sm:px-6 py-2 bg-white bg-opacity-20 backdrop-blur-sm text-white rounded-md hover:bg-opacity-30 transition font-medium text-center text-sm sm:text-base">
-                    Settings
-                </a>
+            
+            <div class="text-center md:text-left flex-1">
+                <div class="flex flex-wrap justify-center md:justify-start gap-2 mb-4">
+                     <span class="px-4 py-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[9px] font-black uppercase tracking-[0.2em] text-green-200">
+                        Primary Account
+                    </span>
+                    @if($user->membership_code)
+                        <span class="px-4 py-1.5 bg-green-500/20 backdrop-blur-md border border-green-500/30 rounded-full text-[9px] font-black uppercase tracking-[0.2em] text-white">
+                            {{ $user->membership_code }}
+                        </span>
+                    @endif
+                </div>
+                <h1 class="text-4xl md:text-6xl font-black mb-2 tracking-tight">{{ $user->name }}</h1>
+                <p class="text-green-50 text-lg opacity-80 font-medium mb-8">{{ $user->email }}</p>
+                
+                <div class="flex flex-wrap justify-center md:justify-start gap-4">
+                    <a href="{{ route('member.profile.edit') }}" class="px-10 py-4 bg-white text-[#015425] rounded-2xl font-black text-xs shadow-xl hover:-translate-y-1 transition-all">Identity Edit</a>
+                    <a href="{{ route('member.profile.settings') }}" class="px-10 py-4 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-2xl font-black text-xs hover:bg-white/20 transition-all">Security Portal</a>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        <!-- Main Content -->
-        <div class="lg:col-span-2 space-y-4 sm:space-y-6">
-            <!-- Statistics Cards -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-                <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-xs sm:text-sm text-gray-600 mb-1">Loans</p>
-                            <p class="text-xl sm:text-2xl font-bold text-[#015425]">{{ $stats['loans'] }}</p>
-                        </div>
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
+    @if(session('success'))
+        <div class="bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-3xl font-bold text-sm animate-in fade-in slide-in-from-top duration-500 flex items-center gap-3">
+             <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
+             {{ session('success') }}
+        </div>
+    @endif
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Analysis -->
+        <div class="lg:col-span-2 space-y-8">
+            <!-- Asset Matrix -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between group cursor-default">
+                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4">Liability</p>
+                    <div>
+                        <p class="text-3xl font-black text-[#015425]">{{ $stats['loans'] }}</p>
+                        <p class="text-[10px] text-gray-400 font-bold mt-1">Total Credit</p>
                     </div>
                 </div>
-
-                <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-xs sm:text-sm text-gray-600 mb-1">Savings</p>
-                            <p class="text-xl sm:text-2xl font-bold text-green-600">{{ $stats['savings'] }}</p>
-                        </div>
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-full flex items-center justify-center">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                            </svg>
-                        </div>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between group cursor-default">
+                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4">Liquidity</p>
+                    <div>
+                        <p class="text-3xl font-black text-green-600">{{ $stats['savings'] }}</p>
+                        <p class="text-[10px] text-gray-400 font-bold mt-1">Savings Acc</p>
                     </div>
                 </div>
-
-                <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-xs sm:text-sm text-gray-600 mb-1">Investments</p>
-                            <p class="text-xl sm:text-2xl font-bold text-purple-600">{{ $stats['investments'] }}</p>
-                        </div>
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                            </svg>
-                        </div>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between group cursor-default">
+                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4">Capital</p>
+                    <div>
+                        <p class="text-3xl font-black text-purple-600">{{ $stats['investments'] }}</p>
+                        <p class="text-[10px] text-gray-400 font-bold mt-1">Fixed Plans</p>
                     </div>
                 </div>
-
-                <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-xs sm:text-sm text-gray-600 mb-1">Issues</p>
-                            <p class="text-xl sm:text-2xl font-bold text-orange-600">{{ $stats['issues'] }}</p>
-                        </div>
-                        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-full flex items-center justify-center">
-                            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                        </div>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between group cursor-default">
+                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-4">Feedback</p>
+                    <div>
+                        <p class="text-3xl font-black text-orange-600">{{ $stats['issues'] }}</p>
+                        <p class="text-[10px] text-gray-400 font-bold mt-1">Open Tickets</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Personal Information -->
-            <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
-                <h2 class="text-lg sm:text-xl font-bold text-[#015425] mb-4">Personal Information</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                    <div>
-                        <p class="text-xs sm:text-sm text-gray-600 mb-1">Full Name</p>
-                        <p class="text-base sm:text-lg font-semibold text-gray-900">{{ $user->name }}</p>
+            <!-- Detailed Credentials -->
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-8 sm:p-12 border-b border-gray-50 flex justify-between items-center">
+                    <h2 class="text-2xl font-black text-gray-900">Digital Credentials</h2>
+                    <div class="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400">
+                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A10.003 10.003 0 0012 3a9.99 9.99 0 00-4.534 1.08l.094.05c1.415.79 2.44 2.15 2.44 3.73a4.43 4.43 0 00-4.46 4.48c0 2.21 1.76 4 3.93 4z"></path></svg>
                     </div>
-                    <div>
-                        <p class="text-xs sm:text-sm text-gray-600 mb-1">Email Address</p>
-                        <p class="text-base sm:text-lg font-semibold text-gray-900">{{ $user->email }}</p>
+                </div>
+                <div class="p-8 sm:p-12 grid grid-cols-1 sm:grid-cols-2 gap-12">
+                    <div class="space-y-1">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Legal Identity</p>
+                        <p class="text-xl font-black text-gray-900">{{ $user->name }}</p>
+                        <p class="text-[10px] text-gray-400 font-bold">Authorized Account Holder</p>
                     </div>
-                    @if($user->phone)
-                    <div>
-                        <p class="text-xs sm:text-sm text-gray-600 mb-1">Phone Number</p>
-                        <p class="text-base sm:text-lg font-semibold text-gray-900">{{ $user->phone }}</p>
+                    <div class="space-y-1">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Email Relay</p>
+                        <p class="text-xl font-black text-gray-900 break-all">{{ $user->email }}</p>
+                        <p class="text-[10px] text-gray-400 font-bold">Primary Communication Channel</p>
                     </div>
-                    @endif
-                    @if($user->address)
-                    <div>
-                        <p class="text-xs sm:text-sm text-gray-600 mb-1">Address</p>
-                        <p class="text-base sm:text-lg font-semibold text-gray-900">{{ $user->address }}</p>
+                    <div class="space-y-1">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Cellular Contact</p>
+                        <p class="text-xl font-black text-gray-900">{{ $user->phone ?? 'Un-registered' }}</p>
+                        <p class="text-[10px] text-gray-400 font-bold">Mobile Authentication Link</p>
                     </div>
-                    @endif
-                    <div>
-                        <p class="text-xs sm:text-sm text-gray-600 mb-1">Member Since</p>
-                        <p class="text-base sm:text-lg font-semibold text-gray-900">{{ $user->created_at->format('F d, Y') }}</p>
-                    </div>
-                    <div>
-                        <p class="text-xs sm:text-sm text-gray-600 mb-1">Last Updated</p>
-                        <p class="text-base sm:text-lg font-semibold text-gray-900">{{ $user->updated_at->format('F d, Y') }}</p>
+                    <div class="space-y-1">
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Member Since</p>
+                        <p class="text-xl font-black text-gray-900">{{ $user->created_at->format('F d, Y') }}</p>
+                        <p class="text-[10px] text-gray-400 font-bold">Origin Date of Membership</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Roles & Permissions -->
-            <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
-                <h2 class="text-lg sm:text-xl font-bold text-[#015425] mb-4">Roles & Permissions</h2>
-                <div class="flex flex-wrap gap-2">
+            <!-- Status Badges -->
+            <div class="bg-gray-50 rounded-[2.5rem] p-8 sm:p-12 border border-gray-100">
+                <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest mb-8">Role Clearance</h3>
+                <div class="flex flex-wrap gap-4">
                     @forelse($user->roles as $role)
-                        <span class="px-3 sm:px-4 py-1 sm:py-2 bg-[#015425] text-white rounded-full text-xs sm:text-sm font-medium">
-                            {{ $role->name }}
-                        </span>
+                        <div class="px-8 py-5 bg-white rounded-3xl shadow-sm border border-gray-200 text-center min-w-[140px] hover:-translate-y-1 transition-all group">
+                             <div class="w-8 h-8 bg-green-50 rounded-full mx-auto mb-3 flex items-center justify-center text-[#015425] group-hover:bg-[#015425] group-hover:text-white transition-colors">
+                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
+                             </div>
+                             <p class="text-xs font-black text-gray-900 uppercase tracking-tighter">{{ $role->name }}</p>
+                             <p class="text-[9px] text-gray-400 font-bold tracking-widest uppercase mt-1">Authorized</p>
+                        </div>
                     @empty
-                        <p class="text-gray-500 text-sm">No roles assigned</p>
+                        <div class="w-full flex items-center gap-4 text-gray-400">
+                            <svg class="w-12 h-12 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            <p class="text-sm font-bold italic">No specialized roles assigned. Standard Member Protocol active.</p>
+                        </div>
                     @endforelse
                 </div>
             </div>
-
-            @if($user->bio)
-            <!-- Bio -->
-            <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
-                <h2 class="text-lg sm:text-xl font-bold text-[#015425] mb-4">About</h2>
-                <p class="text-sm sm:text-base text-gray-700 whitespace-pre-wrap">{{ $user->bio }}</p>
-            </div>
-            @endif
         </div>
 
-        <!-- Sidebar -->
-        <div class="space-y-4 sm:space-y-6">
-            <!-- Quick Actions -->
-            <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
-                <h3 class="text-base sm:text-lg font-bold text-[#015425] mb-4">Quick Actions</h3>
-                <div class="space-y-2">
-                    <a href="{{ route('member.profile.edit') }}" class="flex items-center px-3 sm:px-4 py-2 sm:py-3 rounded-md hover:bg-gray-50 transition text-gray-700 text-sm sm:text-base">
-                        <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                        </svg>
-                        Edit Profile
-                    </a>
-                    <a href="{{ route('member.profile.settings') }}" class="flex items-center px-3 sm:px-4 py-2 sm:py-3 rounded-md hover:bg-gray-50 transition text-gray-700 text-sm sm:text-base">
-                        <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                        Settings
-                    </a>
-                    <a href="{{ route('member.dashboard') }}" class="flex items-center px-3 sm:px-4 py-2 sm:py-3 rounded-md hover:bg-gray-50 transition text-gray-700 text-sm sm:text-base">
-                        <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                        </svg>
-                        Dashboard
-                    </a>
-                </div>
+        <!-- Sidebar Insights -->
+        <div class="space-y-8">
+            <!-- Security Audit -->
+            <div class="bg-white rounded-[2rem] p-10 shadow-sm border border-gray-100">
+                 <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-10 border-b border-gray-50 pb-6">Account Maturity</h3>
+                 <div class="space-y-8">
+                     <div class="flex items-center gap-6 group">
+                         <div class="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-green-600 transition-all group-hover:scale-110">
+                              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                         </div>
+                         <div>
+                             <p class="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1">Email Verification</p>
+                             <p class="text-sm font-black {{ $user->email_verified_at ? 'text-green-600' : 'text-yellow-600' }} uppercase tracking-tighter">
+                                {{ $user->email_verified_at ? 'Verified Trust' : 'Action Required' }}
+                             </p>
+                         </div>
+                     </div>
+
+                     <div class="flex items-center gap-6 group">
+                         <div class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 transition-all group-hover:scale-110">
+                              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                         </div>
+                         <div>
+                             <p class="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1">Access Protocol</p>
+                             <p class="text-sm font-black text-gray-900 uppercase tracking-tighter">Standard Auth</p>
+                         </div>
+                     </div>
+
+                     <div class="flex items-center gap-6 group">
+                         <div class="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 transition-all group-hover:scale-110">
+                              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                         </div>
+                         <div>
+                             <p class="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1">Last Update</p>
+                             <p class="text-sm font-black text-gray-900 uppercase tracking-tighter">{{ $user->updated_at->diffForHumans() }}</p>
+                         </div>
+                     </div>
+                 </div>
             </div>
 
-            <!-- Account Security -->
-            <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
-                <h3 class="text-base sm:text-lg font-bold text-[#015425] mb-4">Account Security</h3>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs sm:text-sm text-gray-600">Email Verified</span>
-                        @if($user->email_verified_at)
-                            <span class="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">Verified</span>
-                        @else
-                            <span class="px-2 py-1 text-xs bg-yellow-100 text-yellow-800 rounded-full">Not Verified</span>
-                        @endif
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs sm:text-sm text-gray-600">Two-Factor Auth</span>
-                        <span class="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full">Disabled</span>
-                    </div>
-                    <a href="{{ route('member.profile.edit') }}#password" class="block w-full mt-4 px-4 py-2 text-center bg-[#015425] text-white rounded-md hover:bg-[#013019] transition text-xs sm:text-sm font-medium">
-                        Change Password
-                    </a>
+            <!-- Narrative Bio -->
+            @if($user->bio)
+            <div class="bg-gray-900 rounded-[2.5rem] p-10 text-white shadow-2xl relative overflow-hidden group">
+                <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full group-hover:scale-125 transition-transform duration-1000"></div>
+                <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500 mb-8 border-b border-white/10 pb-4">Personal Narrative</h3>
+                <p class="text-sm text-gray-300 leading-relaxed font-medium italic opacity-80">"{{ $user->bio }}"</p>
+            </div>
+            @endif
+
+            <!-- Governance Card -->
+            <div class="bg-indigo-600 rounded-[2.5rem] p-10 text-white shadow-xl relative overflow-hidden group cursor-pointer">
+                <div class="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity"></div>
+                <h3 class="text-2xl font-black mb-4">Core Safety</h3>
+                <p class="text-xs text-indigo-100 leading-relaxed opacity-70">Your profile is your reputation within the community. Higher verification levels unlock tiered financial benefits and priority processing.</p>
+                <div class="mt-8 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+                    <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                    Governance Tier: Member
                 </div>
             </div>
         </div>
     </div>
 </div>
 @endsection
-

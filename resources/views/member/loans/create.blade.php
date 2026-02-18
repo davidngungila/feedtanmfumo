@@ -1,86 +1,52 @@
 @extends('layouts.member')
 
-@section('page-title', 'Apply for Loan')
+@section('page-title', 'Apply for Community Capital')
 
 @section('content')
-<div class="space-y-6">
-    <!-- Header Section -->
-    <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-6 text-white">
-        <div class="flex flex-col md:flex-row md:items-center">
-            <div class="flex-1">
-                <h1 class="text-2xl sm:text-3xl font-bold mb-2">Loan Application</h1>
-                <p class="text-white text-opacity-90 text-sm sm:text-base">Submit a comprehensive loan application with detailed information and supporting documents</p>
+<div class="max-w-7xl mx-auto space-y-8">
+    <!-- Premium Header -->
+    <div class="bg-gradient-to-br from-[#015425] via-[#027a3a] to-[#013019] rounded-[2.5rem] shadow-2xl p-10 sm:p-14 text-white relative overflow-hidden">
+        <div class="absolute -right-24 -top-24 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl"></div>
+        <div class="absolute -left-24 -bottom-24 w-96 h-96 bg-black opacity-10 rounded-full blur-3xl"></div>
+        
+        <div class="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-10">
+            <div class="text-center lg:text-left">
+                <h1 class="text-4xl sm:text-6xl font-black mb-6 tracking-tight">Community Capital</h1>
+                <p class="text-green-50 text-lg sm:text-xl opacity-80 max-w-2xl leading-relaxed font-medium">Access fair, low-interest funding backed by the community. Your growth is our collective success.</p>
             </div>
-            <div class="mt-4 md:mt-0 md:ml-auto flex flex-wrap gap-3 justify-end">
-                <a href="{{ route('member.loans.index') }}" class="inline-flex items-center px-6 py-3 bg-white text-[#015425] rounded-md hover:bg-gray-100 transition font-medium shadow-md">
-                    My Loans
-                </a>
+            <div class="flex flex-col gap-4">
+                 <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 text-center">
+                    <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-green-200 mb-1">Standard Interest</p>
+                    <p class="text-4xl font-black">10.0% <span class="text-xs font-normal opacity-60">p.a</span></p>
+                </div>
             </div>
         </div>
     </div>
 
     <form action="{{ route('member.loans.store') }}" method="POST" id="loan-form" enctype="multipart/form-data">
-            @csrf
-            
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Main Form Section -->
-            <div class="lg:col-span-2 space-y-6">
-                <!-- Member Information -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <div class="flex items-center mb-4">
-                        <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                            </svg>
+        @csrf
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Main Application Section (8 columns) -->
+            <div class="lg:col-span-8 space-y-8">
+                
+                <!-- Section: Financial Requirements -->
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-8 sm:p-10">
+                    <div class="flex items-center gap-4 mb-10">
+                        <div class="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-[#015425]">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         </div>
-                        <h2 class="text-xl font-bold text-[#015425]">Your Information</h2>
-                    </div>
-                    
-                    <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-xs text-gray-600 mb-1">Full Name</p>
-                                <p class="text-sm font-medium text-gray-900">{{ Auth::user()->name }}</p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-600 mb-1">Email</p>
-                                <p class="text-sm font-medium text-gray-900">{{ Auth::user()->email }}</p>
-                            </div>
-                            @if(Auth::user()->phone)
-                            <div>
-                                <p class="text-xs text-gray-600 mb-1">Phone</p>
-                                <p class="text-sm font-medium text-gray-900">{{ Auth::user()->phone }}</p>
-                            </div>
-                            @endif
-                            @if(Auth::user()->membership_code)
-                <div>
-                                <p class="text-xs text-gray-600 mb-1">Membership Code</p>
-                                <p class="text-sm font-semibold text-[#015425]">{{ Auth::user()->membership_code }}</p>
-                            </div>
-                            @endif
+                        <div>
+                            <h2 class="text-xl font-black text-gray-900">Capital Requirements</h2>
+                            <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-0.5">Define your funding goals</p>
                         </div>
                     </div>
-                </div>
 
-                <!-- Loan Details -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <div class="flex items-center mb-4">
-                        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                        </div>
-                        <h2 class="text-xl font-bold text-[#015425]">Loan Details</h2>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Loan Type
-                            </label>
-                            <select name="loan_type" id="loan_type" 
-                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition">
-                                <option value="">-- Select loan type --</option>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 block">Loan Classification</label>
+                            <select name="loan_type" id="loan_type" class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold text-gray-700 focus:ring-2 focus:ring-[#015425] transition-all">
+                                <option value="">Select Category</option>
                                 <option value="Personal">Personal Loan</option>
                                 <option value="Business">Business Loan</option>
                                 <option value="Agricultural">Agricultural Loan</option>
@@ -88,491 +54,240 @@
                                 <option value="Emergency">Emergency Loan</option>
                                 <option value="Asset Financing">Asset Financing</option>
                                 <option value="Home Improvement">Home Improvement</option>
-                                <option value="Other">Other</option>
-                        </select>
-                            @error('loan_type')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Principal Amount (TZS) <span class="text-red-500">*</span>
-                            </label>
-                            <div class="relative">
-                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">TZS</span>
-                                <input type="number" name="principal_amount" id="principal_amount" step="0.01" min="1000" required 
-                                    class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
-                                    placeholder="0.00">
-                            </div>
-                            @error('principal_amount')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                            <p class="text-xs text-gray-500 mt-1">Minimum amount: 1,000 TZS</p>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Interest Rate (%) <span class="text-gray-500">(Optional - Default: 10%)</span>
-                            </label>
-                            <div class="relative">
-                                <input type="number" name="interest_rate" id="interest_rate" step="0.01" min="0" max="100" value="10"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
-                                    placeholder="10.00">
-                                <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
-                            </div>
-                            @error('interest_rate')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                            <p class="text-xs text-gray-500 mt-1">Annual interest rate percentage</p>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Loan Term (Months) <span class="text-red-500">*</span>
-                            </label>
-                            <input type="number" name="term_months" id="term_months" min="1" max="120" required 
-                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
-                                placeholder="12">
-                            @error('term_months')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                            <p class="text-xs text-gray-500 mt-1">Repayment period in months (1-120 months)</p>
-                    </div>
-
-                    <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Payment Frequency <span class="text-red-500">*</span>
-                            </label>
-                            <select name="payment_frequency" id="payment_frequency" required 
-                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition">
-                                <option value="">-- Select frequency --</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="bi-weekly">Bi-weekly</option>
-                                <option value="monthly" selected>Monthly</option>
                             </select>
-                            @error('payment_frequency')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                            <p class="text-xs text-gray-500 mt-1">How often payments will be made</p>
+                             @error('loan_type')<p class="text-red-500 text-[10px] font-bold mt-2 ml-1">{{ $message }}@enderror</p>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Application Date <span class="text-red-500">*</span>
-                            </label>
-                            <input type="date" name="application_date" id="application_date" value="{{ date('Y-m-d') }}" required 
-                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition">
-                            @error('application_date')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-
-                    <div class="mt-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Loan Purpose <span class="text-red-500">*</span>
-                        </label>
-                        <select name="loan_purpose_category" id="loan_purpose_category" 
-                            class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition mb-3">
-                            <option value="">-- Select purpose category --</option>
-                            <option value="Business Expansion">Business Expansion</option>
-                            <option value="Agricultural Investment">Agricultural Investment</option>
-                            <option value="Education">Education</option>
-                            <option value="Emergency">Emergency</option>
-                            <option value="Asset Financing">Asset Financing</option>
-                            <option value="Home Improvement">Home Improvement</option>
-                            <option value="Other">Other</option>
-                        </select>
-                        <textarea name="purpose" id="purpose" rows="4" required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
-                            placeholder="Provide detailed description of the loan purpose and how it will be used..."></textarea>
-                        @error('purpose')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
-                        <p class="text-xs text-gray-500 mt-1">Detailed explanation of how the loan will be used (minimum 10 characters)</p>
-                    </div>
-                </div>
-
-                <!-- Collateral Information -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <div class="flex items-center mb-4">
-                        <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
-                            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                            </svg>
-                        </div>
-                        <h2 class="text-xl font-bold text-[#015425]">Collateral Information</h2>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Collateral Description
-                            </label>
-                            <textarea name="collateral_description" id="collateral_description" rows="3"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
-                                placeholder="Describe the collateral being offered (e.g., land title, vehicle, property, etc.)"></textarea>
-                            @error('collateral_description')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Collateral Value (TZS)
-                            </label>
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 block">Requested Principal (TZS)</label>
                             <div class="relative">
-                                <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">TZS</span>
-                                <input type="number" name="collateral_value" id="collateral_value" step="0.01" min="0"
-                                    class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
-                                    placeholder="0.00">
+                                <input type="number" name="principal_amount" id="principal_amount" step="0.01" min="1000" required 
+                                    class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl text-sm font-black text-gray-900 focus:ring-2 focus:ring-[#015425] transition-all"
+                                    placeholder="e.g. 5,000,000">
+                                <span class="absolute right-5 top-1/2 -translate-y-1/2 text-[10px] font-black text-gray-300">CURRENCY</span>
                             </div>
-                            @error('collateral_value')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
+                             @error('principal_amount')<p class="text-red-500 text-[10px] font-bold mt-2 ml-1">{{ $message }}@enderror</p>
+                        </div>
+
+                        <div>
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 block">Interest Rate (%)</label>
+                            <input type="number" name="interest_rate" id="interest_rate" step="0.01" min="0" max="100" value="10"
+                                class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl text-sm font-black text-gray-900 focus:ring-2 focus:ring-[#015425] transition-all">
+                             @error('interest_rate')<p class="text-red-500 text-[10px] font-bold mt-2 ml-1">{{ $message }}@enderror</p>
+                        </div>
+
+                        <div>
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 block">Repayment Term (Months)</label>
+                            <input type="number" name="term_months" id="term_months" min="1" max="120" required 
+                                class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl text-sm font-black text-gray-900 focus:ring-2 focus:ring-[#015425] transition-all"
+                                placeholder="e.g. 12">
+                             @error('term_months')<p class="text-red-500 text-[10px] font-bold mt-2 ml-1">{{ $message }}@enderror</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Guarantor Information -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <div class="flex items-center mb-4">
-                        <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
-                            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                            </svg>
+                <!-- Section: Purpose & Analysis -->
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-8 sm:p-10">
+                     <div class="flex items-center gap-4 mb-10">
+                        <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         </div>
-                        <h2 class="text-xl font-bold text-[#015425]">Guarantor Information</h2>
+                        <div>
+                            <h2 class="text-xl font-black text-gray-900">Purpose & Analysis</h2>
+                            <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-0.5">Help us understand the impact</p>
+                        </div>
                     </div>
 
-                    <div class="space-y-4">
+                    <div class="space-y-8">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Select Guarantor Member <span class="text-gray-500">(Optional)</span>
-                            </label>
-                            <select name="guarantor_id" id="guarantor_id" 
-                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition">
-                                <option value="">-- Select a member by member code --</option>
-                                @foreach($members ?? [] as $member)
-                                    <option value="{{ $member->id }}" 
-                                        data-code="{{ $member->membership_code }}"
-                                        data-email="{{ $member->email }}"
-                                        data-phone="{{ $member->phone ?? 'N/A' }}">
-                                        {{ $member->membership_code }} - {{ $member->name }} ({{ $member->email }})
-                                    </option>
-                                @endforeach
-                        </select>
-                            @error('guarantor_id')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                            <p class="text-xs text-gray-500 mt-1">Select a member from the list to act as guarantor. Only members with membership codes are available.</p>
+                            <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 block">Strategic Use of Funds</label>
+                            <select name="loan_purpose_category" id="loan_purpose_category" 
+                                class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold text-gray-700 focus:ring-2 focus:ring-blue-600 transition-all mb-4">
+                                <option value="">Select Primary Intent</option>
+                                <option value="Business Expansion">Business Expansion</option>
+                                <option value="Agricultural Investment">Agricultural Investment</option>
+                                <option value="Education">Education</option>
+                                <option value="Emergency">Emergency Relief</option>
+                                <option value="Asset Financing">Asset Acquisition</option>
+                                <option value="Home Improvement">Real Estate Improvement</option>
+                            </select>
+                            <textarea name="purpose" id="purpose" rows="4" required
+                                class="w-full px-5 py-4 bg-gray-50 border-none rounded-3xl text-sm font-medium text-gray-700 focus:ring-2 focus:ring-blue-600 transition-all"
+                                placeholder="Provide a detailed operational breakdown of how this capital will be deployed..."></textarea>
+                             @error('purpose')<p class="text-red-500 text-[10px] font-bold mt-2 ml-1">{{ $message }}@enderror</p>
                         </div>
 
-                        <div id="guarantor-details" class="hidden bg-gray-50 rounded-lg p-4 border border-gray-200">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <p class="text-xs text-gray-600 mb-1">Member Code</p>
-                                    <p class="text-sm font-medium text-gray-900" id="guarantor-code">-</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-600 mb-1">Email</p>
-                                    <p class="text-sm font-medium text-gray-900" id="guarantor-email">-</p>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-gray-600 mb-1">Phone</p>
-                                    <p class="text-sm font-medium text-gray-900" id="guarantor-phone">-</p>
-                                </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                             <div>
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 block">Repayment Methodology</label>
+                                <textarea name="repayment_source" id="repayment_source" rows="3"
+                                    class="w-full px-5 py-4 bg-gray-50 border-none rounded-3xl text-sm font-medium text-gray-700 focus:ring-2 focus:ring-blue-600 transition-all"
+                                    placeholder="Define the income streams for repayment..."></textarea>
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 block">Exposure / Collateral</label>
+                                <textarea name="collateral_description" id="collateral_description" rows="3"
+                                    class="w-full px-5 py-4 bg-gray-50 border-none rounded-3xl text-sm font-medium text-gray-700 focus:ring-2 focus:ring-blue-600 transition-all"
+                                    placeholder="Describe physical or financial assets offered..."></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Business Plan & Repayment -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <div class="flex items-center mb-4">
-                        <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center mr-3">
-                            <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
+                <!-- Section: Endorsements (Guarantor) -->
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-8 sm:p-10">
+                     <div class="flex items-center gap-4 mb-10">
+                        <div class="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                         </div>
-                        <h2 class="text-xl font-bold text-[#015425]">Business Plan & Repayment Source</h2>
-                    </div>
-
-                    <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Business Plan / Project Description
-                            </label>
-                            <textarea name="business_plan" id="business_plan" rows="4"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
-                                placeholder="Describe the business plan or project that the loan will finance..."></textarea>
-                            @error('business_plan')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
+                            <h2 class="text-xl font-black text-gray-900">Community Endorsement</h2>
+                            <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-0.5">Trust-based verification</p>
                         </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Repayment Source
-                            </label>
-                            <textarea name="repayment_source" id="repayment_source" rows="3"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
-                                placeholder="Explain how the loan will be repaid (e.g., business income, salary, agricultural sales, etc.)"></textarea>
-                            @error('repayment_source')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Additional Notes
-                            </label>
-                            <textarea name="additional_notes" id="additional_notes" rows="3"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
-                                placeholder="Any additional information or notes about this loan application..."></textarea>
-                            @error('additional_notes')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Document Uploads -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <div class="flex items-center mb-4">
-                        <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center mr-3">
-                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                            </svg>
-                        </div>
-                        <h2 class="text-xl font-bold text-[#015425]">Loan Application Documents</h2>
                     </div>
 
                     <div class="space-y-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Main Application Document <span class="text-gray-500">(PDF, DOC, DOCX, JPG, PNG - Max 10MB)</span>
-                            </label>
-                            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md hover:border-[#015425] transition">
-                                <div class="space-y-1 text-center">
-                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                    </svg>
-                                    <div class="flex text-sm text-gray-600">
-                                        <label for="application_document" class="relative cursor-pointer bg-white rounded-md font-medium text-[#015425] hover:text-[#027a3a] focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-[#015425]">
-                                            <span>Upload a file</span>
-                                            <input id="application_document" name="application_document" type="file" class="sr-only" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-                                        </label>
-                                        <p class="pl-1">or drag and drop</p>
-                                    </div>
-                                    <p class="text-xs text-gray-500">PDF, DOC, DOCX, JPG, PNG up to 10MB</p>
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 block">Select Sponsoring Member</label>
+                        <select name="guarantor_id" id="guarantor_id" 
+                            class="w-full px-5 py-4 bg-gray-50 border-none rounded-2xl text-sm font-bold text-gray-700 focus:ring-2 focus:ring-purple-600 transition-all">
+                            <option value="">Search Community Members...</option>
+                            @foreach($members ?? [] as $member)
+                                <option value="{{ $member->id }}" 
+                                    data-code="{{ $member->membership_code }}"
+                                    data-email="{{ $member->email }}"
+                                    data-phone="{{ $member->phone ?? 'N/A' }}">
+                                    {{ $member->membership_code }} — {{ $member->name }}
+                                </option>
+                            @endforeach
+                        </select>
+
+                        <div id="guarantor-details" class="hidden bg-purple-50/50 rounded-3xl p-6 border border-purple-100">
+                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                                <div>
+                                    <p class="text-[9px] font-bold text-purple-400 uppercase tracking-widest mb-1">Code</p>
+                                    <p class="text-sm font-black text-purple-900" id="guarantor-code">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-[9px] font-bold text-purple-400 uppercase tracking-widest mb-1">Contact</p>
+                                    <p class="text-sm font-black text-purple-900" id="guarantor-email">-</p>
+                                </div>
+                                <div>
+                                    <p class="text-[9px] font-bold text-purple-400 uppercase tracking-widest mb-1">Verification</p>
+                                    <p class="text-sm font-black text-green-600">Qualified</p>
                                 </div>
                             </div>
-                            @error('application_document')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                            <div id="application_document_preview" class="mt-2 hidden">
-                                <p class="text-sm text-green-600 font-medium">✓ File selected: <span id="application_document_name"></span></p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                ID Document <span class="text-gray-500">(PDF, JPG, PNG - Max 10MB)</span>
-                            </label>
-                            <input type="file" name="id_document" id="id_document" accept=".pdf,.jpg,.jpeg,.png"
-                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#015425] file:text-white hover:file:bg-[#027a3a] file:cursor-pointer">
-                            @error('id_document')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Proof of Income <span class="text-gray-500">(PDF, DOC, DOCX, JPG, PNG - Max 10MB)</span>
-                            </label>
-                            <input type="file" name="proof_of_income" id="proof_of_income" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#015425] file:text-white hover:file:bg-[#027a3a] file:cursor-pointer">
-                            @error('proof_of_income')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Collateral Document <span class="text-gray-500">(PDF, DOC, DOCX, JPG, PNG - Max 10MB)</span>
-                            </label>
-                            <input type="file" name="collateral_document" id="collateral_document" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#015425] file:text-white hover:file:bg-[#027a3a] file:cursor-pointer">
-                            @error('collateral_document')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Guarantor Document <span class="text-gray-500">(PDF, DOC, DOCX, JPG, PNG - Max 10MB)</span>
-                            </label>
-                            <input type="file" name="guarantor_document" id="guarantor_document" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#015425] file:text-white hover:file:bg-[#027a3a] file:cursor-pointer">
-                            @error('guarantor_document')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Supporting Documents <span class="text-gray-500">(Multiple files - PDF, DOC, DOCX, JPG, PNG - Max 10MB each)</span>
-                            </label>
-                            <input type="file" name="supporting_documents[]" id="supporting_documents" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#015425] file:text-white hover:file:bg-[#027a3a] file:cursor-pointer">
-                            @error('supporting_documents.*')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                            <p class="text-xs text-gray-500 mt-1">You can select multiple files (e.g., bank statements, references, etc.)</p>
-                            <div id="supporting_documents_preview" class="mt-2 hidden">
-                                <p class="text-sm text-green-600 font-medium">✓ <span id="supporting_documents_count"></span> file(s) selected</p>
-                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Terms & Conditions -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <div class="flex items-center mb-4">
-                        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3">
-                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
+                <!-- Section: Evidence Uploads -->
+                <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-8 sm:p-10">
+                     <div class="flex items-center gap-4 mb-10">
+                        <div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-red-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                         </div>
-                        <h2 class="text-xl font-bold text-[#015425]">Terms & Conditions</h2>
+                        <div>
+                            <h2 class="text-xl font-black text-gray-900">Documentary Evidence</h2>
+                            <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-0.5">Verification & Compliance</p>
+                        </div>
                     </div>
 
-                    <div class="space-y-4">
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <h4 class="font-semibold text-blue-900 mb-2">Important Notes:</h4>
-                            <ul class="text-sm text-blue-800 space-y-1 list-disc list-inside">
-                                <li>Loan application will be submitted with "Pending" status</li>
-                                <li>Requires approval from authorized personnel before disbursement</li>
-                                <li>All uploaded documents will be securely stored</li>
-                                <li>Interest will be calculated based on the provided rate and term</li>
-                                <li>Loan number will be automatically generated upon submission</li>
-                                <li>You will be notified via email and in-app notification once the loan is reviewed</li>
-                            </ul>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-6">
+                            <div class="bg-gray-50 p-6 rounded-3xl border-2 border-dashed border-gray-200 hover:border-red-400 transition-all group relative">
+                                <p class="text-[10px] font-black text-gray-400 uppercase mb-4 tracking-widest">Master Application</p>
+                                <input id="application_document" name="application_document" type="file" class="absolute inset-0 opacity-0 cursor-pointer z-10" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                <div class="text-center group-hover:-translate-y-1 transition-transform">
+                                    <p class="text-xs font-bold text-gray-600" id="application_document_name">Click or drag to upload</p>
+                                    <p class="text-[9px] text-gray-400 mt-1">PDF, DOC, JPG (MAX 10MB)</p>
+                                </div>
+                            </div>
+
+                             <div class="space-y-4">
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Identity Verification</label>
+                                <input type="file" name="id_document" class="block w-full text-xs text-gray-500 file:mr-4 file:py-2.5 file:px-6 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:bg-gray-100 file:text-gray-600 hover:file:bg-gray-200">
+                            </div>
                         </div>
 
-                        <div class="flex items-start">
-                            <input type="checkbox" id="terms_accepted" name="terms_accepted" required 
-                                class="mt-1 mr-3 h-4 w-4 text-[#015425] focus:ring-[#015425] border-gray-300 rounded">
-                            <label for="terms_accepted" class="text-sm text-gray-700">
-                                I confirm that all information provided is accurate, all documents are authentic, and I understand the terms and conditions of the loan application.
-                            </label>
+                        <div class="space-y-6">
+                            <div class="space-y-4">
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Proof of Solvency</label>
+                                <input type="file" name="proof_of_income" class="block w-full text-xs text-gray-500 file:mr-4 file:py-2.5 file:px-6 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:bg-gray-100 file:text-gray-600 hover:file:bg-gray-200">
+                            </div>
+                            <div class="space-y-4">
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Exposure Appraisal</label>
+                                <input type="file" name="collateral_document" class="block w-full text-xs text-gray-500 file:mr-4 file:py-2.5 file:px-6 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:bg-gray-100 file:text-gray-600 hover:file:bg-gray-200">
+                            </div>
+                            <div class="space-y-4">
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block">Supporting Artifacts</label>
+                                <input type="file" name="supporting_documents[]" multiple class="block w-full text-xs text-gray-500 file:mr-4 file:py-2.5 file:px-6 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:bg-gray-100 file:text-gray-600 hover:file:bg-gray-200">
+                            </div>
                         </div>
-                        @error('terms_accepted')
-                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                        @enderror
                     </div>
                 </div>
             </div>
 
-            <!-- Sidebar - Loan Calculator & Summary -->
-            <div class="space-y-6">
-                <!-- Loan Calculator -->
-                <div class="bg-white rounded-lg shadow-md p-6 sticky top-6">
-                    <div class="flex items-center mb-4">
-                        <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center mr-3">
-                            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                            </svg>
+            <!-- Sidebar Strategy (4 columns) -->
+            <div class="lg:col-span-4 space-y-8">
+                
+                <!-- Financial Simulation -->
+                <div class="bg-gray-900 rounded-[2.5rem] p-10 text-white shadow-2xl sticky top-8 border border-white/10">
+                    <h3 class="text-sm font-black uppercase tracking-widest mb-10 text-gray-400">Yield Simulation</h3>
+                    
+                    <div class="space-y-8">
+                        <div>
+                            <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Total Exposure</p>
+                            <p class="text-4xl font-black text-white" id="calc-total-amount">0.00</p>
                         </div>
-                        <h2 class="text-xl font-bold text-[#015425]">Loan Calculator</h2>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <p class="text-xs text-gray-600 mb-1">Principal Amount</p>
-                            <p class="text-lg font-bold text-gray-900" id="calc-principal">TZS 0.00</p>
-                        </div>
-
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <p class="text-xs text-gray-600 mb-1">Interest Rate</p>
-                            <p class="text-lg font-bold text-gray-900" id="calc-interest-rate">0.00%</p>
-                        </div>
-
-                        <div class="bg-gray-50 rounded-lg p-4">
-                            <p class="text-xs text-gray-600 mb-1">Loan Term</p>
-                            <p class="text-lg font-bold text-gray-900" id="calc-term">0 months</p>
-                        </div>
-
-                        <div class="border-t pt-4 space-y-3">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-gray-600">Total Interest</span>
-                                <span class="text-sm font-semibold text-orange-600" id="calc-total-interest">TZS 0.00</span>
+                        
+                        <div class="grid grid-cols-2 gap-6 pt-8 border-t border-white/10">
+                            <div>
+                                <p class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1">Net Interest</p>
+                                <p class="text-base font-black text-red-500" id="calc-total-interest">0.00</p>
                             </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-gray-600">Total Amount</span>
-                                <span class="text-lg font-bold text-[#015425]" id="calc-total-amount">TZS 0.00</span>
-                            </div>
-                            <div class="flex justify-between items-center pt-2 border-t">
-                                <span class="text-sm font-medium text-gray-700">Monthly Payment</span>
-                                <span class="text-lg font-bold text-green-600" id="calc-monthly-payment">TZS 0.00</span>
+                            <div>
+                                <p class="text-[9px] font-bold text-gray-500 uppercase tracking-widest mb-1">Instalment</p>
+                                <p class="text-base font-black text-green-500" id="calc-monthly-payment">0.00</p>
                             </div>
                         </div>
-                    </div>
-                </div>
+                        
+                         <div class="bg-white/5 rounded-3xl p-6 border border-white/5">
+                            <p class="text-xs text-gray-400 leading-relaxed italic">"Simple interest calculation applied. Terms subject to final community credit committee approval."</p>
+                        </div>
 
-                <!-- Quick Stats -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <h3 class="text-lg font-bold text-[#015425] mb-4">Quick Information</h3>
-                    <div class="space-y-3">
-                        <div class="flex items-center text-sm">
-                            <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <span class="text-gray-600">Loan will be submitted with status: <strong>Pending</strong></span>
+                        <div class="pt-4">
+                            <div class="flex items-center gap-3 mb-6">
+                                <input type="checkbox" id="terms_accepted" name="terms_accepted" required 
+                                    class="h-5 w-5 bg-white/10 border-none rounded text-green-600 focus:ring-0">
+                                <label for="terms_accepted" class="text-[10px] font-bold text-gray-400 uppercase leading-normal">
+                                    I attest to the veracity of all provided metrics & evidence.
+                                </label>
+                            </div>
+
+                            <button type="submit" class="w-full py-5 bg-[#015425] hover:bg-[#027a3a] text-white rounded-2xl font-black text-sm shadow-xl transition-all duration-300 hover:-translate-y-1">
+                                SUBMIT APPLICATION
+                            </button>
+                            <a href="{{ route('member.loans.index') }}" class="block w-full text-center py-4 text-xs font-bold text-gray-500 hover:text-white mt-2 transition-colors">
+                                Discard & Exit
+                            </a>
                         </div>
-                        <div class="flex items-center text-sm">
-                            <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <span class="text-gray-600">Requires approval before disbursement</span>
-                        </div>
-                        <div class="flex items-center text-sm">
-                            <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                            </svg>
-                            <span class="text-gray-600">Documents will be securely stored</span>
-                        </div>
-                        <div class="flex items-center text-sm">
-                            <svg class="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <span class="text-gray-600">Loan number will be auto-generated</span>
                     </div>
                 </div>
-            </div>
 
-                <!-- Action Buttons -->
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <div class="space-y-3">
-                        <button type="submit" class="w-full px-6 py-3 bg-[#015425] text-white rounded-md hover:bg-[#013019] transition font-medium shadow-md">
-                            <div class="flex items-center justify-center">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                </svg>
-                    Submit Application
-                            </div>
-                </button>
-                        <a href="{{ route('member.loans.index') }}" class="block w-full px-6 py-3 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition text-center font-medium">
-                    Cancel
-                </a>
-                    </div>
+                <!-- Guidance Card -->
+                <div class="bg-indigo-600 rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden group">
+                     <div class="absolute -right-10 -top-10 w-32 h-32 bg-white opacity-10 rounded-full group-hover:scale-110 transition-transform"></div>
+                     <h3 class="text-lg font-black mb-4">Capital Speed</h3>
+                     <p class="text-xs text-indigo-100 leading-relaxed mb-6">Complete applications with high-quality evidence are prioritized. Ensure your guarantor is notified to expedite the trust-check.</p>
+                     <div class="flex items-center gap-2 text-[10px] font-black text-white/80">
+                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                         AVG PROCESSING: 48-72 HRS
+                     </div>
                 </div>
             </div>
-            </div>
-        </form>
-    </div>
+        </div>
+    </form>
+</div>
 
 @push('scripts')
 <script>
@@ -580,22 +295,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const principalInput = document.getElementById('principal_amount');
     const interestInput = document.getElementById('interest_rate');
     const termInput = document.getElementById('term_months');
-    const frequencySelect = document.getElementById('payment_frequency');
+    const loanForm = document.getElementById('loan-form');
 
     // Guarantor selection handler
     const guarantorSelect = document.getElementById('guarantor_id');
     const guarantorDetails = document.getElementById('guarantor-details');
     const guarantorCode = document.getElementById('guarantor-code');
     const guarantorEmail = document.getElementById('guarantor-email');
-    const guarantorPhone = document.getElementById('guarantor-phone');
 
     if (guarantorSelect) {
         guarantorSelect.addEventListener('change', function() {
-            const selectedOption = this.options[this.selectedIndex];
-            if (selectedOption.value) {
-                guarantorCode.textContent = selectedOption.dataset.code || '-';
-                guarantorEmail.textContent = selectedOption.dataset.email || '-';
-                guarantorPhone.textContent = selectedOption.dataset.phone || '-';
+            const opt = this.options[this.selectedIndex];
+            if (opt.value) {
+                guarantorCode.textContent = opt.dataset.code || '-';
+                guarantorEmail.textContent = opt.dataset.email || '-';
                 guarantorDetails.classList.remove('hidden');
             } else {
                 guarantorDetails.classList.add('hidden');
@@ -603,80 +316,43 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Loan calculator
-    function calculateLoan() {
+    // Advanced Simulator
+    function simulate() {
         const principal = parseFloat(principalInput.value) || 0;
-        const interestRate = parseFloat(interestInput.value) || 0;
+        const rate = parseFloat(interestInput.value) || 0;
         const term = parseInt(termInput.value) || 0;
-        const frequency = frequencySelect.value;
 
-        // Update display values
-        document.getElementById('calc-principal').textContent = formatCurrency(principal);
-        document.getElementById('calc-interest-rate').textContent = interestRate.toFixed(2) + '%';
-        document.getElementById('calc-term').textContent = term + ' months';
+        if (principal > 0 && rate > 0 && term > 0) {
+            const interest = (principal * rate / 100) * (term / 12);
+            const total = principal + interest;
+            const monthly = total / term;
 
-        if (principal > 0 && interestRate > 0 && term > 0) {
-            // Calculate total interest (simple interest)
-            const totalInterest = (principal * interestRate / 100) * (term / 12);
-            const totalAmount = principal + totalInterest;
-
-            // Calculate monthly payment
-            let monthlyPayment = 0;
-            if (term > 0) {
-                monthlyPayment = totalAmount / term;
-            }
-
-            // Update display
-            document.getElementById('calc-total-interest').textContent = formatCurrency(totalInterest);
-            document.getElementById('calc-total-amount').textContent = formatCurrency(totalAmount);
-            document.getElementById('calc-monthly-payment').textContent = formatCurrency(monthlyPayment);
+            animateValue('calc-total-amount', total);
+            animateValue('calc-total-interest', interest);
+            animateValue('calc-monthly-payment', monthly);
         } else {
-            document.getElementById('calc-total-interest').textContent = 'TZS 0.00';
-            document.getElementById('calc-total-amount').textContent = 'TZS 0.00';
-            document.getElementById('calc-monthly-payment').textContent = 'TZS 0.00';
+            document.getElementById('calc-total-amount').textContent = '0.00';
+            document.getElementById('calc-total-interest').textContent = '0.00';
+            document.getElementById('calc-monthly-payment').textContent = '0.00';
         }
     }
 
-    function formatCurrency(amount) {
-        return 'TZS ' + amount.toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
+    function animateValue(id, value) {
+        const el = document.getElementById(id);
+        el.textContent = new Intl.NumberFormat('en-US', { minimumFractionDigits: 0 }).format(value);
     }
 
-    // Add event listeners for calculator
-    principalInput.addEventListener('input', calculateLoan);
-    interestInput.addEventListener('input', calculateLoan);
-    termInput.addEventListener('input', calculateLoan);
-    frequencySelect.addEventListener('change', calculateLoan);
+    principalInput.addEventListener('input', simulate);
+    interestInput.addEventListener('input', simulate);
+    termInput.addEventListener('input', simulate);
 
-    // Initial calculation
-    calculateLoan();
+    // Initial sync
+    simulate();
 
-    // File upload preview handlers
-    const applicationDocument = document.getElementById('application_document');
-    if (applicationDocument) {
-        applicationDocument.addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                document.getElementById('application_document_name').textContent = e.target.files[0].name;
-                document.getElementById('application_document_preview').classList.remove('hidden');
-            } else {
-                document.getElementById('application_document_preview').classList.add('hidden');
-            }
-        });
-    }
-
-    const supportingDocuments = document.getElementById('supporting_documents');
-    if (supportingDocuments) {
-        supportingDocuments.addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                document.getElementById('supporting_documents_count').textContent = e.target.files.length;
-                document.getElementById('supporting_documents_preview').classList.remove('hidden');
-            } else {
-                document.getElementById('supporting_documents_preview').classList.add('hidden');
-            }
-        });
-    }
+    // File name sync
+    document.getElementById('application_document').addEventListener('change', function(e) {
+        if(e.target.files.length) document.getElementById('application_document_name').textContent = e.target.files[0].name;
+    });
 });
 </script>
 @endpush

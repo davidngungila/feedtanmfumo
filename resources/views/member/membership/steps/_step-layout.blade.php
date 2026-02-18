@@ -2,877 +2,368 @@
     $currentStep = $currentStep ?? 1;
     $completedSteps = $user->membership_application_completed_steps ?? [];
     $stepTitles = [
-        1 => 'Membership Type',
-        2 => 'Personal Info',
-        3 => 'Address',
-        4 => 'Employment',
-        5 => 'Bank Info',
-        6 => 'Additional',
+        1 => 'Selection',
+        2 => 'Identity',
+        3 => 'Location',
+        4 => 'Occupation',
+        5 => 'Equity',
+        6 => 'Parameters',
         7 => 'Beneficiaries',
-        8 => 'Group Info',
-        9 => 'Documents',
-        10 => 'Options',
+        8 => 'Social',
+        9 => 'Verification',
+        10 => 'Finalize',
     ];
 @endphp
 
 @extends('layouts.member')
 
-@section('page-title', 'Membership Application - Step ' . $currentStep)
+@section('page-title', 'Onboarding Journey - Stage ' . $currentStep)
 
 @push('styles')
 <style>
+    /* Premium Progress Architecture */
     .step-progress-container {
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        padding: 1rem;
-        margin-bottom: 2rem;
-    }
-    
-    @media (min-width: 768px) {
-        .step-progress-container {
-            padding: 2rem;
-        }
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px);
+        border-radius: 2.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 2.5rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 10px 40px rgba(1, 84, 37, 0.05);
     }
     
     .step-indicator {
         display: flex;
         justify-content: space-between;
         position: relative;
-        margin-bottom: 1rem;
+        padding-bottom: 1.5rem;
         overflow-x: auto;
-        overflow-y: visible;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
-        -ms-overflow-style: none;
-        padding-bottom: 0.5rem;
     }
     
-    .step-indicator::-webkit-scrollbar {
-        display: none;
-    }
+    .step-indicator::-webkit-scrollbar { display: none; }
     
     .step-indicator::before {
         content: '';
         position: absolute;
-        top: 18px;
+        top: 24px;
         left: 0;
         right: 0;
-        height: 3px;
-        background: linear-gradient(to right, #e5e7eb 0%, #e5e7eb 100%);
+        height: 2px;
+        background: #f1f5f9;
         z-index: 0;
-        border-radius: 2px;
-    }
-    
-    @media (max-width: 767px) {
-        .step-indicator::before {
-            top: 15px;
-            height: 2px;
-        }
     }
     
     .step-progress-line {
         position: absolute;
-        top: 18px;
+        top: 24px;
         left: 0;
-        height: 3px;
-        background: linear-gradient(to right, #10b981 0%, #015425 100%);
+        height: 2px;
+        background: linear-gradient(to right, #10b981, #015425);
         z-index: 1;
-        border-radius: 2px;
-        transition: width 0.5s ease;
-        max-width: 100%;
-    }
-    
-    @media (max-width: 767px) {
-        .step-progress-line {
-            top: 15px;
-            height: 2px;
-        }
+        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .step-item {
         position: relative;
         z-index: 2;
-        flex: 0 0 auto;
+        flex: 1;
         text-align: center;
-        min-width: 60px;
-        padding: 0 4px;
-    }
-    
-    @media (min-width: 768px) {
-        .step-item {
-            flex: 1;
-            min-width: auto;
-            padding: 0;
-        }
+        min-width: 80px;
     }
     
     .step-number {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        border-radius: 1.25rem;
         background: white;
-        border: 3px solid #e5e7eb;
+        border: 2px solid #f1f5f9;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 0.5rem;
-        font-weight: 700;
-        font-size: 14px;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    @media (min-width: 768px) {
-        .step-number {
-            width: 42px;
-            height: 42px;
-            font-size: 16px;
-        }
+        margin: 0 auto 1rem;
+        font-weight: 900;
+        font-size: 0.9rem;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        color: #94a3b8;
     }
     
     .step-item.completed .step-number {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        border-color: #10b981;
+        background: #015425;
+        border-color: #015425;
         color: white;
-        box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
-    }
-    
-    .step-item.completed .step-number::after {
-        content: '✓';
-        font-size: 18px;
-    }
-    
-    @media (min-width: 768px) {
-        .step-item.completed .step-number::after {
-            font-size: 20px;
-        }
+        box-shadow: 0 10px 15px -3px rgba(1, 84, 37, 0.2);
     }
     
     .step-item.active .step-number {
-        background: linear-gradient(135deg, #015425 0%, #027a3a 100%);
+        background: white;
         border-color: #015425;
-        color: white;
-        transform: scale(1.1);
-        box-shadow: 0 4px 12px rgba(1, 84, 37, 0.4);
-    }
-    
-    @media (max-width: 767px) {
-        .step-item.active .step-number {
-            transform: scale(1.05);
-        }
-    }
-    
-    .step-item.locked .step-number {
-        background: #f3f4f6;
-        border-color: #d1d5db;
-        color: #9ca3af;
-        cursor: not-allowed;
+        color: #015425;
+        transform: scale(1.15);
+        box-shadow: 0 20px 25px -5px rgba(1, 84, 37, 0.1);
     }
     
     .step-title {
-        font-size: 0.6rem;
-        color: #6b7280;
-        font-weight: 500;
+        font-size: 0.65rem;
+        color: #94a3b8;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
         transition: all 0.3s;
-        line-height: 1.2;
-        word-break: break-word;
-    }
-    
-    @media (min-width: 768px) {
-        .step-title {
-            font-size: 0.7rem;
-        }
     }
     
     .step-item.active .step-title {
         color: #015425;
-        font-weight: 700;
-        font-size: 0.65rem;
+        transform: translateY(2px);
     }
     
-    @media (min-width: 768px) {
-        .step-item.active .step-title {
-            font-size: 0.75rem;
-        }
-    }
-    
-    .step-item.completed .step-title {
-        color: #10b981;
-        font-weight: 600;
-    }
-    
-    .step-item.locked .step-title {
-        color: #9ca3af;
-    }
-    
+    /* Content Sculpting */
     .step-content-card {
         background: white;
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        border: 1px solid #e5e7eb;
+        border-radius: 3rem;
+        box-shadow: 0 25px 50px -12px rgba(1, 84, 37, 0.08);
+        border: 1px solid #f8fafc;
+        overflow: hidden;
+        transition: transform 0.3s ease;
     }
     
-    @media (min-width: 768px) {
-        .step-content-card {
-            padding: 2.5rem;
-        }
+    .step-header-banner {
+        padding: 4rem 3rem;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border-bottom: 1px solid #e2e8f0;
     }
     
-    .step-header {
-        border-bottom: 2px solid #f3f4f6;
-        padding-bottom: 1.5rem;
-        margin-bottom: 2rem;
+    .step-body {
+        padding: 4rem 3rem;
     }
     
-    .step-header h2 {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #015425;
-        margin-bottom: 0.5rem;
-    }
-    
-    @media (min-width: 768px) {
-        .step-header h2 {
-            font-size: 1.75rem;
-        }
-    }
-    
-    .step-header p {
-        color: #6b7280;
-        font-size: 0.85rem;
-    }
-    
-    @media (min-width: 768px) {
-        .step-header p {
-            font-size: 0.95rem;
-        }
-    }
-    
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-    
-    .form-label {
+    .premium-label {
         display: block;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 0.5rem;
-        font-size: 0.9rem;
+        font-[900] text-[10px] text-[#015425] uppercase tracking-[0.2em] mb-3 ml-1;
     }
     
-    .form-label .required {
-        color: #ef4444;
-        margin-left: 2px;
-    }
-    
-    .form-input {
+    .premium-input {
         width: 100%;
-        padding: 0.75rem 1rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 8px;
-        font-size: 0.95rem;
+        padding: 1.25rem 1.5rem;
+        background: #f8fafc;
+        border: 2px solid transparent;
+        border-radius: 1.25rem;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1e293b;
         transition: all 0.3s;
     }
     
-    .form-input:focus {
-        outline: none;
+    .premium-input:focus {
+        background: white;
         border-color: #015425;
-        box-shadow: 0 0 0 3px rgba(1, 84, 37, 0.1);
+        outline: none;
+        box-shadow: 0 10px 15px -3px rgba(1, 84, 37, 0.1);
     }
     
-    .form-textarea {
-        min-height: 120px;
-        resize: vertical;
-    }
-    
-    .btn-primary {
-        background: linear-gradient(135deg, #015425 0%, #027a3a 100%);
+    .luxury-button {
+        background: #015425;
         color: white;
-        padding: 0.875rem 2rem;
-        border-radius: 8px;
-        font-weight: 600;
+        padding: 1.25rem 3rem;
+        border-radius: 1.5rem;
+        font-weight: 900;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        transition: all 0.3s;
+        box-shadow: 0 20px 25px -5px rgba(1, 84, 37, 0.3);
         border: none;
         cursor: pointer;
-        transition: all 0.3s;
-        box-shadow: 0 4px 12px rgba(1, 84, 37, 0.3);
     }
     
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(1, 84, 37, 0.4);
+    .luxury-button:hover {
+        transform: translateY(-3px);
+        background: #027a3a;
+        box-shadow: 0 25px 30px -5px rgba(2, 122, 58, 0.4);
     }
     
-    .btn-secondary {
-        background: white;
-        color: #374151;
-        padding: 0.875rem 2rem;
-        border-radius: 8px;
-        font-weight: 600;
-        border: 2px solid #e5e7eb;
-        cursor: pointer;
-        transition: all 0.3s;
+    .luxury-button:disabled {
+        background: #94a3b8;
+        box-shadow: none;
+        cursor: not-allowed;
+        transform: none;
     }
-    
-    .btn-secondary:hover {
-        background: #f9fafb;
-        border-color: #d1d5db;
-    }
-    
-    .info-box {
-        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-        border-left: 4px solid #3b82f6;
-        padding: 1rem 1.5rem;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-    }
-    
-    .info-box p {
-        color: #1e40af;
-        font-size: 0.9rem;
-        margin: 0;
-    }
-    
-    .help-text {
-        font-size: 0.8rem;
-        color: #6b7280;
-        margin-top: 0.25rem;
-    }
-    
-    /* Toast Notification */
-    .toast-container {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-        max-width: 400px;
-    }
-    
-    .toast {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        padding: 1rem 1.5rem;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        border-left: 4px solid;
-        animation: slideInRight 0.3s ease-out;
-        min-width: 300px;
-    }
-    
-    .toast.success {
-        border-left-color: #10b981;
-    }
-    
-    .toast.error {
-        border-left-color: #ef4444;
-    }
-    
-    .toast.info {
-        border-left-color: #3b82f6;
-    }
-    
-    .toast-icon {
-        flex-shrink: 0;
-        width: 24px;
-        height: 24px;
-    }
-    
-    .toast.success .toast-icon {
-        color: #10b981;
-    }
-    
-    .toast.error .toast-icon {
-        color: #ef4444;
-    }
-    
-    .toast.info .toast-icon {
-        color: #3b82f6;
-    }
-    
-    .toast-content {
-        flex: 1;
-    }
-    
-    .toast-title {
-        font-weight: 600;
-        font-size: 0.9rem;
-        margin-bottom: 0.25rem;
-    }
-    
-    .toast-message {
-        font-size: 0.85rem;
-        color: #6b7280;
-    }
-    
-    .toast-close {
-        flex-shrink: 0;
-        cursor: pointer;
-        color: #9ca3af;
-        padding: 0.25rem;
-    }
-    
-    .toast-close:hover {
-        color: #374151;
-    }
-    
-    @keyframes slideInRight {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOutRight {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-    
-    .toast.hiding {
-        animation: slideOutRight 0.3s ease-out forwards;
-    }
-    
-    /* Save Popup Modal */
+
+    /* Modal Styling */
     .save-popup-overlay {
         position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.6);
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(8px);
         display: flex;
         align-items: center;
         justify-content: center;
-        z-index: 20000;
+        z-index: 50;
         opacity: 0;
         visibility: hidden;
-        transition: all 0.3s ease;
+        transition: all 0.4s;
     }
-
-    .save-popup-overlay.show {
-        opacity: 1;
-        visibility: visible;
-    }
-
+    .save-popup-overlay.show { opacity: 1; visibility: visible; }
+    
     .save-popup-content {
         background: white;
-        border-radius: 16px;
-        padding: 2rem;
-        max-width: 450px;
+        border-radius: 2.5rem;
+        padding: 3rem;
+        max-width: 400px;
         width: 90%;
-        transform: scale(0.9);
-        transition: transform 0.3s ease;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         text-align: center;
+        transform: scale(0.9);
+        transition: all 0.4s;
     }
-
-    .save-popup-overlay.show .save-popup-content {
-        transform: scale(1);
-    }
-
-    .save-popup-icon {
-        width: 80px;
-        height: 80px;
-        margin: 0 auto 1.5rem;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 40px;
-    }
-
-    .save-popup-overlay.success .save-popup-icon {
-        background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-        color: #10b981;
-    }
-
-    .save-popup-overlay.error .save-popup-icon {
-        background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-        color: #ef4444;
-    }
-
-    .save-popup-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        color: #1f2937;
-    }
-
-    .save-popup-overlay.success .save-popup-title {
-        color: #10b981;
-    }
-
-    .save-popup-overlay.error .save-popup-title {
-        color: #ef4444;
-    }
-
-    .save-popup-message {
-        font-size: 1rem;
-        color: #6b7280;
-        margin-bottom: 1.5rem;
-        line-height: 1.6;
-    }
-
-    .save-popup-button {
-        padding: 0.875rem 2rem;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-        border: none;
-        font-size: 0.95rem;
-        background: linear-gradient(135deg, #015425 0%, #027a3a 100%);
-        color: white;
-        box-shadow: 0 4px 12px rgba(1, 84, 37, 0.3);
-    }
-
-    .save-popup-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(1, 84, 37, 0.4);
-    }
+    .save-popup-overlay.show .save-popup-content { transform: scale(1); }
 </style>
 @endpush
 
 @section('content')
-<div class="space-y-6">
-    <!-- Progress Indicator -->
+<div class="max-w-5xl mx-auto py-8 lg:py-12">
+    <!-- Sophisticated Progress Navigation -->
     <div class="step-progress-container">
         <div class="step-indicator" id="stepIndicator">
-            <div class="step-progress-line" style="width: {{ (($currentStep - 1) / 9) * 100 }}%; max-width: 100%;"></div>
+            <div class="step-progress-line" style="width: {{ (($currentStep - 1) / 9) * 100 }}%;"></div>
             @for($i = 1; $i <= 10; $i++)
                 @php
                     $isCompleted = in_array($i, $completedSteps);
                     $isActive = $i == $currentStep;
                     $isLocked = !$isCompleted && !$isActive && $i > 1 && !in_array($i - 1, $completedSteps);
                 @endphp
-                <div class="step-item {{ $isCompleted ? 'completed' : '' }} {{ $isActive ? 'active' : '' }} {{ $isLocked ? 'locked' : '' }}" data-step="{{ $i }}">
+                <div class="step-item {{ $isCompleted ? 'completed' : '' }} {{ $isActive ? 'active' : '' }} {{ $isLocked ? 'locked' : '' }}">
                     <div class="step-number">
-                        @if(!$isCompleted)
+                        @if($isCompleted)
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                        @else
                             {{ $i }}
                         @endif
                     </div>
-                    <div class="step-title">
-                        <span class="hidden sm:inline">{{ $stepTitles[$i] ?? 'Step ' . $i }}</span>
-                        <span class="sm:hidden">{{ $i }}</span>
-                    </div>
+                    <div class="step-title">{{ $stepTitles[$i] }}</div>
                 </div>
             @endfor
         </div>
         
-        <div class="text-center mt-4">
-            <p class="text-xs sm:text-sm text-gray-600">
-                <span class="font-semibold text-[#015425]">Step {{ $currentStep }} of 10</span>
-                <span class="mx-1 sm:mx-2 hidden sm:inline">•</span>
-                <span class="block sm:inline mt-1 sm:mt-0">{{ count($completedSteps) }} steps completed</span>
-            </p>
-            <p class="text-xs text-gray-500 mt-1 sm:hidden">
-                <span class="font-medium">{{ $stepTitles[$currentStep] ?? 'Step ' . $currentStep }}</span>
-            </p>
-        </div>
-    </div>
-
-    @if(session('success'))
-    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
-        <div class="flex">
-            <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                </svg>
+        <div class="flex items-center justify-between mt-10 px-4">
+            <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                <span class="text-[10px] font-black uppercase text-gray-400 tracking-widest">Stage {{ $currentStep }} of 10</span>
             </div>
-            <div class="ml-3">
-                <p class="text-sm text-green-700">{{ session('success') }}</p>
+            <div class="text-[10px] font-black uppercase text-[#015425] tracking-widest bg-green-50 px-4 py-1.5 rounded-full">
+                {{ floor((count($completedSteps) / 10) * 100) }}% Complete
             </div>
         </div>
     </div>
-    @endif
 
-    @if(session('error'))
-    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
-        <div class="flex">
-            <div class="flex-shrink-0">
-                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                </svg>
-            </div>
-            <div class="ml-3">
-                <p class="text-sm text-red-700">{{ session('error') }}</p>
-            </div>
-        </div>
-    </div>
-    @endif
-
-    <!-- Step Content -->
+    <!-- Main Content Vessel -->
     <div class="step-content-card">
         @yield('step-content')
     </div>
 </div>
 
-<!-- Toast Container -->
-<div id="toastContainer" class="toast-container"></div>
+<!-- Global Notifications -->
+<div id="toastContainer" class="fixed top-8 right-8 z-[100] space-y-4"></div>
 
-@push('scripts')
+<div id="savePopupOverlay" class="save-popup-overlay">
+    <div class="save-popup-content">
+        <div id="popupIcon" class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"></div>
+        <h3 id="popupTitle" class="text-2xl font-black text-gray-900 mb-2"></h3>
+        <p id="popupMessage" class="text-sm text-gray-500 font-medium mb-8"></p>
+        <button onclick="closeSavePopup()" class="luxury-button w-full">Acknowledged</button>
+    </div>
+</div>
+
 <script>
-// Toast Notification System
-function showToast(type, title, message, duration = 5000) {
-    const container = document.getElementById('toastContainer');
-    if (!container) return;
-    
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    
-    const icons = {
-        success: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
-        error: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
-        info: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
-    };
-    
-    toast.innerHTML = `
-        <div class="toast-icon">${icons[type] || icons.info}</div>
-        <div class="toast-content">
-            <div class="toast-title">${title}</div>
-            <div class="toast-message">${message}</div>
-        </div>
-        <div class="toast-close" onclick="this.closest('.toast').remove()">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-        </div>
-    `;
-    
-    container.appendChild(toast);
-    
-    // Auto remove after duration
-    setTimeout(() => {
-        toast.classList.add('hiding');
-        setTimeout(() => toast.remove(), 300);
-    }, duration);
-}
-
-// Save Popup Notification System
-function showSavePopup(type, title, message) {
-    // Remove existing popup if any
-    const existingPopup = document.getElementById('savePopupOverlay');
-    if (existingPopup) {
-        existingPopup.remove();
-    }
-    
-    const icons = {
-        success: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 40px; height: 40px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>',
-        error: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width: 40px; height: 40px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>'
-    };
-    
-    const popupHTML = `
-        <div id="savePopupOverlay" class="save-popup-overlay ${type}">
-            <div class="save-popup-content">
-                <div class="save-popup-icon">
-                    ${icons[type] || icons.success}
-                </div>
-                <div class="save-popup-title">${title}</div>
-                <div class="save-popup-message">${message}</div>
-                <button class="save-popup-button" onclick="closeSavePopup()">OK</button>
+    // System Intelligence
+    function showToast(type, title, message) {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        const color = type === 'success' ? '#015425' : '#ef4444';
+        
+        toast.className = "p-6 bg-white rounded-3xl shadow-2xl border border-gray-100 flex items-center gap-4 animate-in slide-in-from-right duration-500";
+        toast.innerHTML = `
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-white" style="background: ${color}">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>
             </div>
-        </div>
-    `;
-    
-    document.body.insertAdjacentHTML('beforeend', popupHTML);
-    
-    // Show popup
-    setTimeout(() => {
-        const popup = document.getElementById('savePopupOverlay');
-        if (popup) {
-            popup.classList.add('show');
-        }
-    }, 10);
-    
-    // Auto close after 3 seconds
-    setTimeout(() => {
-        closeSavePopup();
-    }, 3000);
-}
-
-function closeSavePopup() {
-    const popup = document.getElementById('savePopupOverlay');
-    if (popup) {
-        popup.classList.remove('show');
-        setTimeout(() => {
-            popup.remove();
-        }, 300);
+            <div>
+                <p class="text-sm font-black text-gray-900">${title}</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tight">${message}</p>
+            </div>
+        `;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
     }
-}
 
-// Show success message from session
-@if(session('success'))
-    showToast('success', 'Success!', '{{ session('success') }}');
-@endif
+    function showSavePopup(type, title, message) {
+        const overlay = document.getElementById('savePopupOverlay');
+        const icon = document.getElementById('popupIcon');
+        const titleEl = document.getElementById('popupTitle');
+        const msgEl = document.getElementById('popupMessage');
+        
+        icon.className = `w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 ${type === 'success' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`;
+        icon.innerHTML = `<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>`;
+        titleEl.textContent = title;
+        msgEl.textContent = message;
+        
+        overlay.classList.add('show');
+        setTimeout(closeSavePopup, 4000);
+    }
 
-@if(session('error'))
-    showToast('error', 'Error!', '{{ session('error') }}');
-@endif
+    function closeSavePopup() {
+        document.getElementById('savePopupOverlay').classList.remove('show');
+    }
 
-// AJAX Form Submission Handler
-function setupAjaxForm(formId, successCallback) {
-    const form = document.getElementById(formId);
-    if (!form) return;
-    
-    // Check if form already has submit handler
-    const existingHandler = form.dataset.ajaxSetup;
-    if (existingHandler === 'true') return;
-    form.dataset.ajaxSetup = 'true';
-    
-    form.addEventListener('submit', function(e) {
-        // Don't prevent default if form has HTML5 validation errors
-        if (!form.checkValidity()) {
-            return true; // Let browser handle validation
-        }
+    @if(session('success')) showToast('success', 'Certification Success', '{{ session('success') }}'); @endif
+    @if(session('error')) showToast('error', 'Protocol Alert', '{{ session('error') }}'); @endif
+
+    // Ajax Orchestration
+    function setupAjaxForm(formId) {
+        const form = document.getElementById(formId);
+        if(!form) return;
         
-        e.preventDefault();
-        
-        const formData = new FormData(form);
-        const submitButton = form.querySelector('button[type="submit"]');
-        const originalText = submitButton ? submitButton.innerHTML : '';
-        
-        // Disable submit button
-        if (submitButton) {
-            submitButton.disabled = true;
-            const spinner = '<span class="spinner"></span>';
-            submitButton.innerHTML = spinner + ' Saving...';
-        }
-        
-        // Add AJAX header
-        formData.append('_ajax', '1');
-        
-        fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(data => {
-                    throw new Error(data.message || 'An error occurred');
+        form.addEventListener('submit', async function(e) {
+            if (!form.checkValidity()) return;
+            e.preventDefault();
+            
+            const btn = form.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="animate-pulse">PROCESSING DATA...</span>';
+            
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: new FormData(form),
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
                 });
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Show popup notification
-                showSavePopup('success', 'Success!', data.message || 'Step saved successfully!');
+                const data = await response.json();
                 
-                if (data.redirect) {
-                    setTimeout(() => {
-                        window.location.href = data.redirect;
-                    }, 2000);
-                } else if (successCallback) {
-                    successCallback(data);
+                if (data.success) {
+                    showSavePopup('success', 'Stage Certified', data.message);
+                    if (data.redirect) setTimeout(() => window.location.href = data.redirect, 1500);
                 } else {
-                    // Re-enable button after popup closes
-                    setTimeout(() => {
-                        if (submitButton) {
-                            submitButton.disabled = false;
-                            submitButton.innerHTML = originalText;
-                        }
-                    }, 2000);
+                    showSavePopup('error', 'Verification Failed', data.message);
                 }
-            } else {
-                showSavePopup('error', 'Error!', data.message || 'An error occurred. Please try again.');
-                if (submitButton) {
-                    submitButton.disabled = false;
-                    submitButton.innerHTML = originalText;
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showSavePopup('error', 'Error!', error.message || 'An error occurred. Please try again.');
-            if (submitButton) {
-                submitButton.disabled = false;
-                submitButton.innerHTML = originalText;
+            } catch (err) {
+                showSavePopup('error', 'Network Interruption', 'Establish connection and retry.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
             }
         });
-    });
-}
+    }
 
-// Initialize AJAX forms on page load
-document.addEventListener('DOMContentLoaded', function() {
-    // Auto-setup forms with class 'ajax-form' or id starting with 'step'
-    // Skip forms that have data-no-auto-setup attribute
-    const forms = document.querySelectorAll('form.ajax-form, form[id^="step"]');
-    forms.forEach(form => {
-        if (form.id && !form.dataset.noAutoSetup) {
-            setupAjaxForm(form.id);
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('form[id^="step"]').forEach(f => setupAjaxForm(f.id));
+        
+        // Mobile Navigation Optimization
+        const stepContainer = document.getElementById('stepIndicator');
+        const activeItem = stepContainer.querySelector('.step-item.active');
+        if (activeItem && window.innerWidth < 768) {
+            stepContainer.scrollTo({ left: activeItem.offsetLeft - 100, behavior: 'smooth' });
         }
     });
-});
-
-// Add spinner CSS
-const style = document.createElement('style');
-style.textContent = `
-    .spinner {
-        display: inline-block;
-        width: 16px;
-        height: 16px;
-        border: 2px solid rgba(255,255,255,0.3);
-        border-radius: 50%;
-        border-top-color: white;
-        animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-`;
-document.head.appendChild(style);
 </script>
-@endpush
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Auto-scroll to active step on mobile
-    const stepIndicator = document.getElementById('stepIndicator');
-    const activeStep = stepIndicator.querySelector('.step-item.active');
-    
-    if (activeStep && window.innerWidth < 768) {
-        const stepIndicatorRect = stepIndicator.getBoundingClientRect();
-        const activeStepRect = activeStep.getBoundingClientRect();
-        const scrollPosition = activeStep.offsetLeft - (stepIndicatorRect.width / 2) + (activeStepRect.width / 2);
-        
-        stepIndicator.scrollTo({
-            left: Math.max(0, scrollPosition),
-            behavior: 'smooth'
-        });
-    }
-    
-    // Add scroll indicators on mobile
-    if (window.innerWidth < 768) {
-        let scrollTimeout;
-        stepIndicator.addEventListener('scroll', function() {
-            clearTimeout(scrollTimeout);
-            stepIndicator.classList.add('scrolling');
-            scrollTimeout = setTimeout(function() {
-                stepIndicator.classList.remove('scrolling');
-            }, 150);
-        });
-    }
-});
-</script>
-@endpush
 @endsection
-
