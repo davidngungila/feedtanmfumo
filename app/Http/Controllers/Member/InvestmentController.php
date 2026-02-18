@@ -65,10 +65,10 @@ class InvestmentController extends Controller
         $interestRate = $is4Year ? 8.6 : 10.0;
         $unitPrice = $is4Year ? 110.0 : 120.0;
         
-        // Calculate units bought (priced at price/100)
-        $units = $principal / ($unitPrice / 100);
+        // Calculate units bought (as per user formula: principal * unitPrice/100)
+        $units = $principal * ($unitPrice / 100);
         $totalInterest = $units * ($interestRate / 100) * $years;
-        // Expected return is face value (units * 100/100) + total interest
+        // Expected return is units bought + total interest
         $expectedReturn = $units + $totalInterest;
 
         $receiptPath = null;
@@ -79,6 +79,7 @@ class InvestmentController extends Controller
         Investment::create([
             'user_id' => Auth::id(),
             'investment_number' => 'INV-'.strtoupper(Str::random(8)),
+            'investment_name' => $is4Year ? '8.6% Four-years FIA' : '10% Six-years FIA',
             'plan_type' => $validated['plan_type'],
             'principal_amount' => $principal,
             'interest_rate' => $interestRate,

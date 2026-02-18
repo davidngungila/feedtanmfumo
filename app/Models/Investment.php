@@ -15,6 +15,7 @@ class Investment extends Model
         'ulid',
         'user_id',
         'investment_number',
+        'investment_name',
         'plan_type',
         'principal_amount',
         'interest_rate',

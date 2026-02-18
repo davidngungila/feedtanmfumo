@@ -12,9 +12,23 @@ use Carbon\Carbon;
 
 class SavingsAccountController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $accounts = SavingsAccount::with('user')->latest()->paginate(20);
+        $query = SavingsAccount::with('user');
+        
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('account_number', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($userQuery) use ($search) {
+                      $userQuery->where('name', 'like', "%{$search}%")
+                                ->orWhere('email', 'like', "%{$search}%")
+                                ->orWhere('membership_code', 'like', "%{$search}%");
+                  });
+            });
+        }
+        
+        $accounts = $query->latest()->paginate(20);
         $stats = [
             'total' => SavingsAccount::count(),
             'total_balance' => SavingsAccount::sum('balance'),
@@ -107,7 +121,8 @@ class SavingsAccountController extends Controller
                 $q->where('account_number', 'like', "%{$search}%")
                   ->orWhereHas('user', function($userQuery) use ($search) {
                       $userQuery->where('name', 'like', "%{$search}%")
-                                ->orWhere('email', 'like', "%{$search}%");
+                                ->orWhere('email', 'like', "%{$search}%")
+                                ->orWhere('membership_code', 'like', "%{$search}%");
                   });
             });
         }
@@ -140,7 +155,8 @@ class SavingsAccountController extends Controller
                 $q->where('account_number', 'like', "%{$search}%")
                   ->orWhereHas('user', function($userQuery) use ($search) {
                       $userQuery->where('name', 'like', "%{$search}%")
-                                ->orWhere('email', 'like', "%{$search}%");
+                                ->orWhere('email', 'like', "%{$search}%")
+                                ->orWhere('membership_code', 'like', "%{$search}%");
                   });
             });
         }
@@ -244,7 +260,8 @@ class SavingsAccountController extends Controller
                 $q->where('account_number', 'like', "%{$search}%")
                   ->orWhereHas('user', function($userQuery) use ($search) {
                       $userQuery->where('name', 'like', "%{$search}%")
-                                ->orWhere('email', 'like', "%{$search}%");
+                                ->orWhere('email', 'like', "%{$search}%")
+                                ->orWhere('membership_code', 'like', "%{$search}%");
                   });
             });
         }
@@ -274,7 +291,8 @@ class SavingsAccountController extends Controller
                 $q->where('account_number', 'like', "%{$search}%")
                   ->orWhereHas('user', function($userQuery) use ($search) {
                       $userQuery->where('name', 'like', "%{$search}%")
-                                ->orWhere('email', 'like', "%{$search}%");
+                                ->orWhere('email', 'like', "%{$search}%")
+                                ->orWhere('membership_code', 'like', "%{$search}%");
                   });
             });
         }
@@ -319,7 +337,8 @@ class SavingsAccountController extends Controller
                 $q->where('account_number', 'like', "%{$search}%")
                   ->orWhereHas('user', function($userQuery) use ($search) {
                       $userQuery->where('name', 'like', "%{$search}%")
-                                ->orWhere('email', 'like', "%{$search}%");
+                                ->orWhere('email', 'like', "%{$search}%")
+                                ->orWhere('membership_code', 'like', "%{$search}%");
                   });
             });
         }

@@ -172,7 +172,7 @@
         const price = is4Year ? 110 : 120;
         
         const unitPriceFactor = price / 100;
-        const units = amount / unitPriceFactor;
+        const units = amount * unitPriceFactor;
         const totalInterest = units * rate * years;
         const expectedReturn = units + totalInterest;
         

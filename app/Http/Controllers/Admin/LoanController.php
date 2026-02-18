@@ -28,7 +28,8 @@ class LoanController extends Controller
                 $q->where('loan_number', 'like', "%{$search}%")
                   ->orWhereHas('user', function($userQuery) use ($search) {
                       $userQuery->where('name', 'like', "%{$search}%")
-                                ->orWhere('email', 'like', "%{$search}%");
+                                ->orWhere('email', 'like', "%{$search}%")
+                                ->orWhere('membership_code', 'like', "%{$search}%");
                   });
             });
         }

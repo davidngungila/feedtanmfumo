@@ -167,6 +167,7 @@
             <!-- Scrollable Content Area -->
             <main class="flex-1 overflow-y-auto pt-16 lg:pt-0 flex flex-col">
                 <div class="flex-1 p-4 sm:p-6 lg:p-8">
+                    @include('components.alerts')
                     @yield('content')
                 </div>
                 

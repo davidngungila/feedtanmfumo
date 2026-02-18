@@ -95,9 +95,26 @@
         </div>
     </div>
 
-    <!-- Accounts Section -->
-    <div class="flex justify-between items-center">
-        <h2 class="text-xl font-bold text-[#015425]">All Savings Accounts</h2>
+    <!-- Search Section -->
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+        <form action="{{ route('admin.savings.index') }}" method="GET" class="flex flex-col sm:flex-row gap-4">
+            <div class="flex-1 relative">
+                <input type="text" name="search" value="{{ request('search') }}" 
+                    placeholder="Search by account #, member name or code (e.g. ASC108)..." 
+                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425]">
+                <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+            </div>
+            <button type="submit" class="px-6 py-2 bg-[#015425] text-white rounded-md hover:bg-[#013019] transition font-medium">
+                Search
+            </button>
+            @if(request('search'))
+                <a href="{{ route('admin.savings.index') }}" class="px-6 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition font-medium text-center">
+                    Clear
+                </a>
+            @endif
+        </form>
     </div>
 
     <!-- Accounts Table -->
@@ -118,7 +135,10 @@
                     @forelse($accounts as $account)
                         <tr class="hover:bg-gray-50">
                             <td class="px-4 py-3 text-sm font-medium">{{ $account->account_number }}</td>
-                            <td class="px-4 py-3 text-sm">{{ $account->user->name }}</td>
+                            <td class="px-4 py-3">
+                                <p class="text-sm font-medium text-gray-900">{{ $account->user->name }}</p>
+                                <p class="text-[10px] font-bold text-[#015425]">{{ $account->user->membership_code ?? 'NO CODE' }}</p>
+                            </td>
                             <td class="px-4 py-3 text-sm">{{ $account->account_type_name }}</td>
                             <td class="px-4 py-3 text-sm font-semibold">{{ number_format($account->balance, 0) }} TZS</td>
                             <td class="px-4 py-3">
