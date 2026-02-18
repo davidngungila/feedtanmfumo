@@ -156,31 +156,46 @@
     @endif
 
     @if($user->membership_status === 'approved')
+    <!-- Dashboard Tabs -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden mb-6">
+        <div class="flex border-b border-gray-100">
+            <button class="flex-1 py-3 px-4 text-sm font-bold text-[#015425] border-b-2 border-[#015425] transition bg-green-50/50">
+                Financial Overview
+            </button>
+            <button onclick="document.getElementById('payment-verifications-section').scrollIntoView({behavior: 'smooth'})" class="flex-1 py-3 px-4 text-sm font-semibold text-gray-500 hover:text-[#015425] hover:bg-gray-50 transition border-b-2 border-transparent">
+                Payment Verifications
+            </button>
+        </div>
+    </div>
+
     <!-- Detailed Statistics Overview -->
-    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
-        <h2 class="text-lg sm:text-xl font-bold text-[#015425] mb-4">Financial Overview</h2>
+    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-[#015425]">Financial Overview</h2>
+            <div class="px-3 py-1 bg-green-100 text-green-800 text-xs font-bold rounded-full uppercase tracking-wider">Live Status</div>
+        </div>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div class="text-center p-3 bg-blue-50 rounded-lg">
-                <p class="text-xs text-gray-600 mb-1">Total Assets</p>
-                <p class="text-lg font-bold text-blue-600">{{ number_format($stats['total_savings_balance'] + $stats['total_investment_amount'] + $stats['total_profit'], 0) }} TZS</p>
+            <div class="text-center p-3 bg-blue-50 rounded-lg border border-blue-100">
+                <p class="text-[10px] sm:text-xs text-gray-600 mb-1 uppercase tracking-tight">Total Assets</p>
+                <p class="text-base sm:text-lg font-bold text-blue-600">{{ number_format($stats['total_savings_balance'] + $stats['total_investment_amount'] + $stats['total_profit'], 0) }} <span class="text-[10px]">TZS</span></p>
             </div>
-            <div class="text-center p-3 bg-green-50 rounded-lg">
-                <p class="text-xs text-gray-600 mb-1">Total Income</p>
-                <p class="text-lg font-bold text-green-600">{{ number_format($stats['total_income'], 0) }} TZS</p>
+            <div class="text-center p-3 bg-green-50 rounded-lg border border-green-100">
+                <p class="text-[10px] sm:text-xs text-gray-600 mb-1 uppercase tracking-tight">Total Income</p>
+                <p class="text-base sm:text-lg font-bold text-green-600">{{ number_format($stats['total_income'], 0) }} <span class="text-[10px]">TZS</span></p>
             </div>
-            <div class="text-center p-3 bg-red-50 rounded-lg">
-                <p class="text-xs text-gray-600 mb-1">Total Expenses</p>
-                <p class="text-lg font-bold text-red-600">{{ number_format($stats['total_expenses'], 0) }} TZS</p>
+            <div class="text-center p-3 bg-red-50 rounded-lg border border-red-100">
+                <p class="text-[10px] sm:text-xs text-gray-600 mb-1 uppercase tracking-tight">Total Expenses</p>
+                <p class="text-base sm:text-lg font-bold text-red-600">{{ number_format($stats['total_expenses'], 0) }} <span class="text-[10px]">TZS</span></p>
             </div>
-            <div class="text-center p-3 bg-purple-50 rounded-lg">
-                <p class="text-xs text-gray-600 mb-1">Net Worth</p>
-                <p class="text-lg font-bold text-purple-600">{{ number_format(($stats['total_savings_balance'] + $stats['total_investment_amount'] + $stats['total_profit']) - $stats['remaining_amount'], 0) }} TZS</p>
+            <div class="text-center p-3 bg-purple-50 rounded-lg border border-purple-100">
+                <p class="text-[10px] sm:text-xs text-gray-600 mb-1 uppercase tracking-tight">Net Worth</p>
+                <p class="text-base sm:text-lg font-bold text-purple-600">{{ number_format(($stats['total_savings_balance'] + $stats['total_investment_amount'] + $stats['total_profit']) - $stats['remaining_amount'], 0) }} <span class="text-[10px]">TZS</span></p>
             </div>
         </div>
     </div>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
         <!-- Loans Card -->
         <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 hover:shadow-lg transition">
             <div class="flex items-center justify-between mb-3 sm:mb-4">
@@ -206,12 +221,6 @@
                     <span class="text-gray-600">Remaining:</span>
                     <span class="text-[#015425] font-semibold">{{ number_format($stats['remaining_amount'], 0) }} TZS</span>
                 </div>
-                @if($stats['overdue_loans'] > 0)
-                <div class="flex items-center justify-between text-xs sm:text-sm">
-                    <span class="text-gray-600">Overdue:</span>
-                    <span class="text-red-600 font-semibold">{{ $stats['overdue_loans'] }}</span>
-                </div>
-                @endif
             </div>
         </div>
 
@@ -264,12 +273,10 @@
                     <span class="text-gray-600">Profit Earned:</span>
                     <span class="text-orange-600 font-semibold">{{ number_format($stats['total_profit'], 0) }} TZS</span>
                 </div>
-                @if($stats['expected_profit'] > 0)
                 <div class="flex items-center justify-between text-xs sm:text-sm">
                     <span class="text-gray-600">Expected:</span>
                     <span class="text-blue-600 font-semibold">{{ number_format($stats['expected_profit'], 0) }} TZS</span>
                 </div>
-                @endif
             </div>
         </div>
 
@@ -298,9 +305,99 @@
         </div>
     </div>
 
+    <!-- Payment Verifications Section -->
+    <div id="payment-verifications-section" class="bg-white rounded-lg shadow-md mb-6 border border-gray-100">
+        <div class="p-4 sm:p-6 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-green-50 to-white rounded-t-lg">
+            <div>
+                <h2 class="text-lg sm:text-xl font-bold text-[#015425]">Uthibitishaji wa Malipo (Divine Verification)</h2>
+                <p class="text-xs sm:text-sm text-gray-500 mt-1">Gawa gawio lako utakavyo - Akiba au FIA</p>
+            </div>
+            <a href="{{ route('member.payment-confirmations.index') }}" class="px-3 sm:px-4 py-2 bg-[#015425] text-white rounded-md hover:bg-[#013019] transition text-center text-xs sm:text-sm font-bold shadow-sm">
+                Thibitisha Sasa
+            </a>
+        </div>
+        <div class="p-4 sm:p-6">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-widest border-b border-gray-100">
+                            <th class="pb-3 px-2">Taarifa ya Malipo</th>
+                            <th class="pb-3 px-2">Kiasi (TZS)</th>
+                            <th class="pb-3 px-2">Aina ya Mgawanyo</th>
+                            <th class="pb-3 px-2">Status</th>
+                            <th class="pb-3 px-2">Tarehe</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        @forelse($paymentConfirmations as $confirmation)
+                            <tr class="hover:bg-gray-50 transition-colors group">
+                                <td class="py-3 px-2">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center mr-3 text-green-700">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-bold text-[#015425]">{{ $confirmation->member_id }}</p>
+                                            <p class="text-[10px] text-gray-400 font-mono">{{ $confirmation->member_name }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3 px-2">
+                                    <p class="text-sm font-bold text-gray-800">{{ number_format($confirmation->amount_to_pay, 0) }}</p>
+                                    <p class="text-[10px] text-green-600 font-medium">+ {{ number_format($confirmation->total_distribution, 0) }} allocated</p>
+                                </td>
+                                <td class="py-3 px-2">
+                                    <div class="flex flex-wrap gap-1">
+                                        @if($confirmation->re_deposit > 0)
+                                            <span class="text-[9px] px-1.5 py-0.5 bg-blue-50 text-blue-700 rounded font-bold uppercase tracking-tighter">Akiba</span>
+                                        @endif
+                                        @if($confirmation->fia_investment > 0)
+                                            <span class="text-[9px] px-1.5 py-0.5 bg-purple-50 text-purple-700 rounded font-bold uppercase tracking-tighter">FIA</span>
+                                        @endif
+                                        @php
+                                            $cashRemaining = $confirmation->amount_to_pay - $confirmation->swf_contribution - $confirmation->loan_repayment - $confirmation->capital_contribution - $confirmation->fine_penalty - $confirmation->re_deposit - $confirmation->fia_investment;
+                                        @endphp
+                                        @if($cashRemaining > 0)
+                                            <span class="text-[9px] px-1.5 py-0.5 bg-green-50 text-green-700 rounded font-bold uppercase tracking-tighter">Cash</span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="py-3 px-2">
+                                    <span class="px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-widest bg-green-100 text-green-800">
+                                        Verified
+                                    </span>
+                                </td>
+                                <td class="py-3 px-2">
+                                    <p class="text-[11px] text-gray-500 font-medium">{{ $confirmation->created_at->format('d M, Y') }}</p>
+                                    <p class="text-[9px] text-gray-400">{{ $confirmation->created_at->format('H:i') }}</p>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="py-12 text-center">
+                                    <div class="flex flex-col items-center">
+                                        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-3">
+                                            <svg class="w-8 h-8 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm font-bold text-gray-400">Hakuna kumbukumbu za malipo bado</p>
+                                        <p class="text-xs text-gray-300 mt-1">Anza kwa kuthibitisha malipo yako ya kwanza</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- Additional Statistics -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 pb-2 sm:pb-4 border-b border-gray-50 last:border-0 md:border-0">
             <h3 class="text-base sm:text-lg font-bold text-[#015425] mb-3">Transaction Summary</h3>
             <div class="space-y-2">
                 <div class="flex items-center justify-between">
@@ -309,61 +406,66 @@
                 </div>
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-gray-600">Total Income</span>
-                    <span class="text-sm font-semibold text-green-600">{{ number_format($stats['total_income'], 0) }} TZS</span>
+                    <span class="text-sm font-semibold text-green-600 font-mono">{{ number_format($stats['total_income'], 0) }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-gray-600">Total Expenses</span>
-                    <span class="text-sm font-semibold text-red-600">{{ number_format($stats['total_expenses'], 0) }} TZS</span>
+                    <span class="text-sm font-semibold text-red-600 font-mono">{{ number_format($stats['total_expenses'], 0) }}</span>
                 </div>
                 <div class="pt-2 border-t border-gray-200">
                     <div class="flex items-center justify-between">
-                        <span class="text-sm font-semibold text-[#015425]">Net Flow</span>
-                        <span class="text-sm font-bold {{ ($stats['total_income'] - $stats['total_expenses']) >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                            {{ number_format($stats['total_income'] - $stats['total_expenses'], 0) }} TZS
+                        <span class="text-sm font-bold text-[#015425]">Net Cash Flow</span>
+                        <span class="text-sm font-bold font-mono {{ ($stats['total_income'] - $stats['total_expenses']) >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                            {{ number_format($stats['total_income'] - $stats['total_expenses'], 0) }}
                         </span>
                     </div>
                 </div>
             </div>
         </div>
         
-        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 last:border-0 md:border-0">
             <h3 class="text-base sm:text-lg font-bold text-[#015425] mb-3">Loan Performance</h3>
             <div class="space-y-2">
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-gray-600">Total Borrowed</span>
-                    <span class="text-sm font-semibold text-[#015425]">{{ number_format($stats['total_loan_amount'], 0) }} TZS</span>
+                    <span class="text-sm font-semibold text-[#015425] font-mono">{{ number_format($stats['total_loan_amount'], 0) }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-gray-600">Amount Paid</span>
-                    <span class="text-sm font-semibold text-green-600">{{ number_format($stats['paid_amount'], 0) }} TZS</span>
+                    <span class="text-sm font-semibold text-green-600 font-mono">{{ number_format($stats['paid_amount'], 0) }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-gray-600">Remaining</span>
-                    <span class="text-sm font-semibold text-orange-600">{{ number_format($stats['remaining_amount'], 0) }} TZS</span>
+                    <span class="text-sm font-semibold text-orange-600 font-mono">{{ number_format($stats['remaining_amount'], 0) }}</span>
                 </div>
                 @if($stats['total_loan_amount'] > 0)
                 <div class="pt-2 border-t border-gray-200">
                     <div class="flex items-center justify-between">
-                        <span class="text-sm font-semibold text-[#015425]">Repayment Rate</span>
-                        <span class="text-sm font-bold text-blue-600">
-                            {{ number_format(($stats['paid_amount'] / $stats['total_loan_amount']) * 100, 1) }}%
-                        </span>
+                        <span class="text-sm font-bold text-[#015425]">Repayment Rate</span>
+                        <div class="flex items-center gap-2">
+                             <div class="w-16 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                <div class="h-full bg-green-500 rounded-full" style="width: {{ ($stats['paid_amount'] / $stats['total_loan_amount']) * 100 }}%"></div>
+                             </div>
+                             <span class="text-sm font-bold text-blue-600">
+                                {{ number_format(($stats['paid_amount'] / $stats['total_loan_amount']) * 100, 1) }}%
+                            </span>
+                        </div>
                     </div>
                 </div>
                 @endif
             </div>
         </div>
         
-        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
+        <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 last:mb-0 md:mb-0">
             <h3 class="text-base sm:text-lg font-bold text-[#015425] mb-3">Investment Performance</h3>
             <div class="space-y-2">
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-gray-600">Total Invested</span>
-                    <span class="text-sm font-semibold text-[#015425]">{{ number_format($stats['total_investment_amount'], 0) }} TZS</span>
+                    <span class="text-sm font-semibold text-[#015425] font-mono">{{ number_format($stats['total_investment_amount'], 0) }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-gray-600">Profit Earned</span>
-                    <span class="text-sm font-semibold text-green-600">{{ number_format($stats['total_profit'], 0) }} TZS</span>
+                    <span class="text-sm font-semibold text-green-600 font-mono">{{ number_format($stats['total_profit'], 0) }}</span>
                 </div>
                 <div class="flex items-center justify-between">
                     <span class="text-sm text-gray-600">Matured</span>
@@ -372,7 +474,7 @@
                 @if($stats['total_investment_amount'] > 0)
                 <div class="pt-2 border-t border-gray-200">
                     <div class="flex items-center justify-between">
-                        <span class="text-sm font-semibold text-[#015425]">ROI</span>
+                        <span class="text-sm font-bold text-[#015425]">Return ROI %</span>
                         <span class="text-sm font-bold text-purple-600">
                             {{ number_format(($stats['total_profit'] / $stats['total_investment_amount']) * 100, 2) }}%
                         </span>
@@ -455,6 +557,9 @@
             <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
                 <h3 class="text-base sm:text-lg font-bold text-[#015425] mb-3 sm:mb-4">Quick Actions</h3>
                 <div class="grid grid-cols-2 sm:grid-cols-1 gap-2 sm:space-y-2">
+                    <a href="{{ route('member.payment-confirmations.index') }}" class="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-center text-xs sm:text-sm font-bold shadow-sm">
+                        Verify Dividend Payment
+                    </a>
                     <a href="{{ route('member.loans.create') }}" class="px-3 sm:px-4 py-2 bg-[#015425] text-white rounded-md hover:bg-[#013019] transition text-center text-xs sm:text-sm font-medium">
                         Apply for Loan
                     </a>

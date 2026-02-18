@@ -47,6 +47,8 @@ class Loan extends Model
         'proof_of_income',
         'collateral_document',
         'guarantor_document',
+        'agreement_path',
+        'schedule_path',
     ];
 
     protected $casts = [

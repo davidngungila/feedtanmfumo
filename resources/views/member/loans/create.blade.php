@@ -76,20 +76,20 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Loan Type
+                                Loan Type <span class="text-red-500">*</span>
                             </label>
-                            <select name="loan_type" id="loan_type" 
-                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition">
+                            <select name="loan_type" id="loan_type" required onchange="calculateLoanSummary()"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition shadow-sm">
                                 <option value="">-- Select loan type --</option>
-                                <option value="Personal">Personal Loan</option>
-                                <option value="Business">Business Loan</option>
-                                <option value="Agricultural">Agricultural Loan</option>
-                                <option value="Education">Education Loan</option>
-                                <option value="Emergency">Emergency Loan</option>
-                                <option value="Asset Financing">Asset Financing</option>
-                                <option value="Home Improvement">Home Improvement</option>
-                                <option value="Other">Other</option>
-                        </select>
+                                <option value="Normal Loan">Normal Loan (1.3%)</option>
+                                <option value="Guaranteed Loan">Guaranteed Loan (1.4%)</option>
+                                <option value="Quick Loan">Quick Loan (5%)</option>
+                                <option value="Emergency Loan">Emergency Loan (2%)</option>
+                                <option value="Staff Loan">Staff Loan (0.6%)</option>
+                                <option value="Device Loan">Device Loan (0%)</option>
+                                <option value="FIA Loan">FIA Loan (1%)</option>
+                                <option value="Business Loan">Business Loan (1.8%)</option>
+                            </select>
                             @error('loan_type')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
@@ -111,20 +111,17 @@
                             <p class="text-xs text-gray-500 mt-1">Minimum amount: 1,000 TZS</p>
                         </div>
 
-                        <div>
+                        <div id="interest_rate_container">
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Interest Rate (%) <span class="text-gray-500">(Optional - Default: 10%)</span>
+                                Interest Rate (Annual %)
                             </label>
-                            <div class="relative">
-                                <input type="number" name="interest_rate" id="interest_rate" step="0.01" min="0" max="100" value="10"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425] transition"
-                                    placeholder="10.00">
+                            <div class="relative bg-gray-50">
+                                <input type="number" name="interest_rate" id="interest_rate" step="0.001" readonly
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-md bg-gray-50 text-gray-700 font-semibold cursor-not-allowed transition"
+                                    value="15.6">
                                 <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">%</span>
                             </div>
-                            @error('interest_rate')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                            <p class="text-xs text-gray-500 mt-1">Annual interest rate percentage</p>
+                            <p class="text-[10px] text-gray-500 mt-1">Hiki ni kiwango cha riba kilichowekwa kitalaamu kulingana na aina ya mkopo uliyochagua.</p>
                         </div>
 
                         <div>
@@ -603,28 +600,53 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Loan calculator
+    const rateMap = {
+        'Normal Loan': 1.3,
+        'Guaranteed Loan': 1.4,
+        'Quick Loan': 5,
+        'Emergency Loan': 2,
+        'Staff Loan': 0.6,
+        'Device Loan': 0,
+        'FIA Loan': 1,
+        'Business Loan': 1.8
+    };
+
+    const loanTypeSelect = document.getElementById('loan_type');
+    const guarantorSection = document.getElementById('guarantor_selection_section') || document.querySelector('[data-guarantor-section]');
+
     function calculateLoan() {
         const principal = parseFloat(principalInput.value) || 0;
-        const interestRate = parseFloat(interestInput.value) || 0;
+        const loanType = loanTypeSelect.value;
+        const monthlyRate = rateMap[loanType] || 0;
+        const interestRate = monthlyRate * 12; // Annual rate for display
+        
+        // Update interest rate input
+        interestInput.value = interestRate.toFixed(1);
+        
         const term = parseInt(termInput.value) || 0;
         const frequency = frequencySelect.value;
 
+        // Show/Hide guarantor section based on loan type
+        const guarantorFieldContainer = document.getElementById('guarantor_id')?.closest('.bg-white');
+        if (loanType === 'Guaranteed Loan') {
+            document.getElementById('guarantor_id').required = true;
+            // You might want to scroll to or highlight the guarantor section
+        } else {
+            document.getElementById('guarantor_id').required = false;
+        }
+
         // Update display values
         document.getElementById('calc-principal').textContent = formatCurrency(principal);
-        document.getElementById('calc-interest-rate').textContent = interestRate.toFixed(2) + '%';
+        document.getElementById('calc-interest-rate').textContent = interestRate.toFixed(1) + '%';
         document.getElementById('calc-term').textContent = term + ' months';
 
-        if (principal > 0 && interestRate > 0 && term > 0) {
-            // Calculate total interest (simple interest)
-            const totalInterest = (principal * interestRate / 100) * (term / 12);
+        if (principal > 0 && term > 0) {
+            // Calculate total interest (Principal * MonthlyRate * Term)
+            const totalInterest = principal * (monthlyRate / 100) * term;
             const totalAmount = principal + totalInterest;
 
             // Calculate monthly payment
-            let monthlyPayment = 0;
-            if (term > 0) {
-                monthlyPayment = totalAmount / term;
-            }
+            const monthlyPayment = totalAmount / term;
 
             // Update display
             document.getElementById('calc-total-interest').textContent = formatCurrency(totalInterest);
@@ -646,9 +668,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add event listeners for calculator
     principalInput.addEventListener('input', calculateLoan);
-    interestInput.addEventListener('input', calculateLoan);
     termInput.addEventListener('input', calculateLoan);
     frequencySelect.addEventListener('change', calculateLoan);
+    loanTypeSelect.addEventListener('change', calculateLoan);
 
     // Initial calculation
     calculateLoan();

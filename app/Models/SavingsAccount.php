@@ -21,6 +21,7 @@ class SavingsAccount extends Model
         'minimum_balance',
         'opening_date',
         'maturity_date',
+        'payment_receipt',
         'status',
         'notes',
     ];
@@ -46,10 +47,10 @@ class SavingsAccount extends Model
     public function getAccountTypeNameAttribute(): string
     {
         return match($this->account_type) {
-            'emergency' => 'Emergency Savings',
-            'rda' => 'Recurrent Deposit Account',
-            'flex' => 'Flex Account',
-            'business' => 'Business Savings',
+            'emergency' => 'Emergence Fund',
+            'rda' => 'Recurrent Deposit Account (RDA)',
+            'flex' => 'FeedTan Flexi',
+            'business' => 'Business Saving',
             default => ucfirst($this->account_type),
         };
     }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Investment;
 use App\Models\Issue;
 use App\Models\Loan;
+use App\Models\PaymentConfirmation;
 use App\Models\SavingsAccount;
 use App\Models\SocialWelfare;
 use App\Models\Transaction;
@@ -13,6 +14,11 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
+    /**
+     * Show the member dashboard
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
         $user = Auth::user();
@@ -24,6 +30,14 @@ class DashboardController extends Controller
         $investments = Investment::where('user_id', $user->id)->latest()->take(5)->get();
         $welfare = SocialWelfare::where('user_id', $user->id)->latest()->take(5)->get();
         $issues = Issue::where('user_id', $user->id)->latest()->take(5)->get();
+
+        // Get payment confirmations
+        $paymentConfirmations = PaymentConfirmation::where('user_id', $user->id)
+            ->orWhere('member_id', $user->member_number)
+            ->orWhere('member_id', $user->membership_code)
+            ->latest()
+            ->take(5)
+            ->get();
 
         // Calculate detailed statistics
         $stats = [
@@ -153,7 +167,7 @@ class DashboardController extends Controller
             'user', 'loans', 'savings', 'investments', 'welfare', 'issues',
             'stats', 'recentTransactions', 'alerts', 'loanOutstanding', 'nextDueLoan',
             'isLoanOfficer', 'isDepositOfficer', 'isInvestmentOfficer',
-            'isChairperson', 'isSecretary', 'isAccountant'
+            'isChairperson', 'isSecretary', 'isAccountant', 'paymentConfirmations'
         ));
     }
 }

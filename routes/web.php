@@ -141,6 +141,11 @@ Route::middleware('auth')->group(function () {
         Route::get('membership/step/10', [MembershipController::class, 'showStep10'])->name('membership.step10');
         Route::post('membership/step/10', [MembershipController::class, 'storeStep10'])->name('membership.store-step10');
 
+        // Payment Confirmation Routes
+        Route::get('payment-confirmations', [\App\Http\Controllers\PaymentConfirmationController::class, 'index'])->name('payment-confirmations.index');
+        Route::post('payment-confirmations/lookup', [\App\Http\Controllers\PaymentConfirmationController::class, 'lookupMember'])->name('payment-confirmations.lookup');
+        Route::post('payment-confirmations', [\App\Http\Controllers\PaymentConfirmationController::class, 'store'])->name('payment-confirmations.store');
+
         // Legacy route redirect
         Route::get('membership/application', function () {
             $user = Auth::user();

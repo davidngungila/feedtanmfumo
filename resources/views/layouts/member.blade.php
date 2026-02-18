@@ -143,6 +143,10 @@
                             </div>
                             @endif
                         </div>
+
+                        <a href="{{ $isApproved ? route('member.payment-confirmations.index') : '#' }}" class="px-3 py-2 rounded-md transition {{ !$isApproved ? 'opacity-50 cursor-not-allowed' : '' }} {{ request()->routeIs('member.payment-confirmations.*') ? 'bg-white font-semibold text-[#015425]' : 'bg-[#015425] text-white hover:bg-[#027a3a]' }}" {{ !$isApproved ? 'title="Membership must be approved to access Payment Verification"' : '' }}>
+                            Payment Verification
+                        </a>
                     </nav>
                     
                     <div class="flex items-center space-x-3 sm:space-x-4 flex-shrink-0 ml-auto">
@@ -199,22 +203,21 @@
                                         </svg>
                                         My Profile
                                     </a>
-                                    <a href="{{ route('member.profile.settings') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition group">
+                                    <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition group">
                                         <svg class="w-4 h-4 mr-3 text-gray-400 group-hover:text-[#015425] transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                         </svg>
-                                        Settings
+                                        Account Settings
                                     </a>
-                                </div>
-                                <div class="border-t border-gray-200 py-1">
+                                    <div class="border-t border-gray-100"></div>
                                     <form method="POST" action="{{ route('logout') }}">
                                         @csrf
-                                        <button type="submit" class="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition">
-                                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <button type="submit" class="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition group">
+                                            <svg class="w-4 h-4 mr-3 text-red-400 group-hover:text-red-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
                                             </svg>
-                                            Logout
+                                            Sign Out
                                         </button>
                                     </form>
                                 </div>
@@ -223,509 +226,214 @@
                     </div>
                 </div>
             </div>
-        </header>
-        
-        <!-- Mobile Sidebar Menu -->
-        <div id="mobile-sidebar" class="hidden lg:hidden fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out">
-            <div class="flex flex-col h-full">
-                <!-- Sidebar Header -->
-                <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] px-4 py-4 flex items-center justify-between">
-                    <div class="flex items-center">
-                        <div class="w-10 h-10 bg-white bg-opacity-20 backdrop-blur-sm rounded-lg flex items-center justify-center mr-3 border border-white border-opacity-30">
-                            <span class="text-[#015425] font-bold">FD</span>
-                        </div>
-                        <span class="text-lg font-bold text-white">FeedTan</span>
-                    </div>
-                    <button id="close-sidebar" class="text-white hover:bg-white hover:bg-opacity-20 hover:text-[#015425] p-2 rounded-md transition">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-                
-                <!-- Sidebar Navigation -->
-                <nav class="flex-1 px-4 py-4 overflow-y-auto">
-                    @php
-                        $isApproved = Auth::user()->membership_status === 'approved';
-                    @endphp
-                    
-                    <a href="{{ route('member.dashboard') }}" class="flex items-center px-3 py-2 mb-2 rounded-md {{ request()->routeIs('member.dashboard') ? 'bg-white text-[#015425] font-semibold' : 'text-gray-700 hover:bg-green-50 hover:text-[#015425]' }} transition">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                        </svg>
+            
+            <!-- Mobile Navigation Menu - Enhanced with Slide Animation -->
+            <div id="mobile-menu" class="hidden md:hidden border-t border-white border-opacity-10 py-3 bg-[#013019] shadow-inner">
+                <div class="px-4 space-y-1">
+                    <a href="{{ route('member.dashboard') }}" class="block px-3 py-2 rounded-md transition {{ request()->routeIs('member.dashboard') ? 'bg-white text-[#015425] font-bold shadow-md' : 'text-white hover:bg-white hover:bg-opacity-10' }}">
                         Dashboard
                     </a>
                     
-                    <!-- Loans Mobile -->
-                    <div class="mobile-dropdown {{ !$isApproved ? 'opacity-50' : '' }} mb-2">
-                        <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="mobile-dropdown-toggle w-full flex items-center justify-between px-3 py-2 rounded-md {{ !$isApproved ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-green-50 hover:text-[#015425]' }} {{ request()->routeIs('member.loans.*') ? 'bg-white text-[#015425] font-semibold' : '' }} transition">
-                            <div class="flex items-center">
-                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <span>Loans</span>
-                            </div>
-                            @if($isApproved)
-                            <svg class="w-4 h-4 mobile-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                            @endif
-                        </button>
-                        @if($isApproved)
-                        <div class="mobile-dropdown-menu hidden pl-4 mt-1 space-y-1">
-                            <a href="{{ route('member.loans.index') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition">All Loans</a>
-                            <a href="{{ route('member.loans.create') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition">Apply for Loan</a>
-                        </div>
-                        @endif
+                    @if($isApproved)
+                    <div class="border-t border-white border-opacity-5 my-2"></div>
+                    
+                    <!-- Mobile Loans -->
+                    <div class="space-y-1">
+                        <p class="px-3 py-1 text-[10px] uppercase tracking-widest text-white text-opacity-50 font-bold">Loans</p>
+                        <a href="{{ route('member.loans.index') }}" class="block px-3 py-2 rounded-md transition {{ request()->routeIs('member.loans.index') ? 'bg-white text-[#015425] font-bold' : 'text-white hover:bg-white hover:bg-opacity-10' }}">All Loans</a>
+                        <a href="{{ route('member.loans.create') }}" class="block px-3 py-2 rounded-md transition {{ request()->routeIs('member.loans.create') ? 'bg-white text-[#015425] font-bold' : 'text-white hover:bg-white hover:bg-opacity-10' }}">Apply for Loan</a>
                     </div>
                     
-                    <!-- Savings Mobile -->
-                    <div class="mobile-dropdown {{ !$isApproved ? 'opacity-50' : '' }} mb-2">
-                        <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="mobile-dropdown-toggle w-full flex items-center justify-between px-3 py-2 rounded-md {{ !$isApproved ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-green-50 hover:text-[#015425]' }} {{ request()->routeIs('member.savings.*') || request()->routeIs('member.monthly-deposits.*') ? 'bg-white text-[#015425] font-semibold' : '' }} transition">
-                            <div class="flex items-center">
-                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                </svg>
-                                <span>Savings</span>
-                            </div>
-                            @if($isApproved)
-                            <svg class="w-4 h-4 mobile-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                            @endif
-                        </button>
-                        @if($isApproved)
-                        <div class="mobile-dropdown-menu hidden pl-4 mt-1 space-y-1">
-                            <a href="{{ route('member.savings.index') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition">All Accounts</a>
-                            <a href="{{ route('member.savings.create') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition">Open Account</a>
-                            <a href="{{ route('member.monthly-deposits.index') }}" class="block px-3 py-2 rounded-md text-sm font-bold text-orange-600 hover:bg-orange-50 transition border-t border-gray-100 mt-1 pt-1">Deposit Statements</a>
-                        </div>
-                        @endif
+                    <div class="border-t border-white border-opacity-5 my-2"></div>
+                    
+                    <!-- Mobile Savings -->
+                    <div class="space-y-1">
+                        <p class="px-3 py-1 text-[10px] uppercase tracking-widest text-white text-opacity-50 font-bold">Savings</p>
+                        <a href="{{ route('member.savings.index') }}" class="block px-3 py-2 rounded-md transition {{ request()->routeIs('member.savings.index') ? 'bg-white text-[#015425] font-bold' : 'text-white hover:bg-white hover:bg-opacity-10' }}">All Accounts</a>
+                        <a href="{{ route('member.savings.create') }}" class="block px-3 py-2 rounded-md transition {{ request()->routeIs('member.savings.create') ? 'bg-white text-[#015425] font-bold' : 'text-white hover:bg-white hover:bg-opacity-10' }}">Open Account</a>
                     </div>
                     
-                    <!-- Investments Mobile -->
-                    <div class="mobile-dropdown {{ !$isApproved ? 'opacity-50' : '' }} mb-2">
-                        <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="mobile-dropdown-toggle w-full flex items-center justify-between px-3 py-2 rounded-md {{ !$isApproved ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-green-50 hover:text-[#015425]' }} {{ request()->routeIs('member.investments.*') ? 'bg-white text-[#015425] font-semibold' : '' }} transition">
-                            <div class="flex items-center">
-                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                                </svg>
-                                <span>Investments</span>
-                            </div>
-                            @if($isApproved)
-                            <svg class="w-4 h-4 mobile-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                            @endif
-                        </button>
-                        @if($isApproved)
-                        <div class="mobile-dropdown-menu hidden pl-4 mt-1 space-y-1">
-                            <a href="{{ route('member.investments.index') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition">All Investments</a>
-                            <a href="{{ route('member.investments.create') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition">Start Investment</a>
-                        </div>
-                        @endif
-                    </div>
+                    <div class="border-t border-white border-opacity-5 my-2"></div>
                     
-                    <a href="{{ $isApproved ? route('member.welfare.index') : '#' }}" class="flex items-center px-3 py-2 mb-2 rounded-md {{ !$isApproved ? 'text-gray-400 cursor-not-allowed opacity-50' : 'text-gray-700 hover:bg-green-50 hover:text-[#015425]' }} {{ request()->routeIs('member.welfare.*') ? 'bg-white text-[#015425] font-semibold' : '' }} transition">
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                        </svg>
-                        Welfare
+                    <!-- Mobile Investments -->
+                    <div class="space-y-1">
+                        <p class="px-3 py-1 text-[10px] uppercase tracking-widest text-white text-opacity-50 font-bold">Investments</p>
+                        <a href="{{ route('member.investments.index') }}" class="block px-3 py-2 rounded-md transition {{ request()->routeIs('member.investments.index') ? 'bg-white text-[#015425] font-bold' : 'text-white hover:bg-white hover:bg-opacity-10' }}">All Investments</a>
+                        <a href="{{ route('member.investments.create') }}" class="block px-3 py-2 rounded-md transition {{ request()->routeIs('member.investments.create') ? 'bg-white text-[#015425] font-bold' : 'text-white hover:bg-white hover:bg-opacity-10' }}">Start Investment</a>
+                    </div>
+
+                    <div class="border-t border-white border-opacity-5 my-2"></div>
+
+                    <!-- Mobile Payment Verification -->
+                    <a href="{{ route('member.payment-confirmations.index') }}" class="block px-3 py-2 rounded-md transition {{ request()->routeIs('member.payment-confirmations.*') ? 'bg-white text-[#015425] font-bold' : 'text-white hover:bg-white hover:bg-opacity-10' }}">
+                        Payment Verification
                     </a>
                     
-                    <!-- Issues Mobile -->
-                    <div class="mobile-dropdown {{ !$isApproved ? 'opacity-50' : '' }} mb-2">
-                        <button type="button" {{ !$isApproved ? 'disabled' : '' }} class="mobile-dropdown-toggle w-full flex items-center justify-between px-3 py-2 rounded-md {{ !$isApproved ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-green-50 hover:text-[#015425]' }} {{ request()->routeIs('member.issues.*') ? 'bg-white text-[#015425] font-semibold' : '' }} transition">
-                            <div class="flex items-center">
-                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                                </svg>
-                                <span>Issues</span>
-                            </div>
-                            @if($isApproved)
-                            <svg class="w-4 h-4 mobile-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                            </svg>
-                            @endif
-                        </button>
-                        @if($isApproved)
-                        <div class="mobile-dropdown-menu hidden pl-4 mt-1 space-y-1">
-                            <a href="{{ route('member.issues.index') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition">All Issues</a>
-                            <a href="{{ route('member.issues.create') }}" class="block px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-green-50 hover:text-[#015425] transition">Report Issue</a>
-                        </div>
-                        @endif
+                    <div class="border-t border-white border-opacity-5 my-2"></div>
+                    
+                    <a href="{{ route('member.welfare.index') }}" class="block px-3 py-2 rounded-md transition {{ request()->routeIs('member.welfare.*') ? 'bg-white text-[#015425] font-bold' : 'text-white hover:bg-white hover:bg-opacity-10' }}">
+                        Welfare Fund
+                    </a>
+                    
+                    <div class="border-t border-white border-opacity-5 my-2"></div>
+                    
+                    <div class="space-y-1">
+                        <p class="px-3 py-1 text-[10px] uppercase tracking-widest text-white text-opacity-50 font-bold">Help & Support</p>
+                        <a href="{{ route('member.issues.index') }}" class="block px-3 py-2 rounded-md transition {{ request()->routeIs('member.issues.index') ? 'bg-white text-[#015425] font-bold' : 'text-white hover:bg-white hover:bg-opacity-10' }}">View Issues</a>
+                        <a href="{{ route('member.issues.create') }}" class="block px-3 py-2 rounded-md transition {{ request()->routeIs('member.issues.create') ? 'bg-white text-[#015425] font-bold' : 'text-white hover:bg-white hover:bg-opacity-10' }}">Report Issue</a>
                     </div>
-                </nav>
-                
-                <!-- Sidebar Footer -->
-                <div class="px-4 py-4 border-t border-gray-200">
-                    <div class="flex items-center mb-3">
-                        <div class="w-10 h-10 rounded-full bg-white bg-opacity-20 backdrop-blur-sm border border-white border-opacity-30 flex items-center justify-center text-[#015425] font-semibold text-sm mr-3">
-                            {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-sm font-medium text-gray-900">{{ Auth::user()->name }}</p>
-                            <p class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</p>
-                        </div>
+                    @else
+                    <div class="p-3 bg-white bg-opacity-10 rounded-md text-white text-xs text-center italic">
+                        Access restricted until membership is approved
                     </div>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="w-full flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition text-sm font-medium">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                            </svg>
-                            Logout
-                        </button>
-                    </form>
+                    @endif
                 </div>
             </div>
-        </div>
-        
-        <!-- Sidebar Overlay -->
-        <div id="sidebar-overlay" class="hidden lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"></div>
-        
-        <!-- Main Content -->
-        <main class="flex-1 flex flex-col pt-16">
-            <div class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 w-full">
-                @if(session('success'))
-                    <div class="mb-6 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">
-                        {{ session('success') }}
-                    </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="flex-grow pt-16">
+            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <!-- Page Breadcrumbs/Header -->
+                @if(!request()->routeIs('member.dashboard'))
+                <nav class="flex mb-5" aria-label="Breadcrumb">
+                    <ol class="flex items-center space-x-2">
+                        <li>
+                            <div class="flex items-center">
+                                <a href="{{ route('member.dashboard') }}" class="text-xs sm:text-sm font-medium text-gray-400 hover:text-[#015425] transition">Dashboard</a>
+                            </div>
+                        </li>
+                        <li class="flex items-center text-gray-400">
+                            <svg class="flex-shrink-0 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"></path>
+                            </svg>
+                            <span class="ml-2 text-xs sm:text-sm font-bold text-[#015425]">@yield('page-title')</span>
+                        </li>
+                    </ol>
+                </nav>
                 @endif
                 
-                @if(session('error'))
-                    <div class="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
-                        {{ session('error') }}
-                    </div>
-                @endif
-                
+                @include('components.alerts')
                 @yield('content')
             </div>
-            
-            <!-- Footer -->
-            <footer class="bg-white border-t border-gray-200 mt-auto w-full">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-                    <div class="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
-                        <span>&copy; {{ date('Y') }} FeedTan CMG. All rights reserved.</span>
-                        <div class="flex items-center gap-2 sm:gap-4">
-                            <span class="text-gray-400">Version 1.0.0</span>
-                            <span class="hidden sm:inline text-gray-300">|</span>
-                            <span class="hidden sm:inline">Powered by FeedTan Team</span>
+        </main>
+
+        <!-- Dynamic and Modern Footer -->
+        <footer class="bg-white border-t border-gray-100 py-8">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                    <div class="text-center md:text-left">
+                        <div class="flex items-center justify-center md:justify-start">
+                             <div class="w-8 h-8 bg-[#015425] rounded-md flex items-center justify-center mr-2">
+                                <span class="text-white font-bold text-xs">FD</span>
+                            </div>
+                            <span class="text-lg font-bold text-[#015425]">FeedTan Digital</span>
                         </div>
+                        <p class="text-xs text-gray-500 mt-2">Empowering Growth through Digital Finance.</p>
+                    </div>
+                    
+                    <div class="flex justify-center space-x-6">
+                        <a href="#" class="text-gray-400 hover:text-[#015425] transition">
+                            <span class="sr-only">Facebook</span>
+                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-[#015425] transition">
+                            <span class="sr-only">Twitter</span>
+                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-[#015425] transition">
+                            <span class="sr-only">LinkedIn</span>
+                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0H5C2.24 0 0 2.24 0 5v14c0 2.76 2.24 5 5 5h14c2.76 0 5-2.24 5-5V5c0-2.76-2.24-5-5-5zM8 19H5V10h3v9zM6.5 8.25c-.96 0-1.75-.79-1.75-1.75S5.54 4.75 6.5 4.75s1.75.79 1.75 1.75-.79 1.75-1.75 1.75zM19 19h-3v-4.74c0-1.42-.6-2.39-1.93-2.39-1.07 0-1.61.72-1.89 1.42-.1.24-.13.57-.13.9v4.81h-3V10h3v1.38c.4-.62 1.12-1.5 2.72-1.5 1.99 0 3.48 1.3 3.48 4.09V19z"/></svg>
+                        </a>
+                    </div>
+                    
+                    <div class="text-center md:text-right">
+                        <p class="text-xs text-gray-400">&copy; {{ date('Y') }} FEEDTAN DIGITAL. All Rights Reserved.</p>
                     </div>
                 </div>
-            </footer>
-        </main>
+            </div>
+        </footer>
     </div>
-    
+
+    <!-- Enhanced Layout Scripts -->
     <script>
-        (function() {
-            'use strict';
-            
-            // Mobile Sidebar Toggle
-            function initMobileSidebar() {
-                const mobileMenuButton = document.getElementById('mobile-menu-button');
-                const mobileSidebar = document.getElementById('mobile-sidebar');
-                const sidebarOverlay = document.getElementById('sidebar-overlay');
-                const closeSidebar = document.getElementById('close-sidebar');
-                
-                function openSidebar() {
-                    mobileSidebar.classList.remove('hidden');
-                    mobileSidebar.classList.remove('-translate-x-full');
-                    sidebarOverlay.classList.remove('hidden');
-                    document.body.style.overflow = 'hidden';
-                }
-                
-                function closeSidebarFunc() {
-                    mobileSidebar.classList.add('-translate-x-full');
-                    setTimeout(() => {
-                        mobileSidebar.classList.add('hidden');
-                    }, 300);
-                    sidebarOverlay.classList.add('hidden');
-                    document.body.style.overflow = '';
-                }
-                
-                if (mobileMenuButton) {
-                    mobileMenuButton.addEventListener('click', openSidebar);
-                }
-                
-                if (closeSidebar) {
-                    closeSidebar.addEventListener('click', closeSidebarFunc);
-                }
-                
-                if (sidebarOverlay) {
-                    sidebarOverlay.addEventListener('click', closeSidebarFunc);
-                }
-            }
-            
-            // Initialize when DOM is ready
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', initMobileSidebar);
-            } else {
-                initMobileSidebar();
-            }
-        })();
-        
         document.addEventListener('DOMContentLoaded', function() {
-            // Notification dropdown - Hover on desktop, click on mobile
-            const notificationContainer = document.querySelector('.notification-container');
-            const notificationButton = document.getElementById('notification-button');
-            const notificationDropdown = document.getElementById('notification-dropdown');
-            let notificationClicked = false;
+            // Mobile Menu Toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuIcon = document.getElementById('mobile-menu-icon');
             
-            if (notificationContainer && notificationDropdown) {
-                // Desktop: hover to show, click to toggle
-                if (window.innerWidth >= 1024) {
-                    notificationContainer.addEventListener('mouseenter', function() {
-                        if (!notificationClicked) {
-                            notificationDropdown.classList.remove('hidden');
-                        }
-                    });
-                    
-                    notificationContainer.addEventListener('mouseleave', function() {
-                        if (!notificationClicked) {
-                            notificationDropdown.classList.add('hidden');
-                        }
-                    });
-                    
-                    // Click to toggle (stays open after click)
-                    if (notificationButton) {
-                        notificationButton.addEventListener('click', function(e) {
-                            e.stopPropagation();
-                            notificationClicked = !notificationClicked;
-                            if (notificationClicked) {
-                                notificationDropdown.classList.remove('hidden');
-                            } else {
-                                notificationDropdown.classList.add('hidden');
-                            }
-                        });
-                    }
-                } else {
-                    // Mobile: click to toggle
-                    if (notificationButton) {
-                        notificationButton.addEventListener('click', function(e) {
-                            e.stopPropagation();
-                            notificationDropdown.classList.toggle('hidden');
-                        });
-                    }
-                }
-            }
-            
-            // User profile dropdown - Hover only on desktop
-            const userProfileContainer = document.querySelector('.user-profile-container');
-            const userMenuButton = document.getElementById('user-menu-button');
-            const userMenuDropdown = document.getElementById('user-menu-dropdown');
-            const userMenuArrow = document.querySelector('.user-menu-arrow');
-            
-            if (userProfileContainer && userMenuDropdown) {
-                // Desktop: hover
-                if (window.innerWidth >= 1024) {
-                    userProfileContainer.addEventListener('mouseenter', function() {
-                        userMenuDropdown.classList.remove('hidden');
-                        if (userMenuArrow) userMenuArrow.classList.add('rotate-180');
-                    });
-                    
-                    userProfileContainer.addEventListener('mouseleave', function() {
-                        userMenuDropdown.classList.add('hidden');
-                        if (userMenuArrow) userMenuArrow.classList.remove('rotate-180');
-                    });
-                }
-                
-                // Mobile: click
-                if (userMenuButton) {
-                    userMenuButton.addEventListener('click', function(e) {
-                        if (window.innerWidth < 1024) {
-                            e.stopPropagation();
-                            userMenuDropdown.classList.toggle('hidden');
-                            if (userMenuArrow) userMenuArrow.classList.toggle('rotate-180');
-                        }
-                    });
-                }
-            }
-            
-            // Desktop Navigation dropdowns - Hover on desktop (PC size), click on mobile
-            const navDropdowns = document.querySelectorAll('.nav-dropdown');
-            navDropdowns.forEach(function(dropdown) {
-                const toggle = dropdown.querySelector('.nav-dropdown-toggle');
-                const menu = dropdown.querySelector('.nav-dropdown-menu');
-                const arrow = dropdown.querySelector('.nav-dropdown-arrow');
-                let hoverTimeout;
-                
-                if (toggle && menu) {
-                    // Function to close all dropdowns except the specified one
-                    function closeOtherDropdowns(exceptDropdown) {
-                        navDropdowns.forEach(function(otherDropdown) {
-                            if (otherDropdown !== exceptDropdown) {
-                                const otherMenu = otherDropdown.querySelector('.nav-dropdown-menu');
-                                const otherArrow = otherDropdown.querySelector('.nav-dropdown-arrow');
-                                if (otherMenu) otherMenu.classList.add('hidden');
-                                if (otherArrow) otherArrow.classList.remove('rotate-180');
-                            }
-                        });
-                    }
-                    
-                    // Desktop (lg and above - 1024px+): Hover behavior
-                    function setupDesktopHover() {
-                        dropdown.addEventListener('mouseenter', function() {
-                            if (window.innerWidth >= 1024) {
-                                if (hoverTimeout) {
-                                    clearTimeout(hoverTimeout);
-                                }
-                                closeOtherDropdowns(dropdown);
-                                menu.classList.remove('hidden');
-                                if (arrow) arrow.classList.add('rotate-180');
-                            }
-                        });
-                        
-                        dropdown.addEventListener('mouseleave', function() {
-                            if (window.innerWidth >= 1024) {
-                                hoverTimeout = setTimeout(function() {
-                                    menu.classList.add('hidden');
-                                    if (arrow) arrow.classList.remove('rotate-180');
-                                }, 150);
-                            }
-                        });
-                    }
-                    
-                    // Mobile: Click behavior
-                    function setupMobileClick() {
-                        toggle.addEventListener('click', function(e) {
-                            if (window.innerWidth < 1024) {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                
-                                const isHidden = menu.classList.contains('hidden');
-                                closeOtherDropdowns(dropdown);
-                                
-                                if (isHidden) {
-                                    menu.classList.remove('hidden');
-                                    if (arrow) arrow.classList.add('rotate-180');
-                                } else {
-                                    menu.classList.add('hidden');
-                                    if (arrow) arrow.classList.remove('rotate-180');
-                                }
-                            }
-                        });
-                    }
-                    
-                    // Setup both behaviors
-                    setupDesktopHover();
-                    setupMobileClick();
-                }
-            });
-            
-            // Mobile dropdowns
-            const mobileDropdowns = document.querySelectorAll('.mobile-dropdown');
-            mobileDropdowns.forEach(function(dropdown) {
-                const toggle = dropdown.querySelector('.mobile-dropdown-toggle');
-                const menu = dropdown.querySelector('.mobile-dropdown-menu');
-                const arrow = dropdown.querySelector('.mobile-dropdown-arrow');
-                
-                if (toggle && menu) {
-                    toggle.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        
-                        // Close all other mobile dropdowns
-                        mobileDropdowns.forEach(function(otherDropdown) {
-                            if (otherDropdown !== dropdown) {
-                                const otherMenu = otherDropdown.querySelector('.mobile-dropdown-menu');
-                                const otherArrow = otherDropdown.querySelector('.mobile-dropdown-arrow');
-                                if (otherMenu) otherMenu.classList.add('hidden');
-                                if (otherArrow) otherArrow.classList.remove('rotate-180');
-                            }
-                        });
-                        
-                        // Toggle current dropdown
-                        menu.classList.toggle('hidden');
-                        if (arrow) arrow.classList.toggle('rotate-180');
-                    });
-                }
-            });
-            
-            // Close dropdowns when clicking outside
-            document.addEventListener('click', function(event) {
-                // Close notification dropdown
-                if (notificationContainer && notificationDropdown) {
-                    if (window.innerWidth >= 1024) {
-                        // Desktop: close if clicked outside and was clicked before
-                        if (notificationClicked && !notificationContainer.contains(event.target)) {
-                            notificationDropdown.classList.add('hidden');
-                            notificationClicked = false;
-                        }
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                    // Change icon based on state
+                    if (mobileMenu.classList.contains('hidden')) {
+                        mobileMenuIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>';
                     } else {
-                        // Mobile: close if clicked outside
-                        if (notificationButton && !notificationButton.contains(event.target) && !notificationDropdown.contains(event.target)) {
-                            notificationDropdown.classList.add('hidden');
-                        }
+                        mobileMenuIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>';
                     }
-                }
+                });
+            }
+
+            // Dropdown Menu Handling (Hover Simulation for better UX)
+            const dropdownContainers = document.querySelectorAll('.nav-dropdown, .notification-container, .user-profile-container');
+            
+            dropdownContainers.forEach(container => {
+                const trigger = container.querySelector('button');
+                const menu = container.querySelector('div[id$="-dropdown"], .nav-dropdown-menu');
+                const arrow = container.querySelector('.nav-dropdown-arrow, .user-menu-arrow');
                 
-                // Close user dropdown (mobile only)
-                if (window.innerWidth < 1024) {
-                    if (userMenuDropdown && userMenuButton && !userMenuButton.contains(event.target) && !userMenuDropdown.contains(event.target)) {
-                        userMenuDropdown.classList.add('hidden');
-                        if (userMenuArrow) {
-                            userMenuArrow.classList.remove('rotate-180');
+                if (trigger && menu) {
+                    let timeout;
+
+                    const showMenu = () => {
+                        clearTimeout(timeout);
+                        menu.classList.remove('hidden');
+                        if (arrow) arrow.style.transform = 'rotate(180deg)';
+                    };
+
+                    const hideMenu = () => {
+                        timeout = setTimeout(() => {
+                            menu.classList.add('hidden');
+                            if (arrow) arrow.style.transform = 'rotate(0deg)';
+                        }, 200);
+                    };
+
+                    container.addEventListener('mouseenter', showMenu);
+                    container.addEventListener('mouseleave', hideMenu);
+                    
+                    // Also support click for touch devices
+                    trigger.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const isHidden = menu.classList.contains('hidden');
+                        
+                        // Close all other menus first
+                        dropdownContainers.forEach(c => {
+                             const m = c.querySelector('div[id$="-dropdown"], .nav-dropdown-menu');
+                             const a = c.querySelector('.nav-dropdown-arrow, .user-menu-arrow');
+                             if (m) m.classList.add('hidden');
+                             if (a) a.style.transform = 'rotate(0deg)';
+                        });
+                        
+                        if (isHidden) {
+                            menu.classList.remove('hidden');
+                            if (arrow) arrow.style.transform = 'rotate(180deg)';
                         }
-                    }
+                    });
                 }
+            });
+
+            // Close menus on outside click
+            document.addEventListener('click', () => {
+                dropdownContainers.forEach(container => {
+                    const menu = container.querySelector('div[id$="-dropdown"], .nav-dropdown-menu');
+                    const arrow = container.querySelector('.nav-dropdown-arrow, .user-menu-arrow');
+                    if (menu) menu.classList.add('hidden');
+                    if (arrow) arrow.style.transform = 'rotate(0deg)';
+                });
             });
         });
     </script>
-    
-    <style>
-        .rotate-180 {
-            transform: rotate(180deg);
-        }
-        
-        .mobile-dropdown-arrow {
-            transition: transform 0.2s ease-in-out;
-        }
-        
-        .mobile-dropdown-arrow.rotate-180 {
-            transform: rotate(180deg);
-        }
-        
-        .mobile-dropdown-menu {
-            animation: slideDown 0.2s ease-out;
-        }
-        
-        .user-menu-arrow {
-            transition: transform 0.2s ease-in-out;
-        }
-        
-        .user-menu-arrow.rotate-180 {
-            transform: rotate(180deg);
-        }
-        
-        #user-menu-dropdown, #notification-dropdown {
-            animation: slideDown 0.2s ease-out;
-        }
-        
-        #mobile-sidebar {
-            transform: translateX(-100%);
-        }
-        
-        #mobile-sidebar:not(.hidden) {
-            transform: translateX(0);
-        }
-        
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    </style>
-    
     @stack('scripts')
-    
-    <!-- Quick Contact Widget -->
-    @include('components.quick-contact-widget')
 </body>
 </html>

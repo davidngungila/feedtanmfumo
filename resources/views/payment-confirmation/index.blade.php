@@ -250,6 +250,7 @@
                     name="member_id" 
                     class="input-field" 
                     placeholder="Weka namba yako ya uanachama"
+                    value="{{ Auth::check() ? (Auth::user()->member_number ?? Auth::user()->membership_code) : '' }}"
                     required
                 >
                 <div id="member_id_error" class="error-message"></div>
@@ -542,6 +543,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const submitBtn = document.getElementById('submitBtn');
 
     let memberData = null;
+
+    // Check if member ID is pre-filled (for logged-in members)
+    if (memberIdInput.value.trim()) {
+        setTimeout(() => {
+            lookupBtn.click();
+        }, 100);
+    }
 
     // Lookup member
     lookupBtn.addEventListener('click', async function() {
