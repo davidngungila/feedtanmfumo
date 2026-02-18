@@ -104,6 +104,7 @@
                                 <a href="{{ route('member.savings.index') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-green-50 hover:text-[#015425] transition">All Accounts</a>
                                 <a href="{{ route('member.savings.create') }}" class="block px-4 py-2 text-sm text-[#015425] hover:bg-green-50 hover:text-[#015425] transition">Open Account</a>
                                 <a href="{{ route('member.monthly-deposits.index') }}" class="block px-4 py-2 text-sm font-bold text-orange-600 hover:bg-orange-50 transition border-t border-gray-100 mt-1 pt-2">Deposit Statements</a>
+                                <a href="{{ route('member.loan-statements.index') }}" class="block px-4 py-2 text-sm font-bold text-[#015425] hover:bg-green-50 transition border-t border-gray-100 mt-1 pt-2">Loan Statements</a>
                             </div>
                             @endif
                         </div>
@@ -246,11 +247,12 @@
                     
                     <div class="border-t border-white border-opacity-5 my-2"></div>
                     
-                    <!-- Mobile Savings -->
                     <div class="space-y-1">
                         <p class="px-3 py-1 text-[10px] uppercase tracking-widest text-white text-opacity-50 font-bold">Savings</p>
                         <a href="{{ route('member.savings.index') }}" class="block px-3 py-2 rounded-md transition {{ request()->routeIs('member.savings.index') ? 'bg-white text-[#015425] font-bold' : 'text-white hover:bg-white hover:bg-opacity-10' }}">All Accounts</a>
                         <a href="{{ route('member.savings.create') }}" class="block px-3 py-2 rounded-md transition {{ request()->routeIs('member.savings.create') ? 'bg-white text-[#015425] font-bold' : 'text-white hover:bg-white hover:bg-opacity-10' }}">Open Account</a>
+                        <a href="{{ route('member.monthly-deposits.index') }}" class="block px-3 py-2 rounded-md transition text-orange-400 font-bold border-l-2 border-orange-400 ml-2">Deposit Statements</a>
+                        <a href="{{ route('member.loan-statements.index') }}" class="block px-3 py-2 rounded-md transition text-green-400 font-bold border-l-2 border-green-400 ml-2">Loan Statements</a>
                     </div>
                     
                     <div class="border-t border-white border-opacity-5 my-2"></div>

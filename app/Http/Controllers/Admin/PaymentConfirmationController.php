@@ -399,10 +399,15 @@ class PaymentConfirmationController extends Controller
                         continue;
                     }
 
-                    // Try to find user (optional - don't fail if not found)
-                    $user = User::where('member_number', $memberId)
-                        ->orWhere('membership_code', $memberId)
+                    // Try to find user (strictly using member_number or membership_code)
+                    $user = User::where('membership_code', $memberId)
+                        ->orWhere('member_number', $memberId)
                         ->first();
+
+                    // If user found, strictly use their membership_code as the ID for consistency
+                    if ($user && $user->membership_code) {
+                        $memberId = $user->membership_code;
+                    }
 
                     // Extract member name from Excel or use user name
                     $memberName = '';
