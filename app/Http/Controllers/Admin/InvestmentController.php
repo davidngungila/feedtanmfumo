@@ -10,29 +10,15 @@ use Illuminate\Support\Str;
 
 class InvestmentController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $query = Investment::with('user');
-        
-        if ($request->has('search') && $request->search) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('investment_number', 'like', "%{$search}%")
-                  ->orWhereHas('user', function($userQuery) use ($search) {
-                      $userQuery->where('name', 'like', "%{$search}%")
-                                ->orWhere('email', 'like', "%{$search}%")
-                                ->orWhere('membership_code', 'like', "%{$search}%");
-                  });
-            });
-        }
-        
-        $investments = $query->latest()->paginate(20);
+        $investments = Investment::with('user')->latest()->paginate(20);
         $stats = [
             'total' => Investment::count(),
             'active' => Investment::where('status', 'active')->count(),
             'matured' => Investment::where('status', 'matured')->count(),
-            'total_principal' => Investment::sum('principal_amount') ?? 0,
-            'total_profit' => Investment::sum('profit_share') ?? 0,
+            'total_principal' => Investment::sum('principal_amount'),
+            'total_profit' => Investment::sum('profit_share'),
         ];
         return view('admin.investments.index', compact('investments', 'stats'));
     }

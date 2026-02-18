@@ -31,7 +31,7 @@
                             <option value="">-- Select Your Name --</option>
                             @foreach($members as $member)
                                 <option value="{{ $member->id }}" {{ old('guarantor_id') == $member->id ? 'selected' : '' }}>
-                                    {{ $member->name }} ({{ $member->membership_code ?? 'No Code' }})
+                                    {{ $member->name }} ({{ $member->member_number }})
                                 </option>
                             @endforeach
                         </select>

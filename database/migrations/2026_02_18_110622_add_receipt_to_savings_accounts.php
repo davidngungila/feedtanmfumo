@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('savings_accounts', function (Blueprint $table) {
-            $table->string('payment_receipt')->nullable()->after('balance');
+            //
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('savings_accounts', function (Blueprint $table) {
-            $table->dropColumn('payment_receipt');
+            //
         });
     }
 };

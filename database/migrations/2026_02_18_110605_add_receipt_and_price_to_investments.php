@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('investments', function (Blueprint $table) {
-            $table->string('payment_receipt')->nullable()->after('principal_amount');
-            $table->decimal('unit_price', 10, 2)->default(110.00)->after('interest_rate');
+            //
         });
     }
 
@@ -23,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('investments', function (Blueprint $table) {
-            $table->dropColumn(['payment_receipt', 'unit_price']);
+            //
         });
     }
 };

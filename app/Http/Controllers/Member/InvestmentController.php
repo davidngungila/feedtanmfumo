@@ -55,43 +55,28 @@ class InvestmentController extends Controller
         $validated = $request->validate([
             'plan_type' => 'required|in:4_year,6_year',
             'principal_amount' => 'required|numeric|min:1000',
-            'payment_receipt' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'start_date' => 'required|date',
         ]);
 
         $principal = $validated['principal_amount'];
-        $is4Year = $validated['plan_type'] === '4_year';
-        
-        $years = $is4Year ? 4 : 6;
-        $interestRate = $is4Year ? 8.6 : 10.0;
-        $unitPrice = $is4Year ? 110.0 : 120.0;
-        
-        // Calculate units bought (as per user formula: principal * unitPrice/100)
-        $units = $principal * ($unitPrice / 100);
-        $totalInterest = $units * ($interestRate / 100) * $years;
-        // Expected return is units bought + total interest
-        $expectedReturn = $units + $totalInterest;
-
-        $receiptPath = null;
-        if ($request->hasFile('payment_receipt')) {
-            $receiptPath = $request->file('payment_receipt')->store('investments/receipts', 'public');
-        }
+        $years = $validated['plan_type'] === '4_year' ? 4 : 6;
+        $interestRate = 12; // Default interest rate
+        $interest = ($principal * $interestRate / 100) * $years;
+        $expectedReturn = $principal + $interest;
 
         Investment::create([
             'user_id' => Auth::id(),
             'investment_number' => 'INV-'.strtoupper(Str::random(8)),
-            'investment_name' => $is4Year ? '8.6% Four-years FIA' : '10% Six-years FIA',
             'plan_type' => $validated['plan_type'],
             'principal_amount' => $principal,
             'interest_rate' => $interestRate,
-            'unit_price' => $unitPrice,
             'expected_return' => $expectedReturn,
             'profit_share' => 0,
-            'start_date' => now(),
-            'maturity_date' => now()->addYears($years),
-            'payment_receipt' => $receiptPath,
-            'status' => 'pending',
+            'start_date' => $validated['start_date'],
+            'maturity_date' => now()->parse($validated['start_date'])->addYears($years),
+            'status' => 'active',
         ]);
 
-        return redirect()->route('member.investments.index')->with('success', 'Uwekezaji wako umewasilishwa na unasubiri kuhakikiwa. Tafadhali subiri uidhinishaji.');
+        return redirect()->route('member.investments.index')->with('success', 'Investment created successfully.');
     }
 }

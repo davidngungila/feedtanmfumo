@@ -44,17 +44,17 @@
     
     @stack('styles')
 </head>
-<body class="bg-[#fafafa] text-[#41546b]">
+<body class="h-full bg-[#fafafa] text-[#41546b] overflow-hidden">
     <!-- Loading Screen -->
     @include('components.loading-screen')
-    <div class="min-h-screen flex flex-col lg:flex-row">
+    <div class="h-full flex flex-col lg:flex-row">
         <!-- Mobile Menu Overlay -->
         <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden"></div>
 
         <!-- Sidebar -->
-        <aside id="sidebar" class="fixed lg:sticky top-0 left-0 z-50 w-64 bg-[#015425] text-white transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col h-screen">
+        <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#015425] text-white transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col h-full">
             <!-- Logo -->
-            <div class="p-6 border-b border-[#013019] flex-shrink-0">
+            <div class="p-6 border-b border-[#013019]">
                 <h1 class="text-2xl font-bold text-white">FeedTan Digital</h1>
                 <button id="close-sidebar" class="lg:hidden absolute top-4 right-4 text-white hover:text-gray-300">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,9 +70,9 @@
         </aside>
 
         <!-- Main Content Area -->
-        <div class="flex-1 flex flex-col min-w-0">
-            <!-- Header -->
-            <header class="bg-white shadow-sm z-30 lg:z-auto sticky top-0">
+        <div class="flex-1 flex flex-col lg:ml-0 overflow-hidden">
+            <!-- Fixed Header -->
+            <header class="fixed lg:static top-0 left-0 right-0 lg:right-auto bg-white shadow-sm z-30 lg:z-auto">
                 <div class="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
                     <div class="flex items-center">
                         <button id="menu-toggle" class="lg:hidden mr-4 text-[#015425] hover:text-[#013019]">
@@ -99,10 +99,14 @@
                                     <button id="mark-all-read" class="text-xs text-[#015425] hover:underline">Mark all as read</button>
                                 </div>
                                 <div id="notification-list" class="py-2">
+                                    <!-- Notifications will be loaded here via AJAX -->
                                     <div class="px-4 py-3 text-center text-gray-500 text-sm">
                                         <div class="animate-spin inline-block w-4 h-4 border-2 border-[#015425] border-t-transparent rounded-full"></div>
                                         <span class="ml-2">Loading notifications...</span>
                                     </div>
+                                </div>
+                                <div class="px-4 py-3 border-t border-gray-200 text-center">
+                                    <a href="#" class="text-sm text-[#015425] hover:underline">View all notifications</a>
                                 </div>
                             </div>
                         </div>
@@ -122,6 +126,7 @@
                                 </svg>
                             </button>
 
+                            <!-- Dropdown Menu -->
                             <div id="user-menu-dropdown" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                                 <div class="px-4 py-3 border-b border-gray-200">
                                     <p class="text-sm font-semibold text-gray-900">{{ Auth::user()->name }}</p>
@@ -159,10 +164,9 @@
                 </div>
             </header>
 
-            <!-- Main Content Area -->
-            <main class="flex-1 flex flex-col">
+            <!-- Scrollable Content Area -->
+            <main class="flex-1 overflow-y-auto pt-16 lg:pt-0 flex flex-col">
                 <div class="flex-1 p-4 sm:p-6 lg:p-8">
-                    @include('components.alerts')
                     @yield('content')
                 </div>
                 

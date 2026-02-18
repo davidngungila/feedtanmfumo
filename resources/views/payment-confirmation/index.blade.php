@@ -243,14 +243,14 @@
         <!-- Member ID Lookup Section -->
         <div id="lookupSection">
             <div class="input-group">
-                <label for="member_id" class="input-label">Namba ya Uanachama (Member Code - ASC108)</label>
+                <label for="member_id" class="input-label">Namba ya Uanachama (Member ID)</label>
                 <input 
                     type="text" 
                     id="member_id" 
                     name="member_id" 
                     class="input-field" 
-                    placeholder="Weka Namba ya Uanachama (Mfn: ASC108)"
-                    value="{{ Auth::check() ? (Auth::user()->membership_code ?? Auth::user()->member_number) : '' }}"
+                    placeholder="Weka namba yako ya uanachama"
+                    value="{{ Auth::check() ? (Auth::user()->member_number ?? Auth::user()->membership_code) : '' }}"
                     required
                 >
                 <div id="member_id_error" class="error-message"></div>

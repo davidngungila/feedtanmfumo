@@ -15,17 +15,14 @@ class Investment extends Model
         'ulid',
         'user_id',
         'investment_number',
-        'investment_name',
         'plan_type',
         'principal_amount',
         'interest_rate',
-        'unit_price',
         'expected_return',
         'profit_share',
         'start_date',
         'maturity_date',
         'disbursement_date',
-        'payment_receipt',
         'status',
         'maturity_alert_sent',
         'notes',
@@ -34,7 +31,6 @@ class Investment extends Model
     protected $casts = [
         'principal_amount' => 'decimal:2',
         'interest_rate' => 'decimal:2',
-        'unit_price' => 'decimal:2',
         'expected_return' => 'decimal:2',
         'profit_share' => 'decimal:2',
         'start_date' => 'date',
@@ -56,8 +52,8 @@ class Investment extends Model
     public function getPlanTypeNameAttribute(): string
     {
         return match($this->plan_type) {
-            '4_year' => '8.6% Four-years FIA (Priced at TZS 110/100)',
-            '6_year' => '10% Six-years FIA (Priced at TZS 120/100)',
+            '4_year' => '4-Year Investment Plan',
+            '6_year' => '6-Year Investment Plan',
             default => ucfirst($this->plan_type),
         };
     }

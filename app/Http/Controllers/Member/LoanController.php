@@ -71,18 +71,21 @@ class LoanController extends Controller
     {
         $validated = $request->validate([
             'principal_amount' => 'required|numeric|min:1000',
+            'interest_rate' => 'nullable|numeric|min:0|max:100',
             'term_months' => 'required|integer|min:1|max:120',
             'payment_frequency' => 'required|in:weekly,bi-weekly,monthly',
             'purpose' => 'required|string|min:10',
             'application_date' => 'required|date',
             'terms_accepted' => 'required|accepted',
-            'loan_type' => 'required|string|max:255',
+            // Additional fields
+            'loan_type' => 'nullable|string|max:255',
             'collateral_description' => 'nullable|string',
             'collateral_value' => 'nullable|numeric|min:0',
-            'guarantor_id' => 'required_if:loan_type,Guaranteed Loan|nullable|exists:users,id',
+            'guarantor_id' => 'nullable|exists:users,id',
             'business_plan' => 'nullable|string',
             'repayment_source' => 'nullable|string',
             'additional_notes' => 'nullable|string',
+            // Document uploads
             'application_document' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
             'supporting_documents.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240',
             'id_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
@@ -92,27 +95,12 @@ class LoanController extends Controller
         ]);
 
         $principal = $validated['principal_amount'];
-        $loanType = $validated['loan_type'];
-        
-        $rateMap = [
-            'Normal Loan' => 0.013,
-            'Guaranteed Loan' => 0.014,
-            'Quick Loan' => 0.05,
-            'Emergency Loan' => 0.02,
-            'Staff Loan' => 0.006,
-            'Device Loan' => 0,
-            'FIA Loan' => 0.01,
-            'Business Loan' => 0.018,
-        ];
-
-        $monthlyRate = $rateMap[$loanType] ?? 0.01; // Default to 1% if not found
-        $interestRate = $monthlyRate * 12 * 100; // Annualized percentage
-        
-        $interest = $principal * $monthlyRate * $validated['term_months'];
+        $interestRate = $validated['interest_rate'] ?? 10; // Default to 10% if not provided
+        $interest = ($principal * $interestRate / 100) * ($validated['term_months'] / 12);
         $total = $principal + $interest;
 
         // Combine purpose category with description if provided
-        $purpose = $validated['purpose'] ?? 'Loan';
+        $purpose = $validated['purpose'];
         if ($request->has('loan_purpose_category') && !empty($request->loan_purpose_category)) {
             $purpose = $request->loan_purpose_category . ': ' . $purpose;
         }
@@ -154,75 +142,45 @@ class LoanController extends Controller
             $loanData['supporting_documents'] = $supportingDocs;
         }
 
-        // Initial creation to have relationship data for PDF
+        // Upload ID document
+        if ($request->hasFile('id_document')) {
+            $loanData['id_document'] = $request->file('id_document')->store('loans/documents', 'public');
+        }
+
+        // Upload proof of income
+        if ($request->hasFile('proof_of_income')) {
+            $loanData['proof_of_income'] = $request->file('proof_of_income')->store('loans/documents', 'public');
+        }
+
+        // Upload collateral document
+        if ($request->hasFile('collateral_document')) {
+            $loanData['collateral_document'] = $request->file('collateral_document')->store('loans/documents', 'public');
+        }
+
+        // Upload guarantor document
+        if ($request->hasFile('guarantor_document')) {
+            $loanData['guarantor_document'] = $request->file('guarantor_document')->store('loans/documents', 'public');
+        }
+
         $loan = Loan::create($loanData);
         $loan->load(['user', 'guarantor']);
-
-        // Generate PDFs
-        try {
-            $pdf = app('dompdf.wrapper');
-            
-            // Schedule
-            $schedulePdf = $pdf->loadView('member.loans.pdf.schedule', ['loan' => $loan]);
-            $schedulePath = 'loans/documents/' . $loan->loan_number . '_schedule.pdf';
-            \Storage::disk('public')->put($schedulePath, $schedulePdf->output());
-            $loan->schedule_path = $schedulePath;
-
-            // Agreement
-            $agreementPdf = $pdf->loadView('member.loans.pdf.agreement', ['loan' => $loan]);
-            $agreementPath = 'loans/documents/' . $loan->loan_number . '_agreement.pdf';
-            \Storage::disk('public')->put($agreementPath, $agreementPdf->output());
-            $loan->agreement_path = $agreementPath;
-            
-            $loan->save();
-        } catch (\Exception $e) {
-            \Log::error('Failed to generate loan documents: ' . $e->getMessage());
-        }
-
-        // Upload other documents
-        if ($request->hasFile('id_document')) {
-            $loan->id_document = $request->file('id_document')->store('loans/documents', 'public');
-        }
-        if ($request->hasFile('proof_of_income')) {
-            $loan->proof_of_income = $request->file('proof_of_income')->store('loans/documents', 'public');
-        }
-        if ($request->hasFile('collateral_document')) {
-            $loan->collateral_document = $request->file('collateral_document')->store('loans/documents', 'public');
-        }
-        if ($request->hasFile('guarantor_document')) {
-            $loan->guarantor_document = $request->file('guarantor_document')->store('loans/documents', 'public');
-        }
-        $loan->save();
 
         // Send notification to applicant
         NotificationHelper::create(
             $loan->user,
             'loan',
             'Loan Application Submitted',
-            "Your loan application ({$loan->loan_number}) has been submitted successfully. Documents have been generated.",
+            "Your loan application (Loan Number: {$loan->loan_number}) has been submitted successfully and is pending approval.",
             'document',
             'blue',
             route('member.loans.show', $loan)
         );
 
-        // Send notification to guarantor if applicable
-        if ($loan->guarantor_id) {
-            NotificationHelper::create(
-                $loan->guarantor,
-                'loan_guarantee',
-                'Maombi ya Udhamini wa Mkopo',
-                "Mwanachama {$loan->user->name} amekuomba umdhamini kwenye mkopo wake ({$loan->loan_number}). Tafadhali jaza fomu ya maombi ya udhamini.",
-                'user-check',
-                'purple',
-                route('guarantor-assessment.show', $loan->ulid)
-            );
-        }
-
         // Send notification to admins
         NotificationHelper::createForAdmins(
             'loan',
             'New Loan Application',
-            "A new loan application has been submitted by {$loan->user->name} ({$loan->loan_number}).",
+            "A new loan application has been submitted by {$loan->user->name} (Loan Number: {$loan->loan_number}).",
             'bell',
             'green',
             route('admin.loans.show', $loan)

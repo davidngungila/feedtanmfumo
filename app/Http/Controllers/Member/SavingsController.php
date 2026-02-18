@@ -57,56 +57,21 @@ class SavingsController extends Controller
         $validated = $request->validate([
             'account_type' => 'required|in:emergency,rda,flex,business',
             'opening_date' => 'required|date',
-            'initial_deposit' => 'required|numeric|min:0',
-            'payment_receipt' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'maturity_date' => 'nullable|date|required_if:account_type,rda',
         ]);
-
-        $type = $validated['account_type'];
-        $amount = $validated['initial_deposit'];
-        $interestRate = 0;
-
-        switch ($type) {
-            case 'business':
-                $interestRate = 0.0296 * 100;
-                break;
-            case 'flex':
-                $interestRate = 0.0537 * 100;
-                break;
-            case 'emergency':
-                $interestRate = 0;
-                break;
-            case 'rda':
-                if ($amount > 299000) {
-                    $interestRate = 0.0678 * 100;
-                } elseif ($amount >= 200000) {
-                    $interestRate = 0.063 * 100;
-                } elseif ($amount >= 100000) {
-                    $interestRate = 0.0584 * 100;
-                } else {
-                    $interestRate = 0;
-                }
-                break;
-        }
-
-        $receiptPath = null;
-        if ($request->hasFile('payment_receipt')) {
-            $receiptPath = $request->file('payment_receipt')->store('savings/receipts', 'public');
-        }
 
         SavingsAccount::create([
             'user_id' => Auth::id(),
             'account_number' => 'SAV-'.strtoupper(Str::random(8)),
-            'account_type' => $type,
-            'balance' => $amount,
-            'interest_rate' => $interestRate,
+            'account_type' => $validated['account_type'],
+            'balance' => 0,
+            'interest_rate' => 0,
             'minimum_balance' => 0,
             'opening_date' => $validated['opening_date'],
             'maturity_date' => $validated['maturity_date'] ?? null,
-            'payment_receipt' => $receiptPath,
-            'status' => 'pending',
+            'status' => 'active',
         ]);
 
-        return redirect()->route('member.savings.index')->with('success', 'Akaunti yako ya akiba imefunguliwa na inasubiri kuhakikiwa kwa amana ya kwanza.');
+        return redirect()->route('member.savings.index')->with('success', 'Savings account created successfully.');
     }
 }

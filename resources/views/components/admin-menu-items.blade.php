@@ -382,23 +382,6 @@
         <a href="{{ route('admin.monthly-deposits.create') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">Upload Excel Sheet</a>
     </div>
 </div>
-
-<!-- Loan Statements -->
-<div class="dropdown-container" data-menu="loan-statements">
-    <button class="dropdown-toggle flex items-center justify-between w-full px-4 py-3 rounded-md hover:bg-[#013019] transition {{ request()->routeIs('admin.loan-statements.*') ? 'bg-[#013019]' : '' }}">
-        <div class="flex items-center">
-            <span class="text-lg mr-3">📄</span>
-            <span>Loan Statements</span>
-        </div>
-        <svg class="w-4 h-4 dropdown-arrow transition-transform {{ request()->routeIs('admin.loan-statements.*') ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-        </svg>
-    </button>
-    <div class="dropdown-menu pl-4 mt-1 space-y-1 {{ request()->routeIs('admin.loan-statements.*') ? '' : 'hidden' }}">
-        <a href="{{ route('admin.loan-statements.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">Management</a>
-        <a href="{{ route('admin.loan-statements.create') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">Import Excel</a>
-    </div>
-</div>
 @endif
 
 @if($isInvestmentOfficer || $canViewAll)

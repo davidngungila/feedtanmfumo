@@ -20,11 +20,7 @@
                     </div>
                 @endif
             </div>
-            <div class="mt-4 sm:mt-0 sm:ml-4 flex flex-col gap-2">
-                <div class="text-left sm:text-right">
-                    <p class="text-xs sm:text-sm text-white text-opacity-75 tracking-wider uppercase font-bold">MEMBER CODE</p>
-                    <p class="text-xl sm:text-2xl font-black font-mono tracking-widest">{{ $user->membership_code ?? 'PENDING' }}</p>
-                </div>
+            <div class="mt-4 sm:mt-0 sm:ml-4">
                 <div class="text-left sm:text-right">
                     <p class="text-xs sm:text-sm text-white text-opacity-75">Member Since</p>
                     <p class="text-base sm:text-lg font-semibold">{{ $user->created_at->format('M Y') }}</p>

@@ -99,10 +99,6 @@ Route::middleware('auth')->group(function () {
         Route::get('statements', [\App\Http\Controllers\Member\MonthlyDepositController::class, 'index'])->name('monthly-deposits.index');
         Route::get('statements/{monthlyDeposit}', [\App\Http\Controllers\Member\MonthlyDepositController::class, 'show'])->name('monthly-deposits.show');
 
-        // Loan Statements
-        Route::get('loan-statements', [\App\Http\Controllers\Member\LoanStatementController::class, 'index'])->name('loan-statements.index');
-        Route::get('loan-statements/{loanStatement}', [\App\Http\Controllers\Member\LoanStatementController::class, 'show'])->name('loan-statements.show');
-
         // Issues - available to all members
         Route::resource('issues', MemberIssueController::class)->only(['index', 'show', 'create', 'store']);
 
@@ -388,13 +384,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('monthly-deposits/{year}/{month}', [\App\Http\Controllers\Admin\MonthlyDepositController::class, 'show'])->name('monthly-deposits.show');
     Route::get('monthly-deposits/record/{monthlyDeposit}', [\App\Http\Controllers\Admin\MonthlyDepositController::class, 'record'])->name('monthly-deposits.record');
     Route::delete('monthly-deposits/{year}/{month}', [\App\Http\Controllers\Admin\MonthlyDepositController::class, 'destroy'])->name('monthly-deposits.destroy');
-
-    // Loan Statements
-    Route::get('loan-statements', [\App\Http\Controllers\Admin\LoanStatementController::class, 'index'])->name('loan-statements.index');
-    Route::get('loan-statements/create', [\App\Http\Controllers\Admin\LoanStatementController::class, 'create'])->name('loan-statements.create');
-    Route::post('loan-statements', [\App\Http\Controllers\Admin\LoanStatementController::class, 'store'])->name('loan-statements.store');
-    Route::get('loan-statements/{year}/{month}', [\App\Http\Controllers\Admin\LoanStatementController::class, 'show'])->name('loan-statements.show');
-    Route::delete('loan-statements/{year}/{month}', [\App\Http\Controllers\Admin\LoanStatementController::class, 'destroy'])->name('loan-statements.destroy');
 
     // Advanced System Settings Routes
     Route::prefix('system-settings')->name('system-settings.')->group(function () {

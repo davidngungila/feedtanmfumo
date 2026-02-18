@@ -102,7 +102,7 @@ class PaymentConfirmationController extends Controller
             'success' => true,
             'member' => [
                 'id' => $user->id,
-                'member_id' => $user->membership_code ?? $user->member_number,
+                'member_id' => $user->member_number ?? $user->membership_code,
                 'name' => $user->name,
                 'member_type' => $user->membershipType?->name ?? 'N/A',
                 'email' => $user->email,

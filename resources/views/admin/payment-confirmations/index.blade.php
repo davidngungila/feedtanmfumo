@@ -136,7 +136,7 @@
                         type="text" 
                         name="search" 
                         value="{{ request('search') }}"
-                        placeholder="Search Member Code (ASC108), Name or Email..."
+                        placeholder="Search by Member ID, Name, or Email..."
                         class="w-full pl-10 rounded-lg border-gray-300 shadow-sm focus:border-[#015425] focus:ring-[#015425] transition-all duration-200"
                     >
                 </div>
@@ -190,7 +190,7 @@
                     <tr>
 
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member Code</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Member ID</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount to Pay</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deposit Balance</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
