@@ -37,16 +37,16 @@
     </div>
 
     <!-- Status Badge -->
-    @if($user->status)
-    <div class="bg-white rounded-lg shadow-md p-4">
-        <div class="flex items-center justify-between">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        @if($user->status)
+        <div class="bg-white rounded-lg shadow-md p-4 flex items-center justify-between">
             <div class="flex items-center">
                 <span class="px-4 py-2 rounded-full text-sm font-medium {{ 
                     $user->status === 'active' ? 'bg-green-100 text-green-800' : 
                     ($user->status === 'inactive' ? 'bg-gray-100 text-gray-800' : 
                     ($user->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'))
                 }}">
-                    Status: {{ ucfirst($user->status) }}
+                    User Status: {{ ucfirst($user->status) }}
                 </span>
                 @if($user->status_reason)
                 <span class="ml-4 text-sm text-gray-600">{{ $user->status_reason }}</span>
@@ -56,6 +56,147 @@
             <span class="text-sm text-gray-500">Changed: {{ $user->status_changed_at->format('M d, Y') }}</span>
             @endif
         </div>
+        @endif
+
+        @if($user->membership_type_id)
+        <div class="bg-white rounded-lg shadow-md p-4 flex items-center justify-between">
+            <div class="flex items-center">
+                @php
+                    $mStatusClasses = [
+                        'pending' => 'bg-yellow-100 text-yellow-800',
+                        'approved' => 'bg-green-100 text-green-800',
+                        'rejected' => 'bg-red-100 text-red-800',
+                        'suspended' => 'bg-orange-100 text-orange-800',
+                    ];
+                    $mStatusLabel = [
+                        'pending' => 'Pending Approval',
+                        'approved' => 'Membership Approved',
+                        'rejected' => 'Membership Rejected',
+                        'suspended' => 'Membership Suspended',
+                    ];
+                @endphp
+                <span class="px-4 py-2 rounded-full text-sm font-medium {{ $mStatusClasses[$user->membership_status] ?? 'bg-gray-100 text-gray-800' }}">
+                    {{ $mStatusLabel[$user->membership_status] ?? ucfirst($user->membership_status) }}
+                </span>
+            </div>
+            <div class="flex items-center gap-3">
+                @if($user->membership_approved_at)
+                <span class="text-sm text-gray-500">Approved: {{ $user->membership_approved_at->format('M d, Y') }}</span>
+                @endif
+                <a href="{{ route('admin.memberships.pdf', $user) }}" target="_blank" class="text-red-600 hover:text-red-800" title="Export Membership PDF">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+        @endif
+    </div>
+
+    @if($user->membership_type_id)
+    <!-- Membership Management Actions -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-[#015425] mb-6">Membership Actions</h2>
+        
+        @if($user->membership_status === 'pending')
+            <div class="space-y-8">
+                <!-- Approve Form -->
+                <form method="POST" action="{{ route('admin.memberships.approve', $user) }}" class="p-4 border border-green-200 rounded-lg bg-green-50">
+                    @csrf
+                    <h3 class="text-lg font-semibold text-green-700 mb-4">Approve Membership</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Membership Code</label>
+                            <input type="text" name="membership_code" value="{{ $user->membership_code }}" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Number of Shares</label>
+                            <input type="number" name="number_of_shares" value="{{ $user->number_of_shares ?? 0 }}" min="0" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Entrance Fee (TZS)</label>
+                            <input type="number" name="entrance_fee" value="{{ $user->entrance_fee ?? 0 }}" min="0" step="0.01" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Capital Contribution (TZS)</label>
+                            <input type="number" name="capital_contribution" value="{{ $user->capital_contribution ?? 0 }}" min="0" step="0.01" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+                        <textarea name="notes" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">{{ $user->notes }}</textarea>
+                    </div>
+                    <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition font-medium shadow-sm">
+                        Approve Membership
+                    </button>
+                </form>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Request Edits Form -->
+                    <div class="p-4 border border-yellow-200 rounded-lg bg-yellow-50">
+                        @if($user->editing_requested)
+                        <div class="mb-4 p-3 bg-white border-l-4 border-yellow-500 rounded text-sm">
+                            <p class="font-bold text-yellow-800 mb-1">Edit Request Active</p>
+                            <p class="text-gray-700 mb-2">{{ $user->reviewer_comments }}</p>
+                            <form method="POST" action="{{ route('admin.memberships.clear-edit-request', $user) }}">
+                                @csrf
+                                <button type="submit" class="text-xs text-gray-600 hover:text-gray-800 underline">Clear Request</button>
+                            </form>
+                        </div>
+                        @endif
+                        <form method="POST" action="{{ route('admin.memberships.request-edits', $user) }}">
+                            @csrf
+                            <h3 class="text-lg font-semibold text-yellow-700 mb-4">Request Edits</h3>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Comments for Applicant</label>
+                                <textarea name="reviewer_comments" rows="3" required class="w-full px-4 py-2 border border-gray-300 rounded-md" placeholder="Explain what needs to be fixed...">{{ $user->reviewer_comments }}</textarea>
+                            </div>
+                            <button type="submit" class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition text-sm font-medium shadow-sm">
+                                Request Edits
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Reject Form -->
+                    <div class="p-4 border border-red-200 rounded-lg bg-red-50">
+                        <form method="POST" action="{{ route('admin.memberships.reject', $user) }}">
+                            @csrf
+                            <h3 class="text-lg font-semibold text-red-700 mb-4">Reject Application</h3>
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Rejection Reason</label>
+                                <textarea name="rejection_reason" rows="3" required class="w-full px-4 py-2 border border-gray-300 rounded-md" placeholder="Enter reason for rejection..."></textarea>
+                            </div>
+                            <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition text-sm font-medium shadow-sm">
+                                Reject Application
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @elseif($user->membership_status === 'approved')
+            <form method="POST" action="{{ route('admin.memberships.suspend', $user) }}" class="p-4 border border-orange-200 rounded-lg bg-orange-50 max-w-2xl">
+                @csrf
+                <h3 class="text-lg font-semibold text-orange-700 mb-4">Suspend Membership</h3>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Suspension Reason</label>
+                    <textarea name="suspension_reason" rows="2" required class="w-full px-4 py-2 border border-gray-300 rounded-md"></textarea>
+                </div>
+                <button type="submit" class="px-6 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition font-medium shadow-sm">
+                    Suspend Membership
+                </button>
+            </form>
+        @elseif($user->membership_status === 'suspended')
+            <form method="POST" action="{{ route('admin.memberships.reactivate', $user) }}">
+                @csrf
+                <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition font-medium shadow-sm">
+                    Reactivate Membership
+                </button>
+            </form>
+        @endif
     </div>
     @endif
 
@@ -179,6 +320,44 @@
                 </div>
             </div>
 
+            <!-- Membership Information -->
+            @if($user->membership_type_id)
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-bold text-[#015425] mb-6 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-[#015425]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                    Membership Information
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Membership Type</p>
+                        <p class="text-lg font-semibold">{{ $user->membershipType->name ?? 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Membership Code</p>
+                        <p class="text-lg font-semibold text-blue-600">{{ $user->membership_code ?? 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Number of Shares</p>
+                        <p class="text-lg font-semibold">{{ number_format($user->number_of_shares ?? 0) }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Entrance Fee</p>
+                        <p class="text-lg font-semibold">{{ number_format($user->entrance_fee ?? 0) }} TZS</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Capital Contribution</p>
+                        <p class="text-lg font-semibold">{{ number_format($user->capital_contribution ?? 0) }} TZS</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Capital Outstanding</p>
+                        <p class="text-lg font-semibold text-red-600">{{ number_format($user->capital_outstanding ?? 0) }} TZS</p>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <!-- Contact Information -->
             @if($user->address || $user->city || $user->region)
             <div class="bg-white rounded-lg shadow-md p-6">
@@ -250,6 +429,168 @@
                 </div>
             </div>
             @endif
+
+            <!-- Bank Information -->
+            @if($user->bank_name || $user->bank_account_number)
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-bold text-[#015425] mb-6 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-[#015425]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                    </svg>
+                    Bank Account Information
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Bank Name</p>
+                        <p class="text-lg font-semibold">{{ $user->bank_name ?? 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Bank Branch</p>
+                        <p class="text-lg font-semibold">{{ $user->bank_branch ?? 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Account Number</p>
+                        <p class="text-lg font-semibold font-mono">{{ $user->bank_account_number ?? 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Payment Reference Number</p>
+                        <p class="text-lg font-semibold font-mono">{{ $user->payment_reference_number ?? 'N/A' }}</p>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            <!-- Additional Information -->
+            @if($user->short_bibliography || $user->introduced_by || $user->statement_preference)
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-bold text-[#015425] mb-6 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-[#015425]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Additional Information
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @if($user->statement_preference)
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Statement Preference</p>
+                        <p class="text-lg font-semibold">{{ ucfirst($user->statement_preference) }}</p>
+                    </div>
+                    @endif
+                    @if($user->introduced_by)
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Introduced By</p>
+                        <p class="text-lg font-semibold">{{ $user->introduced_by }}</p>
+                    </div>
+                    @endif
+                    @if($user->short_bibliography)
+                    <div class="md:col-span-2">
+                        <p class="text-sm text-gray-600 mb-1">Short Biography</p>
+                        <p class="text-gray-900 text-sm italic">{{ $user->short_bibliography }}</p>
+                    </div>
+                    @endif
+                </div>
+            </div>
+            @endif
+
+            <!-- Beneficiaries Information -->
+            @if($user->beneficiaries_info && count($user->beneficiaries_info) > 0)
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-bold text-[#015425] mb-6 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-[#015425]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    Beneficiaries Information
+                </h3>
+                <div class="space-y-4">
+                    @foreach($user->beneficiaries_info as $index => $beneficiary)
+                    <div class="border border-gray-100 rounded-lg p-3 bg-gray-50">
+                        <p class="font-bold text-[#015425] mb-2 text-sm border-b pb-1">Beneficiary {{ $index + 1 }}</p>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                            <div>
+                                <p class="text-gray-500 text-xs">Name</p>
+                                <p class="font-semibold">{{ $beneficiary['name'] ?? 'N/A' }}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-xs">Relationship</p>
+                                <p class="font-semibold">{{ ucfirst($beneficiary['relationship'] ?? 'N/A') }}</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-xs">Allocation</p>
+                                <p class="font-semibold text-green-600">{{ $beneficiary['allocation'] ?? 0 }}%</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-500 text-xs">Contact</p>
+                                <p class="font-semibold">{{ $beneficiary['contact'] ?? 'N/A' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+            <!-- Group Registration -->
+            @if($user->is_group_registered)
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-bold text-[#015425] mb-6 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-[#015425]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    Group Information
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Group Name</p>
+                        <p class="text-lg font-semibold">{{ $user->group_name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Group Leaders</p>
+                        <p class="text-lg font-semibold">{{ $user->group_leaders }}</p>
+                    </div>
+                    <div class="md:col-span-2">
+                        <p class="text-sm text-gray-600 mb-1">Group Bank Account</p>
+                        <p class="text-lg font-semibold font-mono">{{ $user->group_bank_account }}</p>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            <!-- Documents -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h3 class="text-xl font-bold text-[#015425] mb-6 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-[#015425]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    </svg>
+                    Uploaded Documents
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    @foreach([
+                        ['label' => 'Passport Picture', 'path' => $user->passport_picture_path],
+                        ['label' => 'NIDA Picture', 'path' => $user->nida_picture_path],
+                        ['label' => 'Application Letter', 'path' => $user->application_letter_path],
+                        ['label' => 'Payment Slip', 'path' => $user->payment_slip_path],
+                        ['label' => 'Standing Order', 'path' => $user->standing_order_path],
+                    ] as $doc)
+                    <div class="flex items-center justify-between p-3 border border-gray-100 rounded-lg bg-gray-50">
+                        <div>
+                            <p class="text-xs text-gray-500">{{ $doc['label'] }}</p>
+                            @if($doc['path'])
+                                <span class="text-xs text-green-600 font-bold">✓ Uploaded</span>
+                            @else
+                                <span class="text-xs text-red-400">✗ Not Uploaded</span>
+                            @endif
+                        </div>
+                        @if($doc['path'])
+                        <a href="{{ Storage::url($doc['path']) }}" target="_blank" class="text-[#015425] hover:text-[#027a3a]">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                            </svg>
+                        </a>
+                        @endif
+                    </div>
+                    @endforeach
+                </div>
+            </div>
 
             <!-- Loans Overview -->
             @if($stats['loans']['total'] > 0)

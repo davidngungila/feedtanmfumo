@@ -254,15 +254,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('users/officials', [UserController::class, 'storeOfficial'])->name('users.officials.store');
 
     // Membership Management
-    Route::get('memberships', [\App\Http\Controllers\Admin\MembershipController::class, 'index'])->name('memberships.index');
-    Route::get('memberships/{user}', [\App\Http\Controllers\Admin\MembershipController::class, 'show'])->name('memberships.show');
-    Route::get('memberships/{user}/pdf', [\App\Http\Controllers\Admin\MembershipController::class, 'exportPdf'])->name('memberships.pdf');
-    Route::post('memberships/{user}/approve', [\App\Http\Controllers\Admin\MembershipController::class, 'approve'])->name('memberships.approve');
-    Route::post('memberships/{user}/reject', [\App\Http\Controllers\Admin\MembershipController::class, 'reject'])->name('memberships.reject');
-    Route::post('memberships/{user}/suspend', [\App\Http\Controllers\Admin\MembershipController::class, 'suspend'])->name('memberships.suspend');
-    Route::post('memberships/{user}/reactivate', [\App\Http\Controllers\Admin\MembershipController::class, 'reactivate'])->name('memberships.reactivate');
-    Route::post('memberships/{user}/request-edits', [\App\Http\Controllers\Admin\MembershipController::class, 'requestEdits'])->name('memberships.request-edits');
-    Route::post('memberships/{user}/clear-edit-request', [\App\Http\Controllers\Admin\MembershipController::class, 'clearEditRequest'])->name('memberships.clear-edit-request');
+    Route::get('memberships', [UserController::class, 'indexMemberships'])->name('memberships.index');
+    Route::get('memberships/{user}', [UserController::class, 'show'])->name('memberships.show');
+    Route::get('memberships/{user}/pdf', [UserController::class, 'exportMembershipPdf'])->name('memberships.pdf');
+    Route::post('memberships/{user}/approve', [UserController::class, 'approveMembership'])->name('memberships.approve');
+    Route::post('memberships/{user}/reject', [UserController::class, 'rejectMembership'])->name('memberships.reject');
+    Route::post('memberships/{user}/suspend', [UserController::class, 'suspendMembership'])->name('memberships.suspend');
+    Route::post('memberships/{user}/reactivate', [UserController::class, 'reactivateMembership'])->name('memberships.reactivate');
+    Route::post('memberships/{user}/request-edits', [UserController::class, 'requestMembershipEdits'])->name('memberships.request-edits');
+    Route::post('memberships/{user}/clear-edit-request', [UserController::class, 'clearMembershipEditRequest'])->name('memberships.clear-edit-request');
     Route::get('users/permissions', [UserController::class, 'permissions'])->name('users.permissions');
     Route::get('users/login-history', [UserController::class, 'loginHistory'])->name('users.login-history');
     Route::get('users/activity-logs', [UserController::class, 'activityLogs'])->name('users.activity-logs');
