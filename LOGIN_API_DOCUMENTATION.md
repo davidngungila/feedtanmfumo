@@ -3,18 +3,97 @@
 
 ### Overview
 
-The Login API provides secure token-based authentication for the FEEDTAN DIGITAL mobile application using Laravel Sanctum. Upon successful login, users receive an authentication token that must be included in all subsequent API requests.
+This document describes how to authenticate the FEEDTAN DIGITAL **React Native** mobile app against the backend using **Laravel Sanctum personal access tokens**.
+
+After successful login, the API returns a token. The app must send that token on every authenticated request using the `Authorization: Bearer <token>` header.
+
+## Table of Contents
+
+- [Base URL](#base-url)
+- [Common Request Headers](#common-request-headers)
+- [Authentication](#authentication)
+- [Accessing Protected Services](#accessing-protected-services)
+- [Endpoints](#endpoints)
+  - [Login](#login-endpoint)
+  - [Get Current User](#get-current-user-endpoint)
+  - [Logout](#logout-endpoint)
+  - [API Guide](#api-guide-endpoint)
+  - [Dashboard](#dashboard-endpoints)
+  - [Loans](#loans-endpoints)
+  - [Savings](#savings-endpoints)
+  - [Investments](#investments-endpoints)
+  - [Welfare](#welfare-endpoints)
+  - [Issues](#issues-endpoints)
+  - [Transactions](#transactions-endpoints)
+  - [Profile](#profile-endpoints)
+  - [Notifications](#notification-endpoints)
+  - [File Uploads](#file-upload-endpoints)
+- [React Native (TypeScript) Integration](#react-native-typescript-integration)
+  - [Environment configuration](#environment-configuration)
+  - [Secure token storage](#secure-token-storage)
+  - [HTTP client (Axios) with interceptors](#http-client-axios-with-interceptors)
+  - [Typical auth flow](#typical-auth-flow)
+- [Error Handling](#error-handling)
+- [Security Best Practices](#security-best-practices)
+- [Troubleshooting (React Native)](#troubleshooting-react-native)
 
 ---
 
 ## Base URL
 
 ```
-Production: https://your-domain.com/api/mobile/v1
+Production: https://digital.feedtancmg.org/api/mobile/v1
 Development: http://localhost:8000/api/mobile/v1
 ```
 
+All endpoint paths in this document are **relative to the Base URL**.
+
+Example (development login):
+
+`POST http://localhost:8000/api/mobile/v1/auth/login`
+
 ---
+
+## Common Request Headers
+
+For JSON APIs:
+
+```
+Content-Type: application/json
+Accept: application/json
+```
+
+---
+
+## Authentication
+
+This API uses **Laravel Sanctum** personal access tokens.
+
+- **Public endpoints** do not require a token (login/register/forgot-password/guide).
+- **Protected endpoints** require `Authorization: Bearer {token}`.
+
+---
+
+## Accessing Protected Services
+
+For every protected request, send:
+
+```bash
+Accept: application/json
+Authorization: Bearer {token}
+```
+
+Notes:
+
+- If you receive `401 Unauthorized`, your token is missing/invalid/expired/revoked.
+- The recommended mobile pattern is:
+  - Store token in Keychain
+  - Load token on app start
+  - Call `GET /auth/user` to validate the session
+
+---
+
+## Endpoints
 
 ## Login Endpoint
 
@@ -23,8 +102,6 @@ Development: http://localhost:8000/api/mobile/v1
 Authenticates a user with email and password, returning a Sanctum authentication token.
 
 #### Request
-
-**URL:** `POST /api/mobile/v1/auth/login`
 
 **Headers:**
 ```
@@ -141,454 +218,39 @@ Accept: application/json
 
 ---
 
-## Using the Authentication Token
+## API Guide Endpoint
 
-After successful login, you must include the token in all authenticated API requests.
+### GET `/guide`
 
-### Authorization Header
+Returns a simple API contract payload (base URL + key endpoint groups). This is mainly for client bootstrapping and human verification.
 
-Include the token in the `Authorization` header using the Bearer token format:
-
-```
-Authorization: Bearer {token}
-```
-
-**Example:**
-```
-Authorization: Bearer 1|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-```
-
-### Token Storage
-
-**⚠️ Security Best Practice:** Store tokens securely using platform-specific secure storage:
-
-- **Flutter:** Use `flutter_secure_storage`
-- **React Native:** Use `react-native-keychain`
-- **iOS (Native):** Use Keychain Services
-- **Android (Native):** Use EncryptedSharedPreferences
-
-**❌ Never store tokens in:**
-- SharedPreferences / UserDefaults
-- Plain text files
-- Local storage / AsyncStorage (unencrypted)
-- URL parameters
-- Browser cookies (for mobile apps)
+This endpoint is **public**.
 
 ---
 
-## Code Examples
+## Get Current User Endpoint
 
-### Flutter (Dart)
+### GET `/auth/user`
 
-```dart
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+Returns the authenticated user's profile.
 
-class AuthService {
-  static const String baseUrl = 'https://your-domain.com/api/mobile/v1';
-  final _storage = const FlutterSecureStorage();
+#### Request
 
-  Future<Map<String, dynamic>> login(String email, String password) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/auth/login'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode({
-          'email': email,
-          'password': password,
-          'remember': true,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        
-        // Store token securely
-        await _storage.write(
-          key: 'auth_token',
-          value: data['data']['token'],
-        );
-        
-        // Store user data (optional)
-        await _storage.write(
-          key: 'user_data',
-          value: jsonEncode(data['data']['user']),
-        );
-        
-        return data;
-      } else {
-        final error = jsonDecode(response.body);
-        throw Exception(error['message'] ?? 'Login failed');
-      }
-    } catch (e) {
-      throw Exception('Network error: ${e.toString()}');
-    }
-  }
-
-  Future<String?> getToken() async {
-    return await _storage.read(key: 'auth_token');
-  }
-
-  Future<void> logout() async {
-    final token = await getToken();
-    if (token != null) {
-      await http.post(
-        Uri.parse('$baseUrl/auth/logout'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-        },
-      );
-    }
-    await _storage.delete(key: 'auth_token');
-    await _storage.delete(key: 'user_data');
-  }
-}
-```
-
-### React Native (JavaScript/TypeScript)
-
-```typescript
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Keychain from 'react-native-keychain';
-
-const BASE_URL = 'https://your-domain.com/api/mobile/v1';
-
-interface LoginResponse {
-  success: boolean;
-  message: string;
-  data: {
-    user: {
-      id: number;
-      name: string;
-      email: string;
-      phone: string | null;
-      role: string;
-    };
-    token: string;
-  };
-}
-
-export const login = async (
-  email: string,
-  password: string
-): Promise<LoginResponse> => {
-  try {
-    const response = await fetch(`${BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        email,
-        password,
-        remember: true,
-      }),
-    });
-
-    const data: LoginResponse = await response.json();
-
-    if (response.ok && data.success) {
-      // Store token securely
-      await Keychain.setGenericPassword('auth_token', data.data.token);
-      
-      // Store user data
-      await AsyncStorage.setItem(
-        'user_data',
-        JSON.stringify(data.data.user)
-      );
-      
-      return data;
-    } else {
-      throw new Error(data.message || 'Login failed');
-    }
-  } catch (error) {
-    throw new Error(`Network error: ${error}`);
-  }
-};
-
-export const getToken = async (): Promise<string | null> => {
-  try {
-    const credentials = await Keychain.getGenericPassword();
-    return credentials ? credentials.password : null;
-  } catch (error) {
-    return null;
-  }
-};
-
-export const logout = async (): Promise<void> => {
-  const token = await getToken();
-  if (token) {
-    await fetch(`${BASE_URL}/auth/logout`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Accept': 'application/json',
-      },
-    });
-  }
-  await Keychain.resetGenericPassword();
-  await AsyncStorage.removeItem('user_data');
-};
-```
-
-### iOS (Swift)
-
-```swift
-import Foundation
-
-class AuthService {
-    static let baseURL = "https://your-domain.com/api/mobile/v1"
-    
-    struct LoginRequest: Codable {
-        let email: String
-        let password: String
-        let remember: Bool
-    }
-    
-    struct LoginResponse: Codable {
-        let success: Bool
-        let message: String
-        let data: LoginData
-        
-        struct LoginData: Codable {
-            let user: User
-            let token: String
-            
-            struct User: Codable {
-                let id: Int
-                let name: String
-                let email: String
-                let phone: String?
-                let role: String
-            }
-        }
-    }
-    
-    func login(email: String, password: String) async throws -> LoginResponse {
-        guard let url = URL(string: "\(Self.baseURL)/auth/login") else {
-            throw URLError(.badURL)
-        }
-        
-        let requestBody = LoginRequest(
-            email: email,
-            password: password,
-            remember: true
-        )
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-        request.httpBody = try JSONEncoder().encode(requestBody)
-        
-        let (data, response) = try await URLSession.shared.data(for: request)
-        
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
-        }
-        
-        if httpResponse.statusCode == 200 {
-            let loginResponse = try JSONDecoder().decode(LoginResponse.self, from: data)
-            
-            // Store token in Keychain
-            KeychainHelper.save(token: loginResponse.data.token)
-            
-            return loginResponse
-        } else {
-            throw URLError(.badServerResponse)
-        }
-    }
-}
-
-// Keychain Helper
-import Security
-
-class KeychainHelper {
-    static func save(token: String) {
-        let data = token.data(using: .utf8)!
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: "auth_token",
-            kSecValueData as String: data
-        ]
-        SecItemDelete(query as CFDictionary)
-        SecItemAdd(query as CFDictionary, nil)
-    }
-    
-    static func getToken() -> String? {
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrAccount as String: "auth_token",
-            kSecReturnData as String: true
-        ]
-        
-        var result: AnyObject?
-        let status = SecItemCopyMatching(query as CFDictionary, &result)
-        
-        if status == errSecSuccess,
-           let data = result as? Data,
-           let token = String(data: data, encoding: .utf8) {
-            return token
-        }
-        return nil
-    }
-}
-```
-
-### Android (Kotlin)
-
-```kotlin
-import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONObject
-import android.content.Context
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
-
-class AuthService(private val context: Context) {
-    private val baseUrl = "https://your-domain.com/api/mobile/v1"
-    private val client = OkHttpClient()
-    
-    data class LoginRequest(
-        val email: String,
-        val password: String,
-        val remember: Boolean = true
-    )
-    
-    data class LoginResponse(
-        val success: Boolean,
-        val message: String,
-        val data: LoginData
-    ) {
-        data class LoginData(
-            val user: User,
-            val token: String
-        ) {
-            data class User(
-                val id: Int,
-                val name: String,
-                val email: String,
-                val phone: String?,
-                val role: String
-            )
-        }
-    }
-    
-    suspend fun login(email: String, password: String): LoginResponse {
-        val json = JSONObject().apply {
-            put("email", email)
-            put("password", password)
-            put("remember", true)
-        }
-        
-        val requestBody = json.toString()
-            .toRequestBody("application/json".toMediaType())
-        
-        val request = Request.Builder()
-            .url("$baseUrl/auth/login")
-            .post(requestBody)
-            .addHeader("Content-Type", "application/json")
-            .addHeader("Accept", "application/json")
-            .build()
-        
-        client.newCall(request).execute().use { response ->
-            val responseBody = response.body?.string() ?: throw Exception("Empty response")
-            
-            if (response.isSuccessful) {
-                val jsonResponse = JSONObject(responseBody)
-                val token = jsonResponse.getJSONObject("data").getString("token")
-                
-                // Store token securely
-                saveToken(token)
-                
-                // Parse and return response
-                return parseLoginResponse(responseBody)
-            } else {
-                throw Exception("Login failed: ${response.code}")
-            }
-        }
-    }
-    
-    private fun saveToken(token: String) {
-        val masterKey = MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
-        
-        val sharedPreferences = EncryptedSharedPreferences.create(
-            context,
-            "auth_prefs",
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
-        
-        sharedPreferences.edit()
-            .putString("auth_token", token)
-            .apply()
-    }
-    
-    fun getToken(): String? {
-        val masterKey = MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
-        
-        val sharedPreferences = EncryptedSharedPreferences.create(
-            context,
-            "auth_prefs",
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
-        
-        return sharedPreferences.getString("auth_token", null)
-    }
-    
-    private fun parseLoginResponse(json: String): LoginResponse {
-        // Implement JSON parsing
-        // This is a simplified version - use proper JSON parsing library
-        return LoginResponse(
-            success = true,
-            message = "Login successful",
-            data = LoginResponse.LoginData(
-                user = LoginResponse.LoginData.User(
-                    id = 1,
-                    name = "",
-                    email = "",
-                    phone = null,
-                    role = ""
-                ),
-                token = ""
-            )
-        )
-    }
-}
-```
-
-### cURL Example
+**Headers:**
 
 ```bash
-curl -X POST https://your-domain.com/api/mobile/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -H "Accept: application/json" \
-  -d '{
-    "email": "user@example.com",
-    "password": "password123",
-    "remember": true
-  }'
+Accept: application/json
+Authorization: Bearer {token}
 ```
 
-**Response:**
+#### Success Response
+
+**Status Code:** `200 OK`
+
 ```json
 {
   "success": true,
-  "message": "Login successful",
+  "message": "User retrieved successfully",
   "data": {
     "user": {
       "id": 1,
@@ -596,9 +258,504 @@ curl -X POST https://your-domain.com/api/mobile/v1/auth/login \
       "email": "user@example.com",
       "phone": "+255123456789",
       "role": "user"
-    },
-    "token": "1|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    }
   }
+}
+```
+
+#### Error Responses
+
+- **401 Unauthorized**
+  - Missing/invalid/expired token
+
+---
+
+## Logout Endpoint
+
+### POST `/auth/logout`
+
+Revokes the current access token.
+
+#### Request
+
+**Headers:**
+
+```bash
+Accept: application/json
+Authorization: Bearer {token}
+```
+
+#### Success Response
+
+**Status Code:** `200 OK`
+
+```json
+{
+  "success": true,
+  "message": "Logged out successfully"
+}
+```
+
+#### Error Responses
+
+- **401 Unauthorized**
+  - Missing/invalid/expired token
+
+---
+
+## Dashboard Endpoints
+
+All dashboard endpoints are **protected**.
+
+- `GET /dashboard`
+  - Returns KPIs, alerts and recent transactions
+- `GET /dashboard/stats`
+  - Returns aggregated counts and totals
+- `GET /dashboard/alerts`
+  - Returns alerts only
+
+---
+
+## Loans Endpoints
+
+All loan endpoints are **protected**.
+
+- `GET /loans`
+  - List current user's loans
+- `GET /loans/{loan}`
+  - Get loan details (includes loan transactions)
+- `POST /loans`
+  - Create loan application
+  - Body:
+    - `principal_amount` (number, min 1000)
+    - `purpose` (string)
+    - `term_months` (int, 1-60)
+    - `payment_frequency` (`monthly` | `weekly` | `bi-weekly`)
+- `GET /loans/{loan}/schedule`
+  - Returns repayment schedule (array of installments)
+- `POST /loans/{loan}/pay`
+  - Body:
+    - `amount` (number)
+    - `payment_method` (`cash` | `mobile_money` | `bank_transfer` | `cheque`)
+    - `reference_number` (optional)
+
+---
+
+## Savings Endpoints
+
+All savings endpoints are **protected**.
+
+- `GET /savings`
+  - List savings accounts
+- `GET /savings/{savings}`
+  - Get savings account details
+- `POST /savings`
+  - Create savings account (server-side TODO)
+- `POST /savings/{savings}/deposit`
+  - Body:
+    - `amount` (number)
+    - `payment_method` (`cash` | `mobile_money` | `bank_transfer`)
+    - `reference_number` (optional)
+- `POST /savings/{savings}/withdraw`
+  - Body:
+    - `amount` (number)
+    - `payment_method` (`cash` | `mobile_money` | `bank_transfer`)
+- `GET /savings/{savings}/statements`
+  - Returns account transactions
+
+---
+
+## Investments Endpoints
+
+All investment endpoints are **protected**.
+
+- `GET /investments`
+  - List investments
+- `GET /investments/{investment}`
+  - Get investment details
+- `POST /investments`
+  - Create investment subscription (server-side TODO)
+
+---
+
+## Welfare Endpoints
+
+All welfare endpoints are **protected**.
+
+- `GET /welfare`
+  - List welfare contributions/benefits
+- `GET /welfare/{welfare}`
+  - Get welfare record details
+- `POST /welfare`
+  - Submit welfare request (server-side TODO)
+
+---
+
+## Issues Endpoints
+
+All issue endpoints are **protected**.
+
+- `GET /issues`
+  - List issues submitted by the user
+- `GET /issues/{issue}`
+  - Get issue details
+- `POST /issues`
+  - Body:
+    - `title` (string)
+    - `description` (string)
+    - `category` (string)
+    - `priority` (`low` | `medium` | `high` | `urgent`)
+
+---
+
+## Transactions Endpoints
+
+All transactions endpoints are **protected**.
+
+- `GET /transactions`
+  - Paginated list (currently `paginate(20)` on server)
+
+---
+
+## Profile Endpoints
+
+All profile endpoints are **protected**.
+
+- `GET /profile`
+  - Get profile + preferences
+- `PUT /profile`
+  - Update profile fields
+  - Body may include:
+    - `name`, `email`, `phone`, `address`, `language` (`en` | `sw`)
+- `PUT /profile/password`
+  - Body:
+    - `current_password`
+    - `password`
+    - `password_confirmation`
+- `GET /profile/documents`
+  - Returns documents list (server-side TODO)
+
+---
+
+## Notification Endpoints
+
+All notification endpoints are **protected**.
+
+- `POST /notifications/register-device`
+  - Body:
+    - `device_token` (string)
+    - `device_type` (optional: `mobile` | `web`)
+    - `platform` (optional: `ios` | `android` | `web`)
+    - `app_version` (optional)
+- `DELETE /notifications/unregister-device/{deviceToken}`
+- `GET /notifications`
+  - Returns notification preferences + registered devices
+- `PUT /notifications/preferences`
+  - Body (any of):
+    - `email_notifications` (boolean)
+    - `sms_notifications` (boolean)
+    - `push_notifications` (boolean)
+
+---
+
+## File Upload Endpoints
+
+All file upload endpoints are **protected** and use `multipart/form-data`.
+
+Allowed file types: `jpg`, `jpeg`, `png`, `pdf`.
+Max file size: **5MB** (`max:5120`).
+
+- `POST /upload/kyc`
+  - FormData:
+    - `file` (required)
+    - `document_type` (required: `national_id` | `passport` | `selfie` | `other`)
+- `POST /upload/loan-document`
+  - FormData:
+    - `file` (required)
+    - `loan_id` (optional)
+    - `document_type` (required: `application_letter` | `payment_slip` | `standing_order` | `other`)
+- `POST /upload/welfare-document`
+  - FormData:
+    - `file` (required)
+    - `welfare_id` (optional)
+- `POST /upload/issue-attachment`
+  - FormData:
+    - `file` (required)
+    - `issue_id` (optional)
+
+---
+
+## React Native (TypeScript) Integration
+
+This section is a **mobile app implementation guide** intended for React Native (TypeScript).
+
+### Environment configuration
+
+Use environment variables to swap base URLs per build type.
+
+Recommended:
+
+- `react-native-config`
+
+Example `.env`:
+
+```bash
+API_BASE_URL=http://localhost:8000/api/mobile/v1
+```
+
+In production:
+
+```bash
+API_BASE_URL=https://digital.feedtancmg.org/api/mobile/v1
+```
+
+### Secure Token Storage
+
+Use `react-native-keychain` for the token (secure). If you store user profile for UX purposes, store it separately (e.g. `@react-native-async-storage/async-storage`).
+
+Install packages (example):
+
+- `react-native-keychain`
+- `@react-native-async-storage/async-storage`
+- `axios`
+
+### HTTP Client (Axios) with Interceptors
+
+Create a central API client that:
+
+- Injects `Authorization` header automatically
+- Normalizes errors
+- Detects `401` and triggers logout
+
+```ts
+import axios, { AxiosError } from 'axios';
+import * as Keychain from 'react-native-keychain';
+
+export const API_BASE_URL = process.env.API_BASE_URL ?? 'http://localhost:8000/api/mobile/v1';
+
+export const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+  },
+  timeout: 30000,
+});
+
+async function getAuthToken(): Promise<string | null> {
+  const creds = await Keychain.getGenericPassword();
+  return creds ? creds.password : null;
+}
+
+export async function setAuthToken(token: string): Promise<void> {
+  await Keychain.setGenericPassword('auth_token', token);
+}
+
+export async function clearAuthToken(): Promise<void> {
+  await Keychain.resetGenericPassword();
+}
+
+api.interceptors.request.use(async (config) => {
+  const token = await getAuthToken();
+  if (token) {
+    config.headers = config.headers ?? {};
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export type ApiError = {
+  status?: number;
+  message: string;
+  errors?: Record<string, string[]>;
+};
+
+export function toApiError(err: unknown): ApiError {
+  if (!axios.isAxiosError(err)) {
+    return { message: 'Unexpected error' };
+  }
+
+  const axErr = err as AxiosError<any>;
+  const status = axErr.response?.status;
+  const data = axErr.response?.data;
+
+  return {
+    status,
+    message: data?.message ?? axErr.message ?? 'Request failed',
+    errors: data?.errors,
+  };
+}
+
+// Optional: plug this into your auth state management (Redux/Zustand/Context)
+api.interceptors.response.use(
+  (res) => res,
+  async (err) => {
+    const status = err?.response?.status;
+    if (status === 401) {
+      await clearAuthToken();
+      // trigger navigation to Login screen from your app layer
+    }
+    return Promise.reject(err);
+  }
+);
+```
+
+### Auth API functions
+
+```ts
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { api, setAuthToken, clearAuthToken } from './apiClient';
+
+export type User = {
+  id: number;
+  name: string;
+  email: string;
+  phone: string | null;
+  role: string;
+};
+
+export type LoginResponse = {
+  success: boolean;
+  message: string;
+  data: {
+    user: User;
+    token: string;
+  };
+};
+
+export async function login(email: string, password: string): Promise<User> {
+  const res = await api.post<LoginResponse>('/auth/login', {
+    email,
+    password,
+    remember: true,
+  });
+
+  if (!res.data.success) {
+    throw new Error(res.data.message || 'Login failed');
+  }
+
+  await setAuthToken(res.data.data.token);
+  await AsyncStorage.setItem('user_data', JSON.stringify(res.data.data.user));
+  return res.data.data.user;
+}
+
+export type UserResponse = {
+  success: boolean;
+  message: string;
+  data: {
+    user: User;
+  };
+};
+
+export async function getCurrentUser(): Promise<User> {
+  const res = await api.get<UserResponse>('/auth/user');
+  if (!res.data.success) {
+    throw new Error(res.data.message || 'Failed to load user');
+  }
+  await AsyncStorage.setItem('user_data', JSON.stringify(res.data.data.user));
+  return res.data.data.user;
+}
+
+export type LogoutResponse = {
+  success: boolean;
+  message: string;
+};
+
+export async function logout(): Promise<void> {
+  try {
+    await api.post<LogoutResponse>('/auth/logout');
+  } finally {
+    await clearAuthToken();
+    await AsyncStorage.removeItem('user_data');
+  }
+}
+```
+
+### Typical Auth Flow
+
+- **App start**
+  - Check if token exists in Keychain
+  - If token exists, call `GET /auth/user`
+  - If it returns `200`, show authenticated screens
+  - If it returns `401`, clear token and show login
+
+- **Login screen**
+  - Call `POST /auth/login`
+  - Store token in Keychain
+  - Navigate to authenticated area
+
+- **Logout**
+  - Call `POST /auth/logout`
+  - Clear token + cached user data
+
+---
+
+## React Native Examples (Calling Services)
+
+### Example: load dashboard
+
+```ts
+import { api } from './apiClient';
+
+export async function getDashboard() {
+  const res = await api.get('/dashboard');
+  return res.data;
+}
+```
+
+### Example: list loans + get loan detail
+
+```ts
+import { api } from './apiClient';
+
+export async function listLoans() {
+  const res = await api.get('/loans');
+  return res.data;
+}
+
+export async function getLoan(loanId: number) {
+  const res = await api.get(`/loans/${loanId}`);
+  return res.data;
+}
+```
+
+### Example: create an issue
+
+```ts
+import { api } from './apiClient';
+
+export async function createIssue(input: {
+  title: string;
+  description: string;
+  category: string;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+}) {
+  const res = await api.post('/issues', input);
+  return res.data;
+}
+```
+
+### Example: upload a KYC document (multipart)
+
+```ts
+import { api } from './apiClient';
+
+export async function uploadKyc(fileUri: string, fileName: string, mimeType: string, documentType: 'national_id' | 'passport' | 'selfie' | 'other') {
+  const form = new FormData();
+  form.append('document_type', documentType);
+  form.append('file', {
+    uri: fileUri,
+    name: fileName,
+    type: mimeType,
+  } as any);
+
+  const res = await api.post('/upload/kyc', form, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return res.data;
 }
 ```
 
@@ -624,153 +781,33 @@ curl -X POST https://your-domain.com/api/mobile/v1/auth/login \
    - Status: `401`
    - Action: Clear stored token, redirect to login
 
-### Error Handling Example (Flutter)
+### Error Handling Example (React Native)
 
-```dart
+```ts
+import { login } from './authApi';
+import { toApiError } from './apiClient';
+
 try {
-  final response = await authService.login(email, password);
-  // Handle success
-  Navigator.pushReplacementNamed(context, '/dashboard');
-} on ValidationException catch (e) {
-  // Handle validation errors
-  showErrorDialog(e.message);
-} on NetworkException catch (e) {
-  // Handle network errors
-  showErrorDialog('Please check your internet connection');
+  await login(email, password);
+  // navigate to home
 } catch (e) {
-  // Handle other errors
-  showErrorDialog('An unexpected error occurred');
+  const err = toApiError(e);
+  if (err.status === 422) {
+    // show validation errors
+  } else {
+    // show err.message
+  }
 }
 ```
-
----
-
-## Security Best Practices
-
-1. **Always use HTTPS** in production
-2. **Store tokens securely** using platform-specific secure storage
-3. **Never log tokens** in console or logs
-4. **Implement token refresh** if needed (check token expiration)
-5. **Clear tokens on logout** and app uninstall
-6. **Validate input** on client-side before sending
-7. **Handle 401 errors** by redirecting to login
-8. **Use certificate pinning** for extra security (optional)
-
----
-
-## Token Management
-
-### Token Expiration
-
-By default, Sanctum tokens do not expire. However, you can:
-
-1. **Set expiration** in `config/sanctum.php`:
-   ```php
-   'expiration' => 60 * 24, // 24 hours in minutes
-   ```
-
-2. **Check token validity** by making an authenticated request
-
-3. **Handle expired tokens** by catching 401 responses and redirecting to login
-
-### Logout
-
-**Endpoint:** `POST /api/mobile/v1/auth/logout`
-
-**Headers:**
-```
-Authorization: Bearer {token}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "message": "Logged out successfully"
-}
-```
-
-After logout:
-1. Delete the token from secure storage
-2. Clear any cached user data
-3. Redirect to login screen
-
----
-
-## Testing
-
-### Test Credentials
-
-Contact your backend team for test account credentials.
-
-### Test Environment
-
-```
-Base URL: http://localhost:8000/api/mobile/v1
-```
-
-### Testing with Postman
-
-1. Create a new POST request to `/api/mobile/v1/auth/login`
-2. Set headers:
-   - `Content-Type: application/json`
-   - `Accept: application/json`
-3. Add body (raw JSON):
-   ```json
-   {
-     "email": "test@example.com",
-     "password": "password123",
-     "remember": true
-   }
-   ```
-4. Send request
-5. Copy the token from response
-6. Use token in subsequent requests with `Authorization: Bearer {token}` header
-
----
-
-## Troubleshooting
-
-### Issue: "The provided credentials do not match our records"
-
-**Solutions:**
-- Verify email and password are correct
-- Check if account exists and is active
-- Ensure password hasn't been changed
-- Check for typos in email (case-sensitive)
-
-### Issue: Token not working in subsequent requests
-
-**Solutions:**
-- Verify token is being sent in `Authorization: Bearer {token}` header
-- Check token wasn't deleted from storage
-- Ensure token format is correct (no extra spaces)
-- Verify API endpoint is correct
-
-### Issue: Network errors
-
-**Solutions:**
-- Check internet connection
-- Verify base URL is correct
-- Check if server is running
-- Verify SSL certificate (for HTTPS)
-
-### Issue: 500 Server Error
-
-**Solutions:**
-- Contact backend team
-- Check server logs
-- Verify database connection
-- Retry after a few moments
 
 ---
 
 ## Related Endpoints
 
-- **Register:** `POST /api/mobile/v1/auth/register`
-- **Get User:** `GET /api/mobile/v1/auth/user` (requires authentication)
-- **Logout:** `POST /api/mobile/v1/auth/logout` (requires authentication)
-- **Forgot Password:** `POST /api/mobile/v1/auth/forgot-password`
+- **Register:** `POST /auth/register`
+- **Get User:** `GET /auth/user` (requires authentication)
+- **Logout:** `POST /auth/logout` (requires authentication)
+- **Forgot Password:** `POST /auth/forgot-password`
 
 ---
 
@@ -786,4 +823,3 @@ For additional help:
 **Last Updated:** January 2024  
 **API Version:** v1  
 **Authentication Method:** Laravel Sanctum (Bearer Token)
-
