@@ -119,6 +119,227 @@
                 </div>
             </div>
 
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-8 sm:p-12 border-b border-gray-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                    <div>
+                        <h2 class="text-2xl font-black text-gray-900">Member Data Vault</h2>
+                        <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Extended profile & membership information</p>
+                    </div>
+                    <a href="{{ route('member.profile.edit') }}" class="px-8 py-3 bg-[#015425] text-white rounded-2xl font-black text-xs shadow-xl hover:-translate-y-1 transition-all">Update Profile</a>
+                </div>
+
+                <div class="p-8 sm:p-12 space-y-10">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div class="space-y-6">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Personal Details</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Date of Birth</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->date_of_birth ? $user->date_of_birth->format('F d, Y') : '—' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Gender</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->gender ?: '—' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Marital Status</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->marital_status ?: '—' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">National ID</p>
+                                    <p class="text-sm font-black text-gray-900 break-all">{{ $user->national_id ?: '—' }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Contact & Address</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Primary Phone</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->phone ?: '—' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Alternate Phone</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->alternate_phone ?: '—' }}</p>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Address</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->address ?: '—' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">City</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->city ?: '—' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Region</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->region ?: '—' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Postal Code</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->postal_code ?: '—' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Preferred Language</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->preferred_language ?: '—' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 pt-10 border-t border-gray-50">
+                        <div class="space-y-6">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Membership & KYC</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Member Number</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->member_number ?: '—' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Membership Code</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->membership_code ?: '—' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Membership Status</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->membership_status ?: ($user->status ?: '—') }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">KYC Status</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->kyc_status ?: '—' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">KYC Expiry</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->kyc_expiry_date ? $user->kyc_expiry_date->format('F d, Y') : '—' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Statement Preference</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->statement_preference ?: '—' }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Banking & Employment</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Bank Name</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->bank_name ?: '—' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Bank Branch</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->bank_branch ?: '—' }}</p>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Bank Account Number</p>
+                                    <p class="text-sm font-black text-gray-900 break-all">{{ $user->bank_account_number ?: '—' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Occupation</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->occupation ?: '—' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Employer</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->employer ?: '—' }}</p>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Monthly Income</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->monthly_income !== null ? number_format($user->monthly_income, 0) : '—' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10 pt-10 border-t border-gray-50">
+                        <div class="space-y-6">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">SWF & Group Profile</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">SWF Member</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->swf_member ? 'Yes' : 'No' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">SWF Number</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->swf_number ?: '—' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Group Registered</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->is_group_registered ? 'Yes' : 'No' }}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Group Name</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->group_name ?: '—' }}</p>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Introduced By</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->introduced_by ?: '—' }}</p>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Guarantor</p>
+                                    <p class="text-sm font-black text-gray-900">{{ $user->guarantor_name ?: '—' }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Documents</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Application Letter</p>
+                                    @if($user->application_letter_path)
+                                        <a href="{{ asset('storage/' . $user->application_letter_path) }}" class="text-sm font-black text-[#015425] hover:underline" target="_blank">View</a>
+                                    @else
+                                        <p class="text-sm font-black text-gray-900">—</p>
+                                    @endif
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Payment Slip</p>
+                                    @if($user->payment_slip_path)
+                                        <a href="{{ asset('storage/' . $user->payment_slip_path) }}" class="text-sm font-black text-[#015425] hover:underline" target="_blank">View</a>
+                                    @else
+                                        <p class="text-sm font-black text-gray-900">—</p>
+                                    @endif
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Standing Order</p>
+                                    @if($user->standing_order_path)
+                                        <a href="{{ asset('storage/' . $user->standing_order_path) }}" class="text-sm font-black text-[#015425] hover:underline" target="_blank">View</a>
+                                    @else
+                                        <p class="text-sm font-black text-gray-900">—</p>
+                                    @endif
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">NIDA Picture</p>
+                                    @if($user->nida_picture_path)
+                                        <a href="{{ asset('storage/' . $user->nida_picture_path) }}" class="text-sm font-black text-[#015425] hover:underline" target="_blank">View</a>
+                                    @else
+                                        <p class="text-sm font-black text-gray-900">—</p>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if(is_array($user->beneficiaries_info) && count($user->beneficiaries_info))
+                        <div class="pt-10 border-t border-gray-50">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-6">Beneficiaries</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                @foreach($user->beneficiaries_info as $beneficiary)
+                                    <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+                                        <p class="text-sm font-black text-gray-900">{{ is_array($beneficiary) ? ($beneficiary['name'] ?? 'Beneficiary') : 'Beneficiary' }}</p>
+                                        @if(is_array($beneficiary) && isset($beneficiary['relationship']))
+                                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">{{ $beneficiary['relationship'] }}</p>
+                                        @endif
+                                        @if(is_array($beneficiary) && isset($beneficiary['phone']))
+                                            <p class="text-xs font-bold text-gray-700 mt-3">{{ $beneficiary['phone'] }}</p>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
             <!-- Status Badges -->
             <div class="bg-gray-50 rounded-[2.5rem] p-8 sm:p-12 border border-gray-100">
                 <h3 class="text-sm font-black text-gray-400 uppercase tracking-widest mb-8">Role Clearance</h3>
