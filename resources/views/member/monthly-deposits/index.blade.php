@@ -62,10 +62,10 @@
     <div id="statement-preview-modal" class="fixed inset-0 z-50 hidden">
         <div class="absolute inset-0 bg-black/50" onclick="window.__closeStatementPreview?.()"></div>
         <div class="absolute inset-0 p-4 sm:p-8 flex items-center justify-center">
-            <div class="w-full max-w-5xl bg-white rounded-lg shadow-2xl overflow-hidden">
+            <div class="w-full max-w-7xl bg-white rounded-lg shadow-2xl overflow-hidden">
                 <div class="p-4 border-b border-gray-100 flex items-center justify-between">
                     <div>
-                        <p class="text-sm font-black text-gray-900" id="statement-preview-title">Statement Preview</p>
+                        <p class="text-lg sm:text-xl font-black text-gray-900" id="statement-preview-title">Statement Preview</p>
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest" id="statement-preview-subtitle">Preview</p>
                     </div>
                     <button type="button" class="p-2 rounded-md bg-gray-50 hover:bg-gray-100 transition" onclick="window.__closeStatementPreview?.()">
@@ -74,8 +74,8 @@
                         </svg>
                     </button>
                 </div>
-                <div class="bg-gray-50" style="height: 75vh;">
-                    <iframe id="statement-preview-frame" class="w-full h-full" src="about:blank"></iframe>
+                <div class="bg-gray-50" style="height: 85vh;">
+                    <iframe id="statement-preview-frame" class="w-full h-full bg-white" src="about:blank"></iframe>
                 </div>
             </div>
         </div>

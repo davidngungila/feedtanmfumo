@@ -23,7 +23,7 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
+    <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100">
         <div class="p-8 sm:p-12 border-b border-gray-50 bg-gray-50/30 flex items-center justify-between">
             <div>
                 <h2 class="text-2xl font-black text-gray-900">Vault Configuration</h2>
@@ -97,14 +97,14 @@
                 <div class="space-y-4">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block ml-1">Effective Activation Date</label>
                     <input type="date" name="opening_date" id="opening_date" value="{{ date('Y-m-d') }}" required
-                        class="w-full px-8 py-5 bg-gray-50 border-none rounded-2xl text-sm font-black text-gray-900 focus:ring-2 focus:ring-[#015425] transition-all">
+                        class="w-full px-4 py-3 bg-white border border-gray-200 rounded-md text-sm font-bold text-gray-900 focus:ring-2 focus:ring-[#015425] focus:border-transparent transition">
                     @error('opening_date')<p class="text-red-500 text-[10px] font-bold mt-1 ml-2">{{ $message }}</p>@enderror
                 </div>
 
                 <div id="maturity_date_container" class="space-y-4 hidden opacity-0 translate-y-4 transition-all duration-500">
                     <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest block ml-1">Projected Maturity Date (RDA)</label>
                     <input type="date" name="maturity_date" id="maturity_date" value="{{ date('Y-m-d', strtotime('+1 year')) }}"
-                        class="w-full px-8 py-5 bg-gray-50 border-none rounded-2xl text-sm font-black text-gray-900 focus:ring-2 focus:ring-purple-600 transition-all shadow-inner">
+                        class="w-full px-4 py-3 bg-white border border-gray-200 rounded-md text-sm font-bold text-gray-900 focus:ring-2 focus:ring-purple-600 focus:border-transparent transition">
                     <p class="text-[9px] text-gray-400 font-bold italic ml-2">* Minimum 12-month lock-in period recommended.</p>
                     @error('maturity_date')<p class="text-red-500 text-[10px] font-bold mt-1 ml-2">{{ $message }}</p>@enderror
                 </div>
