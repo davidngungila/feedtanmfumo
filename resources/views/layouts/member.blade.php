@@ -59,7 +59,7 @@
         <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden"></div>
 
         <!-- Sidebar -->
-        <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#015425] text-white transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col h-full">
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-[#015425] text-white transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col h-full">
             <div class="p-6 border-b border-[#013019]">
                 <h1 class="text-2xl font-bold text-white">FeedTan Digital</h1>
                 <button id="close-sidebar" class="lg:hidden absolute top-4 right-4 text-white hover:text-gray-300">
@@ -161,8 +161,8 @@
         </aside>
 
         <!-- Main Content Area -->
-        <div class="flex-1 flex flex-col lg:ml-0 overflow-hidden">
-            <header class="fixed lg:static top-0 left-0 right-0 lg:right-auto bg-white shadow-sm z-30 lg:z-auto">
+        <div class="flex-1 flex flex-col overflow-hidden lg:ml-64">
+            <header class="fixed top-0 left-0 right-0 bg-white shadow-sm z-30 lg:left-64">
                 <div class="px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
                     <div class="flex items-center">
                         <button id="menu-toggle" class="lg:hidden mr-4 text-[#015425] hover:text-[#013019]">
@@ -235,7 +235,7 @@
                 </div>
             </header>
 
-            <main class="flex-1 overflow-y-auto pt-16 lg:pt-0 flex flex-col">
+            <main class="flex-1 overflow-y-auto pt-16 flex flex-col">
                 <div class="flex-1 p-4 sm:p-6 lg:p-8">
                     @include('components.alerts')
                     @yield('content')
