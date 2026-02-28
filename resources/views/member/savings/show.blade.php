@@ -87,9 +87,15 @@
             <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden">
                 <div class="p-8 border-b border-gray-50 flex justify-between items-center">
                     <h3 class="text-lg font-black text-gray-900">Transaction Ledger</h3>
-                    <div class="flex gap-2">
-                        <button class="p-2 bg-gray-50 text-gray-400 rounded-lg hover:bg-gray-100 transition">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                    <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                        <div class="relative w-full sm:w-72">
+                            <input id="txn-search" type="text" class="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold text-gray-700 focus:ring-2 focus:ring-[#015425] focus:border-transparent" placeholder="Search transactions...">
+                            <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                        <button id="txn-export" type="button" class="px-4 py-2 bg-gray-900 text-white rounded-lg text-xs font-black hover:bg-black transition whitespace-nowrap">
+                            Export CSV
                         </button>
                     </div>
                 </div>
@@ -106,7 +112,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-50">
                             @forelse($transactions as $transaction)
-                                <tr class="group hover:bg-gray-50/50 transition-all duration-300">
+                                <tr class="txn-row group hover:bg-gray-50/50 transition-all duration-300" data-search="{{ strtolower(($transaction->reference ?? 'TXN-'.$transaction->id) . ' ' . ($transaction->description ?? '') . ' ' . $transaction->transaction_type . ' ' . $transaction->transaction_date->format('d M, Y H:i') . ' ' . $transaction->amount) }}">
                                     <td class="px-8 py-5">
                                         <p class="text-xs font-bold text-gray-900">{{ $transaction->transaction_date->format('d M, Y') }}</p>
                                         <p class="text-[10px] text-gray-400 mt-0.5">{{ $transaction->transaction_date->format('H:i') }}</p>
@@ -207,4 +213,68 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const search = document.getElementById('txn-search');
+    const exportBtn = document.getElementById('txn-export');
+    const rows = Array.from(document.querySelectorAll('.txn-row'));
+
+    if (search) {
+        search.addEventListener('input', function () {
+            const q = (this.value || '').toLowerCase().trim();
+            rows.forEach((row) => {
+                const hay = (row.dataset.search || '');
+                row.classList.toggle('hidden', q.length > 0 && !hay.includes(q));
+            });
+        });
+    }
+
+    function toCsvCell(v) {
+        const s = String(v ?? '');
+        if (/[\n\r,\"]/g.test(s)) {
+            return '"' + s.replace(/\"/g, '""') + '"';
+        }
+        return s;
+    }
+
+    function downloadCsv(filename, csvText) {
+        const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    if (exportBtn) {
+        exportBtn.addEventListener('click', function () {
+            const visible = rows.filter((r) => !r.classList.contains('hidden'));
+            const lines = [];
+            lines.push(['Date', 'Time', 'Description', 'Reference', 'Type', 'Amount'].map(toCsvCell).join(','));
+
+            visible.forEach((row) => {
+                const cols = row.querySelectorAll('td');
+                if (cols.length < 4) return;
+
+                const date = cols[0]?.querySelector('p')?.textContent?.trim() || '';
+                const time = cols[0]?.querySelectorAll('p')[1]?.textContent?.trim() || '';
+                const desc = cols[1]?.querySelector('p')?.textContent?.trim() || '';
+                const ref = cols[1]?.querySelectorAll('p')[1]?.textContent?.trim() || '';
+                const type = cols[2]?.textContent?.trim() || '';
+                const amount = cols[3]?.textContent?.trim() || '';
+
+                lines.push([date, time, desc, ref, type, amount].map(toCsvCell).join(','));
+            });
+
+            downloadCsv('savings_transactions_' + new Date().toISOString().slice(0, 10) + '.csv', lines.join('\n'));
+        });
+    }
+});
+</script>
+@endpush
 @endsection

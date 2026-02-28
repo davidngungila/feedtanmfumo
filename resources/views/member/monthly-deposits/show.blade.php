@@ -3,26 +3,85 @@
 @section('page-title', 'Certified Ledger Preview')
 
 @section('content')
-<div class="max-w-5xl mx-auto space-y-8 pb-20">
-    <!-- Action Header -->
-    <div class="flex flex-col md:flex-row items-center justify-between gap-6 no-print">
-        <a href="{{ route('member.monthly-deposits.index') }}" class="group flex items-center gap-3 text-[#015425] font-black text-xs uppercase tracking-widest">
-            <div class="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center group-hover:bg-[#015425] group-hover:text-white transition-all">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+<div class="max-w-6xl mx-auto space-y-6 pb-20">
+    <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-6 sm:p-8 text-white no-print">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2">Statement Details</h1>
+                <p class="text-white text-opacity-90 text-sm sm:text-base">Monthly statement for {{ $monthlyDeposit->month_name }} {{ $monthlyDeposit->year }}.</p>
+                <div class="mt-4 flex flex-wrap gap-4 text-sm">
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>{{ now()->format('l, F d, Y') }}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <span>Ledger ID: CM-{{ str_pad($monthlyDeposit->id, 8, '0', STR_PAD_LEFT) }}</span>
+                    </div>
+                </div>
             </div>
-            Back to Vault
-        </a>
-        <div class="flex items-center gap-4">
-            @if($monthlyDeposit->statement_pdf)
-            <a href="{{ $monthlyDeposit->statement_pdf }}" target="_blank" class="px-8 py-4 bg-orange-600 text-white rounded-[1.25rem] font-black text-xs shadow-xl hover:bg-orange-700 hover:-translate-y-1 transition-all flex items-center gap-3">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                OFFICIAL SYSTEM PDF
-            </a>
-            @endif
-            <button onclick="window.print()" class="px-8 py-4 bg-white text-[#015425] border-2 border-[#015425]/10 rounded-[1.25rem] font-black text-xs hover:bg-[#015425] hover:text-white transition-all flex items-center gap-3 shadow-sm">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
-                PRINT LEDGER
-            </button>
+
+            <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                <a href="{{ route('member.monthly-deposits.index') }}" class="inline-flex items-center justify-center px-4 py-2 bg-white/10 text-white rounded-md border border-white/20 hover:bg-white/20 transition font-medium">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Back to Statements
+                </a>
+                @if($monthlyDeposit->statement_pdf)
+                <a href="{{ $monthlyDeposit->statement_pdf }}" target="_blank" class="inline-flex items-center justify-center px-4 py-2 bg-white text-[#015425] rounded-md hover:bg-gray-100 transition font-medium">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Open PDF
+                </a>
+                @endif
+                <button type="button" onclick="window.print()" class="inline-flex items-center justify-center px-4 py-2 bg-white/10 text-white rounded-md border border-white/20 hover:bg-white/20 transition font-medium">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+                    </svg>
+                    Print
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md border border-gray-100 p-4 sm:p-5 no-print">
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+            <a href="{{ route('member.loans.index') }}" class="px-3 py-2 rounded-md bg-blue-50 text-blue-700 text-xs font-bold text-center hover:bg-blue-100 transition">Loans</a>
+            <a href="{{ route('member.savings.index') }}" class="px-3 py-2 rounded-md bg-green-50 text-[#015425] text-xs font-bold text-center hover:bg-green-100 transition">Savings</a>
+            <a href="{{ route('member.savings.create') }}" class="px-3 py-2 rounded-md bg-emerald-50 text-emerald-700 text-xs font-bold text-center hover:bg-emerald-100 transition">Saving Plan</a>
+            <a href="{{ route('member.investments.index') }}" class="px-3 py-2 rounded-md bg-purple-50 text-purple-700 text-xs font-bold text-center hover:bg-purple-100 transition">Investments</a>
+            <a href="{{ route('member.welfare.index') }}" class="px-3 py-2 rounded-md bg-amber-50 text-amber-800 text-xs font-bold text-center hover:bg-amber-100 transition">SWF</a>
+            <a href="{{ route('member.issues.index') }}" class="px-3 py-2 rounded-md bg-orange-50 text-orange-700 text-xs font-bold text-center hover:bg-orange-100 transition">Issues</a>
+            <a href="{{ route('member.monthly-deposits.index') }}" class="px-3 py-2 rounded-md bg-slate-50 text-slate-700 text-xs font-bold text-center hover:bg-slate-100 transition">Transactions</a>
+        </div>
+    </div>
+
+    <div id="quick-stats" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 no-print">
+        <div class="bg-white rounded-lg shadow-md p-5 sm:p-6 hover:shadow-lg transition">
+            <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1">Total</p>
+            <p class="text-2xl sm:text-3xl font-bold text-[#015425]">{{ number_format($monthlyDeposit->total, 0) }}</p>
+            <p class="text-xs text-gray-500 mt-2">TZS</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-5 sm:p-6 hover:shadow-lg transition">
+            <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1">Savings</p>
+            <p class="text-2xl sm:text-3xl font-bold text-blue-600">{{ number_format($monthlyDeposit->savings, 0) }}</p>
+            <p class="text-xs text-gray-500 mt-2">TZS</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-5 sm:p-6 hover:shadow-lg transition">
+            <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1">Shares</p>
+            <p class="text-2xl sm:text-3xl font-bold text-purple-600">{{ number_format($monthlyDeposit->shares, 0) }}</p>
+            <p class="text-xs text-gray-500 mt-2">TZS</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-md p-5 sm:p-6 hover:shadow-lg transition">
+            <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1">Welfare</p>
+            <p class="text-2xl sm:text-3xl font-bold text-amber-700">{{ number_format($monthlyDeposit->welfare, 0) }}</p>
+            <p class="text-xs text-gray-500 mt-2">TZS</p>
         </div>
     </div>
 
