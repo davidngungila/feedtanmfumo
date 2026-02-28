@@ -3,30 +3,64 @@
 @section('page-title', 'Financial Repository')
 
 @section('content')
-<div class="space-y-10 pb-12">
-    <!-- Premium Header -->
-    <div class="bg-gradient-to-br from-[#015425] via-[#027a3a] to-[#013019] rounded-[2.5rem] shadow-2xl p-10 sm:p-14 text-white relative overflow-hidden">
-        <div class="absolute -right-24 -top-24 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl"></div>
-        <div class="absolute -left-24 -bottom-24 w-96 h-96 bg-black opacity-10 rounded-full blur-3xl"></div>
-        
-        <div class="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-10">
-            <div class="text-center lg:text-left">
-                <h1 class="text-4xl sm:text-6xl font-black mb-6 tracking-tight">Deposit Ledger</h1>
-                <p class="text-green-50 text-lg sm:text-xl opacity-80 max-w-2xl leading-relaxed font-medium">Historical verification of your monthly community contributions. Access certified statements for your financial records.</p>
+<div class="space-y-6 pb-12">
+    <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-6 sm:p-8 text-white">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2">Deposit Statements</h1>
+                <p class="text-white text-opacity-90 text-sm sm:text-base">Filter your monthly contributions and export your ledger for your records.</p>
+                <div class="mt-4 flex flex-wrap gap-4 text-sm">
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>{{ now()->format('l, F d, Y') }}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>{{ number_format($deposits->count() ?? 0) }} cycles</span>
+                    </div>
+                </div>
             </div>
-            <div class="bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20 text-center min-w-[240px]">
-                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-green-200 mb-2">Authenticated History</p>
-                <p class="text-5xl font-black">{{ $deposits->count() }}</p>
-                <p class="text-[10px] font-bold uppercase tracking-widest text-white/60 mt-2">Active Monthly Cycles</p>
+
+            <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                <a href="{{ route('member.monthly-deposits.index', array_merge(request()->query(), ['export' => 'csv'])) }}" class="inline-flex items-center justify-center px-4 py-2 bg-white text-[#015425] rounded-md hover:bg-gray-100 transition font-medium">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Export CSV
+                </a>
+                <a href="{{ route('member.monthly-deposits.index') }}" class="inline-flex items-center justify-center px-4 py-2 bg-white/10 text-white rounded-md border border-white/20 hover:bg-white/20 transition font-medium">
+                    Reset
+                </a>
             </div>
         </div>
     </div>
 
+    <div class="bg-white rounded-lg shadow-md border border-gray-100 p-4 sm:p-6">
+        <form method="GET" action="{{ route('member.monthly-deposits.index') }}" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+            <div class="md:col-span-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">From (YYYY-MM)</label>
+                <input type="month" name="from" value="{{ request('from') }}" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm focus:ring-2 focus:ring-[#015425] focus:border-transparent">
+            </div>
+            <div class="md:col-span-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">To (YYYY-MM)</label>
+                <input type="month" name="to" value="{{ request('to') }}" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm focus:ring-2 focus:ring-[#015425] focus:border-transparent">
+            </div>
+            <div class="md:col-span-4 flex gap-3">
+                <button type="submit" class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-[#015425] text-white rounded-md hover:bg-[#013019] transition font-medium">Apply Filters</button>
+                <a href="{{ route('member.monthly-deposits.index') }}" class="inline-flex items-center justify-center px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition font-medium">Clear</a>
+            </div>
+        </form>
+    </div>
+
     <!-- Statement Grid Index -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($deposits as $deposit)
-        <div class="bg-white rounded-[2.5rem] shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 overflow-hidden group hover:-translate-y-2">
-            <div class="p-8 sm:p-10">
+        <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden group hover:-translate-y-1">
+            <div class="p-6 sm:p-8">
                 <div class="flex items-center justify-between mb-8">
                     <span class="px-4 py-1.5 bg-green-50 text-[#015425] text-[10px] font-black rounded-full uppercase tracking-widest">
                         Cycle Verification

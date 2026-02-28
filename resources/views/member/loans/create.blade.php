@@ -3,22 +3,37 @@
 @section('page-title', 'Apply for Community Capital')
 
 @section('content')
-<div class="max-w-7xl mx-auto space-y-8">
-    <!-- Premium Header -->
-    <div class="bg-gradient-to-br from-[#015425] via-[#027a3a] to-[#013019] rounded-[2.5rem] shadow-2xl p-10 sm:p-14 text-white relative overflow-hidden">
-        <div class="absolute -right-24 -top-24 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl"></div>
-        <div class="absolute -left-24 -bottom-24 w-96 h-96 bg-black opacity-10 rounded-full blur-3xl"></div>
-        
-        <div class="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-10">
-            <div class="text-center lg:text-left">
-                <h1 class="text-4xl sm:text-6xl font-black mb-6 tracking-tight">Community Capital</h1>
-                <p class="text-green-50 text-lg sm:text-xl opacity-80 max-w-2xl leading-relaxed font-medium">Access fair, low-interest funding backed by the community. Your growth is our collective success.</p>
-            </div>
-            <div class="flex flex-col gap-4">
-                 <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 text-center">
-                    <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-green-200 mb-1">Standard Interest</p>
-                    <p class="text-4xl font-black">10.0% <span class="text-xs font-normal opacity-60">p.a</span></p>
+<div class="max-w-7xl mx-auto space-y-6">
+    <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-6 sm:p-8 text-white">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2">Apply for Community Capital</h1>
+                <p class="text-white text-opacity-90 text-sm sm:text-base">Submit your loan application, add endorsements, and upload supporting documents.</p>
+                <div class="mt-4 flex flex-wrap gap-4 text-sm">
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Standard interest: 10.0% p.a</span>
+                    </div>
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>{{ now()->format('l, F d, Y') }}</span>
+                    </div>
                 </div>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                <a href="{{ route('member.loans.index') }}" class="inline-flex items-center justify-center px-4 py-2 bg-white/10 text-white rounded-md border border-white/20 hover:bg-white/20 transition font-medium">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Back to Loans
+                </a>
+                <button type="button" onclick="document.getElementById('terms_accepted')?.scrollIntoView({behavior: 'smooth', block: 'center'});" class="inline-flex items-center justify-center px-4 py-2 bg-white text-[#015425] rounded-md hover:bg-gray-100 transition font-medium">
+                    Review & Submit
+                </button>
             </div>
         </div>
     </div>
@@ -31,7 +46,7 @@
             <div class="lg:col-span-8 space-y-8">
                 
                 <!-- Section: Financial Requirements -->
-                <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-8 sm:p-10">
+                <div class="bg-white rounded-lg shadow-md border border-gray-100 p-6 sm:p-8">
                     <div class="flex items-center gap-4 mb-10">
                         <div class="w-12 h-12 bg-green-50 rounded-2xl flex items-center justify-center text-[#015425]">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -87,7 +102,7 @@
                 </div>
 
                 <!-- Section: Purpose & Analysis -->
-                <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-8 sm:p-10">
+                <div class="bg-white rounded-lg shadow-md border border-gray-100 p-6 sm:p-8">
                      <div class="flex items-center gap-4 mb-10">
                         <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -135,7 +150,7 @@
                 </div>
 
                 <!-- Section: Endorsements (Guarantor) -->
-                <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-8 sm:p-10">
+                <div class="bg-white rounded-lg shadow-md border border-gray-100 p-6 sm:p-8">
                      <div class="flex items-center gap-4 mb-10">
                         <div class="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
@@ -181,7 +196,7 @@
                 </div>
 
                 <!-- Section: Evidence Uploads -->
-                <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-8 sm:p-10">
+                <div class="bg-white rounded-lg shadow-md border border-gray-100 p-6 sm:p-8">
                      <div class="flex items-center gap-4 mb-10">
                         <div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center text-red-600">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
@@ -231,7 +246,7 @@
             <div class="lg:col-span-4 space-y-8">
                 
                 <!-- Financial Simulation -->
-                <div class="bg-gray-900 rounded-[2.5rem] p-10 text-white shadow-2xl sticky top-8 border border-white/10">
+                <div class="bg-gray-900 rounded-lg p-6 sm:p-8 text-white shadow-2xl sticky top-8 border border-white/10">
                     <h3 class="text-sm font-black uppercase tracking-widest mb-10 text-gray-400">Yield Simulation</h3>
                     
                     <div class="space-y-8">
@@ -275,7 +290,7 @@
                 </div>
 
                 <!-- Guidance Card -->
-                <div class="bg-indigo-600 rounded-[2.5rem] p-8 text-white shadow-xl relative overflow-hidden group">
+                <div class="bg-indigo-600 rounded-lg p-6 sm:p-8 text-white shadow-xl relative overflow-hidden group">
                      <div class="absolute -right-10 -top-10 w-32 h-32 bg-white opacity-10 rounded-full group-hover:scale-110 transition-transform"></div>
                      <h3 class="text-lg font-black mb-4">Capital Speed</h3>
                      <p class="text-xs text-indigo-100 leading-relaxed mb-6">Complete applications with high-quality evidence are prioritized. Ensure your guarantor is notified to expedite the trust-check.</p>

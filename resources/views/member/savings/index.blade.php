@@ -3,66 +3,134 @@
 @section('page-title', 'My Savings Portfolio')
 
 @section('content')
-<div class="space-y-8">
-    <!-- Hero Section -->
-    <div class="bg-gradient-to-br from-[#015425] via-[#027a3a] to-[#013019] rounded-[2.5rem] shadow-2xl p-8 sm:p-12 text-white relative overflow-hidden">
-        <div class="absolute -right-20 -top-20 w-80 h-80 bg-white opacity-5 rounded-full blur-3xl"></div>
-        <div class="absolute -left-20 -bottom-20 w-80 h-80 bg-black opacity-10 rounded-full blur-3xl"></div>
-        
-        <div class="relative z-10">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-                <div class="max-w-2xl">
-                    <h1 class="text-4xl sm:text-5xl font-black mb-4 tracking-tight">Financial Resilience</h1>
-                    <p class="text-green-50 text-base sm:text-xl opacity-80 leading-relaxed font-medium">Your total wealth in community savings is growing. Manage your accounts and watch your discipline pay off.</p>
-                </div>
-                <div class="flex flex-col gap-4 w-full md:w-auto">
-                    <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-                        <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-green-200 mb-1">Total Liquid Assets</p>
-                        <p class="text-3xl font-black">{{ number_format($stats['total_balance'], 0) }} <span class="text-sm font-normal opacity-60">TZS</span></p>
+<div class="space-y-6">
+    <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-6 sm:p-8 text-white">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2">My Savings Portfolio</h1>
+                <p class="text-white text-opacity-90 text-sm sm:text-base">Manage your accounts, track balances, and access your deposit statements.</p>
+                <div class="mt-4 flex flex-wrap gap-4 text-sm">
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>{{ now()->format('l, F d, Y') }}</span>
+                    </div>
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>{{ number_format($stats['total_balance'] ?? 0, 0) }} Total Balance</span>
                     </div>
                 </div>
             </div>
-            
-            <div class="mt-12 flex flex-wrap gap-4">
-                <a href="{{ route('member.savings.create') }}" class="px-8 py-4 bg-white text-[#015425] rounded-2xl font-black shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center gap-3">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+
+            <div class="mt-4 md:mt-0 flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                <a href="{{ route('member.savings.create') }}" class="inline-flex items-center justify-center px-4 py-2 bg-white text-[#015425] rounded-md hover:bg-gray-100 transition font-medium">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
                     New Account
                 </a>
-                <button class="px-8 py-4 bg-white/10 backdrop-blur-md text-white rounded-2xl font-bold border border-white/20 hover:bg-white/20 transition-all">
+                <a href="{{ route('member.monthly-deposits.index') }}" class="inline-flex items-center justify-center px-4 py-2 bg-white/10 text-white rounded-md border border-white/20 hover:bg-white/20 transition font-medium">
                     View Statements
-                </button>
+                </a>
             </div>
         </div>
     </div>
 
     <!-- Stats Matrix -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Accounts</p>
-            <p class="text-3xl font-black text-gray-900">{{ $stats['total_accounts'] }}</p>
-            <div class="mt-2 h-1 w-12 bg-blue-500 rounded-full"></div>
+    <div id="quick-stats" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+        <div class="bg-white rounded-lg shadow-md p-5 sm:p-6 hover:shadow-lg transition">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1">Accounts</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-[#015425]">{{ number_format($stats['total_accounts'] ?? 0) }}</p>
+                    <div class="flex items-center mt-2">
+                        <span class="text-xs text-gray-500 ml-1">active accounts</span>
+                    </div>
+                </div>
+                <div class="w-12 h-12 sm:w-14 sm:h-14 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m10-6h2a2 2 0 012 2v6a2 2 0 01-2 2H9a2 2 0 01-2-2v-2"></path>
+                    </svg>
+                </div>
+            </div>
         </div>
-        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Interest Earned</p>
-            <p class="text-3xl font-black text-green-600">+{{ number_format($accounts->sum('interest_earned') ?? 0, 0) }}</p>
-            <div class="mt-2 h-1 w-12 bg-green-500 rounded-full"></div>
+
+        <div class="bg-white rounded-lg shadow-md p-5 sm:p-6 hover:shadow-lg transition">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1">Interest Earned</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-blue-600">+{{ number_format($accounts->sum('interest_earned') ?? 0, 0) }}</p>
+                    <div class="flex items-center mt-2">
+                        <span class="text-xs text-gray-500 ml-1">to date</span>
+                    </div>
+                </div>
+                <div class="w-12 h-12 sm:w-14 sm:h-14 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                </div>
+            </div>
         </div>
-        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Avg Interest</p>
-            <p class="text-3xl font-black text-gray-900">{{ $accounts->avg('interest_rate') ?? 0 }}%</p>
-            <div class="mt-2 h-1 w-12 bg-purple-500 rounded-full"></div>
+
+        <div class="bg-white rounded-lg shadow-md p-5 sm:p-6 hover:shadow-lg transition">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1">Avg Interest</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-purple-600">{{ number_format($accounts->avg('interest_rate') ?? 0, 1) }}%</p>
+                    <div class="flex items-center mt-2">
+                        <span class="text-xs text-gray-500 ml-1">rate across accounts</span>
+                    </div>
+                </div>
+                <div class="w-12 h-12 sm:w-14 sm:h-14 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
         </div>
-        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-            <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Health Score</p>
-            <p class="text-3xl font-black text-blue-600">Stable</p>
-            <div class="mt-2 h-1 w-12 bg-blue-400 rounded-full"></div>
+
+        <div class="bg-white rounded-lg shadow-md p-5 sm:p-6 hover:shadow-lg transition">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1">Total Balance</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-red-600">{{ number_format($stats['total_balance'] ?? 0, 0) }}</p>
+                    <div class="flex items-center mt-2">
+                        <span class="text-xs text-gray-500 ml-1">TZS</span>
+                    </div>
+                </div>
+                <div class="w-12 h-12 sm:w-14 sm:h-14 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md border border-gray-100 p-4 sm:p-6">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+                <h2 class="text-lg font-bold text-gray-900">Accounts</h2>
+                <p class="text-sm text-gray-500">Search by account type or account number.</p>
+            </div>
+            <div class="w-full sm:w-80">
+                <div class="relative">
+                    <input id="savings-search" type="text" class="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-md text-sm focus:ring-2 focus:ring-[#015425] focus:border-transparent" placeholder="Search accounts...">
+                    <svg class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Account Cards Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div id="savings-accounts-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         @forelse($accounts as $account)
-            <div class="group relative bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition-all duration-500">
+            <div class="savings-account-card group relative bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300" data-search="{{ strtolower($account->account_type_name . ' ' . $account->account_number) }}">
                 <!-- Color Bar based on account type -->
                 @php
                     $colors = [
@@ -75,7 +143,7 @@
                 @endphp
                 <div class="h-2 w-full {{ $color }}"></div>
                 
-                <div class="p-8">
+                <div class="p-6 sm:p-8">
                     <div class="flex justify-between items-start mb-6">
                         <div>
                             <h3 class="text-xl font-black text-gray-900 group-hover:text-[#015425] transition-colors">{{ $account->account_type_name }}</h3>
@@ -127,4 +195,22 @@
         @endforelse
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const input = document.getElementById('savings-search');
+    if (!input) return;
+
+    const cards = Array.from(document.querySelectorAll('.savings-account-card'));
+    input.addEventListener('input', function () {
+        const q = (this.value || '').toLowerCase().trim();
+        cards.forEach((card) => {
+            const hay = (card.dataset.search || '');
+            card.classList.toggle('hidden', q.length > 0 && !hay.includes(q));
+        });
+    });
+});
+</script>
+@endpush
 @endsection
