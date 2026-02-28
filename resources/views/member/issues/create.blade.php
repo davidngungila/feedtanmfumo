@@ -3,21 +3,43 @@
 @section('page-title', 'Open Support Ticket')
 
 @section('content')
-<div class="max-w-4xl mx-auto space-y-8">
-    <!-- Premium Header -->
-    <div class="bg-gradient-to-br from-[#015425] via-[#027a3a] to-[#013019] rounded-[2.5rem] shadow-2xl p-10 sm:p-14 text-white relative overflow-hidden">
-        <div class="absolute -right-24 -top-24 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl"></div>
-        <div class="absolute -left-24 -bottom-24 w-96 h-96 bg-black opacity-10 rounded-full blur-3xl"></div>
-        
-        <div class="relative z-10">
-            <h1 class="text-4xl sm:text-5xl font-black mb-6 tracking-tight">Support Desk</h1>
-            <p class="text-green-50 text-lg sm:text-xl opacity-80 max-w-xl leading-relaxed font-medium">Identify concerns, suggest improvements, or ask for guidance. Our resolution team is ready to assist.</p>
+<div class="max-w-5xl mx-auto space-y-6">
+    <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-6 sm:p-8 text-white">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2">Open Issue</h1>
+                <p class="text-white text-opacity-90 text-sm sm:text-base">Submit a ticket to the community support desk and track resolution progress.</p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                <a href="{{ route('member.issues.index') }}" class="inline-flex items-center justify-center px-4 py-2 bg-white/10 text-white rounded-md border border-white/20 hover:bg-white/20 transition font-medium">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Back to Issues
+                </a>
+                <button type="button" onclick="document.getElementById('issue-form')?.scrollIntoView({behavior: 'smooth', block: 'start'});" class="inline-flex items-center justify-center px-4 py-2 bg-white text-[#015425] rounded-md hover:bg-gray-100 transition font-medium">
+                    Review & Submit
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md border border-gray-100 p-4 sm:p-5">
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+            <a href="{{ route('member.loans.index') }}" class="px-3 py-2 rounded-md bg-blue-50 text-blue-700 text-xs font-bold text-center hover:bg-blue-100 transition">Loans</a>
+            <a href="{{ route('member.savings.index') }}" class="px-3 py-2 rounded-md bg-green-50 text-[#015425] text-xs font-bold text-center hover:bg-green-100 transition">Savings</a>
+            <a href="{{ route('member.savings.create') }}" class="px-3 py-2 rounded-md bg-emerald-50 text-emerald-700 text-xs font-bold text-center hover:bg-emerald-100 transition">Saving Plan</a>
+            <a href="{{ route('member.investments.index') }}" class="px-3 py-2 rounded-md bg-purple-50 text-purple-700 text-xs font-bold text-center hover:bg-purple-100 transition">Investments</a>
+            <a href="{{ route('member.welfare.index') }}" class="px-3 py-2 rounded-md bg-amber-50 text-amber-800 text-xs font-bold text-center hover:bg-amber-100 transition">SWF</a>
+            <a href="{{ route('member.issues.index') }}" class="px-3 py-2 rounded-md bg-orange-50 text-orange-700 text-xs font-bold text-center hover:bg-orange-100 transition">Issues</a>
+            <a href="{{ route('member.monthly-deposits.index') }}" class="px-3 py-2 rounded-md bg-slate-50 text-slate-700 text-xs font-bold text-center hover:bg-slate-100 transition">Transactions</a>
         </div>
     </div>
 
     <!-- Form Container -->
-    <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-8 sm:p-12 overflow-hidden">
-        <form action="{{ route('member.issues.store') }}" method="POST">
+    <div class="bg-white rounded-lg shadow-md border border-gray-100 p-6 sm:p-8 overflow-hidden">
+        <form action="{{ route('member.issues.store') }}" method="POST" id="issue-form">
             @csrf
             
             <div class="space-y-10">
@@ -78,11 +100,11 @@
                     Reporting issues helps us improve community governance for everyone.
                 </div>
                 <div class="flex gap-4 w-full sm:w-auto">
-                    <a href="{{ route('member.issues.index') }}" class="flex-1 sm:flex-none px-10 py-4 bg-gray-100 text-gray-500 rounded-2xl font-black text-xs hover:bg-gray-200 transition-all text-center">
+                    <a href="{{ route('member.issues.index') }}" class="flex-1 sm:flex-none px-6 py-3 bg-gray-100 text-gray-600 rounded-md font-bold text-sm hover:bg-gray-200 transition-all text-center">
                         Discard Case
                     </a>
-                    <button type="submit" class="flex-1 sm:flex-none px-12 py-4 bg-[#015425] text-white rounded-2xl font-black text-xs shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all">
-                        Initialize Ticket
+                    <button type="submit" class="flex-1 sm:flex-none px-6 py-3 bg-[#015425] text-white rounded-md font-bold text-sm shadow-md hover:bg-[#013019] transition-all">
+                        Submit Ticket
                     </button>
                 </div>
             </div>
@@ -91,17 +113,17 @@
 
     <!-- Help Matrix -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-gray-900 rounded-[2rem] p-8 text-white">
+        <div class="bg-gray-900 rounded-lg p-8 text-white">
             <h4 class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-4">AVG RESPONSE</h4>
             <p class="text-2xl font-black">24 Hours</p>
             <p class="text-[9px] text-gray-500 mt-2 font-bold">Standard community response time</p>
         </div>
-        <div class="bg-indigo-600 rounded-[2rem] p-8 text-white">
+        <div class="bg-indigo-600 rounded-lg p-8 text-white">
             <h4 class="text-[10px] font-black uppercase tracking-widest text-indigo-300 mb-4">PRIVACY</h4>
             <p class="text-2xl font-black">Encrypted</p>
             <p class="text-[9px] text-indigo-300 mt-2 font-bold">Your tickets are strictly confidential</p>
         </div>
-        <div class="bg-white rounded-[2rem] p-8 border border-gray-100">
+        <div class="bg-white rounded-lg p-8 border border-gray-100">
             <h4 class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-4">FOLLOW-UP</h4>
             <p class="text-2xl font-black text-gray-900">Live Status</p>
             <p class="text-[9px] text-gray-400 mt-2 font-bold">Track stage-by-stage progress</p>

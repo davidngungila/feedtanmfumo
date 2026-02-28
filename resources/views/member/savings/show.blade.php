@@ -26,6 +26,18 @@
         </div>
     </div>
 
+    <div class="bg-white rounded-lg shadow-md border border-gray-100 p-4 sm:p-5">
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+            <a href="{{ route('member.loans.index') }}" class="px-3 py-2 rounded-md bg-blue-50 text-blue-700 text-xs font-bold text-center hover:bg-blue-100 transition">Loans</a>
+            <a href="{{ route('member.savings.index') }}" class="px-3 py-2 rounded-md bg-green-50 text-[#015425] text-xs font-bold text-center hover:bg-green-100 transition">Savings</a>
+            <a href="{{ route('member.savings.create') }}" class="px-3 py-2 rounded-md bg-emerald-50 text-emerald-700 text-xs font-bold text-center hover:bg-emerald-100 transition">Saving Plan</a>
+            <a href="{{ route('member.investments.index') }}" class="px-3 py-2 rounded-md bg-purple-50 text-purple-700 text-xs font-bold text-center hover:bg-purple-100 transition">Investments</a>
+            <a href="{{ route('member.welfare.index') }}" class="px-3 py-2 rounded-md bg-amber-50 text-amber-800 text-xs font-bold text-center hover:bg-amber-100 transition">SWF</a>
+            <a href="{{ route('member.issues.index') }}" class="px-3 py-2 rounded-md bg-orange-50 text-orange-700 text-xs font-bold text-center hover:bg-orange-100 transition">Issues</a>
+            <a href="{{ route('member.monthly-deposits.index') }}" class="px-3 py-2 rounded-md bg-slate-50 text-slate-700 text-xs font-bold text-center hover:bg-slate-100 transition">Transactions</a>
+        </div>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Main Statement Area -->
         <div class="lg:col-span-2 space-y-6">

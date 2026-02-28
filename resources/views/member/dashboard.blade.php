@@ -1,6 +1,6 @@
 @extends('layouts.member')
 
-@section('page-title', 'Command Center')
+@section('page-title', 'Dashboard')
 
 @section('content')
 <div class="space-y-6">
@@ -33,6 +33,79 @@
                     View Profile
                 </a>
             </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md border border-gray-100 p-6 sm:p-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+            <div>
+                <h2 class="text-lg sm:text-xl font-black text-gray-900">Quick Services</h2>
+                <p class="text-sm text-gray-500">Fast access to your most-used member services.</p>
+            </div>
+            <a href="{{ route('member.guide') }}" class="inline-flex items-center justify-center px-4 py-2 bg-gray-50 text-gray-700 rounded-md border border-gray-200 hover:bg-gray-100 transition font-medium text-sm">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+                Member Guide
+            </a>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
+            <a href="{{ route('member.loans.index') }}" class="group flex flex-col items-start p-4 rounded-lg border border-gray-100 hover:border-blue-200 hover:shadow-md transition">
+                <div class="w-10 h-10 rounded-md bg-blue-50 flex items-center justify-center text-blue-600 mb-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <p class="text-sm font-bold text-gray-900 group-hover:text-blue-700">Loans</p>
+                <p class="text-xs text-gray-500">Requests & status</p>
+            </a>
+
+            <a href="{{ route('member.savings.index') }}" class="group flex flex-col items-start p-4 rounded-lg border border-gray-100 hover:border-green-200 hover:shadow-md transition">
+                <div class="w-10 h-10 rounded-md bg-green-50 flex items-center justify-center text-[#015425] mb-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                </div>
+                <p class="text-sm font-bold text-gray-900 group-hover:text-[#015425]">Savings</p>
+                <p class="text-xs text-gray-500">Accounts</p>
+            </a>
+
+            <a href="{{ route('member.savings.create') }}" class="group flex flex-col items-start p-4 rounded-lg border border-gray-100 hover:border-emerald-200 hover:shadow-md transition">
+                <div class="w-10 h-10 rounded-md bg-emerald-50 flex items-center justify-center text-emerald-600 mb-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                </div>
+                <p class="text-sm font-bold text-gray-900 group-hover:text-emerald-700">Saving Plan</p>
+                <p class="text-xs text-gray-500">Open account</p>
+            </a>
+
+            <a href="{{ route('member.investments.index') }}" class="group flex flex-col items-start p-4 rounded-lg border border-gray-100 hover:border-purple-200 hover:shadow-md transition">
+                <div class="w-10 h-10 rounded-md bg-purple-50 flex items-center justify-center text-purple-600 mb-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                </div>
+                <p class="text-sm font-bold text-gray-900 group-hover:text-purple-700">Investments</p>
+                <p class="text-xs text-gray-500">Portfolio</p>
+            </a>
+
+            <a href="{{ route('member.welfare.index') }}" class="group flex flex-col items-start p-4 rounded-lg border border-gray-100 hover:border-amber-200 hover:shadow-md transition">
+                <div class="w-10 h-10 rounded-md bg-amber-50 flex items-center justify-center text-amber-700 mb-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                </div>
+                <p class="text-sm font-bold text-gray-900 group-hover:text-amber-800">SWF</p>
+                <p class="text-xs text-gray-500">Welfare</p>
+            </a>
+
+            <a href="{{ route('member.issues.index') }}" class="group flex flex-col items-start p-4 rounded-lg border border-gray-100 hover:border-orange-200 hover:shadow-md transition">
+                <div class="w-10 h-10 rounded-md bg-orange-50 flex items-center justify-center text-orange-600 mb-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <p class="text-sm font-bold text-gray-900 group-hover:text-orange-700">Issues</p>
+                <p class="text-xs text-gray-500">Support</p>
+            </a>
+
+            <a href="{{ route('member.monthly-deposits.index') }}" class="group flex flex-col items-start p-4 rounded-lg border border-gray-100 hover:border-slate-200 hover:shadow-md transition">
+                <div class="w-10 h-10 rounded-md bg-slate-50 flex items-center justify-center text-slate-600 mb-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a4 4 0 014-4h4"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h12"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 11h12"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 15h3"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 7h.01M5 11h.01M5 15h.01"></path></svg>
+                </div>
+                <p class="text-sm font-bold text-gray-900 group-hover:text-slate-700">Transactions</p>
+                <p class="text-xs text-gray-500">Statements</p>
+            </a>
         </div>
     </div>
 
