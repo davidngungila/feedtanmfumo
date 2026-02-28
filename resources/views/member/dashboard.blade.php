@@ -3,55 +3,42 @@
 @section('page-title', 'Command Center')
 
 @section('content')
-<div class="space-y-8 pb-12">
+<div class="space-y-6">
     <!-- Premium Welcome Section -->
-    <div class="bg-gradient-to-br from-[#015425] via-[#027a3a] to-[#013019] rounded-[2.5rem] shadow-2xl p-8 sm:p-14 text-white relative overflow-hidden">
-        <div class="absolute -right-24 -top-24 w-96 h-96 bg-white opacity-5 rounded-full blur-3xl"></div>
-        <div class="absolute -left-24 -bottom-24 w-96 h-96 bg-black opacity-10 rounded-full blur-3xl"></div>
-        
-        <div class="relative z-10 flex flex-col lg:flex-row justify-between items-center gap-10">
-            <div class="text-center lg:text-left">
-                <div class="flex items-center justify-center lg:justify-start gap-4 mb-4">
-                     <span class="px-4 py-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-[10px] font-black uppercase tracking-[0.2em] text-green-200">
-                        Operational Status: Live
-                    </span>
-                </div>
-                <h1 class="text-4xl sm:text-6xl font-black mb-4 tracking-tight">Bonjour, {{ explode(' ', $user->name)[0] }}</h1>
-                <p class="text-green-50 text-lg sm:text-xl opacity-80 max-w-xl leading-relaxed font-medium">Your community portfolio is performing within expected parameters. Access your capital and growth metrics below.</p>
-                
-                @if($user->roles->count() > 0)
-                    <div class="flex flex-wrap justify-center lg:justify-start gap-2 mt-8">
-                        @foreach($user->roles as $role)
-                            <span class="px-4 py-2 bg-white/10 backdrop-blur-md rounded-2xl text-xs font-bold border border-white/10">
-                                {{ $role->name }}
-                            </span>
-                        @endforeach
+    <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-6 sm:p-8 text-white">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2">Welcome back, {{ $user->name }}! 👋</h1>
+                <p class="text-white text-opacity-90 text-sm sm:text-base">Here's your member account snapshot for today.</p>
+                <div class="mt-4 flex flex-wrap gap-4 text-sm">
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>{{ now()->format('l, F d, Y') }}</span>
                     </div>
-                @endif
+                    <div class="flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1"></path>
+                        </svg>
+                        <span>Member since {{ $user->created_at->format('M Y') }}</span>
+                    </div>
+                </div>
             </div>
-
-            <div class="bg-white/10 backdrop-blur-xl rounded-[2.5rem] p-8 border border-white/20 shadow-2xl w-full lg:w-96 text-center lg:text-left">
-                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-green-200 mb-2">Portfolio Valuation</p>
-                <p class="text-4xl sm:text-5xl font-black mb-6">
-                    {{ number_format($stats['total_savings_balance'] + $stats['total_investment_amount'] + $stats['total_profit'], 0) }}
-                    <span class="text-sm font-normal opacity-60">TZS</span>
-                </p>
-                <div class="pt-6 border-t border-white/10 flex justify-between items-center group cursor-pointer">
-                    <div>
-                        <p class="text-[10px] font-black uppercase text-green-200">Member Since</p>
-                        <p class="text-lg font-bold">{{ $user->created_at->format('M Y') }}</p>
-                    </div>
-                    <div class="w-12 h-12 bg-white text-[#015425] rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-xl">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                    </div>
-                </div>
+            <div class="mt-4 md:mt-0">
+                <a href="{{ route('member.profile.index') }}" class="inline-flex items-center px-4 py-2 bg-white text-[#015425] rounded-md hover:bg-gray-100 transition font-medium">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    View Profile
+                </a>
             </div>
         </div>
     </div>
 
     <!-- Tier 1: Critical Status & Membership -->
     @if($user->membership_type_id)
-    <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-8 sm:p-10 relative overflow-hidden group">
+    <div class="bg-white rounded-lg shadow-md border border-gray-100 p-6 sm:p-8 relative overflow-hidden group">
         @php
             $statusColors = [
                 'approved' => 'from-green-500 to-emerald-600',
@@ -105,7 +92,7 @@
         </div>
     </div>
     @else
-    <div class="bg-indigo-600 rounded-[2.5rem] p-10 text-white shadow-2xl flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden group">
+    <div class="bg-indigo-600 rounded-lg p-6 sm:p-8 text-white shadow-lg flex flex-col md:flex-row justify-between items-center gap-8 relative overflow-hidden group">
         <div class="absolute -right-20 -top-20 w-80 h-80 bg-white opacity-10 rounded-full blur-3xl group-hover:scale-110 transition-transform duration-1000"></div>
         <div class="relative z-10 text-center md:text-left">
             <h3 class="text-3xl font-black mb-4">Start Your Growth Journey</h3>
@@ -117,81 +104,93 @@
 
     @if($user->membership_status === 'approved')
     <!-- Tier 2: Asset Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div id="quick-stats" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         <!-- Savings -->
-        <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group">
-             <div class="flex justify-between items-start mb-10">
-                <div class="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center text-[#015425] group-hover:bg-[#015425] group-hover:text-white transition-colors">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+        <div class="bg-white rounded-lg shadow-md p-5 sm:p-6 hover:shadow-lg transition">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1">Total Savings</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-[#015425]">{{ number_format($stats['total_savings_balance'], 0) }}</p>
+                    <div class="flex items-center mt-2">
+                        <span class="text-xs text-gray-600 font-medium">{{ $stats['total_savings'] }}</span>
+                        <span class="text-xs text-gray-500 ml-1">accounts</span>
+                    </div>
                 </div>
-                <div class="text-right">
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Accounts</p>
-                    <p class="text-xl font-black text-gray-900">{{ $stats['total_savings'] }}</p>
+                <div class="w-12 h-12 sm:w-14 sm:h-14 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
                 </div>
             </div>
-            <p class="text-[10px] font-black text-[#015425] uppercase tracking-widest mb-2">Savings Liquidity</p>
-            <p class="text-3xl font-black text-gray-900 mb-6">{{ number_format($stats['total_savings_balance'], 0) }}</p>
-            <a href="{{ route('member.savings.index') }}" class="flex items-center justify-between text-[10px] font-black text-gray-400 group-hover:text-[#015425] uppercase tracking-widest transition-colors">
-                Manage Assets
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-            </a>
+            <div class="mt-4">
+                <a href="{{ route('member.savings.index') }}" class="text-xs font-medium text-[#015425] hover:underline">View savings</a>
+            </div>
+        </div>
+
+        <!-- Active Loans -->
+        <div class="bg-white rounded-lg shadow-md p-5 sm:p-6 hover:shadow-lg transition">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1">Active Loans</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-blue-600">{{ number_format($stats['active_loans']) }}</p>
+                    <div class="flex items-center mt-2">
+                        <span class="text-xs text-gray-600 font-medium">{{ number_format($stats['remaining_amount'], 0) }}</span>
+                        <span class="text-xs text-gray-500 ml-1">remaining</span>
+                    </div>
+                </div>
+                <div class="w-12 h-12 sm:w-14 sm:h-14 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-4">
+                <a href="{{ route('member.loans.index') }}" class="text-xs font-medium text-blue-600 hover:underline">View loans</a>
+            </div>
         </div>
 
         <!-- Investments -->
-        <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group">
-             <div class="flex justify-between items-start mb-10">
-                <div class="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+        <div class="bg-white rounded-lg shadow-md p-5 sm:p-6 hover:shadow-lg transition">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1">Investments</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-purple-600">{{ number_format($stats['total_investment_amount'], 0) }}</p>
+                    <div class="flex items-center mt-2">
+                        <span class="text-xs text-gray-600 font-medium">{{ $stats['active_investments'] }}</span>
+                        <span class="text-xs text-gray-500 ml-1">active</span>
+                    </div>
                 </div>
-                <div class="text-right">
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Active Plans</p>
-                    <p class="text-xl font-black text-gray-900">{{ $stats['active_investments'] }}</p>
+                <div class="w-12 h-12 sm:w-14 sm:h-14 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
                 </div>
             </div>
-            <p class="text-[10px] font-black text-purple-600 uppercase tracking-widest mb-2">Market Exposure</p>
-            <p class="text-3xl font-black text-gray-900 mb-6">{{ number_format($stats['total_investment_amount'], 0) }}</p>
-            <a href="{{ route('member.investments.index') }}" class="flex items-center justify-between text-[10px] font-black text-gray-400 group-hover:text-purple-600 uppercase tracking-widest transition-colors">
-                Analytic Desk
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-            </a>
+            <div class="mt-4">
+                <a href="{{ route('member.investments.index') }}" class="text-xs font-medium text-purple-600 hover:underline">View investments</a>
+            </div>
         </div>
 
-        <!-- Loans -->
-        <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group">
-             <div class="flex justify-between items-start mb-10">
-                <div class="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <!-- Pending Issues -->
+        <div class="bg-white rounded-lg shadow-md p-5 sm:p-6 hover:shadow-lg transition">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <p class="text-xs sm:text-sm font-medium text-gray-600 mb-1">Pending Issues</p>
+                    <p class="text-2xl sm:text-3xl font-bold text-orange-600">{{ number_format($stats['pending_issues']) }}</p>
+                    <div class="flex items-center mt-2">
+                        <span class="text-xs text-gray-600 font-medium">{{ number_format($stats['total_issues']) }}</span>
+                        <span class="text-xs text-gray-500 ml-1">total</span>
+                    </div>
                 </div>
-                <div class="text-right">
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Liability</p>
-                    <p class="text-xl font-black text-gray-900">{{ number_format($stats['remaining_amount'], 0) }}</p>
-                </div>
-            </div>
-            <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2">Working Capital</p>
-            <p class="text-3xl font-black text-gray-900 mb-6">{{ number_format($stats['total_loan_amount'], 0) }}</p>
-            <a href="{{ route('member.loans.index') }}" class="flex items-center justify-between text-[10px] font-black text-gray-400 group-hover:text-blue-600 uppercase tracking-widest transition-colors">
-                Repayment Port
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-            </a>
-        </div>
-
-        <!-- Welfare -->
-        <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group">
-             <div class="flex justify-between items-start mb-10">
-                <div class="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center text-orange-600 group-hover:bg-orange-600 group-hover:text-white transition-colors">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
-                </div>
-                <div class="text-right">
-                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Status</p>
-                    <p class="text-xl font-black text-gray-900">Active</p>
+                <div class="w-12 h-12 sm:w-14 sm:h-14 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <svg class="w-6 h-6 sm:w-7 sm:h-7 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
                 </div>
             </div>
-            <p class="text-[10px] font-black text-orange-600 uppercase tracking-widest mb-2">Safety Net</p>
-            <p class="text-3xl font-black text-gray-900 mb-6">{{ number_format($stats['welfare_balance'], 0) }}</p>
-            <a href="{{ route('member.welfare.index') }}" class="flex items-center justify-between text-[10px] font-black text-gray-400 group-hover:text-orange-600 uppercase tracking-widest transition-colors">
-                Social Ledger
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
-            </a>
+            <div class="mt-4">
+                <a href="{{ route('member.issues.index') }}" class="text-xs font-medium text-orange-600 hover:underline">View issues</a>
+            </div>
         </div>
     </div>
 
@@ -199,7 +198,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Main: Dividend Verification -->
         <div class="lg:col-span-2 space-y-8">
-            <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden">
+            <div class="bg-white rounded-lg shadow-md border border-gray-100 overflow-hidden">
                 <div class="p-8 sm:p-10 border-b border-gray-50 flex flex-col md:flex-row justify-between items-center gap-6">
                     <div>
                         <h2 class="text-2xl font-black text-gray-900 mb-1">Divine Verification</h2>
@@ -317,7 +316,7 @@
         <!-- Sidebar: Intelligence & Quick Actions -->
         <div class="space-y-8">
             <!-- Action Console -->
-            <div class="bg-white rounded-[2.5rem] p-10 shadow-sm border border-gray-100">
+            <div class="bg-white rounded-lg p-6 sm:p-8 shadow-md border border-gray-100">
                 <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-8">Operations Console</h3>
                 <div class="space-y-4">
                     <a href="{{ route('member.loans.create') }}" class="flex items-center justify-between p-5 bg-blue-50/50 rounded-2xl hover:bg-blue-600 hover:text-white transition-all group overflow-hidden relative">
@@ -364,7 +363,7 @@
 
             <!-- Priority Alerts -->
             @if($stats['pending_issues'] > 0 || $stats['pending_loans'] > 0)
-            <div class="bg-red-600/5 border border-red-600/10 rounded-[2.5rem] p-8">
+            <div class="bg-red-600/5 border border-red-600/10 rounded-lg p-6 sm:p-8">
                  <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-red-600 mb-6 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-red-600 animate-ping"></span>
                     Priority Alerts
@@ -388,7 +387,7 @@
 
             <!-- Special Administrative Roles -->
             @if($isLoanOfficer || $isDepositOfficer || $isInvestmentOfficer || $isChairperson || $isSecretary || $isAccountant)
-            <div class="bg-[#015425] rounded-[2.5rem] p-10 text-white shadow-2xl relative overflow-hidden group">
+            <div class="bg-[#015425] rounded-lg p-6 sm:p-8 text-white shadow-lg relative overflow-hidden group">
                  <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full group-hover:scale-125 transition-transform duration-1000"></div>
                  <h3 class="text-sm font-black mb-6 border-b border-white/10 pb-4">Governance Mandate</h3>
                  <div class="flex flex-wrap gap-2">
