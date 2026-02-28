@@ -52,8 +52,6 @@
         $isActiveWelfare = request()->routeIs('member.welfare.*');
         $isActivePaymentConfirmations = request()->routeIs('member.payment-confirmations.*');
     @endphp
-    <!-- Loading Screen -->
-    @include('components.loading-screen')
     <div class="h-full flex flex-col lg:flex-row">
         <!-- Mobile Menu Overlay -->
         <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden"></div>
