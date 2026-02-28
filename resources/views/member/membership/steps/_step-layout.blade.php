@@ -141,26 +141,44 @@
     
     .premium-label {
         display: block;
-        font-[900] text-[10px] text-[#015425] uppercase tracking-[0.2em] mb-3 ml-1;
+        font-weight: 900;
+        font-size: 10px;
+        color: #015425;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        margin-bottom: 0.75rem;
+        margin-left: 0.25rem;
     }
     
     .premium-input {
         width: 100%;
         padding: 1.25rem 1.5rem;
-        background: #f8fafc;
-        border: 2px solid transparent;
+        background: #ffffff;
+        border: 2px solid #e2e8f0;
         border-radius: 1.25rem;
         font-size: 1rem;
         font-weight: 700;
         color: #1e293b;
+        box-sizing: border-box;
+        line-height: 1.25;
         transition: all 0.3s;
     }
     
     .premium-input:focus {
-        background: white;
+        background: #ffffff;
         border-color: #015425;
         outline: none;
         box-shadow: 0 10px 15px -3px rgba(1, 84, 37, 0.1);
+    }
+
+    .premium-input::placeholder {
+        color: #94a3b8;
+        font-weight: 700;
+    }
+
+    @media (max-width: 640px) {
+        .step-header-banner { padding: 2.5rem 1.5rem; }
+        .step-body { padding: 2.5rem 1.5rem; }
     }
     
     .luxury-button {
