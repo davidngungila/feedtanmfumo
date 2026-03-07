@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'snippe' => [
+        'base_url' => env('SNIPPE_BASE_URL', 'https://api.snippe.sh'),
+        'api_key' => env('SNIPPE_API_KEY'),
+        'webhook_secret' => env('SNIPPE_WEBHOOK_SECRET'),
+    ],
+
 ];

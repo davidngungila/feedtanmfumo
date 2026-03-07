@@ -43,6 +43,16 @@ Route::get('/payment-confirmation', [\App\Http\Controllers\PaymentConfirmationCo
 Route::post('/payment-confirmation/lookup', [\App\Http\Controllers\PaymentConfirmationController::class, 'lookupMember'])->name('payment-confirmation.lookup');
 Route::post('/payment-confirmation', [\App\Http\Controllers\PaymentConfirmationController::class, 'store'])->name('payment-confirmation.store');
 
+// Public Payment Page (Snippe Integration)
+Route::get('/pay', [\App\Http\Controllers\PaymentController::class, 'showPaymentPage'])->name('public.payments.show');
+Route::post('/api/payments/process', [\App\Http\Controllers\PaymentController::class, 'processPayment'])->name('public.payments.process');
+Route::post('/api/payments/webhook', [\App\Http\Controllers\PaymentController::class, 'handleWebhook'])->name('public.payments.webhook');
+Route::get('/api/payments/status/{reference}', [\App\Http\Controllers\PaymentController::class, 'checkPaymentStatus'])->name('public.payments.status');
+
+// Test Routes (Remove in production)
+Route::get('/test/snippe-config', [\App\Http\Controllers\TestPaymentController::class, 'showConfigStatus']);
+Route::post('/test/snippe-api', [\App\Http\Controllers\TestPaymentController::class, 'testApiConnection']);
+
 // Guarantor Assessment (publicly accessible via obscure link)
 Route::get('/guarantor-assessment/{loanUlid}', [\App\Http\Controllers\GuarantorAssessmentController::class, 'show'])->name('guarantor-assessment.show');
 Route::post('/guarantor-assessment/{loanUlid}', [\App\Http\Controllers\GuarantorAssessmentController::class, 'store'])->name('guarantor-assessment.store');
