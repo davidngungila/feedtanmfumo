@@ -147,7 +147,7 @@
                             <form id="payment-form" class="space-y-6">
                                 <!-- Payment Methods -->
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-4">Select Payment Method</label>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-4">Select Mobile Money Provider</label>
                                     <div class="space-y-3">
                                         <!-- Mobile Money (Auto-selected) -->
                                         <div class="payment-method-card selected rounded-xl p-4 cursor-pointer" data-method="mobile">
@@ -249,6 +249,9 @@
                                                 <div class="w-6 h-6 rounded-full border-2 border-gray-300"></div>
                                             </div>
                                         </div>
+                                    </div>
+                                    <input type="hidden" name="payment_method" id="payment_method" value="mobile" required>
+                                </div>        </div>
                                     </div>
                                     <input type="hidden" name="payment_method" id="payment_method" value="mobile" required>
                                 </div>
@@ -498,69 +501,7 @@
                 console.error('Error initializing phone field:', error);
             }
 
-            // Payment method selection
-            const paymentCards = document.querySelectorAll('.payment-method-card');
-            paymentCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    // Remove selected state from all cards
-                    paymentCards.forEach(c => {
-                        c.classList.remove('selected');
-                        c.classList.add('border-gray-200');
-                        const radio = c.querySelector('.rounded-full');
-                        radio.classList.remove('border-green-600', 'bg-green-600');
-                        radio.classList.add('border-gray-300');
-                        const dot = radio.querySelector('.bg-white');
-                        if (dot) dot.classList.add('hidden');
-                    });
-
-                    // Add selected state to clicked card
-                    this.classList.add('selected');
-                    this.classList.remove('border-gray-200');
-                    const selectedRadio = this.querySelector('.rounded-full');
-                    selectedRadio.classList.remove('border-gray-300');
-                    selectedRadio.classList.add('border-green-600', 'bg-green-600');
-                    const dot = selectedRadio.querySelector('.bg-white');
-                    if (dot) dot.classList.remove('hidden');
-
-                    // Update hidden input
-                    const method = this.dataset.method;
-                    document.getElementById('payment_method').value = method;
-
-                    // Show/hide phone field with animation
-                    const phoneField = document.getElementById('phone-field');
-                    if (method === 'mobile') {
-                        // Show phone field with smooth animation
-                        phoneField.style.display = 'block';
-                        phoneField.style.opacity = '0';
-                        phoneField.style.transform = 'translateY(-10px)';
-                        
-                        setTimeout(() => {
-                            phoneField.style.opacity = '1';
-                            phoneField.style.transform = 'translateY(0)';
-                        }, 100);
-                        
-                        const phoneInput = document.getElementById('customer_phone');
-                        phoneInput.required = true;
-                    } else {
-                        // Hide phone field with smooth animation
-                        phoneField.style.opacity = '1';
-                        phoneField.style.transform = 'translateY(0)';
-                        
-                        setTimeout(() => {
-                            phoneField.style.opacity = '0';
-                            phoneField.style.transform = 'translateY(-10px)';
-                            setTimeout(() => {
-                                phoneField.style.display = 'none';
-                            }, 300);
-                        }, 100);
-                        
-                        const phoneInput = document.getElementById('customer_phone');
-                        phoneInput.required = false;
-                    }
-                });
-            });
-
-            // Mobile provider selection
+            // Mobile provider selection (only mobile money available)
             const mobileProviders = document.querySelectorAll('input[name="mobile_provider"]');
             mobileProviders.forEach(provider => {
                 provider.addEventListener('change', function() {
@@ -666,18 +607,15 @@
             form.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
-                const paymentType = document.getElementById('payment_method').value;
+                const paymentType = 'mobile'; // Always mobile money now
                 const amount = parseInt(amountInput.value.replace(/[^0-9]/g, ''));
                 const phoneNumber = document.getElementById('customer_phone').value;
                 const customerName = document.getElementById('customer_name').value;
                 const customerEmail = document.getElementById('customer_email').value;
 
-                // Get selected mobile provider if mobile money
-                let mobileProvider = null;
-                if (paymentType === 'mobile') {
-                    const selectedProvider = document.querySelector('input[name="mobile_provider"]:checked');
-                    mobileProvider = selectedProvider ? selectedProvider.value : 'mpesa'; // Default to M-Pesa
-                }
+                // Get selected mobile provider
+                const selectedProvider = document.querySelector('input[name="mobile_provider"]:checked');
+                const mobileProvider = selectedProvider ? selectedProvider.value : 'mpesa'; // Default to M-Pesa
 
                 // Enhanced validation
                 if (amount < 500 || amount > 5000000) {
@@ -687,14 +625,12 @@
                     return;
                 }
 
-                if (paymentType === 'mobile') {
-                    const cleanPhone = phoneNumber.replace(/[^0-9]/g, '');
-                    if (cleanPhone.length !== 9) {
-                        showError('Invalid Phone', 'Please enter a valid 9-digit phone number');
-                        document.getElementById('customer_phone').classList.add('error-shake');
-                        setTimeout(() => document.getElementById('customer_phone').classList.remove('error-shake'), 500);
-                        return;
-                    }
+                const cleanPhone = phoneNumber.replace(/[^0-9]/g, '');
+                if (cleanPhone.length !== 9) {
+                    showError('Invalid Phone', 'Please enter a valid 9-digit phone number');
+                    document.getElementById('customer_phone').classList.add('error-shake');
+                    setTimeout(() => document.getElementById('customer_phone').classList.remove('error-shake'), 500);
+                    return;
                 }
 
                 if (!customerName.trim() || customerName.length < 2) {
@@ -712,10 +648,7 @@
                 }
 
                 // Format phone number
-                let formattedPhone = null;
-                if (paymentType === 'mobile') {
-                    formattedPhone = '+255' + phoneNumber.replace(/[^0-9]/g, '');
-                }
+                const formattedPhone = '+255' + cleanPhone;
 
                 // Show progress modal
                 progressModal.classList.remove('hidden');
