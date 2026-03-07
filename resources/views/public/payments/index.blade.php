@@ -158,7 +158,7 @@
                                                     </div>
                                                     <div>
                                                         <p class="font-semibold text-gray-900">Mobile Money</p>
-                                                        <p class="text-sm text-gray-500">M-Pesa, Airtel Money, YAS, Halotel</p>
+                                                        <p class="text-sm text-gray-500">M-Pesa, Airtel Money<br>YAS, Halotel</p>
                                                     </div>
                                                 </div>
                                                 <div class="w-6 h-6 rounded-full border-2 border-green-600 bg-green-600 flex items-center justify-center">
