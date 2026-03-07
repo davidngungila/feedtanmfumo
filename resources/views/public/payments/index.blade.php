@@ -166,38 +166,6 @@
                                                 </div>
                                             </div>
                                         </div>
-
-                                        <!-- QR Code -->
-                                        <div class="payment-method-card rounded-xl p-4 cursor-pointer border-2 border-gray-200" data-method="qr">
-                                            <div class="flex items-center justify-between">
-                                                <div class="flex items-center gap-4">
-                                                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                                                        <i class="fas fa-qrcode text-blue-600 text-lg"></i>
-                                                    </div>
-                                                    <div>
-                                                        <p class="font-semibold text-gray-900 text-sm">Lipa Namba (TIPS)</p>
-                                                        <p class="text-xs text-gray-500">Scan QR code to pay</p>
-                                                    </div>
-                                                </div>
-                                                <div class="w-6 h-6 rounded-full border-2 border-gray-300"></div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Card Payment -->
-                                        <div class="payment-method-card rounded-xl p-4 cursor-pointer border-2 border-gray-200" data-method="card">
-                                            <div class="flex items-center justify-between">
-                                                <div class="flex items-center gap-4">
-                                                    <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                                                        <i class="fas fa-credit-card text-purple-600 text-lg"></i>
-                                                    </div>
-                                                    <div>
-                                                        <p class="font-semibold text-gray-900 text-sm">Card Payment</p>
-                                                        <p class="text-xs text-gray-500">Visa, Mastercard</p>
-                                                    </div>
-                                                </div>
-                                                <div class="w-6 h-6 rounded-full border-2 border-gray-300"></div>
-                                            </div>
-                                        </div>
                                     </div>
                                     <input type="hidden" name="payment_method" id="payment_method" value="mobile" required>
                                 </div>
@@ -447,67 +415,12 @@
                 console.error('Error initializing phone field:', error);
             }
 
-            // Payment method selection
-            const paymentCards = document.querySelectorAll('.payment-method-card');
-            paymentCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    // Remove selected state from all cards
-                    paymentCards.forEach(c => {
-                        c.classList.remove('selected');
-                        c.classList.add('border-gray-200');
-                        const radio = c.querySelector('.rounded-full');
-                        radio.classList.remove('border-green-600', 'bg-green-600');
-                        radio.classList.add('border-gray-300');
-                        const dot = radio.querySelector('.bg-white');
-                        if (dot) dot.classList.add('hidden');
-                    });
-
-                    // Add selected state to clicked card
-                    this.classList.add('selected');
-                    this.classList.remove('border-gray-200');
-                    const selectedRadio = this.querySelector('.rounded-full');
-                    selectedRadio.classList.remove('border-gray-300');
-                    selectedRadio.classList.add('border-green-600', 'bg-green-600');
-                    const dot = selectedRadio.querySelector('.bg-white');
-                    if (dot) dot.classList.remove('hidden');
-
-                    // Update hidden input
-                    const method = this.dataset.method;
-                    document.getElementById('payment_method').value = method;
-
-                    // Show/hide phone field with animation
-                    const phoneField = document.getElementById('phone-field');
-                    if (method === 'mobile') {
-                        // Show phone field with smooth animation
-                        phoneField.style.display = 'block';
-                        phoneField.style.opacity = '0';
-                        phoneField.style.transform = 'translateY(-10px)';
-                        
-                        setTimeout(() => {
-                            phoneField.style.opacity = '1';
-                            phoneField.style.transform = 'translateY(0)';
-                        }, 100);
-                        
-                        const phoneInput = document.getElementById('customer_phone');
-                        phoneInput.required = true;
-                    } else {
-                        // Hide phone field with smooth animation
-                        phoneField.style.opacity = '1';
-                        phoneField.style.transform = 'translateY(0)';
-                        
-                        setTimeout(() => {
-                            phoneField.style.opacity = '0';
-                            phoneField.style.transform = 'translateY(-10px)';
-                            setTimeout(() => {
-                                phoneField.style.display = 'none';
-                            }, 300);
-                        }, 100);
-                        
-                        const phoneInput = document.getElementById('customer_phone');
-                        phoneInput.required = false;
-                    }
-                });
-            });
+            // Payment method selection (removed - only mobile money available)
+            // Mobile money is auto-selected and always visible
+            const phoneField = document.getElementById('phone-field');
+            phoneField.style.display = 'block';
+            phoneField.style.opacity = '1';
+            phoneField.style.transform = 'translateY(0)';
 
             // Amount formatting and validation
             amountInput.addEventListener('input', function() {
@@ -620,30 +533,18 @@
 
                 if (!customerEmail.trim() || !isValidEmail(customerEmail)) {
                     showError('Invalid Email', 'Please enter a valid email address');
-                    document.getElementById('customer_email').classList.add('error-shake');
-                    setTimeout(() => document.getElementById('customer_email').classList.remove('error-shake'), 500);
-                    return;
-                }
-
                 // Format phone number
-                let formattedPhone = null;
-                if (paymentType === 'mobile') {
-                    formattedPhone = '+255' + phoneNumber.replace(/[^0-9]/g, '');
-                }
+                const formattedPhone = formatPhoneNumber(phoneNumber);
+                
+                // Always use mobile money as payment type
+                const paymentType = 'mobile';
 
-                // Show progress modal
-                progressModal.classList.remove('hidden');
-                progressModal.classList.add('flex');
+                // Show processing modal
+                showProcessingModal(paymentType);
 
-                // Start progress animation
-                updateProgressStage(1, true);
-                setTimeout(() => updateProgressStage(2), 1000);
-
-                // Disable button and show loading
-                payButton.disabled = true;
-                payButton.classList.remove('pulse-animation');
-                payButtonText.classList.add('hidden');
-                payButtonLoading.classList.remove('hidden');
+                // Update progress
+                updateProgressStage(2, true);
+                setTimeout(() => updateProgressStage(3), 1000);
 
                 try {
                     const response = await fetch('/api/payments/process', {
