@@ -351,8 +351,8 @@
                         3
                     </div>
                     <div class="flex-1">
-                        <p class="text-sm font-medium text-gray-400">Generating Receipt</p>
-                        <p class="text-xs text-gray-400">Creating payment confirmation</p>
+                        <p class="text-sm font-medium text-gray-900">Checking Payment Status</p>
+                        <p class="text-xs text-gray-500">Verifying payment completion</p>
                     </div>
                 </div>
                 
@@ -361,8 +361,8 @@
                         4
                     </div>
                     <div class="flex-1">
-                        <p class="text-sm font-medium text-gray-400">Sending Notifications</p>
-                        <p class="text-xs text-gray-400">Emailing receipt and SMS confirmation</p>
+                        <p class="text-sm font-medium text-gray-900">Generating Receipt & Sending Notifications</p>
+                        <p class="text-xs text-gray-500">Creating receipt and sending email/SMS</p>
                     </div>
                 </div>
             </div>
@@ -668,10 +668,9 @@
                     setTimeout(() => updateProgressStage(4), 1000);
 
                     if (result.status === 'success') {
-                        // Generate and send receipt
+                        // Check payment status before generating receipt
                         setTimeout(() => {
-                            generateAndSendReceipt(result.data, customerName, customerEmail, formattedPhone, amount, paymentType);
-                            showSuccessModal(paymentType, result.data);
+                            checkPaymentStatusAndGenerateReceipt(result.data, customerName, customerEmail, formattedPhone, amount, paymentType);
                         }, 2000);
                     } else {
                         setTimeout(() => {
@@ -696,11 +695,80 @@
                 }
             });
 
-            // Generate and send receipt
+            // Check payment status and generate receipt only if completed
+            async function checkPaymentStatusAndGenerateReceipt(paymentData, customerName, customerEmail, phoneNumber, amount, paymentType) {
+                try {
+                    // Update progress stage 3 (checking status)
+                    updateProgressStage(3, true);
+                    
+                    // Check payment status via API
+                    const statusResponse = await fetch(`/api/payments/status/${paymentData.reference}`);
+                    const statusResult = await statusResponse.json();
+                    
+                    if (statusResult.status === 'success' && statusResult.data.status === 'completed') {
+                        // Payment is completed, generate receipt
+                        updateProgressStage(4, true);
+                        
+                        // Generate and send receipt
+                        const receiptResponse = await fetch('/api/payments/receipt', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                            },
+                            body: JSON.stringify({
+                                payment_data: paymentData,
+                                customer_name: customerName,
+                                customer_email: customerEmail,
+                                phone_number: phoneNumber,
+                                amount: amount,
+                                payment_type: paymentType
+                            })
+                        });
+                        
+                        const receiptResult = await receiptResponse.json();
+                        
+                        if (receiptResult.status === 'success') {
+                            // Hide progress modal and show success
+                            setTimeout(() => {
+                                hideProgressModal();
+                                showSuccessModal(paymentType, paymentData);
+                            }, 1000);
+                        } else {
+                            console.error('Receipt generation failed:', receiptResult.message);
+                            // Still show success but log the error
+                            setTimeout(() => {
+                                hideProgressModal();
+                                showSuccessModal(paymentType, paymentData);
+                            }, 1000);
+                        }
+                    } else if (statusResult.data.status === 'pending') {
+                        // Payment is still pending, check again after delay
+                        setTimeout(() => {
+                            checkPaymentStatusAndGenerateReceipt(paymentData, customerName, customerEmail, phoneNumber, amount, paymentType);
+                        }, 3000); // Check again after 3 seconds
+                    } else {
+                        // Payment failed or expired
+                        updateProgressStage(4, false);
+                        setTimeout(() => {
+                            hideProgressModal();
+                            showError('Payment Failed', `Payment status: ${statusResult.data.status}. Please try again.`);
+                        }, 1000);
+                    }
+                } catch (error) {
+                    console.error('Status check error:', error);
+                    updateProgressStage(4, false);
+                    setTimeout(() => {
+                        hideProgressModal();
+                        showError('Status Check Failed', 'Unable to verify payment status. Please contact support.');
+                    }, 1000);
+                }
+            }
+
+            // Generate and send receipt (legacy function - kept for compatibility)
             async function generateAndSendReceipt(paymentData, customerName, customerEmail, phoneNumber, amount, paymentType) {
                 try {
-                    // Generate receipt PDF
-                    const receiptResponse = await fetch('/api/payments/receipt', {
+                    const response = await fetch('/api/payments/receipt', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -715,12 +783,9 @@
                             payment_type: paymentType
                         })
                     });
-
-                    const receiptResult = await receiptResponse.json();
                     
-                    if (receiptResult.status === 'success') {
-                        console.log('Receipt generated and sent successfully');
-                    }
+                    const result = await response.json();
+                    console.log('Receipt generation result:', result);
                 } catch (error) {
                     console.error('Receipt generation error:', error);
                 }
