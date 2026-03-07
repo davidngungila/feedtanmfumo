@@ -307,6 +307,9 @@
             <div class="mt-4">
                 <div class="w-12 h-1 bg-green-600 rounded-full animate-pulse mx-auto"></div>
             </div>
+            <button onclick="hideSplashManually()" class="mt-4 text-xs text-gray-500 hover:text-gray-700 underline">
+                Click here if page doesn't load automatically
+            </button>
         </div>
     </div>
 
@@ -414,15 +417,35 @@
 
             // Hide splash screen after page loads
             setTimeout(() => {
-                splashScreen.classList.add('hidden');
-                splashScreen.classList.remove('flex');
-            }, 2000);
+                try {
+                    const splashScreen = document.getElementById('splash-screen');
+                    if (splashScreen) {
+                        splashScreen.classList.add('hidden');
+                        splashScreen.classList.remove('flex');
+                        console.log('Splash screen hidden successfully');
+                    }
+                } catch (error) {
+                    console.error('Error hiding splash screen:', error);
+                    // Fallback: force hide
+                    const splash = document.getElementById('splash-screen');
+                    if (splash) {
+                        splash.style.display = 'none';
+                    }
+                }
+            }, 1500);
 
             // Initialize phone field as visible by default (mobile money auto-selected)
-            const phoneField = document.getElementById('phone-field');
-            phoneField.style.display = 'block';
-            phoneField.style.opacity = '1';
-            phoneField.style.transform = 'translateY(0)';
+            try {
+                const phoneField = document.getElementById('phone-field');
+                if (phoneField) {
+                    phoneField.style.display = 'block';
+                    phoneField.style.opacity = '1';
+                    phoneField.style.transform = 'translateY(0)';
+                    console.log('Phone field initialized as visible');
+                }
+            } catch (error) {
+                console.error('Error initializing phone field:', error);
+            }
 
             // Payment method selection
             const paymentCards = document.querySelectorAll('.payment-method-card');
@@ -795,6 +818,19 @@
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
             }
+
+            window.hideSplashManually = function() {
+                try {
+                    const splashScreen = document.getElementById('splash-screen');
+                    if (splashScreen) {
+                        splashScreen.classList.add('hidden');
+                        splashScreen.classList.remove('flex');
+                        console.log('Splash screen hidden manually');
+                    }
+                } catch (error) {
+                    console.error('Error manually hiding splash screen:', error);
+                }
+            };
 
             window.closeModal = function() {
                 modal.classList.add('hidden');
