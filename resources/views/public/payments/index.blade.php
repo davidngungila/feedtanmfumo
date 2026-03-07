@@ -60,32 +60,32 @@
         <!-- Main Payment Container -->
         <div class="w-full max-w-6xl mx-auto">
             <div class="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
-                <div class="grid md:grid-cols-2 gap-0">
+                <div class="grid lg:grid-cols-2 gap-0">
                     
                     <!-- Left Panel - Brand & Amount -->
-                    <div class="bg-gradient-to-br from-green-700 to-green-900 p-8 md:p-12 text-white">
+                    <div class="bg-gradient-to-br from-green-700 to-green-900 p-6 lg:p-12 text-white">
                         <div class="h-full flex flex-col justify-between">
                             <!-- Header -->
                             <div>
-                                <div class="flex items-center gap-4 mb-8">
-                                    <div class="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
-                                        <span class="text-2xl font-bold">FC</span>
+                                <div class="flex items-center gap-4 mb-6 lg:mb-8">
+                                    <div class="w-12 lg:w-16 h-12 lg:h-16 bg-white/20 backdrop-blur rounded-xl lg:rounded-2xl flex items-center justify-center">
+                                        <span class="text-lg lg:text-2xl font-bold">FC</span>
                                     </div>
                                     <div>
-                                        <h1 class="text-2xl font-bold">{{ $merchantName }}</h1>
-                                        <p class="text-green-200 text-sm">Trusted Payment Partner</p>
+                                        <h1 class="text-lg lg:text-2xl font-bold">{{ $merchantName }}</h1>
+                                        <p class="text-green-200 text-xs lg:text-sm">Trusted Payment Partner</p>
                                     </div>
                                 </div>
 
                                 <!-- Payment Amount -->
-                                <div class="mb-8">
-                                    <label class="block text-green-200 text-sm font-medium mb-3">Payment Amount</label>
+                                <div class="mb-6 lg:mb-8">
+                                    <label class="block text-green-200 text-xs lg:text-sm font-medium mb-2 lg:mb-3">Payment Amount</label>
                                     <div class="relative">
-                                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/70 font-medium">TZS</span>
+                                        <span class="absolute left-3 lg:left-4 top-1/2 -translate-y-1/2 text-white/70 font-medium text-sm lg:text-base">TZS</span>
                                         <input 
                                             type="text" 
                                             id="amount-input"
-                                            class="w-full bg-white/10 backdrop-blur border border-white/20 rounded-xl px-4 py-4 pl-16 text-2xl font-bold text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/20 transition-all"
+                                            class="w-full bg-white/10 backdrop-blur border border-white/20 rounded-xl px-3 lg:px-4 py-3 lg:py-4 pl-14 lg:pl-16 text-lg lg:text-2xl font-bold text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/20 transition-all"
                                             inputMode="numeric" 
                                             pattern="[0-9,]*" 
                                             placeholder="500" 
@@ -95,45 +95,44 @@
                                         >
                                     </div>
                                     <div class="flex justify-between items-center mt-2">
-                                        <p class="text-green-200 text-sm">Min: TSh 500 | Max: TSh 5,000,000</p>
-                                        <p class="text-green-200 text-sm">Fee: <span id="fee-amount">TSh 0</span></p>
+                                        <p class="text-green-200 text-xs lg:text-sm">Min: TSh 500 | Max: TSh 5,000,000</p>
                                     </div>
-                                    <div class="mt-2 p-3 bg-white/10 rounded-lg">
-                                        <p class="text-green-100 text-sm">Total Amount: <span id="total-amount" class="text-white font-bold">TSh {{ number_format($defaultAmount) }}</span></p>
+                                    <div class="mt-2 p-3 lg:p-4 bg-white/10 rounded-lg">
+                                        <p class="text-green-100 text-xs lg:text-sm">Total Amount: <span id="total-amount" class="text-white font-bold">TSh {{ number_format($defaultAmount) }}</span></p>
                                     </div>
                                 </div>
 
                                 <!-- Features -->
-                                <div class="space-y-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 bg-green-400/20 rounded-lg flex items-center justify-center">
-                                            <i class="fas fa-shield-alt text-green-300 text-sm"></i>
+                                <div class="space-y-3 lg:space-y-4">
+                                    <div class="flex items-center gap-2 lg:gap-3">
+                                        <div class="w-6 lg:w-8 h-6 lg:h-8 bg-green-400/20 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-shield-alt text-green-300 text-xs lg:text-sm"></i>
                                         </div>
-                                        <span class="text-sm">Bank-level security encryption</span>
+                                        <span class="text-xs lg:text-sm">Bank-level security encryption</span>
                                     </div>
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 bg-green-400/20 rounded-lg flex items-center justify-center">
-                                            <i class="fas fa-bolt text-green-300 text-sm"></i>
+                                    <div class="flex items-center gap-2 lg:gap-3">
+                                        <div class="w-6 lg:w-8 h-6 lg:h-8 bg-green-400/20 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-bolt text-green-300 text-xs lg:text-sm"></i>
                                         </div>
-                                        <span class="text-sm">Instant payment processing</span>
+                                        <span class="text-xs lg:text-sm">Instant payment processing</span>
                                     </div>
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 bg-green-400/20 rounded-lg flex items-center justify-center">
-                                            <i class="fas fa-mobile-alt text-green-300 text-sm"></i>
+                                    <div class="flex items-center gap-2 lg:gap-3">
+                                        <div class="w-6 lg:w-8 h-6 lg:h-8 bg-green-400/20 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-mobile-alt text-green-300 text-xs lg:text-sm"></i>
                                         </div>
-                                        <span class="text-sm">All major mobile money networks</span>
+                                        <span class="text-xs lg:text-sm">All major mobile money networks</span>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Footer -->
-                            <div class="mt-8 pt-8 border-t border-white/20">
+                            <div class="mt-4 lg:mt-8 pt-4 lg:pt-8 border-t border-white/20">
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-xs text-green-200">Powered by</p>
-                                        <p class="text-sm font-semibold">Feedtan CMG @2026 SECURED PAYMENT GATEWAY</p>
+                                        <p class="text-xs lg:text-sm font-semibold">Feedtan CMG @2026 SECURED PAYMENT GATEWAY</p>
                                     </div>
-                                    <div class="security-badge px-3 py-1 rounded-full text-xs font-medium">
+                                    <div class="security-badge px-2 lg:px-3 py-1 rounded-full text-xs font-medium">
                                         <i class="fas fa-lock mr-1"></i> Secured
                                     </div>
                                 </div>
@@ -142,111 +141,100 @@
                     </div>
 
                     <!-- Right Panel - Payment Form -->
-                    <div class="bg-white p-8 md:p-12">
+                    <div class="bg-white p-6 lg:p-12">
                         <div class="max-w-md mx-auto">
-                            <!-- Form Header -->
-                            <div class="text-center mb-8">
-                                <h2 class="text-2xl font-bold text-gray-900 mb-2">Complete Your Payment</h2>
-                                <p class="text-gray-600">Choose your preferred payment method</p>
-                            </div>
-
-                            <form id="payment-form" class="space-y-6">
-                                <!-- Payment Methods -->
+                            <!-- Step 1: Details -->
+                            <div id="step-1" class="space-y-6">
+                                <h2 class="text-xl lg:text-2xl font-bold text-gray-900 mb-6 text-center lg:text-left">Payment Details</h2>
+                                
+                                <!-- Payment Method Selection -->
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-4">Select Payment Method</label>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-3">Choose Payment Method</label>
                                     <div class="space-y-3">
                                         <!-- Mobile Money (Auto-selected) -->
-                                        <div class="payment-method-card selected rounded-xl p-4 cursor-pointer" data-method="mobile">
+                                        <div class="payment-method-card selected rounded-xl p-3 lg:p-4 cursor-pointer" data-method="mobile">
                                             <div class="flex items-center justify-between">
-                                                <div class="flex items-center gap-4">
-                                                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                                                        <i class="fas fa-mobile-alt text-green-600 text-lg"></i>
+                                                <div class="flex items-center gap-2 lg:gap-4">
+                                                    <div class="w-10 lg:w-12 h-10 lg:h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                                        <i class="fas fa-mobile-alt text-green-600 text-sm lg:text-lg"></i>
                                                     </div>
                                                     <div>
-                                                        <p class="font-semibold text-gray-900">Mobile Money</p>
-                                                        <p class="text-sm text-gray-500">M-Pesa, Airtel Money, Tigo Pesa, Halotel</p>
+                                                        <p class="font-semibold text-gray-900 text-sm lg:text-base">Mobile Money</p>
+                                                        <p class="text-xs lg:text-sm text-gray-500">M-Pesa, Airtel Money, Tigo Pesa, Halotel</p>
                                                     </div>
                                                 </div>
-                                                <div class="w-6 h-6 rounded-full border-2 border-green-600 bg-green-600 flex items-center justify-center">
-                                                    <div class="w-2 h-2 rounded-full bg-white"></div>
+                                                <div class="w-5 lg:w-6 h-5 lg:h-6 rounded-full border-2 border-green-600 bg-green-600 flex items-center justify-center">
+                                                    <div class="w-2 lg:w-2.5 h-2 lg:h-2.5 rounded-full bg-white"></div>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <!-- QR Code -->
-                                        <div class="payment-method-card rounded-xl p-4 cursor-pointer border-2 border-gray-200" data-method="qr">
+                                        <div class="payment-method-card rounded-xl p-3 lg:p-4 cursor-pointer border-2 border-gray-200" data-method="qr">
                                             <div class="flex items-center justify-between">
-                                                <div class="flex items-center gap-4">
-                                                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                                                        <i class="fas fa-qrcode text-blue-600 text-lg"></i>
+                                                <div class="flex items-center gap-2 lg:gap-4">
+                                                    <div class="w-10 lg:w-12 h-10 lg:h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                                        <i class="fas fa-qrcode text-blue-600 text-sm lg:text-lg"></i>
                                                     </div>
                                                     <div>
-                                                        <p class="font-semibold text-gray-900">Lipa Namba (TIPS)</p>
-                                                        <p class="text-sm text-gray-500">Scan QR code to pay</p>
+                                                        <p class="font-semibold text-gray-900 text-sm lg:text-base">Lipa Namba (TIPS)</p>
+                                                        <p class="text-xs lg:text-sm text-gray-500">Scan QR code to pay</p>
                                                     </div>
                                                 </div>
-                                                <div class="w-6 h-6 rounded-full border-2 border-gray-300"></div>
+                                                <div class="w-5 lg:w-6 h-5 lg:h-6 rounded-full border-2 border-gray-300"></div>
                                             </div>
                                         </div>
 
                                         <!-- Card Payment -->
-                                        <div class="payment-method-card rounded-xl p-4 cursor-pointer border-2 border-gray-200" data-method="card">
+                                        <div class="payment-method-card rounded-xl p-3 lg:p-4 cursor-pointer border-2 border-gray-200" data-method="card">
                                             <div class="flex items-center justify-between">
-                                                <div class="flex items-center gap-4">
-                                                    <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                                                        <i class="fas fa-credit-card text-purple-600 text-lg"></i>
+                                                <div class="flex items-center gap-2 lg:gap-4">
+                                                    <div class="w-10 lg:w-12 h-10 lg:h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                                        <i class="fas fa-credit-card text-purple-600 text-sm lg:text-lg"></i>
                                                     </div>
                                                     <div>
-                                                        <p class="font-semibold text-gray-900">Card Payment</p>
-                                                        <p class="text-sm text-gray-500">Visa, Mastercard</p>
+                                                        <p class="font-semibold text-gray-900 text-sm lg:text-base">Card Payment</p>
+                                                        <p class="text-xs lg:text-sm text-gray-500">Visa, Mastercard</p>
                                                     </div>
                                                 </div>
-                                                <div class="w-6 h-6 rounded-full border-2 border-gray-300"></div>
+                                                <div class="w-5 lg:w-6 h-5 lg:h-6 rounded-full border-2 border-gray-300"></div>
                                             </div>
                                         </div>
                                     </div>
-                                    <input type="hidden" name="payment_method" id="payment_method" value="mobile" required>
                                 </div>
 
-                                <!-- Phone Number (for Mobile Money) -->
-                                <div id="phone-field">
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
+                                <!-- Phone Number Field (Mobile Money Only) -->
+                                <div id="phone-field" class="space-y-2">
+                                    <label class="block text-sm font-semibold text-gray-700">Phone Number</label>
                                     <div class="flex">
-                                        <div class="flex">
-                                            <button type="button" class="flex items-center gap-2 px-4 py-3 bg-gray-50 border border-r-0 border-gray-300 rounded-l-lg">
-                                                <span class="w-6 h-4">
-                                                    <svg viewBox="0 85.333 512 341.333" class="w-full h-full">
-                                                        <title>TZ</title>
-                                                        <path fill="#338AF3" d="M0 85.337h512v341.326H0z"></path>
-                                                        <path fill="#6DA544" d="M0 426.663V85.337h512"></path>
-                                                        <path fill="#FFDA44" d="M512 152.222V85.337H411.67L0 359.778v66.885h100.33z"></path>
-                                                        <path d="M512 85.337v40.125L60.193 426.663H0v-40.125L451.807 85.337z"></path>
-                                                    </svg>
-                                                </span>
-                                                <span class="text-sm font-medium">+255</span>
-                                            </button>
-                                            <input 
-                                                type="tel" 
-                                                id="customer_phone"
-                                                name="phone_number"
-                                                class="flex-1 px-4 py-3 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                                placeholder="712 345 678"
-                                                required
-                                            >
-                                        </div>
+                                        <button class="flex items-center gap-2 px-3 lg:px-4 py-3 lg:py-3 bg-gray-100 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-green-500">
+                                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path fill="#FFDA44" d="M512 152.222V85.337H411.67L0 359.778v66.885h100.33z"></path>
+                                                <path d="M512 85.337v40.125L60.193 426.663H0v-40.125L451.807 85.337z"></path>
+                                            </svg>
+                                            <span class="text-sm font-medium">+255</span>
+                                        </button>
+                                        <input 
+                                            type="tel" 
+                                            id="customer_phone"
+                                            name="phone_number"
+                                            class="flex-1 px-3 lg:px-4 py-3 border border-gray-300 rounded-r-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm lg:text-base"
+                                            placeholder="712 345 678"
+                                            required
+                                        >
                                     </div>
-                                    <p class="text-xs text-gray-500 mt-1">Format: 712 345 678</p>
+                                    <p class="text-xs text-gray-500">Format: 712 345 678</p>
                                 </div>
 
                                 <!-- Customer Information -->
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Contact Information</label>
+                                <div class="space-y-3">
+                                    <label class="block text-sm font-semibold text-gray-700">Contact Information</label>
                                     <div class="space-y-3">
                                         <input 
                                             type="text" 
                                             id="customer_name"
                                             name="customer_name"
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            class="w-full px-3 lg:px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm lg:text-base"
                                             placeholder="Full Name"
                                             required
                                         >
@@ -254,31 +242,65 @@
                                             type="email" 
                                             id="customer_email"
                                             name="customer_email"
-                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            class="w-full px-3 lg:px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm lg:text-base"
                                             placeholder="Email Address"
                                             required
                                         >
                                     </div>
                                 </div>
 
-                                <!-- Submit Button -->
+                                <!-- Start Payment Button -->
                                 <button 
-                                    type="submit" 
-                                    id="pay-button"
-                                    class="w-full bg-gradient-to-r from-green-600 to-green-800 text-white font-semibold py-4 px-6 rounded-xl hover:from-green-700 hover:to-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed pulse-animation"
+                                    type="button"
+                                    id="start-payment-btn"
+                                    class="w-full bg-gradient-to-r from-green-600 to-green-800 text-white font-semibold py-3 lg:py-4 px-6 rounded-xl hover:from-green-700 hover:to-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 text-sm lg:text-base"
                                 >
-                                    <span id="pay-button-text">Pay TSh {{ number_format($defaultAmount) }}</span>
-                                    <div id="pay-button-loading" class="hidden flex items-center justify-center gap-2">
-                                        <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    Start Payment Now
+                                </button>
+                            </div>
+
+                            <!-- Step 2: Complete Payment -->
+                            <div id="step-2" class="hidden space-y-6">
+                                <h2 class="text-xl lg:text-2xl font-bold text-gray-900 mb-6 text-center lg:text-left">Complete Your Payment</h2>
+                                
+                                <div class="bg-gray-50 rounded-xl p-4 lg:p-6">
+                                    <div class="text-center space-y-4">
+                                        <div class="w-16 lg:w-20 h-16 lg:h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                                            <i class="fas fa-check text-green-600 text-2xl lg:text-3xl"></i>
+                                        </div>
+                                        <h3 class="text-lg lg:text-xl font-semibold text-gray-900">Ready to Complete Payment</h3>
+                                        <p class="text-gray-600 text-sm lg:text-base">Amount to Pay: <span id="final-amount" class="font-bold text-green-600">TSh 0</span></p>
+                                        <p class="text-gray-500 text-xs lg:text-sm">Payment Method: <span id="selected-method" class="font-medium">Mobile Money</span></p>
+                                    </div>
+                                </div>
+
+                                <button 
+                                    type="submit"
+                                    id="complete-payment-btn"
+                                    class="w-full bg-gradient-to-r from-green-600 to-green-800 text-white font-semibold py-3 lg:py-4 px-6 rounded-xl hover:from-green-700 hover:to-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 text-sm lg:text-base pulse-animation"
+                                >
+                                    <span id="complete-payment-text">Complete Payment</span>
+                                    <div id="complete-payment-loading" class="hidden flex items-center justify-center gap-2">
+                                        <svg class="animate-spin h-4 lg:h-5 w-4 lg:w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                         </svg>
                                         <span>Processing<span class="loading-dots"></span></span>
                                     </div>
                                 </button>
-                            </form>
 
-                            <!-- Trust Badges -->
+                                <button 
+                                    type="button"
+                                    id="back-to-details"
+                                    class="w-full bg-gray-100 text-gray-700 font-medium py-3 lg:py-4 px-6 rounded-xl hover:bg-gray-200 transition-all text-sm lg:text-base"
+                                >
+                                    ← Back to Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trust Badges -->
                             <div class="mt-8 pt-8 border-t border-gray-200">
                                 <div class="flex flex-wrap items-center justify-center gap-4">
                                     <div class="flex items-center gap-2 text-xs text-gray-500">
@@ -357,42 +379,45 @@
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('payment-form');
             const amountInput = document.getElementById('amount-input');
-            const payButton = document.getElementById('pay-button');
-            const payButtonText = document.getElementById('pay-button-text');
-            const payButtonLoading = document.getElementById('pay-button-loading');
+            const startPaymentBtn = document.getElementById('start-payment-btn');
+            const completePaymentBtn = document.getElementById('complete-payment-btn');
+            const backToDetailsBtn = document.getElementById('back-to-details');
+            const step1 = document.getElementById('step-1');
+            const step2 = document.getElementById('step-2');
             const phoneField = document.getElementById('phone-field');
             const modal = document.getElementById('response-modal');
             const processingModal = document.getElementById('processing-modal');
             const modalContent = document.getElementById('modal-content');
             const processingStatus = document.getElementById('processing-status');
-            const feeAmount = document.getElementById('fee-amount');
             const totalAmount = document.getElementById('total-amount');
+            const finalAmount = document.getElementById('final-amount');
+            const selectedMethod = document.getElementById('selected-method');
+            const completePaymentText = document.getElementById('complete-payment-text');
+            const completePaymentLoading = document.getElementById('complete-payment-loading');
 
-            // Calculate fee function
-            function calculateFee(amount) {
-                const feePercentage = 0.02;
-                const minFee = 500;
-                const maxFee = 10000;
+            let currentPaymentMethod = 'mobile';
+            let currentAmount = parseInt(amountInput.value.replace(/[^0-9]/g, '')) || 500;
+
+            // Update total amount display
+            function updateTotalAmount() {
+                let value = parseInt(amountInput.value.replace(/[^0-9]/g, '')) || 500;
+                const minAmount = parseInt(amountInput.dataset.minAmount);
+                const maxAmount = parseInt(amountInput.dataset.maxAmount);
                 
-                let calculatedFee = amount * feePercentage;
-                
-                if (calculatedFee < minFee) {
-                    return minFee;
-                } else if (calculatedFee > maxFee) {
-                    return maxFee;
+                if (value && value >= minAmount && value <= maxAmount) {
+                    currentAmount = value;
+                    totalAmount.textContent = `TSh ${value.toLocaleString()}`;
+                    finalAmount.textContent = `TSh ${value.toLocaleString()}`;
+                    amountInput.classList.remove('border-red-500');
+                } else {
+                    totalAmount.textContent = `TSh ${minAmount.toLocaleString()}`;
+                    finalAmount.textContent = `TSh ${minAmount.toLocaleString()}`;
+                    if (value && (value < minAmount || value > maxAmount)) {
+                        amountInput.classList.add('border-red-500');
+                    } else {
+                        amountInput.classList.remove('border-red-500');
+                    }
                 }
-                
-                return calculatedFee;
-            }
-
-            // Update fee and total amount
-            function updateFeeDisplay() {
-                let value = parseInt(amountInput.value.replace(/[^0-9]/g, '')) || 0;
-                const fee = calculateFee(value);
-                const total = value + fee;
-                
-                feeAmount.textContent = `TSh ${fee.toLocaleString()}`;
-                totalAmount.textContent = `TSh ${total.toLocaleString()}`;
             }
 
             // Payment method selection
@@ -419,41 +444,22 @@
                     const dot = selectedRadio.querySelector('.bg-white');
                     if (dot) dot.classList.remove('hidden');
 
-                    // Update hidden input
-                    const method = this.dataset.method;
-                    document.getElementById('payment_method').value = method;
+                    // Update current payment method
+                    currentPaymentMethod = this.dataset.method;
+                    selectedMethod.textContent = this.querySelector('.font-semibold').textContent;
 
                     // Show/hide phone field
-                    phoneField.style.display = method === 'mobile' ? 'block' : 'none';
-                    const phoneInput = document.getElementById('customer_phone');
-                    phoneInput.required = method === 'mobile';
+                    phoneField.style.display = currentPaymentMethod === 'mobile' ? 'block' : 'none';
                 });
             });
 
             // Amount formatting and validation
             amountInput.addEventListener('input', function() {
-                let value = this.value.replace(/[^0-9]/g, '');
-                const minAmount = parseInt(this.dataset.minAmount);
-                const maxAmount = parseInt(this.dataset.maxAmount);
-                
-                if (value && parseInt(value) >= minAmount && parseInt(value) <= maxAmount) {
-                    payButtonText.textContent = `Pay TSh ${parseInt(value).toLocaleString()}`;
-                    this.classList.remove('border-red-500');
-                } else {
-                    payButtonText.textContent = `Pay TSh ${minAmount.toLocaleString()}`;
-                    if (value && (parseInt(value) < minAmount || parseInt(value) > maxAmount)) {
-                        this.classList.add('border-red-500');
-                    } else {
-                        this.classList.remove('border-red-500');
-                    }
-                }
-                
-                // Update fee display
-                updateFeeDisplay();
+                updateTotalAmount();
             });
 
-            // Initialize fee display
-            updateFeeDisplay();
+            // Initialize amount display
+            updateTotalAmount();
 
             // Phone number formatting
             document.getElementById('customer_phone').addEventListener('input', function() {
@@ -466,69 +472,67 @@
                     if (value.length >= 7) {
                         value = value.slice(0, 7) + ' ' + value.slice(7);
                     }
-                    this.value = value;
                 }
+                this.value = value;
             });
 
-            // Form submission
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                
-                const paymentType = document.getElementById('payment_method').value;
-                const amount = parseInt(amountInput.value.replace(/[^0-9]/g, ''));
-                const phoneNumber = document.getElementById('customer_phone').value;
-                const customerName = document.getElementById('customer_name').value;
-                const customerEmail = document.getElementById('customer_email').value;
+            // Start payment button
+            startPaymentBtn.addEventListener('click', function() {
+                // Validate form
+                const customerName = document.getElementById('customer_name').value.trim();
+                const customerEmail = document.getElementById('customer_email').value.trim();
+                const phoneNumber = document.getElementById('customer_phone').value.replace(/[^0-9]/g, '');
 
-                // Enhanced validation
-                if (amount < 500 || amount > 5000000) {
-                    showError('Invalid Amount', 'Amount must be between TSh 500 and TSh 5,000,000');
-                    amountInput.classList.add('error-shake');
-                    setTimeout(() => amountInput.classList.remove('error-shake'), 500);
-                    return;
-                }
-
-                if (paymentType === 'mobile') {
-                    const cleanPhone = phoneNumber.replace(/[^0-9]/g, '');
-                    if (cleanPhone.length !== 9) {
-                        showError('Invalid Phone', 'Please enter a valid 9-digit phone number');
-                        document.getElementById('customer_phone').classList.add('error-shake');
-                        setTimeout(() => document.getElementById('customer_phone').classList.remove('error-shake'), 500);
-                        return;
-                    }
-                }
-
-                if (!customerName.trim() || customerName.length < 2) {
-                    showError('Invalid Name', 'Please enter your full name');
+                // Validation
+                if (!customerName) {
                     document.getElementById('customer_name').classList.add('error-shake');
                     setTimeout(() => document.getElementById('customer_name').classList.remove('error-shake'), 500);
                     return;
                 }
 
-                if (!customerEmail.trim() || !isValidEmail(customerEmail)) {
-                    showError('Invalid Email', 'Please enter a valid email address');
+                if (!customerEmail || !isValidEmail(customerEmail)) {
                     document.getElementById('customer_email').classList.add('error-shake');
                     setTimeout(() => document.getElementById('customer_email').classList.remove('error-shake'), 500);
                     return;
                 }
 
-                // Format phone number
-                let formattedPhone = null;
-                if (paymentType === 'mobile') {
-                    formattedPhone = '+255' + phoneNumber.replace(/[^0-9]/g, '');
+                if (currentPaymentMethod === 'mobile' && (!phoneNumber || phoneNumber.length < 9)) {
+                    document.getElementById('customer_phone').classList.add('error-shake');
+                    setTimeout(() => document.getElementById('customer_phone').classList.remove('error-shake'), 500);
+                    return;
                 }
 
-                // Show processing modal with stages
-                showProcessingModal(paymentType);
+                // Move to step 2
+                step1.classList.add('hidden');
+                step2.classList.remove('hidden');
+            });
 
-                // Simulate payment stages
+            // Back to details button
+            backToDetailsBtn.addEventListener('click', function() {
+                step2.classList.add('hidden');
+                step1.classList.remove('hidden');
+            });
+
+            // Complete payment button
+            completePaymentBtn.addEventListener('click', async function() {
+                // Format phone number
+                let formattedPhone = null;
+                if (currentPaymentMethod === 'mobile') {
+                    formattedPhone = '+255' + document.getElementById('customer_phone').value.replace(/[^0-9]/g, '');
+                }
+
+                const customerName = document.getElementById('customer_name').value.trim();
+                const customerEmail = document.getElementById('customer_email').value.trim();
+
+                // Show processing modal with stages
+                showProcessingModal(currentPaymentMethod);
                 simulatePaymentStages();
 
                 // Disable button and show loading
-                payButton.disabled = true;
-                payButton.classList.remove('pulse-animation');
-                payButtonText.classList.add('hidden');
-                payButtonLoading.classList.remove('hidden');
+                completePaymentBtn.disabled = true;
+                completePaymentBtn.classList.remove('pulse-animation');
+                completePaymentText.classList.add('hidden');
+                completePaymentLoading.classList.remove('hidden');
 
                 try {
                     const response = await fetch('/api/payments/process', {
@@ -538,11 +542,11 @@
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                         },
                         body: JSON.stringify({
-                            payment_type: paymentType,
-                            amount: amount,
+                            payment_type: currentPaymentMethod,
+                            amount: currentAmount,
                             phone_number: formattedPhone,
-                            customer_name: customerName.trim(),
-                            customer_email: customerEmail.trim()
+                            customer_name: customerName,
+                            customer_email: customerEmail
                         })
                     });
 
@@ -552,7 +556,13 @@
                     hideProcessingModal();
 
                     if (result.status === 'success') {
-                        showSuccessModal(paymentType, result.data);
+                        // Show success modal
+                        showSuccessModal(currentPaymentMethod, result.data);
+                        
+                        // After success, refresh page after delay
+                        setTimeout(() => {
+                            location.reload();
+                        }, 3000);
                     } else {
                         showError('Payment Failed', result.message || 'An error occurred while processing your payment. Please try again.');
                     }
@@ -562,10 +572,10 @@
                     showError('Network Error', 'Unable to connect to payment service. Please check your internet connection and try again.');
                 } finally {
                     // Reset button
-                    payButton.disabled = false;
-                    payButton.classList.add('pulse-animation');
-                    payButtonText.classList.remove('hidden');
-                    payButtonLoading.classList.add('hidden');
+                    completePaymentBtn.disabled = false;
+                    completePaymentBtn.classList.add('pulse-animation');
+                    completePaymentText.classList.remove('hidden');
+                    completePaymentLoading.classList.add('hidden');
                 }
             });
 
@@ -604,7 +614,6 @@
                     card: 'Redirecting to secure payment page...',
                     qr: 'Generating QR code...'
                 };
-                
                 processingStatus.textContent = messages[paymentType] || 'Processing payment...';
                 processingModal.classList.remove('hidden');
                 processingModal.classList.add('flex');
@@ -618,43 +627,37 @@
             function showSuccessModal(paymentType, data) {
                 const messages = {
                     mobile: {
-                        title: 'Payment Initiated Successfully!',
-                        message: 'Please check your phone for a USSD prompt to complete the payment. Enter your PIN when prompted.',
+                        title: 'Payment Initiated Successfully',
+                        message: 'Please check your phone and complete the payment using the prompt sent to your device.',
                         icon: 'fa-mobile-alt',
                         color: 'green'
                     },
                     card: {
-                        title: 'Redirecting to Payment Page',
-                        message: 'You will be redirected to our secure payment page to complete your card transaction.',
+                        title: 'Redirecting to Payment',
+                        message: 'You will be redirected to the secure payment page to complete your transaction.',
                         icon: 'fa-credit-card',
                         color: 'blue'
                     },
                     qr: {
                         title: 'QR Code Generated',
-                        message: 'Scan the QR code with your mobile banking app to complete the payment.',
+                        message: 'Scan the QR code with your banking app to complete the payment.',
                         icon: 'fa-qrcode',
                         color: 'purple'
                     }
                 };
 
-                const config = messages[paymentType];
-                const bgColor = `bg-${config.color}-50`;
-                const textColor = `text-${config.color}-800`;
-
+                const config = messages[paymentType] || messages.mobile;
+                
                 modalContent.innerHTML = `
                     <div class="text-center">
-                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full ${bgColor} mb-4">
+                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-${config.color}-100 mb-4">
                             <i class="fas ${config.icon} text-${config.color}-600 text-2xl"></i>
                         </div>
                         <h3 class="text-xl font-semibold text-gray-900 mb-2">${config.title}</h3>
                         <p class="text-gray-600 mb-6">${config.message}</p>
-                        ${data.reference ? `<p class="text-sm text-gray-500 mb-4">Reference: ${data.reference}</p>` : ''}
                         <div class="space-y-3">
                             <button onclick="closeModal()" class="w-full bg-gradient-to-r from-green-600 to-green-800 text-white font-semibold py-3 px-6 rounded-lg hover:from-green-700 hover:to-green-900 transition-all">
                                 Got it
-                            </button>
-                            <button onclick="location.reload()" class="w-full bg-gray-100 text-gray-700 font-medium py-3 px-6 rounded-lg hover:bg-gray-200 transition-all">
-                                Make Another Payment
                             </button>
                         </div>
                     </div>
@@ -667,13 +670,13 @@
             function showError(title, message) {
                 modalContent.innerHTML = `
                     <div class="text-center">
-                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-50 mb-4">
+                        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4">
                             <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
                         </div>
                         <h3 class="text-xl font-semibold text-gray-900 mb-2">${title}</h3>
                         <p class="text-gray-600 mb-6">${message}</p>
                         <div class="space-y-3">
-                            <button onclick="closeModal()" class="w-full bg-red-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-red-700 transition-all">
+                            <button onclick="closeModal()" class="w-full bg-gradient-to-r from-red-600 to-red-800 text-white font-semibold py-3 px-6 rounded-lg hover:from-red-700 hover:to-red-900 transition-all">
                                 Try Again
                             </button>
                             <button onclick="location.reload()" class="w-full bg-gray-100 text-gray-700 font-medium py-3 px-6 rounded-lg hover:bg-gray-200 transition-all">
@@ -687,10 +690,10 @@
                 modal.classList.add('flex');
             }
 
-            window.closeModal = function() {
+            function closeModal() {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
-            };
+            }
         });
     </script>
 </body>
