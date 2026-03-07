@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Services\SnippeService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class PaymentController extends Controller
@@ -95,34 +97,590 @@ class PaymentController extends Controller
     }
 
     /**
-     * Handle Snippe webhooks
+     * Handle webhook from Snippe for payment/payout events
      */
     public function handleWebhook(Request $request)
     {
         try {
-            $signature = $request->header('Snippe-Signature');
-            $payload = $request->getContent();
+            // Get webhook headers
+            $signature = $request->header('X-Webhook-Signature');
+            $timestamp = $request->header('X-Webhook-Timestamp');
+            $event = $request->header('X-Webhook-Event');
+            $userAgent = $request->header('User-Agent');
 
-            if (!$this->snippeService->verifyWebhookSignature($payload, $signature)) {
+            // Verify webhook signature
+            if (!$this->verifyWebhookSignature($request->getContent(), $signature, $timestamp)) {
+                Log::warning('Invalid webhook signature received', [
+                    'event' => $event,
+                    'signature' => $signature,
+                    'timestamp' => $timestamp,
+                    'user_agent' => $userAgent
+                ]);
                 return response()->json(['error' => 'Invalid signature'], 401);
             }
 
-            $webhookData = $request->all();
+            // Verify user agent
+            if ($userAgent !== 'Snipe-Webhook/1.0') {
+                Log::warning('Invalid webhook user agent', [
+                    'event' => $event,
+                    'user_agent' => $userAgent
+                ]);
+                return response()->json(['error' => 'Invalid user agent'], 401);
+            }
+
+            $payload = $request->json();
             
-            // Store webhook data
-            \App\Models\PaymentWebhook::create([
-                'payment_reference' => $webhookData['data']['reference'] ?? null,
-                'status' => $webhookData['data']['status'] ?? 'unknown',
-                'payload' => json_encode($webhookData),
-                'processed' => false
+            // Log webhook received
+            Log::info('Webhook received', [
+                'event' => $event,
+                'id' => $payload['id'] ?? null,
+                'type' => $payload['type'] ?? null,
+                'reference' => $payload['data']['reference'] ?? null
             ]);
 
-            return response()->json(['status' => 'received']);
+            // Handle different webhook events
+            switch ($event) {
+                case 'payout.completed':
+                    return $this->handlePayoutCompleted($payload);
+                
+                case 'payout.failed':
+                    return $this->handlePayoutFailed($payload);
+                
+                case 'payment.completed':
+                    return $this->handlePaymentCompleted($payload);
+                
+                case 'payment.failed':
+                    return $this->handlePaymentFailed($payload);
+                
+                default:
+                    Log::info('Unhandled webhook event', ['event' => $event]);
+                    return response()->json(['status' => 'ignored']);
+            }
 
         } catch (\Exception $e) {
-            \Log::error('Webhook processing error: ' . $e->getMessage());
+            Log::error('Webhook processing error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json(['error' => 'Webhook processing failed'], 500);
         }
+    }
+
+    /**
+     * Handle payout completed webhook
+     */
+    private function handlePayoutCompleted($payload)
+    {
+        try {
+            $data = $payload['data'];
+            $reference = $data['reference'];
+            $amount = $data['amount']['value'];
+            $currency = $data['amount']['currency'];
+            $customer = $data['customer'];
+            $settlement = $data['settlement'];
+            $channel = $data['channel'];
+            $completedAt = $data['completed_at'];
+
+            // Find and update payment record
+            $payment = \App\Models\Payment::where('reference', $reference)->first();
+            
+            if ($payment) {
+                $payment->update([
+                    'status' => 'completed',
+                    'paid_at' => $completedAt,
+                    'settlement_data' => json_encode($settlement),
+                    'channel_data' => json_encode($channel),
+                    'webhook_processed_at' => now(),
+                ]);
+
+                // Send success notifications
+                $this->sendPayoutSuccessNotifications($payment, $data);
+                
+                Log::info('Payout completed successfully', [
+                    'reference' => $reference,
+                    'amount' => $amount,
+                    'currency' => $currency,
+                    'customer' => $customer
+                ]);
+            } else {
+                Log::warning('Payment record not found for payout completion', [
+                    'reference' => $reference
+                ]);
+            }
+
+            // Create webhook log
+            \App\Models\PaymentWebhook::create([
+                'event_id' => $payload['id'],
+                'event_type' => 'payout.completed',
+                'reference' => $reference,
+                'payload' => json_encode($payload),
+                'processed_at' => now(),
+                'status' => 'success'
+            ]);
+
+            return response()->json(['status' => 'success']);
+
+        } catch (\Exception $e) {
+            Log::error('Payout completion handling failed', [
+                'error' => $e->getMessage(),
+                'payload' => $payload
+            ]);
+            return response()->json(['error' => 'Processing failed'], 500);
+        }
+    }
+
+    /**
+     * Handle payout failed webhook
+     */
+    private function handlePayoutFailed($payload)
+    {
+        try {
+            $data = $payload['data'];
+            $reference = $data['reference'];
+            $amount = $data['amount']['value'];
+            $currency = $data['amount']['currency'];
+            $customer = $data['customer'];
+            $failureReason = $data['failure_reason'];
+
+            // Find and update payment record
+            $payment = \App\Models\Payment::where('reference', $reference)->first();
+            
+            if ($payment) {
+                $payment->update([
+                    'status' => 'failed',
+                    'failure_reason' => $failureReason,
+                    'webhook_processed_at' => now(),
+                ]);
+
+                // Send failure notifications
+                $this->sendPayoutFailureNotifications($payment, $data);
+                
+                Log::warning('Payout failed', [
+                    'reference' => $reference,
+                    'amount' => $amount,
+                    'currency' => $currency,
+                    'customer' => $customer,
+                    'failure_reason' => $failureReason
+                ]);
+            } else {
+                Log::warning('Payment record not found for payout failure', [
+                    'reference' => $reference
+                ]);
+            }
+
+            // Create webhook log
+            \App\Models\PaymentWebhook::create([
+                'event_id' => $payload['id'],
+                'event_type' => 'payout.failed',
+                'reference' => $reference,
+                'payload' => json_encode($payload),
+                'processed_at' => now(),
+                'status' => 'success'
+            ]);
+
+            return response()->json(['status' => 'success']);
+
+        } catch (\Exception $e) {
+            Log::error('Payout failure handling failed', [
+                'error' => $e->getMessage(),
+                'payload' => $payload
+            ]);
+            return response()->json(['error' => 'Processing failed'], 500);
+        }
+    }
+
+    /**
+     * Send payout success notifications
+     */
+    private function sendPayoutSuccessNotifications($payment, $data)
+    {
+        try {
+            // Send email notification
+            if ($payment->customer_email) {
+                Mail::send([], [], function ($message) use ($payment, $data) {
+                    $message->to($payment->customer_email)
+                        ->subject('Payout Completed Successfully - Feedtan CMG')
+                        ->html($this->getPayoutSuccessEmailTemplate($payment, $data));
+                });
+            }
+
+            // Send SMS notification
+            if ($payment->customer_phone) {
+                $message = "Your payout of TSh " . number_format($data['amount']['value']) . 
+                          " has been completed successfully. Ref: " . $payment->reference . 
+                          ". Thank you from Feedtan CMG!";
+                
+                // Log SMS (implement actual SMS service later)
+                Log::info('SMS notification would be sent', [
+                    'phone' => $payment->customer_phone,
+                    'message' => $message
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Failed to send payout success notifications', [
+                'error' => $e->getMessage(),
+                'payment_id' => $payment->id
+            ]);
+        }
+    }
+
+    /**
+     * Send payout failure notifications
+     */
+    private function sendPayoutFailureNotifications($payment, $data)
+    {
+        try {
+            // Send email notification
+            if ($payment->customer_email) {
+                Mail::send([], [], function ($message) use ($payment, $data) {
+                    $message->to($payment->customer_email)
+                        ->subject('Payout Failed - Feedtan CMG')
+                        ->html($this->getPayoutFailureEmailTemplate($payment, $data));
+                });
+            }
+
+            // Send SMS notification
+            if ($payment->customer_phone) {
+                $message = "Your payout of TSh " . number_format($data['amount']['value']) . 
+                          " failed. Reason: " . $data['failure_reason'] . 
+                          ". Ref: " . $payment->reference . ". Please contact support.";
+                
+                // Log SMS (implement actual SMS service later)
+                Log::info('SMS notification would be sent', [
+                    'phone' => $payment->customer_phone,
+                    'message' => $message
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Failed to send payout failure notifications', [
+                'error' => $e->getMessage(),
+                'payment_id' => $payment->id
+            ]);
+        }
+    }
+
+    /**
+     * Get payout success email template
+     */
+    private function getPayoutSuccessEmailTemplate($payment, $data)
+    {
+        $amount = number_format($data['amount']['value']);
+        $netAmount = number_format($data['settlement']['net']['value']);
+        $fees = number_format($data['settlement']['fees']['value']);
+        
+        return "
+        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+            <div style='background: #015425; color: white; padding: 20px; text-align: center;'>
+                <h1 style='margin: 0;'>Feedtan CMG</h1>
+                <p style='margin: 5px 0 0 0; opacity: 0.9;'>Payout Completed Successfully</p>
+            </div>
+            <div style='padding: 30px; background: #f8f9fa;'>
+                <h2 style='color: #015425; margin-bottom: 20px;'>Payout Confirmation</h2>
+                <div style='background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>
+                    <p><strong>Reference:</strong> {$payment->reference}</p>
+                    <p><strong>Amount:</strong> TSh {$amount}</p>
+                    <p><strong>Fees:</strong> TSh {$fees}</p>
+                    <p><strong>Net Amount:</strong> TSh {$netAmount}</p>
+                    <p><strong>Status:</strong> <span style='color: #28a745; font-weight: bold;'>COMPLETED</span></p>
+                    <p><strong>Completed At:</strong> {$data['completed_at']}</p>
+                </div>
+                <p style='color: #666; font-size: 14px; text-align: center; margin-top: 30px;'>
+                    Powered by Feedtan CMG @2026 SECURED PAYMENT GATEWAY
+                </p>
+            </div>
+        </div>";
+    }
+
+    /**
+     * Get payout failure email template
+     */
+    private function getPayoutFailureEmailTemplate($payment, $data)
+    {
+        $amount = number_format($data['amount']['value']);
+        
+        return "
+        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+            <div style='background: #dc3545; color: white; padding: 20px; text-align: center;'>
+                <h1 style='margin: 0;'>Feedtan CMG</h1>
+                <p style='margin: 5px 0 0 0; opacity: 0.9;'>Payout Failed</p>
+            </div>
+            <div style='padding: 30px; background: #f8f9fa;'>
+                <h2 style='color: #dc3545; margin-bottom: 20px;'>Payout Failed</h2>
+                <div style='background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>
+                    <p><strong>Reference:</strong> {$payment->reference}</p>
+                    <p><strong>Amount:</strong> TSh {$amount}</p>
+                    <p><strong>Status:</strong> <span style='color: #dc3545; font-weight: bold;'>FAILED</span></p>
+                    <p><strong>Reason:</strong> {$data['failure_reason']}</p>
+                </div>
+                <div style='background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107; margin-bottom: 20px;'>
+                    <p style='margin: 0; color: #856404;'><strong>Action Required:</strong> Please check your details and try again, or contact support if the issue persists.</p>
+                </div>
+                <p style='color: #666; font-size: 14px; text-align: center; margin-top: 30px;'>
+                    Powered by Feedtan CMG @2026 SECURED PAYMENT GATEWAY
+                </p>
+            </div>
+        </div>";
+    }
+
+    /**
+     * Handle payment completed webhook
+     */
+    private function handlePaymentCompleted($payload)
+    {
+        try {
+            $data = $payload['data'];
+            $reference = $data['reference'];
+            $amount = $data['amount']['value'];
+            $currency = $data['amount']['currency'];
+            $customer = $data['customer'];
+            $settlement = $data['settlement'] ?? null;
+            $channel = $data['channel'] ?? null;
+            $completedAt = $data['completed_at'] ?? now();
+
+            // Find and update payment record
+            $payment = \App\Models\Payment::where('reference', $reference)->first();
+            
+            if ($payment) {
+                $payment->update([
+                    'status' => 'completed',
+                    'paid_at' => $completedAt,
+                    'settlement_data' => $settlement ? json_encode($settlement) : null,
+                    'channel_data' => $channel ? json_encode($channel) : null,
+                    'webhook_processed_at' => now(),
+                ]);
+
+                // Send success notifications
+                $this->sendPaymentSuccessNotifications($payment, $data);
+                
+                Log::info('Payment completed successfully', [
+                    'reference' => $reference,
+                    'amount' => $amount,
+                    'currency' => $currency,
+                    'customer' => $customer
+                ]);
+            } else {
+                Log::warning('Payment record not found for payment completion', [
+                    'reference' => $reference
+                ]);
+            }
+
+            // Create webhook log
+            \App\Models\PaymentWebhook::create([
+                'event_id' => $payload['id'],
+                'event_type' => 'payment.completed',
+                'reference' => $reference,
+                'payload' => json_encode($payload),
+                'processed_at' => now(),
+                'status' => 'success'
+            ]);
+
+            return response()->json(['status' => 'success']);
+
+        } catch (\Exception $e) {
+            Log::error('Payment completion handling failed', [
+                'error' => $e->getMessage(),
+                'payload' => $payload
+            ]);
+            return response()->json(['error' => 'Processing failed'], 500);
+        }
+    }
+
+    /**
+     * Handle payment failed webhook
+     */
+    private function handlePaymentFailed($payload)
+    {
+        try {
+            $data = $payload['data'];
+            $reference = $data['reference'];
+            $amount = $data['amount']['value'];
+            $currency = $data['amount']['currency'];
+            $customer = $data['customer'];
+            $failureReason = $data['failure_reason'] ?? 'Unknown error';
+
+            // Find and update payment record
+            $payment = \App\Models\Payment::where('reference', $reference)->first();
+            
+            if ($payment) {
+                $payment->update([
+                    'status' => 'failed',
+                    'failure_reason' => $failureReason,
+                    'webhook_processed_at' => now(),
+                ]);
+
+                // Send failure notifications
+                $this->sendPaymentFailureNotifications($payment, $data);
+                
+                Log::warning('Payment failed', [
+                    'reference' => $reference,
+                    'amount' => $amount,
+                    'currency' => $currency,
+                    'customer' => $customer,
+                    'failure_reason' => $failureReason
+                ]);
+            } else {
+                Log::warning('Payment record not found for payment failure', [
+                    'reference' => $reference
+                ]);
+            }
+
+            // Create webhook log
+            \App\Models\PaymentWebhook::create([
+                'event_id' => $payload['id'],
+                'event_type' => 'payment.failed',
+                'reference' => $reference,
+                'payload' => json_encode($payload),
+                'processed_at' => now(),
+                'status' => 'success'
+            ]);
+
+            return response()->json(['status' => 'success']);
+
+        } catch (\Exception $e) {
+            Log::error('Payment failure handling failed', [
+                'error' => $e->getMessage(),
+                'payload' => $payload
+            ]);
+            return response()->json(['error' => 'Processing failed'], 500);
+        }
+    }
+
+    /**
+     * Send payment success notifications
+     */
+    private function sendPaymentSuccessNotifications($payment, $data)
+    {
+        try {
+            // Send email notification
+            if ($payment->customer_email) {
+                Mail::send([], [], function ($message) use ($payment, $data) {
+                    $message->to($payment->customer_email)
+                        ->subject('Payment Completed Successfully - Feedtan CMG')
+                        ->html($this->getPaymentSuccessEmailTemplate($payment, $data));
+                });
+            }
+
+            // Send SMS notification
+            if ($payment->customer_phone) {
+                $message = "Your payment of TSh " . number_format($data['amount']['value']) . 
+                          " has been completed successfully. Ref: " . $payment->reference . 
+                          ". Thank you from Feedtan CMG!";
+                
+                // Log SMS (implement actual SMS service later)
+                Log::info('SMS notification would be sent', [
+                    'phone' => $payment->customer_phone,
+                    'message' => $message
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Failed to send payment success notifications', [
+                'error' => $e->getMessage(),
+                'payment_id' => $payment->id
+            ]);
+        }
+    }
+
+    /**
+     * Send payment failure notifications
+     */
+    private function sendPaymentFailureNotifications($payment, $data)
+    {
+        try {
+            // Send email notification
+            if ($payment->customer_email) {
+                Mail::send([], [], function ($message) use ($payment, $data) {
+                    $message->to($payment->customer_email)
+                        ->subject('Payment Failed - Feedtan CMG')
+                        ->html($this->getPaymentFailureEmailTemplate($payment, $data));
+                });
+            }
+
+            // Send SMS notification
+            if ($payment->customer_phone) {
+                $message = "Your payment of TSh " . number_format($data['amount']['value']) . 
+                          " failed. Reason: " . ($data['failure_reason'] ?? 'Unknown error') . 
+                          ". Ref: " . $payment->reference . ". Please contact support.";
+                
+                // Log SMS (implement actual SMS service later)
+                Log::info('SMS notification would be sent', [
+                    'phone' => $payment->customer_phone,
+                    'message' => $message
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Failed to send payment failure notifications', [
+                'error' => $e->getMessage(),
+                'payment_id' => $payment->id
+            ]);
+        }
+    }
+
+    /**
+     * Get payment success email template
+     */
+    private function getPaymentSuccessEmailTemplate($payment, $data)
+    {
+        $amount = number_format($data['amount']['value']);
+        $netAmount = isset($data['settlement']['net']) ? number_format($data['settlement']['net']['value']) : $amount;
+        $fees = isset($data['settlement']['fees']) ? number_format($data['settlement']['fees']['value']) : '0';
+        
+        return "
+        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+            <div style='background: #015425; color: white; padding: 20px; text-align: center;'>
+                <h1 style='margin: 0;'>Feedtan CMG</h1>
+                <p style='margin: 5px 0 0 0; opacity: 0.9;'>Payment Completed Successfully</p>
+            </div>
+            <div style='padding: 30px; background: #f8f9fa;'>
+                <h2 style='color: #015425; margin-bottom: 20px;'>Payment Confirmation</h2>
+                <div style='background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>
+                    <p><strong>Reference:</strong> {$payment->reference}</p>
+                    <p><strong>Amount:</strong> TSh {$amount}</p>
+                    <p><strong>Fees:</strong> TSh {$fees}</p>
+                    <p><strong>Net Amount:</strong> TSh {$netAmount}</p>
+                    <p><strong>Status:</strong> <span style='color: #28a745; font-weight: bold;'>COMPLETED</span></p>
+                    <p><strong>Completed At:</strong> " . ($data['completed_at'] ?? now()) . "</p>
+                </div>
+                <p style='color: #666; font-size: 14px; text-align: center; margin-top: 30px;'>
+                    Powered by Feedtan CMG @2026 SECURED PAYMENT GATEWAY
+                </p>
+            </div>
+        </div>";
+    }
+
+    /**
+     * Get payment failure email template
+     */
+    private function getPaymentFailureEmailTemplate($payment, $data)
+    {
+        $amount = number_format($data['amount']['value']);
+        
+        return "
+        <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>
+            <div style='background: #dc3545; color: white; padding: 20px; text-align: center;'>
+                <h1 style='margin: 0;'>Feedtan CMG</h1>
+                <p style='margin: 5px 0 0 0; opacity: 0.9;'>Payment Failed</p>
+            </div>
+            <div style='padding: 30px; background: #f8f9fa;'>
+                <h2 style='color: #dc3545; margin-bottom: 20px;'>Payment Failed</h2>
+                <div style='background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;'>
+                    <p><strong>Reference:</strong> {$payment->reference}</p>
+                    <p><strong>Amount:</strong> TSh {$amount}</p>
+                    <p><strong>Status:</strong> <span style='color: #dc3545; font-weight: bold;'>FAILED</span></p>
+                    <p><strong>Reason:</strong> " . ($data['failure_reason'] ?? 'Unknown error') . "</p>
+                </div>
+                <div style='background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 4px solid #ffc107; margin-bottom: 20px;'>
+                    <p style='margin: 0; color: #856404;'><strong>Action Required:</strong> Please check your details and try again, or contact support if the issue persists.</p>
+                </div>
+                <p style='color: #666; font-size: 14px; text-align: center; margin-top: 30px;'>
+                    Powered by Feedtan CMG @2026 SECURED PAYMENT GATEWAY
+                </p>
+            </div>
+        </div>";
     }
 
     /**
