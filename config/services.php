@@ -41,4 +41,10 @@ return [
         'webhook_secret' => env('SNIPPE_WEBHOOK_SECRET'),
     ],
 
+    'feedtan' => [
+        'sms_sender_id' => env('FEEDTAN_SMS_SENDER_ID', 'FEEDTAN'),
+        'email_sender' => env('FEEDTAN_EMAIL_SENDER', 'noreply@feedtancmg.com'),
+        'support_email' => env('FEEDTAN_SUPPORT_EMAIL', 'support@feedtancmg.com'),
+    ],
+
 ];

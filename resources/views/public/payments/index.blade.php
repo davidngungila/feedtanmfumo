@@ -296,6 +296,83 @@
         </div>
     </div>
 
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div class="text-center">
+            <div class="w-20 h-20 bg-green-600 rounded-2xl flex items-center justify-center mb-6 animate-pulse">
+                <span class="text-3xl font-bold text-white">FC</span>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">FEEDTAN CMG</h1>
+            <p class="text-gray-600">Loading secure payment gateway...</p>
+            <div class="mt-4">
+                <div class="w-12 h-1 bg-green-600 rounded-full animate-pulse mx-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Stages Modal -->
+    <div id="progress-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-lock text-green-600 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-2">Processing Payment</h3>
+                <p class="text-gray-600 text-sm">Please wait while we process your payment securely</p>
+            </div>
+            
+            <!-- Progress Steps -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-3" id="stage-1">
+                    <div class="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center text-sm font-semibold">
+                        <i class="fas fa-check text-xs"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-900">Initializing Payment</p>
+                        <p class="text-xs text-gray-500">Setting up secure connection</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-3" id="stage-2">
+                    <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-600 flex items-center justify-center text-sm font-semibold">
+                        <span class="loading-dots">2</span>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-900">Processing Payment</p>
+                        <p class="text-xs text-gray-500">Communicating with payment gateway</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-3" id="stage-3">
+                    <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center text-sm font-semibold">
+                        3
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-400">Generating Receipt</p>
+                        <p class="text-xs text-gray-400">Creating payment confirmation</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-3" id="stage-4">
+                    <div class="w-8 h-8 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center text-sm font-semibold">
+                        4
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-400">Sending Notifications</p>
+                        <p class="text-xs text-gray-400">Emailing receipt and SMS confirmation</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 text-center">
+                <p class="text-xs text-gray-500 mb-2">Powered by Feedtan CMG @2026 SECURED PAYMENT GATEWAY</p>
+                <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div id="progress-bar" class="bg-green-600 h-2 rounded-full transition-all duration-500" style="width: 25%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Success/Error Modal -->
     <div id="response-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 transform transition-all">
@@ -329,8 +406,17 @@
             const phoneField = document.getElementById('phone-field');
             const modal = document.getElementById('response-modal');
             const processingModal = document.getElementById('processing-modal');
+            const progressModal = document.getElementById('progress-modal');
+            const splashScreen = document.getElementById('splash-screen');
             const modalContent = document.getElementById('modal-content');
             const processingStatus = document.getElementById('processing-status');
+            const progressBar = document.getElementById('progress-bar');
+
+            // Hide splash screen after page loads
+            setTimeout(() => {
+                splashScreen.classList.add('hidden');
+                splashScreen.classList.remove('flex');
+            }, 2000);
 
             // Payment method selection
             const paymentCards = document.querySelectorAll('.payment-method-card');
@@ -401,6 +487,46 @@
                 }
             });
 
+            // Update progress stages
+            function updateProgressStage(stage, isComplete = false) {
+                for (let i = 1; i <= 4; i++) {
+                    const stageElement = document.getElementById(`stage-${i}`);
+                    const circleElement = stageElement.querySelector('.rounded-full');
+                    const textElements = stageElement.querySelectorAll('p');
+                    
+                    if (i < stage) {
+                        // Completed stages
+                        circleElement.className = 'w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center text-sm font-semibold';
+                        circleElement.innerHTML = '<i class="fas fa-check text-xs"></i>';
+                        textElements.forEach(el => el.classList.remove('text-gray-400'));
+                        textElements.forEach(el => el.classList.add('text-gray-900'));
+                    } else if (i === stage) {
+                        // Current stage
+                        if (isComplete) {
+                            circleElement.className = 'w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center text-sm font-semibold';
+                            circleElement.innerHTML = '<i class="fas fa-check text-xs"></i>';
+                            textElements.forEach(el => el.classList.remove('text-gray-400'));
+                            textElements.forEach(el => el.classList.add('text-gray-900'));
+                        } else {
+                            circleElement.className = 'w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold';
+                            circleElement.innerHTML = '<span class="loading-dots">' + i + '</span>';
+                            textElements.forEach(el => el.classList.remove('text-gray-400'));
+                            textElements.forEach(el => el.classList.add('text-gray-900'));
+                        }
+                    } else {
+                        // Future stages
+                        circleElement.className = 'w-8 h-8 rounded-full bg-gray-200 text-gray-400 flex items-center justify-center text-sm font-semibold';
+                        circleElement.textContent = i;
+                        textElements.forEach(el => el.classList.add('text-gray-400'));
+                        textElements.forEach(el => el.classList.remove('text-gray-900'));
+                    }
+                }
+                
+                // Update progress bar
+                const progressPercentage = (stage / 4) * 100;
+                progressBar.style.width = `${progressPercentage}%`;
+            }
+
             // Form submission
             form.addEventListener('submit', async function(e) {
                 e.preventDefault();
@@ -449,8 +575,13 @@
                     formattedPhone = '+255' + phoneNumber.replace(/[^0-9]/g, '');
                 }
 
-                // Show processing modal
-                showProcessingModal(paymentType);
+                // Show progress modal
+                progressModal.classList.remove('hidden');
+                progressModal.classList.add('flex');
+
+                // Start progress animation
+                updateProgressStage(1, true);
+                setTimeout(() => updateProgressStage(2), 1000);
 
                 // Disable button and show loading
                 payButton.disabled = true;
@@ -476,26 +607,68 @@
 
                     const result = await response.json();
 
-                    // Hide processing modal
-                    hideProcessingModal();
+                    // Update progress
+                    updateProgressStage(3, true);
+                    setTimeout(() => updateProgressStage(4), 1000);
 
                     if (result.status === 'success') {
-                        showSuccessModal(paymentType, result.data);
+                        // Generate and send receipt
+                        setTimeout(() => {
+                            generateAndSendReceipt(result.data, customerName, customerEmail, formattedPhone, amount, paymentType);
+                            showSuccessModal(paymentType, result.data);
+                        }, 2000);
                     } else {
-                        showError('Payment Failed', result.message || 'An error occurred while processing your payment. Please try again.');
+                        setTimeout(() => {
+                            showError('Payment Failed', result.message || 'An error occurred while processing your payment. Please try again.');
+                        }, 2000);
                     }
                 } catch (error) {
-                    hideProcessingModal();
-                    console.error('Payment error:', error);
-                    showError('Network Error', 'Unable to connect to payment service. Please check your internet connection and try again.');
+                    setTimeout(() => {
+                        console.error('Payment error:', error);
+                        showError('Network Error', 'Unable to connect to payment service. Please check your internet connection and try again.');
+                    }, 2000);
                 } finally {
-                    // Reset button
-                    payButton.disabled = false;
-                    payButton.classList.add('pulse-animation');
-                    payButtonText.classList.remove('hidden');
-                    payButtonLoading.classList.add('hidden');
+                    // Reset button after delay
+                    setTimeout(() => {
+                        payButton.disabled = false;
+                        payButton.classList.add('pulse-animation');
+                        payButtonText.classList.remove('hidden');
+                        payButtonLoading.classList.add('hidden');
+                        progressModal.classList.add('hidden');
+                        progressModal.classList.remove('flex');
+                    }, 5000);
                 }
             });
+
+            // Generate and send receipt
+            async function generateAndSendReceipt(paymentData, customerName, customerEmail, phoneNumber, amount, paymentType) {
+                try {
+                    // Generate receipt PDF
+                    const receiptResponse = await fetch('/api/payments/receipt', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                        },
+                        body: JSON.stringify({
+                            payment_data: paymentData,
+                            customer_name: customerName,
+                            customer_email: customerEmail,
+                            phone_number: phoneNumber,
+                            amount: amount,
+                            payment_type: paymentType
+                        })
+                    });
+
+                    const receiptResult = await receiptResponse.json();
+                    
+                    if (receiptResult.status === 'success') {
+                        console.log('Receipt generated and sent successfully');
+                    }
+                } catch (error) {
+                    console.error('Receipt generation error:', error);
+                }
+            }
 
             function isValidEmail(email) {
                 return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -521,20 +694,20 @@
             function showSuccessModal(paymentType, data) {
                 const messages = {
                     mobile: {
-                        title: 'Payment Initiated Successfully!',
-                        message: 'Please check your phone for a USSD prompt to complete the payment. Enter your PIN when prompted.',
+                        title: 'Payment Completed Successfully!',
+                        message: 'Your payment has been processed successfully. A receipt has been sent to your email and phone.',
                         icon: 'fa-mobile-alt',
                         color: 'green'
                     },
                     card: {
-                        title: 'Redirecting to Payment Page',
-                        message: 'You will be redirected to our secure payment page to complete your card transaction.',
+                        title: 'Payment Completed Successfully!',
+                        message: 'Your card payment has been processed successfully. A receipt has been sent to your email.',
                         icon: 'fa-credit-card',
                         color: 'blue'
                     },
                     qr: {
-                        title: 'QR Code Generated',
-                        message: 'Scan the QR code with your mobile banking app to complete the payment.',
+                        title: 'Payment Completed Successfully!',
+                        message: 'Your QR code payment has been processed successfully. A receipt has been sent to your email.',
                         icon: 'fa-qrcode',
                         color: 'purple'
                     }

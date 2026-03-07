@@ -48,6 +48,7 @@ Route::get('/pay', [\App\Http\Controllers\PaymentController::class, 'showPayment
 Route::post('/api/payments/process', [\App\Http\Controllers\PaymentController::class, 'processPayment'])->name('public.payments.process');
 Route::post('/api/payments/webhook', [\App\Http\Controllers\PaymentController::class, 'handleWebhook'])->name('public.payments.webhook');
 Route::get('/api/payments/status/{reference}', [\App\Http\Controllers\PaymentController::class, 'checkPaymentStatus'])->name('public.payments.status');
+Route::post('/api/payments/receipt', [\App\Http\Controllers\PaymentController::class, 'generateReceipt'])->name('public.payments.receipt');
 
 // Test Routes (Remove in production)
 Route::get('/test/snippe-config', [\App\Http\Controllers\TestPaymentController::class, 'showConfigStatus']);

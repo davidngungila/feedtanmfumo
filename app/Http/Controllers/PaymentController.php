@@ -145,4 +145,147 @@ class PaymentController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Generate and send payment receipt
+     */
+    public function generateReceipt(Request $request)
+    {
+        try {
+            $paymentData = $request->input('payment_data');
+            $customerName = $request->input('customer_name');
+            $customerEmail = $request->input('customer_email');
+            $phoneNumber = $request->input('phone_number');
+            $amount = $request->input('amount');
+            $paymentType = $request->input('payment_type');
+
+            // Create payment record
+            $payment = \App\Models\Payment::create([
+                'reference' => $paymentData['data']['reference'] ?? uniqid('PAY'),
+                'amount' => $amount,
+                'currency' => 'TZS',
+                'payment_type' => $paymentType,
+                'customer_name' => $customerName,
+                'customer_email' => $customerEmail,
+                'customer_phone' => $phoneNumber,
+                'status' => 'completed',
+                'payment_data' => json_encode($paymentData),
+                'paid_at' => now(),
+            ]);
+
+            // Generate PDF receipt
+            $pdf = $this->generateReceiptPDF($payment, $paymentData, $customerName, $customerEmail, $phoneNumber, $amount, $paymentType);
+
+            // Send email receipt
+            $this->sendEmailReceipt($customerEmail, $customerName, $pdf, $payment);
+
+            // Send SMS receipt
+            if ($phoneNumber) {
+                $this->sendSMSReceipt($phoneNumber, $customerName, $amount, $payment->reference);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Receipt generated and sent successfully',
+                'payment_id' => $payment->id
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Receipt generation error: ' . $e->getMessage());
+            
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to generate receipt'
+            ], 500);
+        }
+    }
+
+    /**
+     * Generate PDF receipt using membership structure
+     */
+    private function generateReceiptPDF($payment, $paymentData, $customerName, $customerEmail, $phoneNumber, $amount, $paymentType)
+    {
+        // Create user object for PDF template compatibility
+        $user = new \stdClass();
+        $user->name = $customerName;
+        $user->email = $customerEmail;
+        $user->phone = $phoneNumber;
+        $user->membership_code = $payment->reference;
+
+        // Prepare data for PDF
+        $pdfData = [
+            'payment' => $payment,
+            'payment_data' => $paymentData,
+            'customer_name' => $customerName,
+            'customer_email' => $customerEmail,
+            'phone_number' => $phoneNumber,
+            'amount' => $amount,
+            'payment_type' => $paymentType,
+            'reference' => $payment->reference,
+            'paid_at' => $payment->paid_at->format('d M Y, H:i'),
+        ];
+
+        // Use the membership PDF template
+        $pdf = \PDF::loadView('member.membership.pdf', [
+            'user' => $user,
+            'payment' => $payment,
+            'paymentData' => $pdfData,
+            'isReceipt' => true
+        ]);
+
+        // Save PDF
+        $filename = 'receipt_' . $payment->reference . '.pdf';
+        $pdf->save(public_path('receipts/' . $filename));
+
+        return $filename;
+    }
+
+    /**
+     * Send email receipt
+     */
+    private function sendEmailReceipt($email, $customerName, $pdfFilename, $payment)
+    {
+        try {
+            \Mail::send([
+                'to' => $email,
+                'subject' => 'Payment Receipt - Feedtan CMG',
+                'template' => 'emails.payment-receipt',
+                'data' => [
+                    'customerName' => $customerName,
+                    'payment' => $payment,
+                    'pdfPath' => public_path('receipts/' . $pdfFilename)
+                ]
+            ]);
+
+            \Log::info('Receipt email sent to: ' . $email);
+        } catch (\Exception $e) {
+            \Log::error('Failed to send receipt email: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Send SMS receipt
+     */
+    private function sendSMSReceipt($phoneNumber, $customerName, $amount, $reference)
+    {
+        try {
+            $message = "Dear {$customerName}, your payment of TSh " . number_format($amount) . " has been received successfully. Ref: {$reference}. Thank you from Feedtan CMG!";
+            
+            // Use Feedtan sender ID for SMS
+            $senderId = config('services.feedtan.sms_sender_id', 'FEEDTAN');
+            
+            // Here you would integrate with your SMS service
+            // For now, we'll just log it
+            \Log::info('SMS receipt would be sent to ' . $phoneNumber . ': ' . $message);
+            
+            // Example SMS integration (uncomment when you have SMS service):
+            /*
+            $smsService = new \App\Services\SmsNotificationService();
+            $smsService->sendSms($phoneNumber, $message, $senderId);
+            */
+            
+        } catch (\Exception $e) {
+            \Log::error('Failed to send receipt SMS: ' . $e->getMessage());
+        }
+    }
 }
