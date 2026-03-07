@@ -94,7 +94,13 @@
                                             data-max-amount="5000000"
                                         >
                                     </div>
-                                    <p class="text-green-200 text-sm mt-2">Min: TSh 500 | Max: TSh 5,000,000</p>
+                                    <div class="flex justify-between items-center mt-2">
+                                        <p class="text-green-200 text-sm">Min: TSh 500 | Max: TSh 5,000,000</p>
+                                        <p class="text-green-200 text-sm">Fee: <span id="fee-amount">TSh 0</span></p>
+                                    </div>
+                                    <div class="mt-2 p-3 bg-white/10 rounded-lg">
+                                        <p class="text-green-100 text-sm">Total Amount: <span id="total-amount" class="text-white font-bold">TSh {{ number_format($defaultAmount) }}</span></p>
+                                    </div>
                                 </div>
 
                                 <!-- Features -->
@@ -125,7 +131,7 @@
                                 <div class="flex items-center justify-between">
                                     <div>
                                         <p class="text-xs text-green-200">Powered by</p>
-                                        <p class="text-sm font-semibold">Snippe Payment Gateway</p>
+                                        <p class="text-sm font-semibold">Feedtan CMG @2026 SECURED PAYMENT GATEWAY</p>
                                     </div>
                                     <div class="security-badge px-3 py-1 rounded-full text-xs font-medium">
                                         <i class="fas fa-lock mr-1"></i> Secured
@@ -314,7 +320,35 @@
             </div>
             <h3 class="text-xl font-semibold text-gray-900 mb-2">Processing Payment</h3>
             <p class="text-gray-600 mb-4">Please wait while we process your payment<span class="loading-dots"></span></p>
-            <div id="processing-status" class="text-sm text-gray-500"></div>
+            <div id="processing-status" class="text-sm text-gray-500 mb-4"></div>
+            
+            <!-- Payment Stages -->
+            <div class="space-y-3 mb-6">
+                <div class="flex items-center gap-3" id="stage-1">
+                    <div class="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center">
+                        <i class="fas fa-check text-white text-xs"></i>
+                    </div>
+                    <span class="text-sm text-gray-700">Payment initiated</span>
+                </div>
+                <div class="flex items-center gap-3" id="stage-2">
+                    <div class="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center" id="stage-2-icon">
+                        <div class="w-3 h-3 rounded-full bg-white"></div>
+                    </div>
+                    <span class="text-sm text-gray-500" id="stage-2-text">Connecting to payment provider</span>
+                </div>
+                <div class="flex items-center gap-3" id="stage-3">
+                    <div class="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center" id="stage-3-icon">
+                        <div class="w-3 h-3 rounded-full bg-white"></div>
+                    </div>
+                    <span class="text-sm text-gray-500" id="stage-3-text">Processing payment</span>
+                </div>
+                <div class="flex items-center gap-3" id="stage-4">
+                    <div class="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center" id="stage-4-icon">
+                        <div class="w-3 h-3 rounded-full bg-white"></div>
+                    </div>
+                    <span class="text-sm text-gray-500" id="stage-4-text">Generating receipt</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -331,6 +365,35 @@
             const processingModal = document.getElementById('processing-modal');
             const modalContent = document.getElementById('modal-content');
             const processingStatus = document.getElementById('processing-status');
+            const feeAmount = document.getElementById('fee-amount');
+            const totalAmount = document.getElementById('total-amount');
+
+            // Calculate fee function
+            function calculateFee(amount) {
+                const feePercentage = 0.02;
+                const minFee = 500;
+                const maxFee = 10000;
+                
+                let calculatedFee = amount * feePercentage;
+                
+                if (calculatedFee < minFee) {
+                    return minFee;
+                } else if (calculatedFee > maxFee) {
+                    return maxFee;
+                }
+                
+                return calculatedFee;
+            }
+
+            // Update fee and total amount
+            function updateFeeDisplay() {
+                let value = parseInt(amountInput.value.replace(/[^0-9]/g, '')) || 0;
+                const fee = calculateFee(value);
+                const total = value + fee;
+                
+                feeAmount.textContent = `TSh ${fee.toLocaleString()}`;
+                totalAmount.textContent = `TSh ${total.toLocaleString()}`;
+            }
 
             // Payment method selection
             const paymentCards = document.querySelectorAll('.payment-method-card');
@@ -384,7 +447,13 @@
                         this.classList.remove('border-red-500');
                     }
                 }
+                
+                // Update fee display
+                updateFeeDisplay();
             });
+
+            // Initialize fee display
+            updateFeeDisplay();
 
             // Phone number formatting
             document.getElementById('customer_phone').addEventListener('input', function() {
@@ -449,8 +518,11 @@
                     formattedPhone = '+255' + phoneNumber.replace(/[^0-9]/g, '');
                 }
 
-                // Show processing modal
+                // Show processing modal with stages
                 showProcessingModal(paymentType);
+
+                // Simulate payment stages
+                simulatePaymentStages();
 
                 // Disable button and show loading
                 payButton.disabled = true;
@@ -496,6 +568,31 @@
                     payButtonLoading.classList.add('hidden');
                 }
             });
+
+            // Simulate payment stages
+            function simulatePaymentStages() {
+                const stages = [
+                    { id: 'stage-2', text: 'stage-2-text', icon: 'stage-2-icon', delay: 1000 },
+                    { id: 'stage-3', text: 'stage-3-text', icon: 'stage-3-icon', delay: 3000 },
+                    { id: 'stage-4', text: 'stage-4-text', icon: 'stage-4-icon', delay: 5000 }
+                ];
+
+                stages.forEach(stage => {
+                    setTimeout(() => {
+                        // Complete stage
+                        document.getElementById(stage.id).querySelector('.rounded-full').classList.remove('bg-gray-300');
+                        document.getElementById(stage.id).querySelector('.rounded-full').classList.add('bg-green-500');
+                        document.getElementById(stage.id).querySelector('.rounded-full').innerHTML = '<i class="fas fa-check text-white text-xs"></i>';
+                        
+                        // Update text
+                        const textElement = document.getElementById(stage.text);
+                        if (textElement) {
+                            textElement.classList.remove('text-gray-500');
+                            textElement.classList.add('text-gray-700');
+                        }
+                    }, stage.delay);
+                });
+            }
 
             function isValidEmail(email) {
                 return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);

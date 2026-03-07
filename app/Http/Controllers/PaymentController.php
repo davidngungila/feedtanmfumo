@@ -3,16 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Services\SnippeService;
+use App\Services\ReceiptService;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class PaymentController extends Controller
 {
     protected $snippeService;
+    protected $receiptService;
 
-    public function __construct(SnippeService $snippeService)
+    public function __construct(SnippeService $snippeService, ReceiptService $receiptService)
     {
         $this->snippeService = $snippeService;
+        $this->receiptService = $receiptService;
     }
 
     /**
@@ -49,40 +53,72 @@ class PaymentController extends Controller
         }
 
         try {
+            $amount = $request->amount;
+            $fee = $this->snippeService->calculateFee($amount);
+            $totalAmount = $this->snippeService->getTotalAmount($amount);
+
             $customerName = explode(' ', $request->customer_name, 2);
             $firstName = $customerName[0] ?? '';
             $lastName = $customerName[1] ?? '';
 
-            $paymentData = [
-                'payment_type' => $request->payment_type,
-                'details' => [
-                    'amount' => $request->amount,
-                    'currency' => 'TZS'
-                ],
+            // Create payment record
+            $payment = Payment::create([
+                'reference' => 'PAY-' . strtoupper(uniqid()),
+                'customer_name' => $request->customer_name,
+                'customer_email' => $request->customer_email,
                 'phone_number' => $request->phone_number ?? null,
-                'customer' => [
-                    'firstname' => $firstName,
-                    'lastname' => $lastName,
-                    'email' => $request->customer_email
-                ],
-                'webhook_url' => route('public.payments.webhook'),
-                'metadata' => [
-                    'merchant' => 'FEEDTAN CMG',
-                    'source' => 'public_payment_page'
+                'payment_type' => $request->payment_type,
+                'amount' => $amount,
+                'fee' => $fee,
+                'total_amount' => $totalAmount,
+                'currency' => 'TZS',
+                'status' => 'pending',
+                'payment_data' => [
+                    'payment_type' => $request->payment_type,
+                    'details' => [
+                        'amount' => $totalAmount,
+                        'currency' => 'TZS'
+                    ],
+                    'phone_number' => $request->phone_number ?? null,
+                    'customer' => [
+                        'firstname' => $firstName,
+                        'lastname' => $lastName,
+                        'email' => $request->customer_email
+                    ],
+                    'webhook_url' => route('public.payments.webhook'),
+                    'metadata' => [
+                        'merchant' => 'FEEDTAN CMG',
+                        'source' => 'public_payment_page',
+                        'fee' => $fee,
+                        'original_amount' => $amount
+                    ]
                 ]
-            ];
+            ]);
 
+            $paymentData = $payment->payment_data;
             $response = $this->snippeService->createPayment($paymentData);
 
             if ($response['status'] === 'success') {
+                // Update payment with external reference
+                $payment->update([
+                    'reference' => $response['data']['reference'] ?? $payment->reference,
+                    'payment_data' => array_merge($payment->payment_data, $response['data'])
+                ]);
+
                 return response()->json([
                     'status' => 'success',
-                    'data' => $response['data']
+                    'data' => array_merge($response['data'], [
+                        'local_reference' => $payment->reference,
+                        'fee' => $fee,
+                        'total_amount' => $totalAmount
+                    ])
                 ]);
             } else {
+                $payment->update(['status' => 'failed']);
                 return response()->json([
                     'status' => 'error',
-                    'message' => $response['message'] ?? 'Payment processing failed'
+                    'message' => $response['message'] ?? 'Payment processing failed',
+                    'error_code' => $response['error_code'] ?? 'unknown_error'
                 ], 400);
             }
 
@@ -108,11 +144,27 @@ class PaymentController extends Controller
             }
 
             $webhookData = $request->all();
-            
-            // Store webhook data
+            $reference = $webhookData['data']['reference'] ?? null;
+            $status = $webhookData['data']['status'] ?? 'unknown';
+
+            // Find and update payment
+            $payment = Payment::where('reference', $reference)->first();
+            if ($payment) {
+                $payment->update([
+                    'status' => $status,
+                    'webhook_processed_at' => now(),
+                    'payment_data' => array_merge($payment->payment_data ?? [], $webhookData)
+                ]);
+
+                // Generate and send receipt if payment is successful
+                if (in_array($status, ['completed', 'success', 'paid'])) {
+                    $this->receiptService->generateAndSendReceipt($payment);
+                }
+            }
+
             \App\Models\PaymentWebhook::create([
-                'payment_reference' => $webhookData['data']['reference'] ?? null,
-                'status' => $webhookData['data']['status'] ?? 'unknown',
+                'payment_reference' => $reference,
+                'status' => $status,
                 'payload' => json_encode($webhookData),
                 'processed' => false
             ]);
