@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\SnippeService;
+use App\Services\SmsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -11,10 +12,12 @@ use Illuminate\Support\Facades\Validator;
 class PaymentController extends Controller
 {
     protected $snippeService;
+    protected $smsService;
 
-    public function __construct(SnippeService $snippeService)
+    public function __construct(SnippeService $snippeService, SmsService $smsService = null)
     {
         $this->snippeService = $snippeService;
+        $this->smsService = $smsService;
     }
 
     /**
@@ -556,11 +559,23 @@ class PaymentController extends Controller
         try {
             // Send email notification
             if ($payment->customer_email) {
-                Mail::send([], [], function ($message) use ($payment, $data) {
-                    $message->to($payment->customer_email)
-                        ->subject('Payment Completed Successfully - Feedtan CMG')
-                        ->html($this->getPaymentSuccessEmailTemplate($payment, $data));
-                });
+                try {
+                    Mail::send([], [], function ($message) use ($payment, $data) {
+                        $message->to($payment->customer_email)
+                            ->subject('Payment Completed Successfully - Feedtan CMG')
+                            ->html($this->getPaymentSuccessEmailTemplate($payment, $data));
+                    });
+                    
+                    Log::info('Payment success email sent', [
+                        'email' => $payment->customer_email,
+                        'reference' => $payment->reference
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send payment success email', [
+                        'email' => $payment->customer_email,
+                        'error' => $e->getMessage()
+                    ]);
+                }
             }
 
             // Send SMS notification
@@ -569,11 +584,29 @@ class PaymentController extends Controller
                           " has been completed successfully. Ref: " . $payment->reference . 
                           ". Thank you from Feedtan CMG!";
                 
-                // Log SMS (implement actual SMS service later)
-                Log::info('SMS notification would be sent', [
-                    'phone' => $payment->customer_phone,
-                    'message' => $message
-                ]);
+                if ($this->smsService) {
+                    $smsResult = $this->smsService->sendSms($payment->customer_phone, $message);
+                    
+                    if ($smsResult['status'] === 'success') {
+                        Log::info('Payment success SMS sent', [
+                            'phone' => $payment->customer_phone,
+                            'reference' => $payment->reference,
+                            'message_id' => $smsResult['message_id'] ?? null
+                        ]);
+                    } else {
+                        Log::error('Failed to send payment success SMS', [
+                            'phone' => $payment->customer_phone,
+                            'error' => $smsResult['error'] ?? 'Unknown error'
+                        ]);
+                    }
+                } else {
+                    // Fallback: log SMS if service not available
+                    Log::warning('SMS service not available, logging only', [
+                        'phone' => $payment->customer_phone,
+                        'message' => $message,
+                        'reference' => $payment->reference
+                    ]);
+                }
             }
 
         } catch (\Exception $e) {
@@ -592,11 +625,23 @@ class PaymentController extends Controller
         try {
             // Send email notification
             if ($payment->customer_email) {
-                Mail::send([], [], function ($message) use ($payment, $data) {
-                    $message->to($payment->customer_email)
-                        ->subject('Payment Failed - Feedtan CMG')
-                        ->html($this->getPaymentFailureEmailTemplate($payment, $data));
-                });
+                try {
+                    Mail::send([], [], function ($message) use ($payment, $data) {
+                        $message->to($payment->customer_email)
+                            ->subject('Payment Failed - Feedtan CMG')
+                            ->html($this->getPaymentFailureEmailTemplate($payment, $data));
+                    });
+                    
+                    Log::info('Payment failure email sent', [
+                        'email' => $payment->customer_email,
+                        'reference' => $payment->reference
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Failed to send payment failure email', [
+                        'email' => $payment->customer_email,
+                        'error' => $e->getMessage()
+                    ]);
+                }
             }
 
             // Send SMS notification
@@ -605,11 +650,29 @@ class PaymentController extends Controller
                           " failed. Reason: " . ($data['failure_reason'] ?? 'Unknown error') . 
                           ". Ref: " . $payment->reference . ". Please contact support.";
                 
-                // Log SMS (implement actual SMS service later)
-                Log::info('SMS notification would be sent', [
-                    'phone' => $payment->customer_phone,
-                    'message' => $message
-                ]);
+                if ($this->smsService) {
+                    $smsResult = $this->smsService->sendSms($payment->customer_phone, $message);
+                    
+                    if ($smsResult['status'] === 'success') {
+                        Log::info('Payment failure SMS sent', [
+                            'phone' => $payment->customer_phone,
+                            'reference' => $payment->reference,
+                            'message_id' => $smsResult['message_id'] ?? null
+                        ]);
+                    } else {
+                        Log::error('Failed to send payment failure SMS', [
+                            'phone' => $payment->customer_phone,
+                            'error' => $smsResult['error'] ?? 'Unknown error'
+                        ]);
+                    }
+                } else {
+                    // Fallback: log SMS if service not available
+                    Log::warning('SMS service not available, logging only', [
+                        'phone' => $payment->customer_phone,
+                        'message' => $message,
+                        'reference' => $payment->reference
+                    ]);
+                }
             }
 
         } catch (\Exception $e) {
@@ -829,21 +892,32 @@ class PaymentController extends Controller
         try {
             $message = "Dear {$customerName}, your payment of TSh " . number_format($amount) . " has been received successfully. Ref: {$reference}. Thank you from Feedtan CMG!";
             
-            // Use Feedtan sender ID for SMS
-            $senderId = config('services.feedtan.sms_sender_id', 'FEEDTAN');
-            
-            // Here you would integrate with your SMS service
-            // For now, we'll just log it
-            \Log::info('SMS receipt would be sent to ' . $phoneNumber . ': ' . $message);
-            
-            // Example SMS integration (uncomment when you have SMS service):
-            /*
-            $smsService = new \App\Services\SmsNotificationService();
-            $smsService->sendSms($phoneNumber, $message, $senderId);
-            */
+            if ($this->smsService) {
+                $smsResult = $this->smsService->sendSms($phoneNumber, $message);
+                
+                if ($smsResult['status'] === 'success') {
+                    Log::info('Receipt SMS sent successfully', [
+                        'phone' => $phoneNumber,
+                        'reference' => $reference,
+                        'message_id' => $smsResult['message_id'] ?? null
+                    ]);
+                } else {
+                    Log::error('Failed to send receipt SMS', [
+                        'phone' => $phoneNumber,
+                        'error' => $smsResult['error'] ?? 'Unknown error'
+                    ]);
+                }
+            } else {
+                // Fallback: log SMS if service not available
+                Log::warning('SMS service not available, logging receipt SMS only', [
+                    'phone' => $phoneNumber,
+                    'message' => $message,
+                    'reference' => $reference
+                ]);
+            }
             
         } catch (\Exception $e) {
-            \Log::error('Failed to send receipt SMS: ' . $e->getMessage());
+            Log::error('Failed to send receipt SMS: ' . $e->getMessage());
         }
     }
 }
