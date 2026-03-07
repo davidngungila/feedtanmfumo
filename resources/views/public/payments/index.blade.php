@@ -264,23 +264,7 @@
         </div>
     </div>
 
-    <!-- Splash Screen -->
-    <div id="splash-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
-        <div class="text-center">
-            <div class="w-20 h-20 bg-green-600 rounded-2xl flex items-center justify-center mb-6 animate-pulse">
-                <span class="text-3xl font-bold text-white">FC</span>
-            </div>
-            <h1 class="text-2xl font-bold text-gray-800 mb-2">FEEDTAN CMG</h1>
-            <p class="text-gray-600">Loading secure payment gateway...</p>
-            <div class="mt-4">
-                <div class="w-12 h-1 bg-green-600 rounded-full animate-pulse mx-auto"></div>
-            </div>
-            <button onclick="hideSplashManually()" class="mt-4 text-xs text-gray-500 hover:text-gray-700 underline">
-                Click here if page doesn't load automatically
-            </button>
-        </div>
-    </div>
-
+    
     <!-- Progress Stages Modal -->
     <div id="progress-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
@@ -378,32 +362,14 @@
             const modal = document.getElementById('response-modal');
             const processingModal = document.getElementById('processing-modal');
             const progressModal = document.getElementById('progress-modal');
-            const splashScreen = document.getElementById('splash-screen');
             const modalContent = document.getElementById('modal-content');
             const processingStatus = document.getElementById('processing-status');
             const progressBar = document.getElementById('progress-bar');
 
-            // Hide splash screen after page loads
-            setTimeout(() => {
-                try {
-                    const splashScreen = document.getElementById('splash-screen');
-                    if (splashScreen) {
-                        splashScreen.classList.add('hidden');
-                        splashScreen.classList.remove('flex');
-                        console.log('Splash screen hidden successfully');
-                    }
-                } catch (error) {
-                    console.error('Error hiding splash screen:', error);
-                    // Fallback: force hide
-                    const splash = document.getElementById('splash-screen');
-                    if (splash) {
-                        splash.style.display = 'none';
-                    }
-                }
-            }, 1500);
+            // Hide splash screen after page loads (removed - no splash screen)
+            // Page loads directly without splash screen
 
             // Initialize phone field as visible by default (mobile money auto-selected)
-            const phoneField = document.getElementById('phone-field');
             if (phoneField) {
                 phoneField.style.display = 'block';
                 phoneField.style.opacity = '1';
@@ -778,19 +744,6 @@
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
             }
-
-            window.hideSplashManually = function() {
-                try {
-                    const splashScreen = document.getElementById('splash-screen');
-                    if (splashScreen) {
-                        splashScreen.classList.add('hidden');
-                        splashScreen.classList.remove('flex');
-                        console.log('Splash screen hidden manually');
-                    }
-                } catch (error) {
-                    console.error('Error manually hiding splash screen:', error);
-                }
-            };
 
             window.closeModal = function() {
                 modal.classList.add('hidden');
