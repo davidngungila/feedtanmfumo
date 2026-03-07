@@ -403,24 +403,16 @@
             }, 1500);
 
             // Initialize phone field as visible by default (mobile money auto-selected)
-            try {
-                const phoneField = document.getElementById('phone-field');
-                if (phoneField) {
-                    phoneField.style.display = 'block';
-                    phoneField.style.opacity = '1';
-                    phoneField.style.transform = 'translateY(0)';
-                    console.log('Phone field initialized as visible');
-                }
-            } catch (error) {
-                console.error('Error initializing phone field:', error);
+            const phoneField = document.getElementById('phone-field');
+            if (phoneField) {
+                phoneField.style.display = 'block';
+                phoneField.style.opacity = '1';
+                phoneField.style.transform = 'translateY(0)';
             }
 
             // Payment method selection (removed - only mobile money available)
             // Mobile money is auto-selected and always visible
-            const phoneField = document.getElementById('phone-field');
-            phoneField.style.display = 'block';
-            phoneField.style.opacity = '1';
-            phoneField.style.transform = 'translateY(0)';
+            // Phone field is already initialized above
 
             // Amount formatting and validation
             amountInput.addEventListener('input', function() {
@@ -533,9 +525,11 @@
 
                 if (!customerEmail.trim() || !isValidEmail(customerEmail)) {
                     showError('Invalid Email', 'Please enter a valid email address');
-                // Format phone number
-                const formattedPhone = formatPhoneNumber(phoneNumber);
-                
+                    document.getElementById('customer_email').classList.add('error-shake');
+                    setTimeout(() => document.getElementById('customer_email').classList.remove('error-shake'), 500);
+                    return;
+                }
+
                 // Always use mobile money as payment type
                 const paymentType = 'mobile';
 
@@ -556,7 +550,7 @@
                         body: JSON.stringify({
                             payment_type: paymentType,
                             amount: amount,
-                            phone_number: formattedPhone,
+                            phone_number: formatPhoneNumber(phoneNumber),
                             customer_name: customerName.trim(),
                             customer_email: customerEmail.trim()
                         })
