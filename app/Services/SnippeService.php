@@ -20,35 +20,6 @@ class SnippeService
     }
 
     /**
-     * Calculate transaction fee
-     */
-    public function calculateFee($amount)
-    {
-        // Fee structure: 2% of transaction amount, minimum TSh 500, maximum TSh 10,000
-        $feePercentage = 0.02;
-        $minFee = 500;
-        $maxFee = 10000;
-        
-        $calculatedFee = $amount * $feePercentage;
-        
-        if ($calculatedFee < $minFee) {
-            return $minFee;
-        } elseif ($calculatedFee > $maxFee) {
-            return $maxFee;
-        }
-        
-        return $calculatedFee;
-    }
-
-    /**
-     * Get total amount including fee
-     */
-    public function getTotalAmount($amount)
-    {
-        return $amount + $this->calculateFee($amount);
-    }
-
-    /**
      * Create a payment via Snippe API
      */
     public function createPayment(array $data)

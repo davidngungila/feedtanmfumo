@@ -41,10 +41,4 @@ return [
         'webhook_secret' => env('SNIPPE_WEBHOOK_SECRET'),
     ],
 
-    'sms' => [
-        'api_key' => env('SMS_API_KEY'),
-        'sender_id' => env('SMS_SENDER_ID', 'FEEDTAN'),
-        'endpoint' => env('SMS_ENDPOINT', 'https://api.sms-provider.com/send'),
-    ],
-
 ];
