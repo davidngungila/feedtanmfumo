@@ -151,7 +151,7 @@
                                     <div class="space-y-3">
                                         <!-- Mobile Money (Auto-selected) -->
                                         <div class="payment-method-card selected rounded-xl p-4 cursor-pointer" data-method="mobile">
-                                            <div class="flex items-center justify-between">
+                                            <div class="flex items-center justify-between mb-3">
                                                 <div class="flex items-center gap-4">
                                                     <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
                                                         <i class="fas fa-mobile-alt text-green-600 text-lg"></i>
@@ -165,6 +165,57 @@
                                                     <div class="w-2 h-2 rounded-full bg-white"></div>
                                                 </div>
                                             </div>
+                                            <!-- Mobile Money Options - 2 per row -->
+                                            <div class="grid grid-cols-2 gap-3 mt-3">
+                                                <!-- M-Pesa -->
+                                                <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                                    <input type="radio" name="mobile_provider" value="mpesa" class="sr-only" checked>
+                                                    <div class="w-5 h-5 rounded-full bg-green-600 border-2 border-white flex items-center justify-center">
+                                                        <div class="w-2 h-2 rounded-full bg-white"></div>
+                                                    </div>
+                                                    <div>
+                                                        <p class="font-medium text-gray-900">M-Pesa</p>
+                                                        <p class="text-xs text-gray-500">Dial *150#00#</p>
+                                                    </div>
+                                                </label>
+                                                
+                                                <!-- Airtel Money -->
+                                                <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                                    <input type="radio" name="mobile_provider" value="airtel" class="sr-only">
+                                                    <div class="w-5 h-5 rounded-full border-2 border-orange-500 bg-orange-500 flex items-center justify-center">
+                                                        <div class="w-2 h-2 rounded-full bg-white"></div>
+                                                    </div>
+                                                    <div>
+                                                        <p class="font-medium text-gray-900">Airtel Money</p>
+                                                        <p class="text-xs text-gray-500">Dial *150*60#</p>
+                                                    </div>
+                                                </label>
+                                                
+                                                <!-- Tigo Pesa -->
+                                                <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                                    <input type="radio" name="mobile_provider" value="tigo" class="sr-only">
+                                                    <div class="w-5 h-5 rounded-full border-2 border-blue-500 bg-blue-500 flex items-center justify-center">
+                                                        <div class="w-2 h-2 rounded-full bg-white"></div>
+                                                    </div>
+                                                    <div>
+                                                        <p class="font-medium text-gray-900">Tigo Pesa</p>
+                                                        <p class="text-xs text-gray-500">Dial *150*01#</p>
+                                                    </div>
+                                                </label>
+                                                
+                                                <!-- Halotel -->
+                                                <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                                    <input type="radio" name="mobile_provider" value="halotel" class="sr-only">
+                                                    <div class="w-5 h-5 rounded-full border-2 border-purple-500 bg-purple-500 flex items-center justify-center">
+                                                        <div class="w-2 h-2 rounded-full bg-white"></div>
+                                                    </div>
+                                                    <div>
+                                                        <p class="font-medium text-gray-900">Halotel</p>
+                                                        <p class="text-xs text-gray-500">Dial *150*88#</p>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
                                         </div>
 
                                         <!-- QR Code -->
@@ -509,6 +560,34 @@
                 });
             });
 
+            // Mobile provider selection
+            const mobileProviders = document.querySelectorAll('input[name="mobile_provider"]');
+            mobileProviders.forEach(provider => {
+                provider.addEventListener('change', function() {
+                    // Update visual selection
+                    mobileProviders.forEach(p => {
+                        const label = p.closest('label');
+                        const radioDiv = label.querySelector('.rounded-full');
+                        
+                        if (p.checked) {
+                            // Selected provider
+                            radioDiv.className = 'w-5 h-5 rounded-full border-2 border-white flex items-center justify-center';
+                            const whiteDot = radioDiv.querySelector('.bg-white');
+                            if (whiteDot) whiteDot.classList.remove('hidden');
+                        } else {
+                            // Unselected provider
+                            const color = p.value === 'mpesa' ? 'border-green-600 bg-green-600' :
+                                         p.value === 'airtel' ? 'border-orange-500 bg-orange-500' :
+                                         p.value === 'tigo' ? 'border-blue-500 bg-blue-500' :
+                                         'border-purple-500 bg-purple-500';
+                            radioDiv.className = `w-5 h-5 rounded-full ${color} flex items-center justify-center`;
+                            const whiteDot = radioDiv.querySelector('.bg-white');
+                            if (whiteDot) whiteDot.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+
             // Amount formatting and validation
             amountInput.addEventListener('input', function() {
                 let value = this.value.replace(/[^0-9]/g, '');
@@ -593,6 +672,13 @@
                 const customerName = document.getElementById('customer_name').value;
                 const customerEmail = document.getElementById('customer_email').value;
 
+                // Get selected mobile provider if mobile money
+                let mobileProvider = null;
+                if (paymentType === 'mobile') {
+                    const selectedProvider = document.querySelector('input[name="mobile_provider"]:checked');
+                    mobileProvider = selectedProvider ? selectedProvider.value : 'mpesa'; // Default to M-Pesa
+                }
+
                 // Enhanced validation
                 if (amount < 500 || amount > 5000000) {
                     showError('Invalid Amount', 'Amount must be between TSh 500 and TSh 5,000,000');
@@ -657,7 +743,8 @@
                             amount: amount,
                             phone_number: formattedPhone,
                             customer_name: customerName.trim(),
-                            customer_email: customerEmail.trim()
+                            customer_email: customerEmail.trim(),
+                            mobile_provider: mobileProvider
                         })
                     });
 
