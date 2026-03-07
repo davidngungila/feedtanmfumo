@@ -52,7 +52,6 @@ Route::get('/api/payments/status/{reference}', [\App\Http\Controllers\PaymentCon
 // Test Routes (Remove in production)
 Route::get('/test/snippe-config', [\App\Http\Controllers\TestPaymentController::class, 'showConfigStatus']);
 Route::post('/test/snippe-api', [\App\Http\Controllers\TestPaymentController::class, 'testApiConnection']);
-Route::post('/test/simple-payment', [\App\Http\Controllers\TestPaymentController::class, 'testSimplePayment']);
 
 // Guarantor Assessment (publicly accessible via obscure link)
 Route::get('/guarantor-assessment/{loanUlid}', [\App\Http\Controllers\GuarantorAssessmentController::class, 'show'])->name('guarantor-assessment.show');

@@ -242,49 +242,6 @@
             @endif
         </div>
 
-        <!-- SMS Configuration Section -->
-        <div class="bg-white rounded-lg shadow-md p-6 mt-6">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-800">SMS Configuration</h3>
-                <div class="text-sm text-gray-600">
-                    <span class="inline-block">API Key: </span>
-                    <span class="font-mono bg-gray-100 px-2 py-1 rounded text-xs">
-                        {{ config('services.sms.api_key') ? substr(config('services.sms.api_key'), 0, 8) . '...' : 'Not configured' }}
-                    </span>
-                    <a href="{{ route('admin.settings.communication') }}" class="text-blue-600 hover:text-blue-800 text-xs ml-2">Update in .env</a>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div class="space-y-1">
-                    <span class="font-medium text-gray-700">SMS API Key:</span>
-                    <span class="font-mono bg-gray-100 px-2 py-1 rounded text-xs">
-                        {{ config('services.sms.api_key') ? substr(config('services.sms.api_key'), 0, 12) . '...' : 'your_sms_api_key_here' }}
-                    </span>
-                </div>
-                <div class="space-y-1">
-                    <span class="font-medium text-gray-700">Sender ID:</span>
-                    <span class="font-mono bg-gray-100 px-2 py-1 rounded text-xs">
-                        {{ config('services.sms.sender_id', 'FEEDTAN') }}
-                    </span>
-                </div>
-                <div class="space-y-1">
-                    <span class="font-medium text-gray-700">Endpoint:</span>
-                    <span class="font-mono bg-gray-100 px-2 py-1 rounded text-xs">
-                        {{ config('services.sms.endpoint', 'https://api.sms-provider.com/send') }}
-                    </span>
-                </div>
-            </div>
-            
-            <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p class="text-sm text-blue-800">
-                    <i class="fas fa-info-circle mr-2"></i>
-                    <strong>Important:</strong> SMS configuration is managed through environment variables (.env file). 
-                    Update your .env file with the SMS credentials and restart the application to apply changes.
-                </p>
-            </div>
-        </div>
-
         <!-- Send SMS Section -->
         <div class="bg-white rounded-lg shadow-md p-6">
             <div class="flex items-center justify-between mb-4">
