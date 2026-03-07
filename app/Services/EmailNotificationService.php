@@ -1059,5 +1059,33 @@ Best regards,
             return false;
         }
     }
+
+    /**
+     * Send custom email with template
+     */
+    public function sendCustomEmail(string $email, string $subject, string $template, array $data = []): bool
+    {
+        try {
+            $this->reloadMailConfig();
+
+            $orgInfo = $this->getOrganizationInfo();
+
+            Mail::send($template, $data, function ($mail) use ($email, $subject, $orgInfo) {
+                $mail->to($email)
+                    ->subject($subject)
+                    ->from($orgInfo['from_email'], $orgInfo['from_name']);
+            });
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Failed to send custom email: '.$e->getMessage(), [
+                'email' => $email,
+                'subject' => $subject,
+                'template' => $template
+            ]);
+
+            return false;
+        }
+    }
 }
 
