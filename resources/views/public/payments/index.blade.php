@@ -3,67 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure Payment - Feedtan Community Microfinance Group</title>
+    <title>FEEDTAN | {{ $merchantName }} - Secure Payment</title>
+    <meta name="description" content="FEEDTAN — Secure payment powered by Snippe. Pay with M-Pesa, Tigo Pesa, Airtel Money, or card. Fast, reliable, and secure transactions.">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
-        * {
-            font-family: 'Inter', sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-        
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .payment-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        * { font-family: 'Inter', sans-serif; }
+        .tabular-nums { font-variant-numeric: tabular-nums; }
+        .payment-method-card {
             transition: all 0.3s ease;
+            border: 2px solid transparent;
         }
-        
-        .payment-card:hover {
-            background: rgba(255, 255, 255, 0.15);
+        .payment-method-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
-        
-        .gradient-text {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            color: transparent;
+        .payment-method-card.selected {
+            border-color: #16a34a;
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
         }
-        
-        .shimmer {
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
+        .pulse-animation {
+            animation: pulse 2s infinite;
         }
-        
-        @keyframes shimmer {
-            0% { background-position: -200% center; }
-            100% { background-position: 200% center; }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(22, 163, 74, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
         }
-        
-        .pulse-glow {
-            animation: pulse-glow 2s infinite;
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
         }
-        
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.3); }
-            50% { box-shadow: 0 0 30px rgba(102, 126, 234, 0.5); }
+        @keyframes dots {
+            0%, 20% { content: ''; }
             40% { content: '.'; }
             60% { content: '..'; }
             80%, 100% { content: '...'; }
@@ -81,74 +55,55 @@
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
-    <div class="w-full max-w-6xl mx-auto">
-        <!-- Header Section -->
-        <div class="text-center mb-8">
-            <div class="inline-flex items-center gap-3 mb-4">
-                <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg">
-                    <span class="text-2xl font-bold gradient-text">FC</span>
-                </div>
-                <div class="text-left">
-                    <h1 class="text-4xl font-bold text-white mb-2">Feedtan CMG</h1>
-                    <p class="text-white/80 text-lg">Community Microfinance Group</p>
-                    <p class="text-white/60 text-sm">Secure Payment Gateway</p>
-                </div>
-            </div>
-            
-            <!-- Security Badges -->
-            <div class="flex justify-center gap-4 mb-6">
-                <div class="security-badge px-4 py-2 rounded-full text-xs font-semibold text-white uppercase tracking-wider">
-                    <i class="fas fa-shield-alt mr-2"></i>Secured
-                </div>
-                <div class="security-badge px-4 py-2 rounded-full text-xs font-semibold text-white uppercase tracking-wider">
-                    <i class="fas fa-lock mr-2"></i>Encrypted
-                </div>
-                <div class="security-badge px-4 py-2 rounded-full text-xs font-semibold text-white uppercase tracking-wider">
-                    <i class="fas fa-certificate mr-2"></i>Verified
-                </div>
-            </div>
-        </div>
-
+<body class="min-h-screen bg-white">
+    <div class="relative min-h-screen flex items-center justify-center p-4">
         <!-- Main Payment Container -->
-        <div class="grid lg:grid-cols-2 gap-8 items-start">
-            <!-- Left Panel - Payment Form -->
-            <div class="w-full lg:w-auto">
-                <div class="glass-effect rounded-3xl p-8 shadow-2xl">
-                    <!-- Form Header -->
-                    <div class="mb-8">
-                        <h2 class="text-2xl font-bold text-white mb-2">Complete Your Payment</h2>
-                        <p class="text-white/80 mb-4">Fill in your details to process your payment securely. All transactions are encrypted and protected.</p>
-                        
-                        <!-- Progress Indicator -->
-                        <div class="w-full bg-white/20 rounded-full h-2 mb-6">
-                            <div id="payment-progress" class="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full transition-all duration-500" style="width: 25%"></div>
-                        </div>
-                    </div>
-
-                    <form id="payment-form" class="space-y-6">
-                        <!-- Amount Section -->
-                        <div>
-                            <label class="block text-white font-semibold text-lg mb-3">
-                                <i class="fas fa-money-bill-wave mr-2"></i>
-                                Payment Amount
-                            </label>
-                            <div class="relative">
-                                <div class="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/60">
-                                    <span class="text-sm">TSh</span>
+        <div class="w-full max-w-6xl mx-auto">
+            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
+                <div class="grid md:grid-cols-2 gap-0">
+                    
+                    <!-- Left Panel - Brand & Amount -->
+                    <div class="bg-gradient-to-br from-green-700 to-green-900 p-8 md:p-12 text-white">
+                        <div class="h-full flex flex-col justify-between">
+                            <!-- Header -->
+                            <div>
+                                <div class="flex items-center gap-4 mb-8">
+                                    <div class="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
+                                        <span class="text-2xl font-bold">FC</span>
+                                    </div>
+                                    <div>
+                                        <h1 class="text-2xl font-bold">{{ $merchantName }}</h1>
+                                        <p class="text-green-200 text-sm">Trusted Payment Partner</p>
+                                    </div>
                                 </div>
-                                <input 
-                                    type="text" 
-                                    id="amount-input"
-                                    class="w-full px-12 py-4 bg-white/10 border border-white/20 rounded-2xl text-white text-xl font-semibold focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition-all duration-300"
-                                    placeholder="Enter amount"
-                                    value="{{ request('amount', 500) }}"
-                                    data-min-amount="{{ $minAmount ?? 1000 }}"
-                                    data-max-amount="{{ $maxAmount ?? 1000000 }}"
-                                    required
-                                >
-                                <div class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/60">
-                                    <i class="fas fa-coins text-lg"></i>
+
+                                <!-- Payment Amount -->
+                                <div class="mb-8">
+                                    <label class="block text-green-200 text-sm font-medium mb-3">Payment Amount</label>
+                                    <div class="relative">
+                                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/70 font-medium">TZS</span>
+                                        <input 
+                                            type="text" 
+                                            id="amount-input"
+                                            class="w-full bg-white/10 backdrop-blur border border-white/20 rounded-xl px-4 py-4 pl-16 text-2xl font-bold text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/20 transition-all"
+                                            inputMode="numeric" 
+                                            pattern="[0-9,]*" 
+                                            placeholder="500" 
+                                            value="{{ $defaultAmount }}"
+                                            data-min-amount="500"
+                                            data-max-amount="5000000"
+                                        >
+                                    </div>
+                                    <p class="text-green-200 text-sm mt-2">Min: TSh 500 | Max: TSh 5,000,000</p>
+                                </div>
+
+                                <!-- Features -->
+                                <div class="space-y-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 bg-green-400/20 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-shield-alt text-green-300 text-sm"></i>
+                                        </div>
+                                        <span class="text-sm">Bank-level security encryption</span>
                                     </div>
                                     <div class="flex items-center gap-3">
                                         <div class="w-8 h-8 bg-green-400/20 rounded-lg flex items-center justify-center">
@@ -209,6 +164,38 @@
                                                 <div class="w-6 h-6 rounded-full border-2 border-green-600 bg-green-600 flex items-center justify-center">
                                                     <div class="w-2 h-2 rounded-full bg-white"></div>
                                                 </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- QR Code -->
+                                        <div class="payment-method-card rounded-xl p-4 cursor-pointer border-2 border-gray-200" data-method="qr">
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center gap-4">
+                                                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                                                        <i class="fas fa-qrcode text-blue-600 text-lg"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p class="font-semibold text-gray-900 text-sm">Lipa Namba (TIPS)</p>
+                                                        <p class="text-xs text-gray-500">Scan QR code to pay</p>
+                                                    </div>
+                                                </div>
+                                                <div class="w-6 h-6 rounded-full border-2 border-gray-300"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Card Payment -->
+                                        <div class="payment-method-card rounded-xl p-4 cursor-pointer border-2 border-gray-200" data-method="card">
+                                            <div class="flex items-center justify-between">
+                                                <div class="flex items-center gap-4">
+                                                    <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                                                        <i class="fas fa-credit-card text-purple-600 text-lg"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p class="font-semibold text-gray-900 text-sm">Card Payment</p>
+                                                        <p class="text-xs text-gray-500">Visa, Mastercard</p>
+                                                    </div>
+                                                </div>
+                                                <div class="w-6 h-6 rounded-full border-2 border-gray-300"></div>
                                             </div>
                                         </div>
                                     </div>
@@ -309,7 +296,23 @@
         </div>
     </div>
 
-    
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div class="text-center">
+            <div class="w-20 h-20 bg-green-600 rounded-2xl flex items-center justify-center mb-6 animate-pulse">
+                <span class="text-3xl font-bold text-white">FC</span>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800 mb-2">FEEDTAN CMG</h1>
+            <p class="text-gray-600">Loading secure payment gateway...</p>
+            <div class="mt-4">
+                <div class="w-12 h-1 bg-green-600 rounded-full animate-pulse mx-auto"></div>
+            </div>
+            <button onclick="hideSplashManually()" class="mt-4 text-xs text-gray-500 hover:text-gray-700 underline">
+                Click here if page doesn't load automatically
+            </button>
+        </div>
+    </div>
+
     <!-- Progress Stages Modal -->
     <div id="progress-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 p-4">
         <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4">
@@ -407,23 +410,104 @@
             const modal = document.getElementById('response-modal');
             const processingModal = document.getElementById('processing-modal');
             const progressModal = document.getElementById('progress-modal');
+            const splashScreen = document.getElementById('splash-screen');
             const modalContent = document.getElementById('modal-content');
             const processingStatus = document.getElementById('processing-status');
             const progressBar = document.getElementById('progress-bar');
 
-            // Hide splash screen after page loads (removed - no splash screen)
-            // Page loads directly without splash screen
+            // Hide splash screen after page loads
+            setTimeout(() => {
+                try {
+                    const splashScreen = document.getElementById('splash-screen');
+                    if (splashScreen) {
+                        splashScreen.classList.add('hidden');
+                        splashScreen.classList.remove('flex');
+                        console.log('Splash screen hidden successfully');
+                    }
+                } catch (error) {
+                    console.error('Error hiding splash screen:', error);
+                    // Fallback: force hide
+                    const splash = document.getElementById('splash-screen');
+                    if (splash) {
+                        splash.style.display = 'none';
+                    }
+                }
+            }, 1500);
 
             // Initialize phone field as visible by default (mobile money auto-selected)
-            if (phoneField) {
-                phoneField.style.display = 'block';
-                phoneField.style.opacity = '1';
-                phoneField.style.transform = 'translateY(0)';
+            try {
+                const phoneField = document.getElementById('phone-field');
+                if (phoneField) {
+                    phoneField.style.display = 'block';
+                    phoneField.style.opacity = '1';
+                    phoneField.style.transform = 'translateY(0)';
+                    console.log('Phone field initialized as visible');
+                }
+            } catch (error) {
+                console.error('Error initializing phone field:', error);
             }
 
-            // Payment method selection (removed - only mobile money available)
-            // Mobile money is auto-selected and always visible
-            // Phone field is already initialized above
+            // Payment method selection
+            const paymentCards = document.querySelectorAll('.payment-method-card');
+            paymentCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // Remove selected state from all cards
+                    paymentCards.forEach(c => {
+                        c.classList.remove('selected');
+                        c.classList.add('border-gray-200');
+                        const radio = c.querySelector('.rounded-full');
+                        radio.classList.remove('border-green-600', 'bg-green-600');
+                        radio.classList.add('border-gray-300');
+                        const dot = radio.querySelector('.bg-white');
+                        if (dot) dot.classList.add('hidden');
+                    });
+
+                    // Add selected state to clicked card
+                    this.classList.add('selected');
+                    this.classList.remove('border-gray-200');
+                    const selectedRadio = this.querySelector('.rounded-full');
+                    selectedRadio.classList.remove('border-gray-300');
+                    selectedRadio.classList.add('border-green-600', 'bg-green-600');
+                    const dot = selectedRadio.querySelector('.bg-white');
+                    if (dot) dot.classList.remove('hidden');
+
+                    // Update hidden input
+                    const method = this.dataset.method;
+                    document.getElementById('payment_method').value = method;
+
+                    // Show/hide phone field with animation
+                    const phoneField = document.getElementById('phone-field');
+                    if (method === 'mobile') {
+                        // Show phone field with smooth animation
+                        phoneField.style.display = 'block';
+                        phoneField.style.opacity = '0';
+                        phoneField.style.transform = 'translateY(-10px)';
+                        
+                        setTimeout(() => {
+                            phoneField.style.opacity = '1';
+                            phoneField.style.transform = 'translateY(0)';
+                        }, 100);
+                        
+                        const phoneInput = document.getElementById('customer_phone');
+                        phoneInput.required = true;
+                    } else {
+                        // Hide phone field with smooth animation
+                        phoneField.style.opacity = '1';
+                        phoneField.style.transform = 'translateY(0)';
+                        
+                        setTimeout(() => {
+                            phoneField.style.opacity = '0';
+                            phoneField.style.transform = 'translateY(-10px)';
+                            setTimeout(() => {
+                                phoneField.style.display = 'none';
+                            }, 300);
+                        }, 100);
+                        
+                        const phoneInput = document.getElementById('customer_phone');
+                        phoneInput.required = false;
+                    }
+                });
+            });
 
             // Amount formatting and validation
             amountInput.addEventListener('input', function() {
@@ -541,15 +625,25 @@
                     return;
                 }
 
-                // Always use mobile money as payment type
-                const paymentType = 'mobile';
+                // Format phone number
+                let formattedPhone = null;
+                if (paymentType === 'mobile') {
+                    formattedPhone = '+255' + phoneNumber.replace(/[^0-9]/g, '');
+                }
 
-                // Show processing modal
-                showProcessingModal(paymentType);
+                // Show progress modal
+                progressModal.classList.remove('hidden');
+                progressModal.classList.add('flex');
 
-                // Update progress
-                updateProgressStage(2, true);
-                setTimeout(() => updateProgressStage(3), 1000);
+                // Start progress animation
+                updateProgressStage(1, true);
+                setTimeout(() => updateProgressStage(2), 1000);
+
+                // Disable button and show loading
+                payButton.disabled = true;
+                payButton.classList.remove('pulse-animation');
+                payButtonText.classList.add('hidden');
+                payButtonLoading.classList.remove('hidden');
 
                 try {
                     const response = await fetch('/api/payments/process', {
@@ -561,7 +655,7 @@
                         body: JSON.stringify({
                             payment_type: paymentType,
                             amount: amount,
-                            phone_number: formatPhoneNumber(phoneNumber),
+                            phone_number: formattedPhone,
                             customer_name: customerName.trim(),
                             customer_email: customerEmail.trim()
                         })
@@ -789,6 +883,19 @@
                 modal.classList.remove('hidden');
                 modal.classList.add('flex');
             }
+
+            window.hideSplashManually = function() {
+                try {
+                    const splashScreen = document.getElementById('splash-screen');
+                    if (splashScreen) {
+                        splashScreen.classList.add('hidden');
+                        splashScreen.classList.remove('flex');
+                        console.log('Splash screen hidden manually');
+                    }
+                } catch (error) {
+                    console.error('Error manually hiding splash screen:', error);
+                }
+            };
 
             window.closeModal = function() {
                 modal.classList.add('hidden');
