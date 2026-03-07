@@ -157,8 +157,8 @@
                                                         <i class="fas fa-mobile-alt text-green-600 text-lg"></i>
                                                     </div>
                                                     <div>
-                                                        <p class="font-semibold text-gray-900">Mobile Money</p>
-                                                        <p class="text-sm text-gray-500">M-Pesa, Airtel Money<br>YAS, Halotel</p>
+                                                        <p class="font-semibold text-gray-900 text-sm">Mobile Money</p>
+                                                        <p class="text-xs text-gray-500">M-Pesa, Airtel Money<br>YAS, Halotel</p>
                                                     </div>
                                                 </div>
                                                 <div class="w-6 h-6 rounded-full border-2 border-green-600 bg-green-600 flex items-center justify-center">
@@ -175,8 +175,8 @@
                                                         <i class="fas fa-qrcode text-blue-600 text-lg"></i>
                                                     </div>
                                                     <div>
-                                                        <p class="font-semibold text-gray-900">Lipa Namba (TIPS)</p>
-                                                        <p class="text-sm text-gray-500">Scan QR code to pay</p>
+                                                        <p class="font-semibold text-gray-900 text-sm">Lipa Namba (TIPS)</p>
+                                                        <p class="text-xs text-gray-500">Scan QR code to pay</p>
                                                     </div>
                                                 </div>
                                                 <div class="w-6 h-6 rounded-full border-2 border-gray-300"></div>
@@ -191,8 +191,8 @@
                                                         <i class="fas fa-credit-card text-purple-600 text-lg"></i>
                                                     </div>
                                                     <div>
-                                                        <p class="font-semibold text-gray-900">Card Payment</p>
-                                                        <p class="text-sm text-gray-500">Visa, Mastercard</p>
+                                                        <p class="font-semibold text-gray-900 text-sm">Card Payment</p>
+                                                        <p class="text-xs text-gray-500">Visa, Mastercard</p>
                                                     </div>
                                                 </div>
                                                 <div class="w-6 h-6 rounded-full border-2 border-gray-300"></div>
