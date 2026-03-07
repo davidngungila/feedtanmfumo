@@ -203,7 +203,7 @@
                                 </div>
 
                                 <!-- Phone Number (for Mobile Money) -->
-                                <div id="phone-field">
+                                <div id="phone-field" class="transition-all duration-300">
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
                                     <div class="flex">
                                         <div class="flex">
@@ -418,6 +418,12 @@
                 splashScreen.classList.remove('flex');
             }, 2000);
 
+            // Initialize phone field as visible by default (mobile money auto-selected)
+            const phoneField = document.getElementById('phone-field');
+            phoneField.style.display = 'block';
+            phoneField.style.opacity = '1';
+            phoneField.style.transform = 'translateY(0)';
+
             // Payment method selection
             const paymentCards = document.querySelectorAll('.payment-method-card');
             paymentCards.forEach(card => {
@@ -446,10 +452,37 @@
                     const method = this.dataset.method;
                     document.getElementById('payment_method').value = method;
 
-                    // Show/hide phone field
-                    phoneField.style.display = method === 'mobile' ? 'block' : 'none';
-                    const phoneInput = document.getElementById('customer_phone');
-                    phoneInput.required = method === 'mobile';
+                    // Show/hide phone field with animation
+                    const phoneField = document.getElementById('phone-field');
+                    if (method === 'mobile') {
+                        // Show phone field with smooth animation
+                        phoneField.style.display = 'block';
+                        phoneField.style.opacity = '0';
+                        phoneField.style.transform = 'translateY(-10px)';
+                        
+                        setTimeout(() => {
+                            phoneField.style.opacity = '1';
+                            phoneField.style.transform = 'translateY(0)';
+                        }, 100);
+                        
+                        const phoneInput = document.getElementById('customer_phone');
+                        phoneInput.required = true;
+                    } else {
+                        // Hide phone field with smooth animation
+                        phoneField.style.opacity = '1';
+                        phoneField.style.transform = 'translateY(0)';
+                        
+                        setTimeout(() => {
+                            phoneField.style.opacity = '0';
+                            phoneField.style.transform = 'translateY(-10px)';
+                            setTimeout(() => {
+                                phoneField.style.display = 'none';
+                            }, 300);
+                        }, 100);
+                        
+                        const phoneInput = document.getElementById('customer_phone');
+                        phoneInput.required = false;
+                    }
                 });
             });
 
