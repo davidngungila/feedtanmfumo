@@ -3,41 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FEEDTAN | {{ $merchantName }} - Secure Payment</title>
-    <meta name="description" content="FEEDTAN — Secure payment powered by Snippe. Pay with M-Pesa, Tigo Pesa, Airtel Money, or card. Fast, reliable, and secure transactions.">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Secure Payment - Feedtan Community Microfinance Group</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
-        * { font-family: 'Inter', sans-serif; }
-        .tabular-nums { font-variant-numeric: tabular-nums; }
-        .payment-method-card {
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .payment-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             transition: all 0.3s ease;
-            border: 2px solid transparent;
         }
-        .payment-method-card:hover {
+        
+        .payment-card:hover {
+            background: rgba(255, 255, 255, 0.15);
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
         }
-        .payment-method-card.selected {
-            border-color: #16a34a;
-            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
         }
-        .pulse-animation {
-            animation: pulse 2s infinite;
+        
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
         }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(22, 163, 74, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% center; }
+            100% { background-position: 200% center; }
         }
-        .loading-dots::after {
-            content: '';
-            animation: dots 1.5s steps(4, end) infinite;
+        
+        .pulse-glow {
+            animation: pulse-glow 2s infinite;
         }
-        @keyframes dots {
-            0%, 20% { content: ''; }
+        
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(102, 126, 234, 0.5); }
             40% { content: '.'; }
             60% { content: '..'; }
             80%, 100% { content: '...'; }
@@ -55,55 +81,74 @@
         }
     </style>
 </head>
-<body class="min-h-screen bg-white">
-    <div class="relative min-h-screen flex items-center justify-center p-4">
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-6xl mx-auto">
+        <!-- Header Section -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center gap-3 mb-4">
+                <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-lg">
+                    <span class="text-2xl font-bold gradient-text">FC</span>
+                </div>
+                <div class="text-left">
+                    <h1 class="text-4xl font-bold text-white mb-2">Feedtan CMG</h1>
+                    <p class="text-white/80 text-lg">Community Microfinance Group</p>
+                    <p class="text-white/60 text-sm">Secure Payment Gateway</p>
+                </div>
+            </div>
+            
+            <!-- Security Badges -->
+            <div class="flex justify-center gap-4 mb-6">
+                <div class="security-badge px-4 py-2 rounded-full text-xs font-semibold text-white uppercase tracking-wider">
+                    <i class="fas fa-shield-alt mr-2"></i>Secured
+                </div>
+                <div class="security-badge px-4 py-2 rounded-full text-xs font-semibold text-white uppercase tracking-wider">
+                    <i class="fas fa-lock mr-2"></i>Encrypted
+                </div>
+                <div class="security-badge px-4 py-2 rounded-full text-xs font-semibold text-white uppercase tracking-wider">
+                    <i class="fas fa-certificate mr-2"></i>Verified
+                </div>
+            </div>
+        </div>
+
         <!-- Main Payment Container -->
-        <div class="w-full max-w-6xl mx-auto">
-            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
-                <div class="grid md:grid-cols-2 gap-0">
-                    
-                    <!-- Left Panel - Brand & Amount -->
-                    <div class="bg-gradient-to-br from-green-700 to-green-900 p-8 md:p-12 text-white">
-                        <div class="h-full flex flex-col justify-between">
-                            <!-- Header -->
-                            <div>
-                                <div class="flex items-center gap-4 mb-8">
-                                    <div class="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
-                                        <span class="text-2xl font-bold">FC</span>
-                                    </div>
-                                    <div>
-                                        <h1 class="text-2xl font-bold">{{ $merchantName }}</h1>
-                                        <p class="text-green-200 text-sm">Trusted Payment Partner</p>
-                                    </div>
-                                </div>
+        <div class="grid lg:grid-cols-2 gap-8 items-start">
+            <!-- Left Panel - Payment Form -->
+            <div class="w-full lg:w-auto">
+                <div class="glass-effect rounded-3xl p-8 shadow-2xl">
+                    <!-- Form Header -->
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-white mb-2">Complete Your Payment</h2>
+                        <p class="text-white/80 mb-4">Fill in your details to process your payment securely. All transactions are encrypted and protected.</p>
+                        
+                        <!-- Progress Indicator -->
+                        <div class="w-full bg-white/20 rounded-full h-2 mb-6">
+                            <div id="payment-progress" class="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full transition-all duration-500" style="width: 25%"></div>
+                        </div>
+                    </div>
 
-                                <!-- Payment Amount -->
-                                <div class="mb-8">
-                                    <label class="block text-green-200 text-sm font-medium mb-3">Payment Amount</label>
-                                    <div class="relative">
-                                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/70 font-medium">TZS</span>
-                                        <input 
-                                            type="text" 
-                                            id="amount-input"
-                                            class="w-full bg-white/10 backdrop-blur border border-white/20 rounded-xl px-4 py-4 pl-16 text-2xl font-bold text-white placeholder-white/50 focus:outline-none focus:border-white/40 focus:bg-white/20 transition-all"
-                                            inputMode="numeric" 
-                                            pattern="[0-9,]*" 
-                                            placeholder="500" 
-                                            value="{{ $defaultAmount }}"
-                                            data-min-amount="500"
-                                            data-max-amount="5000000"
-                                        >
-                                    </div>
-                                    <p class="text-green-200 text-sm mt-2">Min: TSh 500 | Max: TSh 5,000,000</p>
+                    <form id="payment-form" class="space-y-6">
+                        <!-- Amount Section -->
+                        <div>
+                            <label class="block text-white font-semibold text-lg mb-3">
+                                <i class="fas fa-money-bill-wave mr-2"></i>
+                                Payment Amount
+                            </label>
+                            <div class="relative">
+                                <div class="absolute left-4 top-1/2 transform -translate-y-1/2 text-white/60">
+                                    <span class="text-sm">TSh</span>
                                 </div>
-
-                                <!-- Features -->
-                                <div class="space-y-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 bg-green-400/20 rounded-lg flex items-center justify-center">
-                                            <i class="fas fa-shield-alt text-green-300 text-sm"></i>
-                                        </div>
-                                        <span class="text-sm">Bank-level security encryption</span>
+                                <input 
+                                    type="text" 
+                                    id="amount-input"
+                                    class="w-full px-12 py-4 bg-white/10 border border-white/20 rounded-2xl text-white text-xl font-semibold focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-transparent transition-all duration-300"
+                                    placeholder="Enter amount"
+                                    value="{{ request('amount', 500) }}"
+                                    data-min-amount="{{ $minAmount ?? 1000 }}"
+                                    data-max-amount="{{ $maxAmount ?? 1000000 }}"
+                                    required
+                                >
+                                <div class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/60">
+                                    <i class="fas fa-coins text-lg"></i>
                                     </div>
                                     <div class="flex items-center gap-3">
                                         <div class="w-8 h-8 bg-green-400/20 rounded-lg flex items-center justify-center">
