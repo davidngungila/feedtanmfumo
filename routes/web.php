@@ -38,6 +38,13 @@ Route::get('/', function () {
 Route::get('/terms', [\App\Http\Controllers\LegalController::class, 'terms'])->name('terms');
 Route::get('/privacy', [\App\Http\Controllers\LegalController::class, 'privacy'])->name('privacy');
 
+// FIA Payments Verification (public)
+Route::get('/fia', [\App\Http\Controllers\FiaPaymentController::class, 'index'])->name('fia.index');
+Route::post('/fia/submit', [\App\Http\Controllers\FiaPaymentController::class, 'submitVerification'])->name('fia.submit');
+Route::post('/fia/verify', [\App\Http\Controllers\FiaPaymentController::class, 'verifyPayment'])->name('fia.verify');
+Route::get('/fia/payments', [\App\Http\Controllers\FiaPaymentController::class, 'getPayments'])->name('fia.payments');
+Route::get('/fia/verified-payments', [\App\Http\Controllers\FiaPaymentController::class, 'getVerifiedPayments'])->name('fia.verified-payments');
+
 // Payment Confirmation (public)
 Route::get('/payment-confirmation', [\App\Http\Controllers\PaymentConfirmationController::class, 'index'])->name('payment-confirmation.index');
 Route::post('/payment-confirmation/lookup', [\App\Http\Controllers\PaymentConfirmationController::class, 'lookupMember'])->name('payment-confirmation.lookup');
