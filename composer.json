@@ -1,0 +1,48 @@
+{
+    "name": "feedtan/clickpesa-laravel",
+    "description": "Laravel integration package for ClickPesa API. Supports token authorization, USSD checkout, card payments, payment status queries, and wallet balance retrieval.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "FeedTan CMG",
+            "email": "info@feedtancmg.org"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "illuminate/support": "^9.0|^10.0|^11.0",
+        "guzzlehttp/guzzle": "^7.0",
+        "ext-json": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0|^10.0",
+        "orchestra/testbench": "^7.0|^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "FeedTan\\ClickPesa\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "FeedTan\\ClickPesa\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "FeedTan\\ClickPesa\\ClickPesaServiceProvider"
+            ],
+            "aliases": {
+                "ClickPesa": "FeedTan\\ClickPesa\\Facades\\ClickPesa"
+            }
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true
+    }
+}
