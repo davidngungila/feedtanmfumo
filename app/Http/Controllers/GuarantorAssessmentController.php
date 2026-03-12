@@ -40,9 +40,9 @@ class GuarantorAssessmentController extends Controller
     }
 
     /**
-     * Send OTP for member verification.
+     * Verify member code for guarantor assessment.
      */
-    public function sendOtp($memberCode)
+    public function verifyMember($memberCode)
     {
         try {
             $member = User::where('membership_code', $memberCode)
@@ -52,136 +52,12 @@ class GuarantorAssessmentController extends Controller
             if (!$member) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Member not found or not approved'
+                    'message' => 'Member not found or not approved. Please check the member code from admin memberships.'
                 ], 404);
             }
 
-            if (!$member->phone) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Member phone number not registered'
-                ], 400);
-            }
-
-            // Generate 6-digit OTP
-            $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-            $sessionId = uniqid('otp_', true);
-
-            // Store OTP session (you might want to use cache or database)
-            session(['otp_session_' . $sessionId => [
-                'member_id' => $member->id,
-                'otp' => $otp,
-                'expires_at' => now()->addMinutes(10),
-                'member_code' => $memberCode
-            ]]);
-
-            // Send OTP via SMS
-            try {
-                $message = "Your FeedTan CMG verification code is: {$otp}. This code expires in 10 minutes. Do not share this code with anyone.";
-                
-                // Use the existing SMS service
-                $smsService = app(\App\Services\SmsNotificationService::class);
-                $result = $smsService->sendSms($member->phone, $message, [
-                    'template_id' => 'guarantor_otp',
-                    'member_id' => $member->id,
-                    'session_id' => $sessionId
-                ]);
-
-                if (!$result['success']) {
-                    Log::error('Failed to send OTP SMS', [
-                        'member_id' => $member->id,
-                        'error' => $result['message'] ?? 'Unknown error'
-                    ]);
-                }
-            } catch (\Exception $e) {
-                Log::error('OTP SMS sending error', [
-                    'member_id' => $member->id,
-                    'error' => $e->getMessage()
-                ]);
-            }
-
-            // Mask phone number for response
-            $phoneMasked = $this->maskPhoneNumber($member->phone);
-
             return response()->json([
                 'status' => 'success',
-                'message' => 'OTP sent successfully',
-                'session_id' => $sessionId,
-                'phone_masked' => $phoneMasked,
-                'expires_in' => 600 // 10 minutes in seconds
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('OTP generation error', [
-                'member_code' => $memberCode,
-                'error' => $e->getMessage()
-            ]);
-
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Error generating OTP'
-            ], 500);
-        }
-    }
-
-    /**
-     * Verify OTP and return member data.
-     */
-    public function verifyOtp(Request $request)
-    {
-        $request->validate([
-            'session_id' => 'required|string',
-            'otp_code' => 'required|string|size:6'
-        ]);
-
-        try {
-            $sessionId = $request->session_id;
-            $otpCode = $request->otp_code;
-
-            // Get OTP session data
-            $sessionKey = 'otp_session_' . $sessionId;
-            $sessionData = session($sessionKey);
-
-            if (!$sessionData) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Session expired or invalid'
-                ], 400);
-            }
-
-            // Check if OTP has expired
-            if (now()->greaterThan($sessionData['expires_at'])) {
-                session()->forget($sessionKey);
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'OTP has expired'
-                ], 400);
-            }
-
-            // Verify OTP
-            if ($sessionData['otp'] !== $otpCode) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Invalid OTP'
-                ], 400);
-            }
-
-            // Get member data
-            $member = User::find($sessionData['member_id']);
-
-            if (!$member) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Member not found'
-                ], 404);
-            }
-
-            // Clear OTP session
-            session()->forget($sessionKey);
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'OTP verified successfully',
                 'data' => [
                     'id' => $member->id,
                     'name' => $member->name,
@@ -194,40 +70,16 @@ class GuarantorAssessmentController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            Log::error('OTP verification error', [
-                'session_id' => $request->session_id,
+            Log::error('Member verification error', [
+                'member_code' => $memberCode,
                 'error' => $e->getMessage()
             ]);
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Error verifying OTP'
+                'message' => 'Error verifying member'
             ], 500);
         }
-    }
-
-    /**
-     * Mask phone number for privacy.
-     */
-    private function maskPhoneNumber($phone)
-    {
-        // Remove any non-digit characters
-        $digits = preg_replace('/[^0-9]/', '', $phone);
-        
-        // Handle different phone number formats
-        if (strlen($digits) === 12 && substr($digits, 0, 3) === '255') {
-            // Tanzania format: +255 XXX XXX XXX
-            return '+255 ' . substr($digits, 3, 3) . ' XXX ' . substr($digits, -3);
-        } elseif (strlen($digits) === 10) {
-            // Local format: 0XX XXX XXX
-            return '0' . substr($digits, 0, 2) . ' XXX ' . substr($digits, -3);
-        } elseif (strlen($digits) === 9) {
-            // Short format: XX XXX XXX
-            return substr($digits, 0, 2) . ' XXX ' . substr($digits, -3);
-        }
-        
-        // Fallback: show first 3 and last 3 digits
-        return substr($digits, 0, 3) . ' XXX ' . substr($digits, -3);
     }
 
     /**

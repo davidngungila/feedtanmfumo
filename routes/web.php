@@ -70,8 +70,7 @@ Route::get('/guarantor-assessment/{loanUlid}/advanced', [\App\Http\Controllers\G
 Route::get('/guarantor-assessment/{loanUlid}/original', [\App\Http\Controllers\GuarantorAssessmentController::class, 'show'])->name('guarantor-assessment.original');
 Route::post('/guarantor-assessment/{loanUlid}', [\App\Http\Controllers\GuarantorAssessmentController::class, 'store'])->name('guarantor-assessment.store');
 Route::get('/guarantor-assessment/success/{assessmentUlid}', [\App\Http\Controllers\GuarantorAssessmentController::class, 'success'])->name('guarantor-assessment.success');
-Route::post('/api/send-otp/{memberCode}', [\App\Http\Controllers\GuarantorAssessmentController::class, 'sendOtp'])->name('api.send-otp');
-Route::post('/api/verify-otp', [\App\Http\Controllers\GuarantorAssessmentController::class, 'verifyOtp'])->name('api.verify-otp');
+Route::get('/api/verify-member/{memberCode}', [\App\Http\Controllers\GuarantorAssessmentController::class, 'verifyMember'])->name('api.verify-member');
 
 // Authentication routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');

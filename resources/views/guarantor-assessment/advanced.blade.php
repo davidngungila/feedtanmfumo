@@ -103,46 +103,13 @@
                                 <input type="text" id="member-code" 
                                     class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg"
                                     placeholder="Enter guarantor member code">
-                                <button type="button" onclick="sendOtp()" 
+                                <button type="button" onclick="verifyMember()" 
                                     class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200 font-medium">
-                                    <i class="fas fa-paper-plane mr-2"></i>
-                                    Send OTP
+                                    <i class="fas fa-search mr-2"></i>
+                                    Verify
                                 </button>
                             </div>
-                            <p class="text-xs text-gray-500 mt-1">Enter the guarantor's unique member identification code</p>
-                        </div>
-
-                        <!-- OTP Verification Section -->
-                        <div id="otp-section" class="hidden">
-                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                                <div class="flex items-center">
-                                    <i class="fas fa-info-circle text-blue-500 mr-3"></i>
-                                    <div>
-                                        <p class="font-semibold text-blue-800">OTP Sent</p>
-                                        <p class="text-blue-600 text-sm">A 6-digit OTP has been sent to the member's registered phone number</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-6">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Enter OTP *</label>
-                                <div class="flex gap-3">
-                                    <input type="text" id="otp-code" maxlength="6" 
-                                        class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg text-center font-mono text-xl"
-                                        placeholder="000000">
-                                    <button type="button" onclick="verifyOtp()" 
-                                        class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200 font-medium">
-                                        <i class="fas fa-check mr-2"></i>
-                                        Verify OTP
-                                    </button>
-                                </div>
-                                <div class="flex justify-between items-center mt-2">
-                                    <p class="text-xs text-gray-500">Enter the 6-digit OTP received via SMS</p>
-                                    <button type="button" onclick="resendOtp()" id="resend-btn" class="text-xs text-green-600 hover:text-green-700">
-                                        Resend OTP
-                                    </button>
-                                </div>
-                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Enter the guarantor's unique member identification code from admin memberships</p>
                         </div>
 
                         <!-- Member Verification Result -->
@@ -434,7 +401,6 @@
         // Global variables
         let currentStep = 1;
         let verifiedMember = null;
-        let currentOtpSession = null;
 
         // Step navigation
         function nextStep() {
@@ -487,8 +453,8 @@
             }
         }
 
-        // OTP Management
-        async function sendOtp() {
+        // Member verification
+        async function verifyMember() {
             const memberCode = document.getElementById('member-code').value.trim();
             
             if (!memberCode) {
@@ -499,96 +465,7 @@
             showLoading(true);
 
             try {
-                const response = await fetch(`/api/send-otp/${memberCode}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    }
-                });
-                const result = await response.json();
-
-                if (result.status === 'success') {
-                    currentOtpSession = result.session_id;
-                    document.getElementById('otp-section').classList.remove('hidden');
-                    document.getElementById('otp-code').focus();
-                    
-                    // Show success message
-                    const resultDiv = document.getElementById('member-verification-result');
-                    resultDiv.innerHTML = `
-                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                            <div class="flex items-center">
-                                <i class="fas fa-check-circle text-green-500 mr-3"></i>
-                                <div>
-                                    <p class="font-semibold text-green-800">OTP Sent Successfully</p>
-                                    <p class="text-green-600 text-sm">OTP has been sent to ${result.phone_masked || 'the registered phone number'}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    resultDiv.classList.remove('hidden');
-                } else {
-                    const resultDiv = document.getElementById('member-verification-result');
-                    resultDiv.innerHTML = `
-                        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                            <div class="flex items-center">
-                                <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
-                                <div>
-                                    <p class="font-semibold text-red-800">Failed to Send OTP</p>
-                                    <p class="text-red-600 text-sm">${result.message || 'Unable to send OTP. Please check member code and try again.'}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    resultDiv.classList.remove('hidden');
-                }
-            } catch (error) {
-                console.error('OTP send error:', error);
-                const resultDiv = document.getElementById('member-verification-result');
-                resultDiv.innerHTML = `
-                    <div class="bg-red-50 border border-red-200 rounded-lg p-4">
-                        <div class="flex items-center">
-                            <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
-                            <div>
-                                <p class="font-semibold text-red-800">Network Error</p>
-                                <p class="text-red-600 text-sm">Unable to send OTP. Please try again.</p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                resultDiv.classList.remove('hidden');
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        async function verifyOtp() {
-            const otpCode = document.getElementById('otp-code').value.trim();
-            
-            if (!otpCode || otpCode.length !== 6) {
-                alert('Please enter a valid 6-digit OTP');
-                return;
-            }
-
-            if (!currentOtpSession) {
-                alert('Session expired. Please request a new OTP');
-                return;
-            }
-
-            showLoading(true);
-
-            try {
-                const response = await fetch(`/api/verify-otp`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({
-                        session_id: currentOtpSession,
-                        otp_code: otpCode
-                    })
-                });
+                const response = await fetch(`/api/verify-member/${memberCode}`);
                 const result = await response.json();
 
                 const resultDiv = document.getElementById('member-verification-result');
@@ -603,7 +480,7 @@
                                 <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
                                 <div>
                                     <p class="font-semibold text-red-800">Verification Failed</p>
-                                    <p class="text-red-600 text-sm">${result.message || 'Invalid OTP. Please try again.'}</p>
+                                    <p class="text-red-600 text-sm">${result.message || 'Member code not found. Please check the member code from admin memberships.'}</p>
                                 </div>
                             </div>
                         </div>
@@ -611,7 +488,7 @@
                     resultDiv.classList.remove('hidden');
                 }
             } catch (error) {
-                console.error('OTP verification error:', error);
+                console.error('Verification error:', error);
                 const resultDiv = document.getElementById('member-verification-result');
                 resultDiv.innerHTML = `
                     <div class="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -619,7 +496,7 @@
                             <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
                             <div>
                                 <p class="font-semibold text-red-800">Network Error</p>
-                                <p class="text-red-600 text-sm">Unable to verify OTP. Please try again.</p>
+                                <p class="text-red-600 text-sm">Unable to verify member. Please try again.</p>
                             </div>
                         </div>
                     </div>
@@ -628,35 +505,6 @@
             } finally {
                 showLoading(false);
             }
-        }
-
-        async function resendOtp() {
-            const memberCode = document.getElementById('member-code').value.trim();
-            
-            if (!memberCode) {
-                alert('Please enter a member code first');
-                return;
-            }
-
-            // Disable resend button temporarily
-            const resendBtn = document.getElementById('resend-btn');
-            resendBtn.disabled = true;
-            resendBtn.textContent = 'Sending...';
-
-            await sendOtp();
-
-            // Re-enable resend button after 30 seconds
-            let countdown = 30;
-            const timer = setInterval(() => {
-                countdown--;
-                if (countdown > 0) {
-                    resendBtn.textContent = `Resend OTP (${countdown}s)`;
-                } else {
-                    resendBtn.disabled = false;
-                    resendBtn.textContent = 'Resend OTP';
-                    clearInterval(timer);
-                }
-            }, 1000);
         }
 
         function displayVerifiedMember(member) {
@@ -842,21 +690,8 @@
         document.getElementById('member-code').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                sendOtp();
+                verifyMember();
             }
-        });
-
-        // Add enter key support for OTP code
-        document.getElementById('otp-code').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                verifyOtp();
-            }
-        });
-
-        // Auto-format OTP input (numbers only, max 6 digits)
-        document.getElementById('otp-code').addEventListener('input', function(e) {
-            this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
         });
     </script>
 </body>
