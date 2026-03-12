@@ -186,7 +186,8 @@ class GuarantorAssessmentController extends Controller
 
             // Send confirmation email to guarantor with PDF attachment
             try {
-                Mail::to($validated['email'])->send(new GuaranteeAgreementMail($assessment, $loan));
+                $organizationInfo = $this->getOrganizationInfo();
+                Mail::to($validated['email'])->send(new GuaranteeAgreementMail($assessment, $loan, $organizationInfo));
                 
                 Log::info('Guarantor confirmation email sent', [
                     'assessment_id' => $assessment->id,
@@ -270,6 +271,25 @@ class GuarantorAssessmentController extends Controller
                 return back()->with('error', $errorMessage)->withInput();
             }
         }
+    }
+
+    /**
+     * Get organization information for emails.
+     */
+    private function getOrganizationInfo(): array
+    {
+        return [
+            'name' => 'FeedTan Community Microfinance Group',
+            'po_box' => 'P.O.Box 7744',
+            'address' => 'Ushirika Sokoine Road',
+            'city' => 'Moshi',
+            'region' => 'Kilimanjaro',
+            'country' => 'Tanzania',
+            'phone' => '+255 27 275 0010',
+            'mobile' => '+255 754 0010',
+            'email' => 'info@feedtancmg.org',
+            'website' => 'www.feedtancmg.org'
+        ];
     }
 
     /**

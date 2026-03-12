@@ -16,13 +16,17 @@ class GuaranteeAgreementMail extends Mailable
     use Queueable, SerializesModels;
 
     public $assessment;
+    public $loan;
+    public $organizationInfo;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(GuarantorAssessment $assessment)
+    public function __construct(GuarantorAssessment $assessment, $loan, $organizationInfo = [])
     {
         $this->assessment = $assessment->load(['loan.user', 'guarantor']);
+        $this->loan = $loan;
+        $this->organizationInfo = $organizationInfo;
     }
 
     /**
@@ -31,7 +35,7 @@ class GuaranteeAgreementMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'FeedTan Loan Guarantee Agreement - ' . $this->assessment->loan->loan_number,
+            subject: 'FeedTan Guarantor Assessment Confirmation - ' . $this->assessment->full_name,
         );
     }
 
@@ -41,7 +45,7 @@ class GuaranteeAgreementMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.guarantee-agreement',
+            view: 'emails.guarantor-assessment',
         );
     }
 
@@ -52,12 +56,13 @@ class GuaranteeAgreementMail extends Mailable
      */
     public function attachments(): array
     {
-        $pdf = Pdf::loadView('pdfs.guarantee-agreement', [
-            'assessment' => $this->assessment
+        $pdf = Pdf::loadView('guarantor-assessment.pdf', [
+            'assessment' => $this->assessment,
+            'loan' => $this->loan
         ]);
 
         return [
-            Attachment::fromData(fn () => $pdf->output(), 'Guarantee_Agreement_' . $this->assessment->ulid . '.pdf')
+            Attachment::fromData(fn () => $pdf->output(), 'Guarantor_Assessment_' . $this->assessment->ulid . '.pdf')
                 ->withMime('application/pdf'),
         ];
     }

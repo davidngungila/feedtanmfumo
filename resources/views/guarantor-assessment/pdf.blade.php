@@ -2,240 +2,296 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Guarantor Agreement</title>
+    <title>Ukaguzi wa Dhamani - {{ $assessment->full_name }}</title>
     <style>
+        @page {
+            margin: 10mm 12mm;
+            size: A4;
+        }
         body {
             font-family: Arial, sans-serif;
-            line-height: 1.6;
+            font-size: 9pt;
+            line-height: 1.4;
             color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
         }
         .header {
+            border-bottom: 3px solid #015425;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
             text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #015425;
-            padding-bottom: 20px;
+            width: 100%;
         }
-        .logo {
-            font-size: 24px;
+        .logo-box {
+            display: inline-block;
+            background: #015425;
+            color: white;
+            padding: 8px 12px;
             font-weight: bold;
-            color: #015425;
+            font-size: 14pt;
             margin-bottom: 10px;
         }
-        .section {
-            margin-bottom: 25px;
-        }
-        .section-title {
-            font-weight: bold;
-            font-size: 16px;
-            margin-bottom: 10px;
-            color: #015425;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 5px;
-        }
-        .info-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .info-item {
-            padding: 8px 0;
-            border-bottom: 1px solid #eee;
-        }
-        .info-label {
-            font-weight: bold;
+        .header-info {
+            font-size: 10pt;
             color: #666;
-            font-size: 12px;
+            margin-top: 8px;
         }
-        .info-value {
-            color: #333;
-            font-size: 14px;
+        .title {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #015425;
+            margin: 15px 0 10px 0;
+        }
+        .serial-number {
+            text-align: center;
+            font-size: 8pt;
+            color: #666;
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 9pt;
+        }
+        th {
+            background: #015425;
+            color: white;
+            padding: 10px 8px;
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid #015425;
+        }
+        td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            vertical-align: top;
+        }
+        .summary-table td:first-child {
+            background: #f9f9f9;
+            font-weight: bold;
+            width: 40%;
+            color: #015425;
+        }
+        .section-header {
+            background: #015425;
+            color: white;
+            padding: 8px 12px;
+            font-weight: bold;
+            font-size: 11pt;
+            margin-top: 20px;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            font-size: 8pt;
+            color: #666;
+            text-align: center;
+        }
+        .text-right {
+            text-align: right;
         }
         .agreement-text {
             text-align: justify;
-            margin-bottom: 20px;
-            font-size: 12px;
+            margin-bottom: 15px;
+            font-size: 9pt;
             line-height: 1.5;
         }
         .signature-section {
-            margin-top: 50px;
+            margin-top: 30px;
             border-top: 2px solid #015425;
-            padding-top: 30px;
+            padding-top: 20px;
         }
         .signature-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 50px;
+            gap: 30px;
         }
         .signature-box {
             text-align: center;
         }
         .signature-line {
             border-bottom: 1px solid #333;
-            margin: 40px 0 10px 0;
+            margin: 30px 0 10px 0;
             height: 30px;
         }
-        .footer {
-            margin-top: 40px;
-            text-align: center;
-            font-size: 10px;
-            color: #666;
+        .highlight-row {
+            background: #f0fdf4;
+            font-weight: bold;
+        }
+        .highlight-text {
+            color: #015425;
+            font-size: 11pt;
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <div class="logo">FEEDTAN CMG</div>
-        <div>Feedtan Community Microfinance Group</div>
-        <div style="font-size: 14px; color: #666;">Guarantor Agreement</div>
-        <div style="font-size: 12px; color: #999;">Document ID: {{ $assessment->ulid }}</div>
-    </div>
-
-    <div class="section">
-        <div class="section-title">Loan Information</div>
-        <div class="info-grid">
-            <div class="info-item">
-                <div class="info-label">Loan Reference</div>
-                <div class="info-value">{{ $loan->ulid }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Borrower Name</div>
-                <div class="info-value">{{ $loan->user->name }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Loan Amount</div>
-                <div class="info-value">TZS {{ number_format($loan->amount ?? 0, 2) }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Assessment Date</div>
-                <div class="info-value">{{ $assessment->assessment_date->format('d M Y') }}</div>
-            </div>
+        <div style="text-align: center; margin-bottom: 15px;">
+            @if(isset($headerBase64) && $headerBase64)
+                <img src="{{ $headerBase64 }}" alt="FeedTan Header" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0 auto;">
+            @else
+                <div class="logo-box">FEEDTAN DIGITAL</div>
+            @endif
+        </div>
+        <div class="title">UKAGUZI WA DHAMANI (GUARANTOR ASSESSMENT)</div>
+        <div class="serial-number">Serial No: FCMG-GA-{{ str_pad($assessment->id, 6, '0', STR_PAD_LEFT) }}</div>
+        <div class="header-info">
+            Tarehe: {{ $assessment->assessment_date->format('d/m/Y H:i:s') }}
         </div>
     </div>
 
-    <div class="section">
-        <div class="section-title">Guarantor Information</div>
-        <div class="info-grid">
-            <div class="info-item">
-                <div class="info-label">Full Name</div>
-                <div class="info-value">{{ $assessment->full_name }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Membership Code</div>
-                <div class="info-value">{{ $assessment->member_code }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Phone Number</div>
-                <div class="info-value">{{ $assessment->phone }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Email Address</div>
-                <div class="info-value">{{ $assessment->email }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Relationship to Borrower</div>
-                <div class="info-value">{{ $assessment->relationship }}{{ $assessment->relationship_other ? ' (' . $assessment->relationship_other . ')' : '' }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Address</div>
-                <div class="info-value">{{ $assessment->address }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Occupation</div>
-                <div class="info-value">{{ $assessment->occupation }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Monthly Income</div>
-                <div class="info-value">TZS {{ number_format($assessment->monthly_income, 2) }}</div>
-            </div>
-        </div>
-    </div>
+    <div class="section-header">Taarifa ya Mkopo</div>
+    <table class="summary-table">
+        <tr>
+            <td>Namba ya Mkopo</td>
+            <td>{{ $loan->ulid }}</td>
+        </tr>
+        <tr>
+            <td>Jina la Mkopaji</td>
+            <td><strong>{{ strtoupper($loan->user->name) }}</strong></td>
+        </tr>
+        <tr>
+            <td>Kiasi cha Mkopo</td>
+            <td class="highlight-text">TZS {{ number_format($loan->amount ?? 0, 2) }}</td>
+        </tr>
+        <tr>
+            <td>Tarehe ya Ukaguzi</td>
+            <td>{{ $assessment->assessment_date->format('d/m/Y') }}</td>
+        </tr>
+    </table>
 
-    <div class="section">
-        <div class="section-title">Assessment Responses</div>
-        <div class="info-grid">
-            <div class="info-item">
-                <div class="info-label">Loan Purpose Understanding</div>
-                <div class="info-value">{{ $assessment->loan_purpose }}{{ $assessment->loan_purpose_other ? ' (' . $assessment->loan_purpose_other . ')' : '' }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Repayment History Reviewed</div>
-                <div class="info-value">{{ $assessment->repayment_history }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Existing Debts</div>
-                <div class="info-value">{{ $assessment->existing_debts }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Sufficient Savings</div>
-                <div class="info-value">{{ $assessment->sufficient_savings }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Sole Responsibility Understanding</div>
-                <div class="info-value">{{ $assessment->sole_responsibility }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Recovery Process Understanding</div>
-                <div class="info-value">{{ $assessment->recovery_process }}</div>
-            </div>
-            <div class="info-item">
-                <div class="info-label">Voluntary Guarantee</div>
-                <div class="info-value">{{ $assessment->voluntary_guarantee }}</div>
-            </div>
-        </div>
-        @if($assessment->additional_comments)
-        <div style="margin-top: 20px;">
-            <div class="info-label">Additional Comments</div>
-            <div class="info-value" style="margin-top: 5px;">{{ $assessment->additional_comments }}</div>
-        </div>
-        @endif
-    </div>
+    <div class="section-header">Taarifa za Mdhambi</div>
+    <table class="summary-table">
+        <tr>
+            <td>Jina Kamili</td>
+            <td><strong>{{ strtoupper($assessment->full_name) }}</strong></td>
+        </tr>
+        <tr>
+            <td>Namba ya Uanachama</td>
+            <td>{{ $assessment->member_code }}</td>
+        </tr>
+        <tr>
+            <td>Namba ya Simu</td>
+            <td><strong>{{ $assessment->phone }}</strong></td>
+        </tr>
+        <tr>
+            <td>Barua Pepe (Email)</td>
+            <td>{{ $assessment->email }}</td>
+        </tr>
+        <tr>
+            <td>Uhusiano na Mkopaji</td>
+            <td>{{ $assessment->relationship }}{{ $assessment->relationship_other ? ' (' . $assessment->relationship_other . ')' : '' }}</td>
+        </tr>
+        <tr>
+            <td>Anwani</td>
+            <td>{{ $assessment->address }}</td>
+        </tr>
+        <tr>
+            <td>Kazi</td>
+            <td>{{ $assessment->occupation }}</td>
+        </tr>
+        <tr>
+            <td>Kipato cha Kila Mwezi</td>
+            <td class="highlight-text">TZS {{ number_format($assessment->monthly_income, 2) }}</td>
+        </tr>
+    </table>
 
-    <div class="section">
-        <div class="section-title">Guarantor Agreement Terms</div>
-        <div class="agreement-text">
-            <p><strong>1. Guarantee Undertaking:</strong> I, the undersigned, hereby irrevocably and unconditionally guarantee to Feedtan Community Microfinance Group (hereinafter referred to as "the Lender") the prompt payment of all principal, interest, costs, charges, and other amounts now or hereafter due and payable by the borrower to the Lender under the loan agreement referenced above.</p>
-            
-            <p><strong>2. Scope of Guarantee:</strong> This guarantee shall cover the entire outstanding loan amount together with all accrued interest, penalties, costs, charges, and expenses that may become due and payable by the borrower to the Lender under the loan agreement.</p>
-            
-            <p><strong>3. Continuing Guarantee:</strong> This guarantee shall continue in full force and effect until the loan, together with all interest, costs, charges, and other amounts payable thereunder, have been fully paid and discharged to the Lender.</p>
-            
-            <p><strong>4. No Notice Required:</strong> The Lender shall not be required to give any notice to the guarantor of any default by the borrower or of any demand made upon the borrower, and the guarantor hereby waives any such notice.</p>
-            
-            <p><strong>5. Immediate Payment:</strong> Upon demand by the Lender, the guarantor shall immediately pay to the Lender all amounts due and payable by the borrower under the loan agreement without any demand or notice being required to be made upon the borrower.</p>
-            
-            <p><strong>6. Waiver of Rights:</strong> The guarantor waives all rights to require the Lender to proceed against the borrower or any security held by the Lender before proceeding against the guarantor.</p>
-            
-            <p><strong>7. Acknowledgment:</strong> The guarantor acknowledges that they have read and understood the terms of this guarantee and that they are signing this agreement voluntarily and without any duress or undue influence.</p>
-        </div>
+    <div class="section-header">Jibu la Ukaguzi</div>
+    <table>
+        <thead>
+            <tr>
+                <th>S/N</th>
+                <th>Suala la Ukaguzi</th>
+                <th>Jibu</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td><strong>Kuelewa Madhumuni ya Mkopo</strong></td>
+                <td>{{ $assessment->loan_purpose }}{{ $assessment->loan_purpose_other ? ' (' . $assessment->loan_purpose_other . ')' : '' }}</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Amechunguza Historia ya Malipo ya Mkopaji</td>
+                <td>{{ $assessment->repayment_history }}</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Madeni Mengine yaliyomo</td>
+                <td>{{ $assessment->existing_debts }}</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>Akifa za Kutosha</td>
+                <td>{{ $assessment->sufficient_savings }}</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>Kuelewa Uwajibikisho Mmoja</td>
+                <td>{{ $assessment->sole_responsibility }}</td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td>Kuelewa Mchakato wa Ukusanyaji</td>
+                <td>{{ $assessment->recovery_process }}</td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td>Dhamani hiyo ni hiari</td>
+                <td>{{ $assessment->voluntary_guarantee }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    @if($assessment->additional_comments)
+    <div class="section-header">Maoni ya Ziada</div>
+    <div style="padding: 10px; border: 1px solid #ddd; margin-top: 5px;">
+        {{ $assessment->additional_comments }}
+    </div>
+    @endif
+
+    <div class="section-header">Masharti ya Dhamani</div>
+    <div class="agreement-text">
+        <p><strong>1. Dhamani ya Uwekezaji:</strong> Mimi, chini chini, hapa kwa bidii na pasipo masharti, ninaliweka dhamani ya kudumu na isiyobadilika kwa Feedtan Community Microfinance Group (hapa inajulikana kama "Mdhamini") malipo ya kila ada, riba, gharama, na ada zote ambazo zinaweza kuwa zinadaiwa na mkopaji kwa Mdhamini chini ya mkataba wa mkopo ulioainishwa hapo juu.</p>
+        
+        <p><strong>2. Kipindi cha Dhamani:</strong> Dhamani hii itaendelea kwa nguvu kamili na athari hadi mkopo pamoja na riba zake zote, gharama, ada, na ada zingine zinazodaiwa na mkopaji kwa Mdhamini chini ya mkataba wa mkopo zitakapolipwa na kusuluhishwa kwa Mdhamini.</p>
+        
+        <p><strong>3. Dhamani Inayoendelea:</strong> Dhamani hii itaendelea kwa nguvu kamili na athari hadi mkopo, pamoja na riba zake zote, gharama, ada, na ada zingine zinazodaiwa na mkopaji kwa Mdhamini chini ya mkataba wa mkopo zitakapolipwa na kusuluhishwa kwa Mdhamini.</p>
+        
+        <p><strong>4. Hakuna Tahadhari Inayohitajika:</strong> Mdhamini hatahitaji kupewa tahadhari yoyote ya kushindwa kwa mkopaji au mahitaji yoyote yaliyowekwa kwa mkopaji, na mdhamini hapa anakanusha tahadhari hiyo yote.</p>
+        
+        <p><strong>5. Malipo ya Haraka:</strong> Kwa ombi la Mdhamini, mdhamini atalipa mara moja kwa Mdhamini kiasi chote kinachodaiwa na kinachodaiwa na mkopaji chini ya mkataba wa mkopo bila kuhitaji mahitaji yoyote au tahadhari kuwekwa kwa mkopaji.</p>
+        
+        <p><strong>6. Kanusho Haki:</strong> Mdhamini anakanusha haki zote za kudai Mdhamini kuendelea dhidi ya mkopaji au dhamani yoyote iliyo na Mdhamini kabla ya kuendelea dhidi ya mdhamini.</p>
+        
+        <p><strong>7. Ukakikishaji:</strong> Mdhamini anakiri kuwa amesoma na kuelewa masharti ya dhamani hii na kuwa anaiandika mkataba hii kwa hiari na bila shinikizo lolote la kushindwa au ushawishi.</p>
     </div>
 
     <div class="signature-section">
-        <div class="section-title">Signatures</div>
+        <div class="section-header">Sahihi</div>
         <div class="signature-grid">
             <div class="signature-box">
-                <div class="info-label">Guarantor Signature</div>
+                <div class="info-label">Sahihi ya Mdhamini</div>
                 <div class="signature-line"></div>
                 <div class="info-value">{{ $assessment->full_name }}</div>
-                <div class="info-label" style="margin-top: 10px;">Date: {{ $assessment->assessment_date->format('d M Y') }}</div>
+                <div class="info-label" style="margin-top: 10px;">Tarehe: {{ $assessment->assessment_date->format('d M Y') }}</div>
             </div>
             <div class="signature-box">
-                <div class="info-label">Witness Signature</div>
+                <div class="info-label">Sahihi ya Shuhuda</div>
                 <div class="signature-line"></div>
                 <div class="info-value">_________________________</div>
-                <div class="info-label" style="margin-top: 10px;">Date: _______________</div>
+                <div class="info-label" style="margin-top: 10px;">Tarehe: _______________</div>
             </div>
         </div>
     </div>
 
     <div class="footer">
-        <div><strong>FEEDTAN CMG</strong></div>
-        <div>Feedtan Community Microfinance Group</div>
-        <div>Powered by Feedtan CMG @2026 SECURED PAYMENT GATEWAY</div>
-        <div style="margin-top: 10px;">This document was generated electronically on {{ now()->format('d M Y, H:i') }}</div>
+        <p>Huu ni uthibitisho wa kielektroniki. Imetolewa na Mfumo wa FeedTan Digital.</p>
+        <p>FeedTan Community Microfinance Group</p>
+        <p>Ripoti imetengenezwa tarehe {{ now()->format('d F, Y') }}</p>
     </div>
 </body>
 </html>
