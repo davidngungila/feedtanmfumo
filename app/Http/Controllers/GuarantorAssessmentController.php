@@ -135,6 +135,7 @@ class GuarantorAssessmentController extends Controller
                 'ulid' => (string) \Str::ulid(),
                 'loan_id' => $loan->id,
                 'guarantor_id' => $validated['guarantor_id'],
+                'borrower_name' => $loan->user->name, // Add borrower name from loan
                 'member_code' => $validated['member_code'],
                 'full_name' => $validated['full_name'],
                 'phone' => $validated['phone'],
