@@ -30,6 +30,14 @@ class FiaPaymentController extends Controller
     }
 
     /**
+     * Show advanced verified payments page
+     */
+    public function showVerifiedPayments()
+    {
+        return view('fia.verified-payments');
+    }
+
+    /**
      * Lookup membership code
      */
     public function lookupMembership($membershipCode)
