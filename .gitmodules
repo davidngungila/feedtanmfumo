@@ -1,0 +1,3 @@
+[submodule "packages/clickpesa-laravel"]
+	path = packages/clickpesa-laravel
+	url = https://github.com/davidngungila/feedtanmfumo.git
