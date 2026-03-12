@@ -16,6 +16,21 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class GuarantorAssessmentController extends Controller
 {
     /**
+     * Show the assessment form to the guarantor.
+     */
+    public function show($loanUlid)
+    {
+        $loan = Loan::where('ulid', $loanUlid)->with('user')->firstOrFail();
+        
+        // Only get active members for the guarantor list
+        $members = User::where('status', 'approved')
+            ->orderBy('name')
+            ->get(['id', 'name', 'member_number']);
+
+        return view('guarantor-assessment.form', compact('loan', 'members'));
+    }
+
+    /**
      * Show the advanced assessment form to the guarantor.
      */
     public function showAdvanced($loanUlid)
