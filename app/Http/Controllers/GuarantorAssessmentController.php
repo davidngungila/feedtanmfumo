@@ -92,7 +92,19 @@ class GuarantorAssessmentController extends Controller
     public function store(Request $request, $loanUlid)
     {
         try {
+            Log::info('Guarantor assessment submission started', [
+                'loan_ulid' => $loanUlid,
+                'request_method' => $request->method(),
+                'content_type' => $request->header('Content-Type'),
+                'all_data' => $request->all()
+            ]);
+
             $loan = Loan::where('ulid', $loanUlid)->with('user')->firstOrFail();
+
+            // Handle both JSON and form data
+            $data = $request->isJson() ? $request->json()->all() : $request->all();
+
+            Log::info('Processed request data', ['data' => $data]);
 
             $validated = $request->validate([
                 'guarantor_id' => 'required|exists:users,id',
@@ -115,6 +127,8 @@ class GuarantorAssessmentController extends Controller
                 'voluntary_guarantee' => 'required|string',
                 'additional_comments' => 'nullable|string',
             ]);
+
+            Log::info('Validation passed', ['validated' => $validated]);
 
             // Create guarantor assessment record
             $assessment = GuarantorAssessment::create([
@@ -145,6 +159,8 @@ class GuarantorAssessmentController extends Controller
                 'status' => 'pending',
                 'submitted_at' => now(),
             ]);
+
+            Log::info('Assessment created', ['assessment_id' => $assessment->id]);
 
             // Generate PDF agreement
             $pdfPath = null;
@@ -199,25 +215,59 @@ class GuarantorAssessmentController extends Controller
                 ]);
             }
 
-            return response()->json([
+            $response = [
                 'status' => 'success',
                 'message' => 'Assessment submitted successfully',
                 'assessment_id' => $assessment->id,
                 'pdf_generated' => $pdfPath ? true : false,
                 'redirect_url' => route('guarantor-assessment.success', $assessment->ulid)
+            ];
+
+            Log::info('Returning success response', ['response' => $response]);
+
+            // Return JSON for AJAX requests, redirect for regular form submissions
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json($response);
+            } else {
+                return redirect()->route('guarantor-assessment.success', $assessment->ulid)
+                    ->with('success', 'Assessment submitted successfully');
+            }
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation error', [
+                'loan_ulid' => $loanUlid,
+                'errors' => $e->errors(),
+                'data' => $request->all()
             ]);
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed',
+                    'errors' => $e->errors()
+                ], 422);
+            } else {
+                return back()->withErrors($e->errors())->withInput();
+            }
 
         } catch (\Exception $e) {
             Log::error('Guarantor assessment submission error', [
                 'loan_ulid' => $loanUlid,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->all()
             ]);
 
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to submit assessment: ' . $e->getMessage()
-            ], 500);
+            $errorMessage = 'Failed to submit assessment: ' . $e->getMessage();
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $errorMessage
+                ], 500);
+            } else {
+                return back()->with('error', $errorMessage)->withInput();
+            }
         }
     }
 

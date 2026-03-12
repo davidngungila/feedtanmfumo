@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Guarantor Assessment - FeedTan CMG</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -644,17 +645,29 @@
                     additional_comments: document.getElementById('additional-comments').value
                 };
 
+                console.log('Submitting form data:', formData);
+
                 const response = await fetch('/guarantor-assessment/{{ $loan->ulid }}', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/x-www-form-urlencoded',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify(formData)
+                    body: new URLSearchParams(formData)
                 });
 
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Response error:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
                 const result = await response.json();
+                console.log('Response result:', result);
 
                 if (result.status === 'success') {
                     // Show success message with PDF generation status
@@ -681,11 +694,12 @@
                     document.getElementById('success-modal').classList.remove('hidden');
                     document.getElementById('success-modal').classList.add('flex');
                 } else {
+                    console.error('Form submission failed:', result);
                     alert('Error: ' + (result.message || 'Failed to submit assessment'));
                 }
             } catch (error) {
                 console.error('Submission error:', error);
-                alert('Network error. Please try again.');
+                alert('Network error: ' + error.message + '. Please try again.');
             } finally {
                 showLoading(false);
             }
