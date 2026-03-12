@@ -93,23 +93,23 @@
                 <div class="bg-white rounded-lg shadow-lg p-8">
                     <div class="text-center mb-8">
                         <h2 class="text-2xl font-bold text-gray-900 mb-2">Step 1: Member Verification</h2>
-                        <p class="text-gray-600">Enter your member code to verify your identity and continue with the assessment</p>
+                        <p class="text-gray-600">Enter your membership code to verify your identity and continue with the assessment</p>
                     </div>
 
                     <div class="max-w-md mx-auto">
                         <div class="mb-6">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">GUARANTOR MEMBER CODE *</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Membership Code *</label>
                             <div class="flex gap-3">
                                 <input type="text" id="member-code" 
                                     class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 text-lg"
-                                    placeholder="Enter guarantor member code">
+                                    placeholder="e.g., SCH-000002">
                                 <button type="button" onclick="verifyMember()" 
                                     class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200 font-medium">
                                     <i class="fas fa-search mr-2"></i>
                                     Verify
                                 </button>
                             </div>
-                            <p class="text-xs text-gray-500 mt-1">Enter the guarantor's unique member identification code from admin memberships</p>
+                            <p class="text-xs text-gray-500 mt-1">Enter the membership code (e.g., SCH-000002) from admin memberships page</p>
                         </div>
 
                         <!-- Member Verification Result -->

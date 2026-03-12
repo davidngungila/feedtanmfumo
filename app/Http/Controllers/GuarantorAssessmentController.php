@@ -45,14 +45,16 @@ class GuarantorAssessmentController extends Controller
     public function verifyMember($memberCode)
     {
         try {
+            // Try to find member by membership_code first, then by member_number
             $member = User::where('membership_code', $memberCode)
+                ->orWhere('member_number', $memberCode)
                 ->where('status', 'approved')
                 ->first();
 
             if (!$member) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Member not found or not approved. Please check the member code from admin memberships.'
+                    'message' => 'Member not found or not approved. Please check the membership code format (e.g., SCH-000002) from admin memberships.'
                 ], 404);
             }
 
@@ -62,6 +64,7 @@ class GuarantorAssessmentController extends Controller
                     'id' => $member->id,
                     'name' => $member->name,
                     'membership_code' => $member->membership_code,
+                    'member_number' => $member->member_number,
                     'phone' => $member->phone,
                     'email' => $member->email,
                     'membership_status' => $member->membership_status ?? 'Active',
@@ -77,7 +80,7 @@ class GuarantorAssessmentController extends Controller
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Error verifying member'
+                'message' => 'Error verifying member. Please try again.'
             ], 500);
         }
     }
