@@ -8,6 +8,7 @@ use App\Models\GuarantorAssessment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use App\Mail\GuaranteeAgreementMail;
 use App\Mail\GuarantorSubmittedNotification;
 use Carbon\Carbon;
@@ -90,33 +91,34 @@ class GuarantorAssessmentController extends Controller
      */
     public function store(Request $request, $loanUlid)
     {
-        $loan = Loan::where('ulid', $loanUlid)->firstOrFail();
-
-        $validated = $request->validate([
-            'guarantor_id' => 'required|exists:users,id',
-            'member_code' => 'required|string',
-            'full_name' => 'required|string',
-            'phone' => 'required|string',
-            'email' => 'required|email',
-            'relationship' => 'required|string',
-            'relationship_other' => 'required_if:relationship,other|nullable|string',
-            'address' => 'required|string',
-            'occupation' => 'required|string',
-            'monthly_income' => 'required|numeric|min:0',
-            'loan_purpose' => 'required|string',
-            'loan_purpose_other' => 'required_if:loan_purpose,other|nullable|string',
-            'repayment_history' => 'required|string',
-            'existing_debts' => 'required|string',
-            'sufficient_savings' => 'required|string',
-            'sole_responsibility' => 'required|string',
-            'recovery_process' => 'required|string',
-            'voluntary_guarantee' => 'required|string',
-            'additional_comments' => 'nullable|string',
-        ]);
-
         try {
+            $loan = Loan::where('ulid', $loanUlid)->with('user')->firstOrFail();
+
+            $validated = $request->validate([
+                'guarantor_id' => 'required|exists:users,id',
+                'member_code' => 'required|string',
+                'full_name' => 'required|string',
+                'phone' => 'required|string',
+                'email' => 'required|email',
+                'relationship' => 'required|string',
+                'relationship_other' => 'required_if:relationship,other|nullable|string',
+                'address' => 'required|string',
+                'occupation' => 'required|string',
+                'monthly_income' => 'required|numeric|min:0',
+                'loan_purpose' => 'required|string',
+                'loan_purpose_other' => 'required_if:loan_purpose,other|nullable|string',
+                'repayment_history' => 'required|string',
+                'existing_debts' => 'required|string',
+                'sufficient_savings' => 'required|string',
+                'sole_responsibility' => 'required|string',
+                'recovery_process' => 'required|string',
+                'voluntary_guarantee' => 'required|string',
+                'additional_comments' => 'nullable|string',
+            ]);
+
             // Create guarantor assessment record
             $assessment = GuarantorAssessment::create([
+                'ulid' => (string) \Str::ulid(),
                 'loan_id' => $loan->id,
                 'guarantor_id' => $validated['guarantor_id'],
                 'member_code' => $validated['member_code'],
@@ -140,11 +142,39 @@ class GuarantorAssessmentController extends Controller
                 'assessment_date' => now(),
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent(),
+                'status' => 'pending',
+                'submitted_at' => now(),
             ]);
 
-            // Send confirmation email to guarantor
+            // Generate PDF agreement
+            $pdfPath = null;
+            try {
+                $pdf = Pdf::loadView('guarantor-assessment.pdf', compact('assessment', 'loan'));
+                $pdfPath = 'guarantor-agreements/' . $assessment->id . '_agreement.pdf';
+                Storage::put($pdfPath, $pdf->output());
+                
+                // Update assessment with PDF path
+                $assessment->update(['agreement_path' => $pdfPath]);
+                
+                Log::info('Guarantor agreement PDF generated', [
+                    'assessment_id' => $assessment->id,
+                    'pdf_path' => $pdfPath
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Failed to generate PDF agreement', [
+                    'assessment_id' => $assessment->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
+            // Send confirmation email to guarantor with PDF attachment
             try {
                 Mail::to($validated['email'])->send(new GuaranteeAgreementMail($assessment, $loan));
+                
+                Log::info('Guarantor confirmation email sent', [
+                    'assessment_id' => $assessment->id,
+                    'email' => $validated['email']
+                ]);
             } catch (\Exception $e) {
                 Log::error('Failed to send guarantor email', [
                     'assessment_id' => $assessment->id,
@@ -156,6 +186,11 @@ class GuarantorAssessmentController extends Controller
             try {
                 if ($loan->user && $loan->user->email) {
                     Mail::to($loan->user->email)->send(new GuarantorSubmittedNotification($assessment, $loan));
+                    
+                    Log::info('Borrower notification sent', [
+                        'assessment_id' => $assessment->id,
+                        'borrower_email' => $loan->user->email
+                    ]);
                 }
             } catch (\Exception $e) {
                 Log::error('Failed to send borrower notification', [
@@ -167,18 +202,21 @@ class GuarantorAssessmentController extends Controller
             return response()->json([
                 'status' => 'success',
                 'message' => 'Assessment submitted successfully',
-                'assessment_id' => $assessment->id
+                'assessment_id' => $assessment->id,
+                'pdf_generated' => $pdfPath ? true : false,
+                'redirect_url' => route('guarantor-assessment.success', $assessment->ulid)
             ]);
 
         } catch (\Exception $e) {
             Log::error('Guarantor assessment submission error', [
                 'loan_ulid' => $loanUlid,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to submit assessment'
+                'message' => 'Failed to submit assessment: ' . $e->getMessage()
             ], 500);
         }
     }

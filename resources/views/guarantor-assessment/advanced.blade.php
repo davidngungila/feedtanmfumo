@@ -644,11 +644,12 @@
                     additional_comments: document.getElementById('additional-comments').value
                 };
 
-                const response = await fetch('/guarantor-assessment/store/{{ $loan->ulid }}', {
+                const response = await fetch('/guarantor-assessment/{{ $loan->ulid }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
                     },
                     body: JSON.stringify(formData)
                 });
@@ -656,6 +657,27 @@
                 const result = await response.json();
 
                 if (result.status === 'success') {
+                    // Show success message with PDF generation status
+                    const successContent = `
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-check text-green-600 text-2xl"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold text-gray-900 mb-2">Assessment Submitted Successfully!</h3>
+                            <p class="text-gray-600 mb-4">Your guarantor assessment has been submitted and is being reviewed.</p>
+                            ${result.pdf_generated ? 
+                                '<p class="text-sm text-green-600 mb-4"><i class="fas fa-file-pdf mr-2"></i>Guarantee agreement PDF has been generated and sent to your email.</p>' : 
+                                '<p class="text-sm text-yellow-600 mb-4"><i class="fas fa-exclamation-triangle mr-2"></i>PDF generation may take a few moments. You will receive it via email.</p>'
+                            }
+                            <div class="mt-6">
+                                <button onclick="closeModal('success-modal')" class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                                    Got it
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('success-modal').querySelector('.text-center').innerHTML = successContent;
                     document.getElementById('success-modal').classList.remove('hidden');
                     document.getElementById('success-modal').classList.add('flex');
                 } else {
