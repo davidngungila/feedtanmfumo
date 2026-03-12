@@ -66,8 +66,10 @@ Route::post('/test/snippe-api', [\App\Http\Controllers\TestPaymentController::cl
 
 // Guarantor Assessment (publicly accessible via obscure link)
 Route::get('/guarantor-assessment/{loanUlid}', [\App\Http\Controllers\GuarantorAssessmentController::class, 'show'])->name('guarantor-assessment.show');
+Route::get('/guarantor-assessment/{loanUlid}/advanced', [\App\Http\Controllers\GuarantorAssessmentController::class, 'showAdvanced'])->name('guarantor-assessment.advanced');
 Route::post('/guarantor-assessment/{loanUlid}', [\App\Http\Controllers\GuarantorAssessmentController::class, 'store'])->name('guarantor-assessment.store');
 Route::get('/guarantor-assessment/success/{assessmentUlid}', [\App\Http\Controllers\GuarantorAssessmentController::class, 'success'])->name('guarantor-assessment.success');
+Route::get('/api/verify-member/{memberCode}', [\App\Http\Controllers\GuarantorAssessmentController::class, 'verifyMember'])->name('api.verify-member');
 
 // Authentication routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');

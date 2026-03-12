@@ -7,25 +7,64 @@ use App\Models\User;
 use App\Models\GuarantorAssessment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use App\Mail\GuaranteeAgreementMail;
+use App\Mail\GuarantorSubmittedNotification;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class GuarantorAssessmentController extends Controller
 {
     /**
-     * Show the assessment form to the guarantor.
+     * Show the advanced assessment form to the guarantor.
      */
-    public function show($loanUlid)
+    public function showAdvanced($loanUlid)
     {
         $loan = Loan::where('ulid', $loanUlid)->with('user')->firstOrFail();
-        
-        // Only get active members for the guarantor list
-        $members = User::where('status', 'approved')
-            ->orderBy('name')
-            ->get(['id', 'name', 'member_number']);
+        return view('guarantor-assessment.advanced', compact('loan'));
+    }
 
-        return view('guarantor-assessment.form', compact('loan', 'members'));
+    /**
+     * Verify member code for guarantor assessment.
+     */
+    public function verifyMember($memberCode)
+    {
+        try {
+            $member = User::where('membership_code', $memberCode)
+                ->where('status', 'approved')
+                ->first();
+
+            if (!$member) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Member not found or not approved'
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'id' => $member->id,
+                    'name' => $member->name,
+                    'membership_code' => $member->membership_code,
+                    'phone' => $member->phone,
+                    'email' => $member->email,
+                    'membership_status' => $member->membership_status ?? 'Active',
+                    'created_at' => $member->created_at
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Member verification error', [
+                'member_code' => $memberCode,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error verifying member'
+            ], 500);
+        }
     }
 
     /**
@@ -37,62 +76,93 @@ class GuarantorAssessmentController extends Controller
 
         $validated = $request->validate([
             'guarantor_id' => 'required|exists:users,id',
+            'member_code' => 'required|string',
+            'full_name' => 'required|string',
+            'phone' => 'required|string',
+            'email' => 'required|email',
             'relationship' => 'required|string',
-            'relationship_other' => 'required_if:relationship,Other|nullable|string',
+            'relationship_other' => 'required_if:relationship,other|nullable|string',
+            'address' => 'required|string',
+            'occupation' => 'required|string',
+            'monthly_income' => 'required|numeric|min:0',
             'loan_purpose' => 'required|string',
-            'loan_purpose_other' => 'required_if:loan_purpose,Other|nullable|string',
-            'reviewed_history' => 'required|string',
-            'other_debts' => 'required|string',
+            'loan_purpose_other' => 'required_if:loan_purpose,other|nullable|string',
+            'repayment_history' => 'required|string',
+            'existing_debts' => 'required|string',
             'sufficient_savings' => 'required|string',
-            'financial_obligation_impact' => 'required|string',
-            'other_guarantees' => 'required|string',
-            'solely_responsible_understanding' => 'required|string',
-            'recovery_mechanism_understanding' => 'required|string',
-            'borrower_backup_plan' => 'required|string',
-            'guarantor_backup_plan' => 'required|string',
-            'final_declaration' => 'required|accepted',
+            'sole_responsibility' => 'required|string',
+            'recovery_process' => 'required|string',
+            'voluntary_guarantee' => 'required|string',
             'additional_comments' => 'nullable|string',
         ]);
 
-        $assessment = GuarantorAssessment::create([
-            'loan_id' => $loan->id,
-            'guarantor_id' => $validated['guarantor_id'],
-            'borrower_name' => $loan->user->name,
-            'relationship' => $validated['relationship'],
-            'relationship_other' => $validated['relationship_other'],
-            'loan_purpose' => $validated['loan_purpose'],
-            'loan_purpose_other' => $validated['loan_purpose_other'],
-            'reviewed_history' => $validated['reviewed_history'],
-            'other_debts' => $validated['other_debts'],
-            'sufficient_savings' => $validated['sufficient_savings'],
-            'financial_obligation_impact' => $validated['financial_obligation_impact'],
-            'other_guarantees' => $validated['other_guarantees'],
-            'solely_responsible_understanding' => $validated['solely_responsible_understanding'],
-            'recovery_mechanism_understanding' => $validated['recovery_mechanism_understanding'],
-            'borrower_backup_plan' => $validated['borrower_backup_plan'],
-            'guarantor_backup_plan' => $validated['guarantor_backup_plan'],
-            'final_declaration' => true,
-            'additional_comments' => $validated['additional_comments'],
-            'status' => 'pending',
-            'submitted_at' => now(),
-        ]);
-
-        // Update the loan with the guarantor if not already set
-        if (!$loan->guarantor_id) {
-            $loan->update(['guarantor_id' => $validated['guarantor_id']]);
-        }
-
-        // Send automated email with Guarantee Agreement
         try {
-            $guarantor = User::find($validated['guarantor_id']);
-            Mail::to($guarantor->email)
-                ->cc($loan->user->email)
-                ->send(new GuaranteeAgreementMail($assessment));
-        } catch (\Exception $e) {
-            \Log::error('Failed to send Guarantee Agreement email: ' . $e->getMessage());
-        }
+            // Create guarantor assessment record
+            $assessment = GuarantorAssessment::create([
+                'loan_id' => $loan->id,
+                'guarantor_id' => $validated['guarantor_id'],
+                'member_code' => $validated['member_code'],
+                'full_name' => $validated['full_name'],
+                'phone' => $validated['phone'],
+                'email' => $validated['email'],
+                'relationship' => $validated['relationship'],
+                'relationship_other' => $validated['relationship_other'],
+                'address' => $validated['address'],
+                'occupation' => $validated['occupation'],
+                'monthly_income' => $validated['monthly_income'],
+                'loan_purpose' => $validated['loan_purpose'],
+                'loan_purpose_other' => $validated['loan_purpose_other'],
+                'repayment_history' => $validated['repayment_history'],
+                'existing_debts' => $validated['existing_debts'],
+                'sufficient_savings' => $validated['sufficient_savings'],
+                'sole_responsibility' => $validated['sole_responsibility'],
+                'recovery_process' => $validated['recovery_process'],
+                'voluntary_guarantee' => $validated['voluntary_guarantee'],
+                'additional_comments' => $validated['additional_comments'],
+                'assessment_date' => now(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
 
-        return redirect()->route('guarantor-assessment.success', $assessment->ulid);
+            // Send confirmation email to guarantor
+            try {
+                Mail::to($validated['email'])->send(new GuaranteeAgreementMail($assessment, $loan));
+            } catch (\Exception $e) {
+                Log::error('Failed to send guarantor email', [
+                    'assessment_id' => $assessment->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
+            // Send notification to borrower
+            try {
+                if ($loan->user && $loan->user->email) {
+                    Mail::to($loan->user->email)->send(new GuarantorSubmittedNotification($assessment, $loan));
+                }
+            } catch (\Exception $e) {
+                Log::error('Failed to send borrower notification', [
+                    'assessment_id' => $assessment->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Assessment submitted successfully',
+                'assessment_id' => $assessment->id
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Guarantor assessment submission error', [
+                'loan_ulid' => $loanUlid,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to submit assessment'
+            ], 500);
+        }
     }
 
     /**
