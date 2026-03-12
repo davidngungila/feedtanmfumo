@@ -30,6 +30,127 @@ class FiaPaymentController extends Controller
     }
 
     /**
+     * Lookup membership code
+     */
+    public function lookupMembership($membershipCode)
+    {
+        try {
+            // Find member by membership code
+            $member = \App\Models\User::where('membership_code', $membershipCode)
+                ->with(['payments'])
+                ->first();
+
+            if (!$member) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Membership code not found'
+                ], 404);
+            }
+
+            // Get payment breakdown for this member
+            $paymentBreakdown = $this->getMemberPaymentBreakdown($member);
+
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'id' => $member->id,
+                    'name' => $member->name,
+                    'membership_code' => $member->membership_code,
+                    'phone' => $member->phone,
+                    'email' => $member->email,
+                    'payments' => $paymentBreakdown
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Membership lookup error', [
+                'membership_code' => $membershipCode,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error looking up membership code'
+            ], 500);
+        }
+    }
+
+    /**
+     * Import payments from Excel file
+     */
+    public function importPayments(Request $request)
+    {
+        $request->validate([
+            'payments_file' => 'required|file|mimes:xlsx,xls,csv|max:10240'
+        ]);
+
+        try {
+            $file = $request->file('payments_file');
+            $importedCount = 0;
+            $errors = [];
+
+            // Process Excel file
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($file->getRealPath());
+            $worksheet = $spreadsheet->getActiveSheet();
+            $rows = $worksheet->toArray();
+
+            // Skip header row if present
+            $headerRow = array_shift($rows);
+            
+            foreach ($rows as $index => $row) {
+                try {
+                    // Map columns (adjust based on your Excel structure)
+                    $paymentData = [
+                        'name' => $row[0] ?? null,
+                        'fia_gawio' => $row[1] ?? null,
+                        'fia_iliyokomaa' => $row[2] ?? null,
+                        'jumla' => $row[3] ?? 0,
+                        'malipo_vipande' => $row[4] ?? 0,
+                        'loan' => $row[5] ?? 0,
+                        'kiasi_baki' => $row[6] ?? 0,
+                        'membership_code' => $row[7] ?? null,
+                        'status' => 'pending'
+                    ];
+
+                    // Validate required fields
+                    if (empty($paymentData['name']) || empty($paymentData['membership_code'])) {
+                        $errors[] = "Row " . ($index + 2) . ": Missing name or membership code";
+                        continue;
+                    }
+
+                    // Create or update payment record
+                    \App\Models\FiaAdminPayment::updateOrCreate(
+                        ['membership_code' => $paymentData['membership_code']],
+                        $paymentData
+                    );
+
+                    $importedCount++;
+
+                } catch (\Exception $e) {
+                    $errors[] = "Row " . ($index + 2) . ": " . $e->getMessage();
+                }
+            }
+
+            return response()->json([
+                'status' => 'success',
+                'message' => "Successfully imported {$importedCount} payments",
+                'imported_count' => $importedCount,
+                'errors' => $errors
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Payment import error', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to import payments: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Submit payment verification
      */
     public function submitVerification(Request $request)
@@ -154,12 +275,11 @@ class FiaPaymentController extends Controller
     }
 
     /**
-     * Get all payments data
+     * Get all payments data (admin uploaded)
      */
     public function getPayments(Request $request)
     {
-        $payments = FiaPayment::with(['verification'])
-            ->orderBy('created_at', 'desc')
+        $payments = \App\Models\FiaAdminPayment::orderBy('created_at', 'desc')
             ->paginate($request->get('per_page', 20));
 
         return response()->json([
@@ -316,5 +436,64 @@ class FiaPaymentController extends Controller
                 'verification_id' => $verification->id
             ]);
         }
+    }
+
+    /**
+     * Get member payment breakdown
+     */
+    private function getMemberPaymentBreakdown($member)
+    {
+        // Get FIA admin payment for this member
+        $fiaPayment = \App\Models\FiaAdminPayment::where('membership_code', $member->membership_code)
+            ->first();
+
+        if (!$fiaPayment) {
+            return [];
+        }
+
+        // Create payment breakdown
+        $breakdown = [];
+
+        // Add FIA Gawio
+        if ($fiaPayment->fia_gawio) {
+            $breakdown[] = [
+                'description' => 'FIA Gawio',
+                'amount' => $fiaPayment->fia_gawio,
+                'due_date' => now()->format('d M Y'),
+                'status' => 'pending'
+            ];
+        }
+
+        // Add FIA Iliyokomaa
+        if ($fiaPayment->fia_iliyokomaa) {
+            $breakdown[] = [
+                'description' => 'FIA Iliyokomaa',
+                'amount' => $fiaPayment->fia_iliyokomaa,
+                'due_date' => now()->format('d M Y'),
+                'status' => 'pending'
+            ];
+        }
+
+        // Add Malipo ya vipande
+        if ($fiaPayment->malipo_vipande) {
+            $breakdown[] = [
+                'description' => 'Malipo ya vipande yailiyokuwa',
+                'amount' => $fiaPayment->malipo_vipande,
+                'due_date' => now()->format('d M Y'),
+                'status' => 'pending'
+            ];
+        }
+
+        // Add Loan
+        if ($fiaPayment->loan) {
+            $breakdown[] = [
+                'description' => 'Loan',
+                'amount' => $fiaPayment->loan,
+                'due_date' => now()->format('d M Y'),
+                'status' => 'pending'
+            ];
+        }
+
+        return $breakdown;
     }
 }
