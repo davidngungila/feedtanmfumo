@@ -247,9 +247,68 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Social Welfare - Specific routes before resource
     Route::get('welfare/fund-management', [SocialWelfareController::class, 'fundManagement'])->name('welfare.fund-management');
-    Route::get('welfare/services', [SocialWelfareController::class, 'services'])->name('welfare.services');
-    Route::get('welfare/claims-processing', [SocialWelfareController::class, 'claimsProcessing'])->name('welfare.claims-processing');
+    Route::get('welfare/contributions', [SocialWelfareController::class, 'contributions'])->name('welfare.contributions');
+    Route::get('welfare/benefits', [SocialWelfareController::class, 'benefits'])->name('welfare.benefits');
     Route::get('welfare/reports', [SocialWelfareController::class, 'reports'])->name('welfare.reports');
+
+    Route::resource('welfare', SocialWelfareController::class);
+
+    // Payments - Specific routes before resource
+    Route::prefix('payments')->name('payments.')->group(function () {
+        Route::get('transactions', [\App\Http\Controllers\Admin\PaymentController::class, 'transactions'])->name('transactions');
+        Route::get('billpay', [\App\Http\Controllers\Admin\PaymentController::class, 'billpay'])->name('billpay');
+        Route::get('checkout', [\App\Http\Controllers\Admin\PaymentController::class, 'checkout'])->name('checkout');
+        Route::get('ussd-push', [\App\Http\Controllers\Admin\PaymentController::class, 'ussdPush'])->name('ussd-push');
+        Route::get('card-payments', [\App\Http\Controllers\Admin\PaymentController::class, 'cardPayments'])->name('card-payments');
+        Route::get('payouts', [\App\Http\Controllers\Admin\PaymentController::class, 'payouts'])->name('payouts');
+        Route::get('reconciliation', [\App\Http\Controllers\Admin\PaymentController::class, 'reconciliation'])->name('reconciliation');
+        
+        // API endpoints for payment operations
+        Route::post('preview-ussd-push', [\App\Http\Controllers\Admin\PaymentController::class, 'previewUssdPush'])->name('preview-ussd-push');
+        Route::post('initiate-ussd-push', [\App\Http\Controllers\Admin\PaymentController::class, 'initiateUssdPush'])->name('initiate-ussd-push');
+        Route::post('process-card-payment', [\App\Http\Controllers\Admin\PaymentController::class, 'processCardPayment'])->name('process-card-payment');
+        Route::post('process-payout', [\App\Http\Controllers\Admin\PaymentController::class, 'processPayout'])->name('process-payout');
+        Route::post('reconcile-transactions', [\App\Http\Controllers\Admin\PaymentController::class, 'reconcileTransactions'])->name('reconcile-transactions');
+        Route::get('transaction-details/{id}', [\App\Http\Controllers\Admin\PaymentController::class, 'transactionDetails'])->name('transaction-details');
+        Route::get('export-transactions', [\App\Http\Controllers\Admin\PaymentController::class, 'exportTransactions'])->name('export-transactions');
+        
+        // ClickPesa API endpoints
+        Route::get('query-payment-status/{orderReference}', [\App\Http\Controllers\Admin\PaymentController::class, 'queryPaymentStatus'])->name('query-payment-status');
+        Route::get('query-all-payments', [\App\Http\Controllers\Admin\PaymentController::class, 'queryAllPayments'])->name('query-all-payments');
+        Route::post('preview-mobile-money-payout', [\App\Http\Controllers\Admin\PaymentController::class, 'previewMobileMoneyPayout'])->name('preview-mobile-money-payout');
+        Route::post('create-mobile-money-payout', [\App\Http\Controllers\Admin\PaymentController::class, 'createMobileMoneyPayout'])->name('create-mobile-money-payout');
+        Route::post('preview-bank-payout', [\App\Http\Controllers\Admin\PaymentController::class, 'previewBankPayout'])->name('preview-bank-payout');
+        Route::post('create-bank-payout', [\App\Http\Controllers\Admin\PaymentController::class, 'createBankPayout'])->name('create-bank-payout');
+        Route::get('query-payout-status/{orderReference}', [\App\Http\Controllers\Admin\PaymentController::class, 'queryPayoutStatus'])->name('query-payout-status');
+        Route::get('query-all-payouts', [\App\Http\Controllers\Admin\PaymentController::class, 'queryAllPayouts'])->name('query-all-payouts');
+        Route::get('retrieve-banks-list', [\App\Http\Controllers\Admin\PaymentController::class, 'retrieveBanksList'])->name('retrieve-banks-list');
+        Route::post('create-order-control-number', [\App\Http\Controllers\Admin\PaymentController::class, 'createOrderControlNumber'])->name('create-order-control-number');
+        Route::post('create-customer-control-number', [\App\Http\Controllers\Admin\PaymentController::class, 'createCustomerControlNumber'])->name('create-customer-control-number');
+        Route::post('bulk-create-order-control-numbers', [\App\Http\Controllers\Admin\PaymentController::class, 'bulkCreateOrderControlNumbers'])->name('bulk-create-order-control-numbers');
+        Route::post('bulk-create-customer-control-numbers', [\App\Http\Controllers\Admin\PaymentController::class, 'bulkCreateCustomerControlNumbers'])->name('bulk-create-customer-control-numbers');
+        Route::patch('update-billpay-reference/{billPayNumber}', [\App\Http\Controllers\Admin\PaymentController::class, 'updateBillPayReference'])->name('update-billpay-reference');
+        Route::get('query-billpay-details/{billPayNumber}', [\App\Http\Controllers\Admin\PaymentController::class, 'queryBillPayNumberDetails'])->name('query-billpay-details');
+        Route::put('update-billpay-status', [\App\Http\Controllers\Admin\PaymentController::class, 'updateBillPayNumberStatus'])->name('update-billpay-status');
+        Route::post('generate-checkout-link', [\App\Http\Controllers\Admin\PaymentController::class, 'generateCheckoutLink'])->name('generate-checkout-link');
+        Route::post('generate-payout-link', [\App\Http\Controllers\Admin\PaymentController::class, 'generatePayoutLink'])->name('generate-payout-link');
+        Route::get('retrieve-account-balance', [\App\Http\Controllers\Admin\PaymentController::class, 'retrieveAccountBalance'])->name('retrieve-account-balance');
+        Route::get('retrieve-account-statement', [\App\Http\Controllers\Admin\PaymentController::class, 'retrieveAccountStatement'])->name('retrieve-account-statement');
+        Route::get('retrieve-exchange-rates', [\App\Http\Controllers\Admin\PaymentController::class, 'retrieveExchangeRates'])->name('retrieve-exchange-rates');
+        Route::get('recent-ussd-pushes', [\App\Http\Controllers\Admin\PaymentController::class, 'getRecentUssdPushes'])->name('recent-ussd-pushes');
+        
+        // Additional helper routes
+        Route::get('recent-control-numbers', [\App\Http\Controllers\Admin\PaymentController::class, 'getRecentControlNumbers'])->name('recent-control-numbers');
+        Route::get('all-control-numbers', [\App\Http\Controllers\Admin\PaymentController::class, 'getAllControlNumbers'])->name('all-control-numbers');
+        Route::get('recent-checkout-sessions', [\App\Http\Controllers\Admin\PaymentController::class, 'getRecentCheckoutSessions'])->name('recent-checkout-sessions');
+        Route::get('all-checkout-sessions', [\App\Http\Controllers\Admin\PaymentController::class, 'getAllCheckoutSessions'])->name('all-checkout-sessions');
+        Route::get('checkout-session-details/{sessionId}', [\App\Http\Controllers\Admin\PaymentController::class, 'getCheckoutSessionDetails'])->name('checkout-session-details');
+        Route::get('checkout-receipt/{sessionId}', [\App\Http\Controllers\Admin\PaymentController::class, 'downloadCheckoutReceipt'])->name('checkout-receipt');
+        Route::get('recent-payouts', [\App\Http\Controllers\Admin\PaymentController::class, 'getRecentPayouts'])->name('recent-payouts');
+        Route::get('all-payouts', [\App\Http\Controllers\Admin\PaymentController::class, 'getAllPayouts'])->name('all-payouts');
+    });
+
+    Route::resource('payments', \App\Http\Controllers\Admin\PaymentController::class);
+
     Route::get('welfare/reports/fund-status', [SocialWelfareController::class, 'fundStatusReport'])->name('welfare.reports.fund-status');
     Route::get('welfare/reports/fund-status/pdf', [SocialWelfareController::class, 'fundStatusReportPdf'])->name('welfare.reports.fund-status.pdf');
     Route::get('welfare/reports/claim-analysis', [SocialWelfareController::class, 'claimAnalysisReport'])->name('welfare.reports.claim-analysis');
