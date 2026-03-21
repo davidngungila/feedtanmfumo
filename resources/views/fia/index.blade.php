@@ -57,15 +57,7 @@
                     <nav class="flex -mb-px">
                         <button onclick="showTab('verification')" id="verification-tab" class="tab-active py-4 px-6 text-sm font-medium border-b-3 border-transparent hover:text-green-600 hover:border-green-600 transition-colors duration-200">
                             <i class="fas fa-file-alt mr-2"></i>
-                            Submit Verification
-                        </button>
-                        <button onclick="showTab('payments')" id="payments-tab" class="py-4 px-6 text-sm font-medium border-b-3 border-transparent hover:text-green-600 hover:border-green-600 transition-colors duration-200">
-                            <i class="fas fa-list mr-2"></i>
-                            Admin Uploaded Payments
-                        </button>
-                        <button onclick="showTab('verified')" id="verified-tab" class="py-4 px-6 text-sm font-medium border-b-3 border-transparent hover:text-green-600 hover:border-green-600 transition-colors duration-200">
-                            <i class="fas fa-check-circle mr-2"></i>
-                            Member Verified Payments
+                            Submit Payment Confirmation
                         </button>
                     </nav>
                 </div>
@@ -208,41 +200,6 @@
                         </div>
                     </form>
                 </div>
-
-                <!-- Admin Uploaded Payments Tab -->
-                <div id="payments-content" class="p-6 hidden">
-                    <div class="mb-4">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">All Payments Uploaded by Admin</h3>
-                        <div class="flex justify-between items-center mb-4">
-                            <p class="text-gray-600">Payment records uploaded and managed by administrators</p>
-                            <button onclick="importPayments()" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm">
-                                <i class="fas fa-upload mr-2"></i>Import Payments
-                            </button>
-                        </div>
-                    </div>
-                    <div id="payments-loading" class="text-center py-8 hidden">
-                        <i class="fas fa-spinner fa-spin text-3xl text-green-600"></i>
-                        <p class="mt-2 text-gray-600">Loading payments data...</p>
-                    </div>
-                    <div id="payments-data" class="hidden">
-                        <!-- Payments will be loaded here via JavaScript -->
-                    </div>
-                </div>
-
-                <!-- Member Verified Payments Tab -->
-                <div id="verified-content" class="p-6 hidden">
-                    <div class="mb-4">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Verified Payments by Members</h3>
-                        <p class="text-gray-600">Payment verifications submitted and confirmed by members</p>
-                    </div>
-                    <div id="verified-loading" class="text-center py-8 hidden">
-                        <i class="fas fa-spinner fa-spin text-3xl text-green-600"></i>
-                        <p class="mt-2 text-gray-600">Loading verified payments...</p>
-                    </div>
-                    <div id="verified-data" class="hidden">
-                        <!-- Verified payments will be loaded here via JavaScript -->
-                    </div>
-                </div>
             </div>
         </div>
     </main>
@@ -288,29 +245,6 @@
 
     <script>
         // Tab switching
-        function showTab(tabName) {
-            // Hide all content
-            document.getElementById('verification-content').classList.add('hidden');
-            document.getElementById('payments-content').classList.add('hidden');
-            document.getElementById('verified-content').classList.add('hidden');
-            
-            // Remove active class from all tabs
-            document.getElementById('verification-tab').classList.remove('tab-active');
-            document.getElementById('payments-tab').classList.remove('tab-active');
-            document.getElementById('verified-tab').classList.remove('tab-active');
-            
-            // Show selected content and activate tab
-            document.getElementById(tabName + '-content').classList.remove('hidden');
-            document.getElementById(tabName + '-tab').classList.add('tab-active');
-            
-            // Load data for payments tabs
-            if (tabName === 'payments') {
-                loadPayments();
-            } else if (tabName === 'verified') {
-                loadVerifiedPayments();
-            }
-        }
-
         // Lookup membership code
         async function lookupMembership() {
             const membershipCode = document.getElementById('membership-code').value.trim();
@@ -320,27 +254,26 @@
                 return;
             }
 
-            // Show loading
-            const lookupBtn = event.target;
-            lookupBtn.disabled = true;
+            const lookupBtn = document.querySelector('button[onclick="lookupMembership()"]');
+            const originalText = lookupBtn.innerHTML;
             lookupBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Looking up...';
+            lookupBtn.disabled = true;
 
             try {
                 const response = await fetch(`/fia/lookup-membership/${membershipCode}`);
-                const result = await response.json();
+                const data = await response.json();
 
-                if (result.status === 'success') {
-                    displayPaymentDetails(result.data);
+                if (data.success) {
+                    displayPaymentDetails(data.member);
                 } else {
-                    alert('Membership code not found: ' + (result.message || 'Please check your membership code'));
+                    alert(data.message || 'Membership code not found. Please check your code and try again.');
                 }
             } catch (error) {
-                console.error('Lookup error:', error);
+                console.error('Error:', error);
                 alert('Error looking up membership code. Please try again.');
             } finally {
-                // Reset button
+                lookupBtn.innerHTML = originalText;
                 lookupBtn.disabled = false;
-                lookupBtn.innerHTML = '<i class="fas fa-search mr-2"></i>Lookup';
             }
         }
 
@@ -350,16 +283,13 @@
             document.getElementById('payment-details').classList.remove('hidden');
             
             // Set member information
-            document.getElementById('member-name').textContent = memberData.name;
-            document.getElementById('member-code').textContent = memberData.membership_code;
-            document.getElementById('member-id').value = memberData.id;
+            document.getElementById('member-name').textContent = memberData.member_name;
+            document.getElementById('member-code').textContent = memberData.member_id;
+            document.getElementById('member-id').value = memberData.member_id;
             
             // Set contact information if available
-            if (memberData.phone) {
-                document.getElementById('phone').value = memberData.phone.replace('+255', '');
-            }
-            if (memberData.email) {
-                document.getElementById('email').value = memberData.email;
+            if (memberData.member_email) {
+                document.getElementById('email').value = memberData.member_email;
             }
             
             // Display payment breakdown
@@ -367,96 +297,91 @@
             breakdownContainer.innerHTML = '';
             
             let totalAmount = 0;
-            const payments = memberData.payments || [];
             
-            if (payments.length === 0) {
-                breakdownContainer.innerHTML = '<p class="text-gray-500">No payment records found for this member.</p>';
-            } else {
-                payments.forEach(payment => {
+            // Create payment breakdown from FIA record
+            const paymentItems = [
+                { description: 'Gawio la FIA', amount: memberData.gawio_la_fia || 0 },
+                { description: 'FIA Ilivyo Koma', amount: memberData.fia_iliyokomaa || 0 },
+                { description: 'Jumla', amount: memberData.jumla || 0 },
+                { description: 'Malipo ya Vipande', amount: memberData.malipo_ya_vipande_yaliyokuwa_yamepelea || 0 },
+                { description: 'Loan', amount: memberData.loan || 0 },
+                { description: 'Kiasi Baki', amount: memberData.kiasi_baki || 0 }
+            ];
+            
+            paymentItems.forEach(payment => {
+                if (payment.amount > 0) {
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'flex justify-between items-center py-2 border-b';
                     itemDiv.innerHTML = `
                         <div>
                             <p class="font-medium">${payment.description}</p>
-                            <p class="text-sm text-gray-600">${payment.due_date}</p>
                         </div>
                         <div class="text-right">
-                            <p class="font-semibold">TSh ${payment.amount.toLocaleString()}</p>
-                            <p class="text-sm ${payment.status === 'paid' ? 'text-green-600' : 'text-orange-600'}">${payment.status}</p>
+                            <p class="font-semibold">TSh ${Number(payment.amount).toLocaleString()}</p>
                         </div>
                     `;
                     breakdownContainer.appendChild(itemDiv);
-                    
-                    if (payment.status !== 'paid') {
-                        totalAmount += payment.amount;
-                    }
-                });
-            }
+                    totalAmount += Number(payment.amount);
+                }
+            });
             
             // Update total amount
             document.getElementById('total-amount').textContent = `TSh ${totalAmount.toLocaleString()}`;
-            document.getElementById('amount').value = totalAmount;
+            document.getElementById('amount-to-pay').value = totalAmount;
+        }
+
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.getElementById(modalId).classList.remove('flex');
+        }
+
+        // Handle form submission
+        document.getElementById('verification-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
             
-            // Scroll to payment details
-            document.getElementById('payment-details').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // Import payments (admin function)
-        function importPayments() {
-            // Create file input
-            const fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.accept = '.xlsx,.xls,.csv';
-            fileInput.onchange = function(e) {
-                const file = e.target.files[0];
-                if (file) {
-                    uploadPaymentsFile(file);
-                }
-            };
-            fileInput.click();
-        }
-
-        // Upload payments file
-        async function uploadPaymentsFile(file) {
-            const formData = new FormData();
-            formData.append('payments_file', file);
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
             
             // Show loading
-            const loadingDiv = document.createElement('div');
-            loadingDiv.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50';
-            loadingDiv.innerHTML = `
-                <div class="bg-white rounded-lg p-8 text-center">
-                    <i class="fas fa-spinner fa-spin text-4xl text-blue-600 mb-4"></i>
-                    <p class="text-lg font-medium text-gray-800">Uploading payments file...</p>
-                </div>
-            `;
-            document.body.appendChild(loadingDiv);
+            document.getElementById('loading-overlay').classList.remove('hidden');
+            document.getElementById('loading-overlay').classList.add('flex');
             
             try {
-                const response = await fetch('/fia/import-payments', {
+                const response = await fetch('/fia/submit', {
                     method: 'POST',
                     headers: {
+                        'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
-                    body: formData
+                    body: JSON.stringify(data)
                 });
                 
                 const result = await response.json();
                 
                 if (result.status === 'success') {
-                    alert('Payments uploaded successfully!');
-                    loadPayments(); // Refresh the payments list
+                    // Reset form
+                    this.reset();
+                    document.getElementById('payment-details').classList.add('hidden');
+                    
+                    // Hide loading and show success
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                    document.getElementById('loading-overlay').classList.remove('flex');
+                    document.getElementById('success-modal').classList.remove('hidden');
+                    document.getElementById('success-modal').classList.add('flex');
                 } else {
-                    alert('Error uploading payments: ' + (result.message || 'Please try again'));
+                    // Hide loading and show error
+                    document.getElementById('loading-overlay').classList.add('hidden');
+                    document.getElementById('loading-overlay').classList.remove('flex');
+                    alert('Error: ' + (result.message || 'Failed to submit verification'));
                 }
             } catch (error) {
-                console.error('Upload error:', error);
-                alert('Error uploading payments file. Please try again.');
-            } finally {
-                // Remove loading
-                document.body.removeChild(loadingDiv);
+                console.error('Submission error:', error);
+                document.getElementById('loading-overlay').classList.add('hidden');
+                document.getElementById('loading-overlay').classList.remove('flex');
+                alert('Network error. Please try again.');
             }
-        }
+        });
 
         // Load all payments
         async function loadPayments() {

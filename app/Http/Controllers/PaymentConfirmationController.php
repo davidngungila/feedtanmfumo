@@ -35,8 +35,8 @@ class PaymentConfirmationController extends Controller
 
         $memberId = trim($request->input('member_id'));
 
-        // First, check if there's a PaymentConfirmation record for this member_id
-        // This handles cases where members are imported from Excel but not yet registered
+        // First, check if there's a payment confirmation record for this member_id
+        // This handles members who have already submitted confirmations
         $paymentConfirmation = PaymentConfirmation::where('member_id', $memberId)
             ->latest()
             ->first();
@@ -81,7 +81,45 @@ class PaymentConfirmationController extends Controller
             ]);
         }
 
-        // If no payment confirmation found, try to find user by member_number or membership_code
+        // Check if there's a payment record for this member_id
+        $paymentRecord = DB::table('fia_payment_records')
+            ->where('member_id', $memberId)
+            ->first();
+
+        if ($paymentRecord) {
+            // Found a payment record - this is the main source for member data
+            return response()->json([
+                'success' => true,
+                'member' => [
+                    'id' => null,
+                    'member_id' => $paymentRecord->member_id,
+                    'name' => $paymentRecord->member_name,
+                    'member_type' => 'N/A',
+                    'email' => '',
+                    'deposit_balance' => number_format(0, 2),
+                    'deposit_balance_raw' => 0,
+                    'amount_to_pay' => $paymentRecord->jumla,
+                    'swf_contribution' => 0,
+                    're_deposit' => 0,
+                    'fia_investment' => 0,
+                    'fia_type' => null,
+                    'capital_contribution' => 0,
+                    'loan_repayment' => $paymentRecord->loan,
+                    'fine_penalty' => 0,
+                    'bank_name' => '',
+                    'bank_account_number' => '',
+                    'has_existing_confirmation' => false,
+                    'payment_record' => [
+                        'gawio_la_fia' => $paymentRecord->gawio_la_fia,
+                        'fia_iliyokomaa' => $paymentRecord->fia_iliyokomaa,
+                        'malipo_ya_vipande' => $paymentRecord->malipo_ya_vipande_yaliyokuwa_yamepelea,
+                        'kiasi_baki' => $paymentRecord->kiasi_baki,
+                    ],
+                ],
+            ]);
+        }
+
+        // If no payment record found, try to find user by member_number or membership_code
         $user = User::where('member_number', $memberId)
             ->orWhere('membership_code', $memberId)
             ->first();
@@ -160,12 +198,25 @@ class PaymentConfirmationController extends Controller
             ], 422);
         }
 
+        $memberId = $request->input('member_id');
+
+        // Check if member has already submitted a confirmation
+        $existingConfirmation = PaymentConfirmation::where('member_id', $memberId)
+            ->first();
+
+        if ($existingConfirmation) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You have already submitted your payment confirmation. Only one submission is allowed per member.',
+            ], 422);
+        }
+
         $userId = $request->input('user_id');
         $user = $userId ? User::find($userId) : null;
 
         // If no user, try to find by member_id from PaymentConfirmation
         if (! $user) {
-            $paymentConfirmation = PaymentConfirmation::where('member_id', $request->input('member_id'))
+            $paymentConfirmation = PaymentConfirmation::where('member_id', $memberId)
                 ->latest()
                 ->first();
 
@@ -209,7 +260,7 @@ class PaymentConfirmationController extends Controller
                 ->sum('balance') ?? 0;
         } else {
             // If no user, check if there's an existing payment confirmation with balance
-            $existingConfirmation = PaymentConfirmation::where('member_id', $request->input('member_id'))
+            $existingConfirmation = PaymentConfirmation::where('member_id', $memberId)
                 ->latest()
                 ->first();
             if ($existingConfirmation) {
@@ -226,7 +277,7 @@ class PaymentConfirmationController extends Controller
 
         // If no user, try to get from existing payment confirmation
         if (empty($memberName)) {
-            $existingConfirmation = PaymentConfirmation::where('member_id', $request->input('member_id'))
+            $existingConfirmation = PaymentConfirmation::where('member_id', $memberId)
                 ->latest()
                 ->first();
             if ($existingConfirmation) {
@@ -235,14 +286,24 @@ class PaymentConfirmationController extends Controller
             }
         }
 
+        // If still no name, try to get from payment records
         if (empty($memberName)) {
-            $memberName = 'Member '.$request->input('member_id');
+            $paymentRecord = DB::table('fia_payment_records')
+                ->where('member_id', $memberId)
+                ->first();
+            if ($paymentRecord) {
+                $memberName = $paymentRecord->member_name ?? '';
+            }
+        }
+
+        if (empty($memberName)) {
+            $memberName = 'Member '.$memberId;
         }
 
         // Create payment confirmation
         $paymentConfirmation = PaymentConfirmation::create([
             'user_id' => $user?->id,
-            'member_id' => $request->input('member_id'),
+            'member_id' => $memberId,
             'member_name' => $memberName,
             'member_type' => $memberType,
             'amount_to_pay' => $amountToPay,

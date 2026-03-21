@@ -505,88 +505,8 @@ class PaymentController extends Controller
         ]);
     }
 
-    /**
-     * Query payment status by order reference.
-     */
-    public function queryPaymentStatus($orderReference)
-    {
-        try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->getClickPesaToken(),
-                'Content-Type' => 'application/json',
-            ])->get("https://api.clickpesa.com/third-parties/payments/{$orderReference}");
-
-            if ($response->successful()) {
-                return response()->json([
-                    'status' => 'success',
-                    'data' => $response->json()
-                ]);
-            } else {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'ClickPesa API error: ' . $response->status(),
-                    'data' => $response->json()
-                ], $response->status());
-            }
-
-        } catch (\Exception $e) {
-            Log::error('Query payment status error: ' . $e->getMessage());
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Internal server error'
-            ], 500);
-        }
-    }
-
-    /**
-     * Query all payments with filtering.
-     */
-    public function queryAllPayments(Request $request)
-    {
-        try {
-            $params = [
-                'orderBy' => $request->get('orderBy', 'DESC'),
-                'limit' => $request->get('limit', 20),
-                'skip' => $request->get('skip', 0),
-            ];
-
-            // Add optional filters
-            if ($request->filled('startDate')) $params['startDate'] = $request->startDate;
-            if ($request->filled('endDate')) $params['endDate'] = $request->endDate;
-            if ($request->filled('status')) $params['status'] = $request->status;
-            if ($request->filled('collectedCurrency')) $params['collectedCurrency'] = $request->collectedCurrency;
-            if ($request->filled('channel')) $params['channel'] = $request->channel;
-            if ($request->filled('orderReference')) $params['orderReference'] = $request->orderReference;
-            if ($request->filled('clientId')) $params['clientId'] = $request->clientId;
-            if ($request->filled('sortBy')) $params['sortBy'] = $request->sortBy;
-
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->getClickPesaToken(),
-                'Content-Type' => 'application/json',
-            ])->get('https://api.clickpesa.com/third-parties/payments/all', $params);
-
-            if ($response->successful()) {
-                return response()->json([
-                    'status' => 'success',
-                    'data' => $response->json()
-                ]);
-            } else {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'ClickPesa API error: ' . $response->status(),
-                    'data' => $response->json()
-                ], $response->status());
-            }
-
-        } catch (\Exception $e) {
-            Log::error('Query all payments error: ' . $e->getMessage());
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Internal server error'
-            ], 500);
-        }
-    }
-
+    
+    
     /**
      * Preview mobile money payout.
      */
@@ -2013,6 +1933,889 @@ class PaymentController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => 'Failed to download receipt'
+            ], 500);
+        }
+    }
+
+    // ========================================
+    // CLICKPESA API INTEGRATION METHODS
+    // ========================================
+
+    /**
+     * Get authorization headers for ClickPesa API.
+     */
+    private function getClickPesaHeaders()
+    {
+        return [
+            'Authorization' => 'Bearer ' . config('clickpesa.api_token'),
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+        ];
+    }
+
+    /**
+     * Make HTTP request to ClickPesa API.
+     */
+    private function makeClickPesaRequest($method, $endpoint, $data = null)
+    {
+        $url = config('clickpesa.api_url') . $endpoint;
+        
+        try {
+            $response = Http::withHeaders($this->getClickPesaHeaders())
+                ->timeout(config('clickpesa.timeout', 30))
+                ->{$method}($url, $data);
+
+            Log::info("ClickPesa API Request: {$method} {$url}", [
+                'data' => $data,
+                'response' => $response->json(),
+                'status' => $response->status()
+            ]);
+
+            return $response;
+        } catch (\Exception $e) {
+            Log::error("ClickPesa API Error: {$e->getMessage()}", [
+                'method' => $method,
+                'endpoint' => $endpoint,
+                'data' => $data
+            ]);
+            throw $e;
+        }
+    }
+
+    // ========================================
+    // PAYMENT METHODS
+    // ========================================
+
+    /**
+     * Query payment status by order reference.
+     */
+    public function queryPaymentStatus($orderReference)
+    {
+        try {
+            $endpoint = str_replace('{orderReference}', $orderReference, config('clickpesa.endpoints.query_payment_status'));
+            $response = $this->makeClickPesaRequest('get', $endpoint);
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to query payment status',
+                'errors' => $response->json()
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error querying payment status: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to query payment status'
+            ], 500);
+        }
+    }
+
+    /**
+     * Query all payments with filtering.
+     */
+    public function queryAllPayments(Request $request)
+    {
+        try {
+            $params = $request->only([
+                'startDate', 'endDate', 'status', 'collectedCurrency', 
+                'channel', 'orderReference', 'clientId', 'sortBy', 
+                'orderBy', 'skip', 'limit'
+            ]);
+
+            $endpoint = config('clickpesa.endpoints.query_all_payments') . '?' . http_build_query($params);
+            $response = $this->makeClickPesaRequest('get', $endpoint);
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to query payments',
+                'errors' => $response->json()
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error querying all payments: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to query payments'
+            ], 500);
+        }
+    }
+
+    // ========================================
+    // PAYOUT METHODS
+    // ========================================
+
+    /**
+     * Preview mobile money payout.
+     */
+    public function previewMobileMoneyPayout(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'amount' => 'required|numeric|min:1',
+            'phoneNumber' => 'required|string|regex:/^[0-9]{12}$/',
+            'currency' => 'required|in:TZS,USD',
+            'orderReference' => 'required|string|max:100',
+            'checksum' => 'nullable|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $endpoint = config('clickpesa.endpoints.preview_mobile_money_payout');
+            $response = $this->makeClickPesaRequest('post', $endpoint, $request->all());
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to preview mobile money payout',
+                'errors' => $response->json()
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error previewing mobile money payout: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to preview payout'
+            ], 500);
+        }
+    }
+
+    /**
+     * Create mobile money payout.
+     */
+    public function createMobileMoneyPayout(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'amount' => 'required|numeric|min:1',
+            'phoneNumber' => 'required|string|regex:/^[0-9]{12}$/',
+            'currency' => 'required|in:TZS,USD',
+            'orderReference' => 'required|string|max:100',
+            'checksum' => 'nullable|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $endpoint = config('clickpesa.endpoints.create_mobile_money_payout');
+            $response = $this->makeClickPesaRequest('post', $endpoint, $request->all());
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to create mobile money payout',
+                'errors' => $response->json()
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error creating mobile money payout: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to create payout'
+            ], 500);
+        }
+    }
+
+    /**
+     * Preview bank payout.
+     */
+    public function previewBankPayout(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'amount' => 'required|numeric|min:1',
+            'accountNumber' => 'required|string|max:50',
+            'currency' => 'required|in:TZS,USD',
+            'orderReference' => 'required|string|max:100',
+            'bic' => 'required|string|max:11',
+            'transferType' => 'required|in:ACH,RTGS',
+            'accountCurrency' => 'nullable|in:TZS',
+            'checksum' => 'nullable|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $endpoint = config('clickpesa.endpoints.preview_bank_payout');
+            $response = $this->makeClickPesaRequest('post', $endpoint, $request->all());
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to preview bank payout',
+                'errors' => $response->json()
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error previewing bank payout: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to preview payout'
+            ], 500);
+        }
+    }
+
+    /**
+     * Create bank payout.
+     */
+    public function createBankPayout(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'amount' => 'required|numeric|min:1',
+            'accountNumber' => 'required|string|max:50',
+            'accountName' => 'required|string|max:100',
+            'currency' => 'required|in:TZS,USD',
+            'orderReference' => 'required|string|max:100',
+            'bic' => 'required|string|max:11',
+            'transferType' => 'required|in:ACH,RTGS',
+            'accountCurrency' => 'nullable|in:TZS',
+            'checksum' => 'nullable|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $endpoint = config('clickpesa.endpoints.create_bank_payout');
+            $response = $this->makeClickPesaRequest('post', $endpoint, $request->all());
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to create bank payout',
+                'errors' => $response->json()
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error creating bank payout: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to create payout'
+            ], 500);
+        }
+    }
+
+    /**
+     * Query payout status by order reference.
+     */
+    public function queryPayoutStatus($orderReference)
+    {
+        try {
+            $endpoint = str_replace('{orderReference}', $orderReference, config('clickpesa.endpoints.query_payout_status'));
+            $response = $this->makeClickPesaRequest('get', $endpoint);
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to query payout status',
+                'errors' => $response->json()
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error querying payout status: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to query payout status'
+            ], 500);
+        }
+    }
+
+    /**
+     * Query all payouts with filtering.
+     */
+    public function queryAllPayouts(Request $request)
+    {
+        try {
+            $params = $request->only([
+                'startDate', 'endDate', 'channel', 'currency', 'orderReference',
+                'status', 'transferType', 'clientId', 'sortBy', 'orderBy', 'skip', 'limit'
+            ]);
+
+            $endpoint = config('clickpesa.endpoints.query_all_payouts') . '?' . http_build_query($params);
+            $response = $this->makeClickPesaRequest('get', $endpoint);
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to query payouts',
+                'errors' => $response->json()
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error querying all payouts: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to query payouts'
+            ], 500);
+        }
+    }
+
+    // ========================================
+    // BILLPAY METHODS
+    // ========================================
+
+    /**
+     * Create order control number.
+     */
+    public function createOrderControlNumber(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'billDescription' => 'required|string|max:500',
+            'billPaymentMode' => 'nullable|in:ALLOW_PARTIAL_AND_OVER_PAYMENT,EXACT',
+            'billAmount' => 'nullable|numeric|min:0.01',
+            'billReference' => 'nullable|string|max:100'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $endpoint = config('clickpesa.endpoints.create_order_control_number');
+            $response = $this->makeClickPesaRequest('post', $endpoint, $request->all());
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to create order control number',
+                'errors' => $response->json()
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error creating order control number: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to create control number'
+            ], 500);
+        }
+    }
+
+    /**
+     * Create customer control number.
+     */
+    public function createCustomerControlNumber(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'customerName' => 'required|string|max:100',
+            'customerEmail' => 'nullable|email|max:100',
+            'customerPhone' => 'nullable|string|regex:/^[0-9]{12}$/',
+            'billDescription' => 'nullable|string|max:500',
+            'billPaymentMode' => 'nullable|in:ALLOW_PARTIAL_AND_OVER_PAYMENT,EXACT',
+            'billAmount' => 'nullable|numeric|min:0.01',
+            'billReference' => 'nullable|string|max:100'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $endpoint = config('clickpesa.endpoints.create_customer_control_number');
+            $response = $this->makeClickPesaRequest('post', $endpoint, $request->all());
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to create customer control number',
+                'errors' => $response->json()
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error creating customer control number: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to create control number'
+            ], 500);
+        }
+    }
+
+    /**
+     * Bulk create order control numbers.
+     */
+    public function bulkCreateOrderControlNumbers(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'controlNumbers' => 'required|array|min:1|max:50',
+            'controlNumbers.*.billDescription' => 'required|string|max:500',
+            'controlNumbers.*.billPaymentMode' => 'nullable|in:ALLOW_PARTIAL_AND_OVER_PAYMENT,EXACT',
+            'controlNumbers.*.billAmount' => 'nullable|numeric|min:0.01',
+            'controlNumbers.*.billReference' => 'nullable|string|max:100'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $endpoint = config('clickpesa.endpoints.bulk_create_order_control_numbers');
+            $response = $this->makeClickPesaRequest('post', $endpoint, $request->all());
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to bulk create order control numbers',
+                'errors' => $response->json()
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error bulk creating order control numbers: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to bulk create control numbers'
+            ], 500);
+        }
+    }
+
+    /**
+     * Bulk create customer control numbers.
+     */
+    public function bulkCreateCustomerControlNumbers(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'controlNumbers' => 'required|array|min:1|max:50',
+            'controlNumbers.*.customerName' => 'required|string|max:100',
+            'controlNumbers.*.customerEmail' => 'nullable|email|max:100',
+            'controlNumbers.*.customerPhone' => 'nullable|string|regex:/^[0-9]{12}$/',
+            'controlNumbers.*.billDescription' => 'nullable|string|max:500',
+            'controlNumbers.*.billPaymentMode' => 'nullable|in:ALLOW_PARTIAL_AND_OVER_PAYMENT,EXACT',
+            'controlNumbers.*.billAmount' => 'nullable|numeric|min:0.01',
+            'controlNumbers.*.billReference' => 'nullable|string|max:100'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $endpoint = config('clickpesa.endpoints.bulk_create_customer_control_numbers');
+            $response = $this->makeClickPesaRequest('post', $endpoint, $request->all());
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to bulk create customer control numbers',
+                'errors' => $response->json()
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error bulk creating customer control numbers: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to bulk create control numbers'
+            ], 500);
+        }
+    }
+
+    /**
+     * Query BillPay number details.
+     */
+    public function queryBillPayDetails($billPayNumber)
+    {
+        try {
+            $endpoint = str_replace('{billPayNumber}', $billPayNumber, config('clickpesa.endpoints.query_billpay_details'));
+            $response = $this->makeClickPesaRequest('get', $endpoint);
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to query BillPay details',
+                'errors' => $response->json()
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error querying BillPay details: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to query BillPay details'
+            ], 500);
+        }
+    }
+
+    /**
+     * Update BillPay reference.
+     */
+    public function updateBillPayReference(Request $request, $billPayNumber)
+    {
+        $validator = Validator::make($request->all(), [
+            'billStatus' => 'nullable|in:ACTIVE,INACTIVE',
+            'billAmount' => 'nullable|numeric|min:0.01',
+            'billDescription' => 'nullable|string|max:500',
+            'billPaymentMode' => 'nullable|in:ALLOW_PARTIAL_AND_OVER_PAYMENT,EXACT'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $endpoint = str_replace('{billPayNumber}', $billPayNumber, config('clickpesa.endpoints.update_billpay_reference'));
+            $response = $this->makeClickPesaRequest('patch', $endpoint, $request->all());
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to update BillPay reference',
+                'errors' => $response->json()
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error updating BillPay reference: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to update BillPay reference'
+            ], 500);
+        }
+    }
+
+    // ========================================
+    // CHECKOUT AND PAYOUT LINKS
+    // ========================================
+
+    /**
+     * Generate checkout link.
+     */
+    public function generateCheckoutLink(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'totalPrice' => 'required|string',
+            'orderReference' => 'required|string|max:100',
+            'orderCurrency' => 'required|in:TZS,USD',
+            'customerName' => 'nullable|string|max:100',
+            'customerEmail' => 'nullable|email|max:100',
+            'customerPhone' => 'nullable|string|regex:/^[0-9]{12}$/',
+            'description' => 'nullable|string|max:500',
+            'checksum' => 'nullable|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $endpoint = config('clickpesa.endpoints.generate_checkout_link');
+            $response = $this->makeClickPesaRequest('post', $endpoint, $request->all());
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to generate checkout link',
+                'errors' => $response->json()
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error generating checkout link: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to generate checkout link'
+            ], 500);
+        }
+    }
+
+    /**
+     * Generate payout link.
+     */
+    public function generatePayoutLink(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'amount' => 'required|string',
+            'orderReference' => 'required|string|max:100',
+            'checksum' => 'nullable|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $endpoint = config('clickpesa.endpoints.generate_payout_link');
+            $response = $this->makeClickPesaRequest('post', $endpoint, $request->all());
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to generate payout link',
+                'errors' => $response->json()
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error generating payout link: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to generate payout link'
+            ], 500);
+        }
+    }
+
+    // ========================================
+    // ACCOUNT METHODS
+    // ========================================
+
+    /**
+     * Get account balance.
+     */
+    public function getAccountBalance()
+    {
+        try {
+            $endpoint = config('clickpesa.endpoints.account_balance');
+            $response = $this->makeClickPesaRequest('get', $endpoint);
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to get account balance',
+                'errors' => $response->json()
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error getting account balance: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to get account balance'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get account statement.
+     */
+    public function getAccountStatement(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'currency' => 'required|string|max:3',
+            'startDate' => 'nullable|date',
+            'endDate' => 'nullable|date|after_or_equal:startDate'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $params = $request->only(['currency', 'startDate', 'endDate']);
+            $endpoint = config('clickpesa.endpoints.account_statement') . '?' . http_build_query($params);
+            $response = $this->makeClickPesaRequest('get', $endpoint);
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to get account statement',
+                'errors' => $response->json()
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error getting account statement: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to get account statement'
+            ], 500);
+        }
+    }
+
+    // ========================================
+    // UTILITY METHODS
+    // ========================================
+
+    /**
+     * Get exchange rates.
+     */
+    public function getExchangeRates(Request $request)
+    {
+        try {
+            $params = $request->only(['source', 'target']);
+            $endpoint = config('clickpesa.endpoints.exchange_rates') . '?' . http_build_query($params);
+            $response = $this->makeClickPesaRequest('get', $endpoint);
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to get exchange rates',
+                'errors' => $response->json()
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error getting exchange rates: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to get exchange rates'
+            ], 500);
+        }
+    }
+
+    /**
+     * Get banks list.
+     */
+    public function getBanksList()
+    {
+        try {
+            $endpoint = config('clickpesa.endpoints.banks_list');
+            $response = $this->makeClickPesaRequest('get', $endpoint);
+
+            if ($response->successful()) {
+                return response()->json([
+                    'status' => 'success',
+                    'data' => $response->json()
+                ]);
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to get banks list',
+                'errors' => $response->json()
+            ], $response->status());
+        } catch (\Exception $e) {
+            Log::error('Error getting banks list: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to get banks list'
             ], 500);
         }
     }

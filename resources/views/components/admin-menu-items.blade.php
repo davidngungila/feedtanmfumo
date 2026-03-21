@@ -22,6 +22,9 @@
     $isActiveFormulas = request()->routeIs(['admin.formulas.*']);
     $isActivePaymentConfirmations = request()->routeIs(['admin.payment-confirmations.*']);
     $isActiveMonthlyDeposits = request()->routeIs(['admin.monthly-deposits.*']);
+    $isActivePayments = request()->routeIs(['admin.payments.*']);
+    $isActiveFiaPayments = request()->routeIs(['admin.fia-payments.*']);
+    $isActiveFiaPaymentRecords = request()->routeIs(['admin.fia-payment-records.*']);
 @endphp
 
 <!-- Dashboard -->
@@ -383,6 +386,124 @@
     </div>
 </div>
 @endif
+
+<!-- Payments -->
+<div class="dropdown-container" data-menu="payments">
+    <button class="dropdown-toggle flex items-center justify-between w-full px-4 py-3 rounded-md hover:bg-[#013019] transition {{ $isActivePayments ? 'bg-[#013019]' : '' }}">
+        <div class="flex items-center">
+            <span class="text-lg mr-3">💳</span>
+            <span>Payments</span>
+        </div>
+        <svg class="w-4 h-4 dropdown-arrow transition-transform {{ $isActivePayments ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+    </button>
+    <div class="dropdown-menu pl-4 mt-1 space-y-1 {{ $isActivePayments ? '' : 'hidden' }}">
+        <a href="{{ route('admin.payments.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">Payment Dashboard</a>
+        <!-- Payment Methods -->
+        <div class="nested-dropdown-container">
+            <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
+                <span>Payment Methods</span>
+                <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+            <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
+                <a href="{{ route('admin.payments.transactions') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">All Transactions</a>
+                <a href="{{ route('admin.payments.ussd-push') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">USSD Push</a>
+                <a href="{{ route('admin.payments.card-payments') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Card Payments</a>
+                <a href="{{ route('admin.payments.checkout') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Checkout Payments</a>
+                <a href="{{ route('admin.payments.billpay') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">BillPay</a>
+            </div>
+        </div>
+        <!-- Payouts -->
+        <div class="nested-dropdown-container">
+            <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
+                <span>Payouts</span>
+                <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+            <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
+                <a href="{{ route('admin.payments.payouts') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Mobile Money Payouts</a>
+                <a href="{{ route('admin.payments.payouts') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Bank Transfer Payouts</a>
+                <a href="{{ route('admin.payments.payouts') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Payout Links</a>
+                <a href="{{ route('admin.payments.payouts') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Payout History</a>
+            </div>
+        </div>
+        <!-- Reconciliation -->
+        <div class="nested-dropdown-container">
+            <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
+                <span>Reconciliation</span>
+                <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+            <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
+                <a href="{{ route('admin.payments.reconciliation') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Transaction Reconciliation</a>
+                <a href="{{ route('admin.payments.reconciliation') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Failed Transactions</a>
+                <a href="{{ route('admin.payments.reconciliation') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Reconciliation Reports</a>
+            </div>
+        </div>
+        <!-- Account Management -->
+        <div class="nested-dropdown-container">
+            <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
+                <span>Account Management</span>
+                <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+            <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
+                <a href="#" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Account Balance</a>
+                <a href="#" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Account Statement</a>
+                <a href="#" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Exchange Rates</a>
+                <a href="#" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">API Settings</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FIA Payments -->
+<div class="dropdown-container" data-menu="fia-payments">
+    <button class="dropdown-toggle flex items-center justify-between w-full px-4 py-3 rounded-md hover:bg-[#013019] transition {{ $isActiveFiaPayments || $isActiveFiaPaymentRecords ? 'bg-[#013019]' : '' }}">
+        <div class="flex items-center">
+            <span class="text-lg mr-3">🏦</span>
+            <span>FIA Payments</span>
+        </div>
+        <svg class="w-4 h-4 dropdown-arrow transition-transform {{ $isActiveFiaPayments || $isActiveFiaPaymentRecords ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+    </button>
+    <div class="dropdown-menu pl-4 mt-1 space-y-1 {{ $isActiveFiaPayments || $isActiveFiaPaymentRecords ? '' : 'hidden' }}">
+        <!-- Payment Records Section -->
+        <div class="nested-dropdown-container">
+            <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
+                <span>Payment Records</span>
+                <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+            <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
+                <a href="{{ route('admin.fia-payment-records.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Records Dashboard</a>
+                <a href="{{ route('admin.fia-payment-records.records') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">All Records</a>
+                <a href="{{ route('admin.fia-payment-records.upload') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Upload Excel Sheet</a>
+            </div>
+        </div>
+        <!-- Payment Confirmations Section -->
+        <div class="nested-dropdown-container">
+            <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
+                <span>Payment Confirmations</span>
+                <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+            <div class="nested-dropdown-menu hidden pl-4 mt-1 space-y-1">
+                <a href="{{ route('admin.fia-payments.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Confirmations Dashboard</a>
+                <a href="{{ route('admin.fia-payments.confirmations') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">All Confirmations</a>
+            </div>
+        </div>
+    </div>
+</div>
 
 @if($isInvestmentOfficer || $canViewAll)
 <!-- Investments -->

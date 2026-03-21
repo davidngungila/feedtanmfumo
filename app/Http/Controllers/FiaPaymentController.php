@@ -8,7 +8,10 @@ use App\Services\SmsNotificationService;
 use App\Services\EmailNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use PDF;
 
 class FiaPaymentController extends Controller
 {
@@ -30,6 +33,22 @@ class FiaPaymentController extends Controller
     }
 
     /**
+     * Show FIA payments popup page
+     */
+    public function popup()
+    {
+        return view('fia.popup');
+    }
+
+    /**
+     * Show FIA payments Swahili page
+     */
+    public function swahili()
+    {
+        return view('fia.swahili');
+    }
+
+    /**
      * Show advanced verified payments page
      */
     public function showVerifiedPayments()
@@ -43,41 +62,27 @@ class FiaPaymentController extends Controller
     public function lookupMembership($membershipCode)
     {
         try {
-            // Find member by membership code
-            $member = \App\Models\User::where('membership_code', $membershipCode)
-                ->with(['payments'])
+            // Find member in FIA payment records
+            $member = DB::table('fia_payment_records')
+                ->where('member_id', $membershipCode)
                 ->first();
 
             if (!$member) {
                 return response()->json([
-                    'status' => 'error',
-                    'message' => 'Membership code not found'
+                    'success' => false,
+                    'message' => 'Membership code not found in FIA payment records'
                 ], 404);
             }
 
-            // Get payment breakdown for this member
-            $paymentBreakdown = $this->getMemberPaymentBreakdown($member);
-
             return response()->json([
-                'status' => 'success',
-                'data' => [
-                    'id' => $member->id,
-                    'name' => $member->name,
-                    'membership_code' => $member->membership_code,
-                    'phone' => $member->phone,
-                    'email' => $member->email,
-                    'payments' => $paymentBreakdown
-                ]
+                'success' => true,
+                'member' => $member
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Membership lookup error', [
-                'membership_code' => $membershipCode,
-                'error' => $e->getMessage()
-            ]);
-
+            Log::error('Error looking up membership: ' . $e->getMessage());
             return response()->json([
-                'status' => 'error',
+                'success' => false,
                 'message' => 'Error looking up membership code'
             ], 500);
         }
@@ -163,66 +168,181 @@ class FiaPaymentController extends Controller
      */
     public function submitVerification(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'email' => 'required|email|max:255',
-            'payment_reference' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:1000',
-            'payment_date' => 'required|date',
-            'payment_method' => 'required|string|in:mobile_money,bank_transfer,cash,other',
-            'description' => 'nullable|string|max:1000',
-        ]);
-
         try {
-            // Check if verification already exists for this reference
-            $existingVerification = FiaVerification::where('payment_reference', $validated['payment_reference'])
-                ->where('status', '!=', 'rejected')
+            // Get the data from the request
+            $data = $request->all();
+            
+            // Validate required fields
+            $validated = $request->validate([
+                'member_id' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+                'phone' => 'nullable|string|max:20',
+                'amount_to_pay' => 'required|numeric|min:0',
+                'savings_amount' => 'nullable|numeric|min:0',
+                'investment_amount' => 'nullable|numeric|min:0',
+                'cash_amount' => 'nullable|numeric|min:0',
+                'payment_method' => 'required|string|in:bank,mobile',
+                'notes' => 'nullable|string|max:1000',
+                'fia_type' => 'nullable|string|max:50',
+                'swf_amount' => 'nullable|numeric|min:0',
+                'loan_repayment_amount' => 'nullable|numeric|min:0',
+                'mobile_network' => 'nullable|string|max:50',
+                'mobile_number' => 'nullable|string|max:20',
+            ]);
+
+            // Get member details from FIA payment records
+            $member = DB::table('fia_payment_records')
+                ->where('member_id', $validated['member_id'])
                 ->first();
 
-            if ($existingVerification) {
-                // Remove previous submission if it exists
-                $existingVerification->delete();
-                Log::info('Previous FIA verification removed and replaced', [
-                    'payment_reference' => $validated['payment_reference'],
-                    'previous_id' => $existingVerification->id
+            if (!$member) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Member not found in FIA payment records'
+                ], 404);
+            }
+
+            // Create payment confirmation record
+            $confirmationData = [
+                'user_id' => null,
+                'member_id' => $validated['member_id'],
+                'member_name' => $member->member_name,
+                'member_type' => $member->member_type ?? 'Member',
+                'amount_to_pay' => $validated['amount_to_pay'],
+                'deposit_balance' => 0,
+                'swf_contribution' => 0,
+                're_deposit' => $validated['savings_amount'] ?? 0,
+                'fia_investment' => $validated['investment_amount'] ?? 0,
+                'fia_type' => $validated['fia_type'] ?? null,
+                'capital_contribution' => 0,
+                'fine_penalty' => 0,
+                'loan_repayment' => 0,
+                'member_email' => $validated['email'],
+                'notes' => $validated['notes'] ?? null,
+                'payment_method' => $validated['payment_method'],
+                'bank_name' => $data['bank_name'] ?? null,
+                'mobile_provider' => $data['mobile_network'] ?? null,
+                'mobile_number' => $data['mobile_number'] ?? null,
+                'bank_account_number' => $data['account_number'] ?? null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+
+            // Insert into payment_confirmations table
+            $confirmationId = DB::table('payment_confirmations')->insertGetId($confirmationData);
+
+            // Generate PDF with all information
+            try {
+                $pdfData = [
+                    'confirmation' => DB::table('payment_confirmations')->find($confirmationId),
+                    'member' => $member,
+                    'payment_breakdown' => [
+                        'gawio_la_fia' => $member->gawio_la_fia ?? 0,
+                        'fia_iliyokomaa' => $member->fia_iliyokomaa ?? 0,
+                        'jumla' => $member->jumla ?? 0,
+                        'malipo_ya_vipande_yaliyokuwa_yamepelea' => $member->malipo_ya_vipande_yaliyokuwa_yamepelea ?? 0,
+                        'loan' => $member->loan ?? 0,
+                        'kiasi_baki' => $member->kiasi_baki ?? 0,
+                    ],
+                    'distribution' => [
+                        'savings_amount' => $validated['savings_amount'] ?? 0,
+                        'investment_amount' => $validated['investment_amount'] ?? 0,
+                        'swf_amount' => $validated['swf_amount'] ?? 0,
+                        'loan_repayment_amount' => $validated['loan_repayment_amount'] ?? 0,
+                        'cash_amount' => $validated['cash_amount'] ?? 0,
+                    ],
+                    'payment_method' => $validated['payment_method'],
+                    'fia_type' => $validated['fia_type'] ?? null,
+                    'notes' => $validated['notes'] ?? null,
+                ];
+
+                $pdf = PDF::loadView('fia.payment-confirmation-pdf', $pdfData);
+                $pdfFileName = 'FIA_Payment_Confirmation_' . $validated['member_id'] . '_' . date('Y-m-d_H-i-s') . '.pdf';
+                $pdfPath = storage_path('app/public/pdf/' . $pdfFileName);
+                
+                // Ensure directory exists
+                $directory = dirname($pdfPath);
+                if (!is_dir($directory)) {
+                    mkdir($directory, 0755, true);
+                }
+                
+                $pdf->save($pdfPath);
+
+                // Send email with PDF attachment
+                $emailData = [
+                    'member_name' => $member->member_name ?? 'Mwanachama',
+                    'member_id' => $validated['member_id'],
+                    'confirmation_id' => $confirmationId,
+                    'amount' => $validated['amount_to_pay'],
+                    'payment_method' => $validated['payment_method'],
+                    'confirmation_date' => now()->format('d M Y, H:i'),
+                ];
+
+                Mail::send('fia.payment-confirmation-email', $emailData, function($message) use ($validated, $pdfPath, $pdfFileName) {
+                    $message->to($validated['email'])
+                            ->subject('Thibitisho la Malipo la FIA - FEEDTAN CMG')
+                            ->attach($pdfPath, [
+                                'as' => $pdfFileName,
+                                'mime' => 'application/pdf',
+                            ]);
+                });
+
+                Log::info('PDF confirmation generated and sent successfully to: ' . $validated['email']);
+
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Payment confirmation submitted successfully! PDF document has been generated and sent to your email.',
+                    'confirmation_id' => $confirmationId,
+                    'pdf_generated' => true,
+                    'email_sent' => true
+                ]);
+
+            } catch (\Exception $pdfError) {
+                Log::error('Error generating PDF or sending email: ' . $pdfError->getMessage());
+                
+                // Still return success even if PDF fails
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Payment confirmation submitted successfully!',
+                    'confirmation_id' => $confirmationId,
+                    'pdf_generated' => false,
+                    'email_sent' => false
                 ]);
             }
 
-            // Create new verification
-            $verification = FiaVerification::create([
-                'name' => $validated['name'],
-                'phone' => $validated['phone'],
-                'email' => $validated['email'],
-                'payment_reference' => $validated['payment_reference'],
-                'amount' => $validated['amount'],
-                'payment_date' => $validated['payment_date'],
-                'payment_method' => $validated['payment_method'],
-                'description' => $validated['description'] ?? null,
-                'status' => 'pending',
-                'submitted_at' => now(),
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent(),
-            ]);
-
-            // Send confirmation notification
-            $this->sendVerificationNotification($verification);
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Payment verification submitted successfully',
-                'verification_id' => $verification->id
-            ]);
-
         } catch (\Exception $e) {
-            Log::error('FIA verification submission error', [
+            Log::error('Payment verification submission error', [
                 'error' => $e->getMessage(),
-                'data' => $validated
+                'request_data' => $request->all()
             ]);
 
             return response()->json([
                 'status' => 'error',
-                'message' => 'Failed to submit verification'
+                'message' => 'Failed to submit payment confirmation: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get member payments
+     */
+    public function getPayments()
+    {
+        try {
+            $payments = DB::table('fia_payment_records')
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $payments
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error getting payments: ' . $e->getMessage());
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error retrieving payments'
             ], 500);
         }
     }
@@ -280,26 +400,6 @@ class FiaPaymentController extends Controller
                 'message' => 'Failed to process verification'
             ], 500);
         }
-    }
-
-    /**
-     * Get all payments data (admin uploaded)
-     */
-    public function getPayments(Request $request)
-    {
-        $payments = \App\Models\FiaAdminPayment::orderBy('created_at', 'desc')
-            ->paginate($request->get('per_page', 20));
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $payments->items(),
-            'pagination' => [
-                'current_page' => $payments->currentPage(),
-                'last_page' => $payments->lastPage(),
-                'per_page' => $payments->perPage(),
-                'total' => $payments->total(),
-            ]
-        ]);
     }
 
     /**

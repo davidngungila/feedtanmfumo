@@ -40,6 +40,8 @@ Route::get('/privacy', [\App\Http\Controllers\LegalController::class, 'privacy']
 
 // FIA Payments Verification (public)
 Route::get('/fia', [\App\Http\Controllers\FiaPaymentController::class, 'index'])->name('fia.index');
+Route::get('/fia/popup', [\App\Http\Controllers\FiaPaymentController::class, 'popup'])->name('fia.popup');
+Route::get('/fia/swahili', [\App\Http\Controllers\FiaPaymentController::class, 'swahili'])->name('fia.swahili');
 Route::get('/fia/verified-payments', [\App\Http\Controllers\FiaPaymentController::class, 'showVerifiedPayments'])->name('fia.verified-payments.show');
 Route::post('/fia/submit', [\App\Http\Controllers\FiaPaymentController::class, 'submitVerification'])->name('fia.submit');
 Route::post('/fia/verify', [\App\Http\Controllers\FiaPaymentController::class, 'verifyPayment'])->name('fia.verify');
@@ -281,19 +283,18 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::post('create-bank-payout', [\App\Http\Controllers\Admin\PaymentController::class, 'createBankPayout'])->name('create-bank-payout');
         Route::get('query-payout-status/{orderReference}', [\App\Http\Controllers\Admin\PaymentController::class, 'queryPayoutStatus'])->name('query-payout-status');
         Route::get('query-all-payouts', [\App\Http\Controllers\Admin\PaymentController::class, 'queryAllPayouts'])->name('query-all-payouts');
-        Route::get('retrieve-banks-list', [\App\Http\Controllers\Admin\PaymentController::class, 'retrieveBanksList'])->name('retrieve-banks-list');
+        Route::get('banks-list', [\App\Http\Controllers\Admin\PaymentController::class, 'getBanksList'])->name('banks-list');
         Route::post('create-order-control-number', [\App\Http\Controllers\Admin\PaymentController::class, 'createOrderControlNumber'])->name('create-order-control-number');
         Route::post('create-customer-control-number', [\App\Http\Controllers\Admin\PaymentController::class, 'createCustomerControlNumber'])->name('create-customer-control-number');
         Route::post('bulk-create-order-control-numbers', [\App\Http\Controllers\Admin\PaymentController::class, 'bulkCreateOrderControlNumbers'])->name('bulk-create-order-control-numbers');
         Route::post('bulk-create-customer-control-numbers', [\App\Http\Controllers\Admin\PaymentController::class, 'bulkCreateCustomerControlNumbers'])->name('bulk-create-customer-control-numbers');
         Route::patch('update-billpay-reference/{billPayNumber}', [\App\Http\Controllers\Admin\PaymentController::class, 'updateBillPayReference'])->name('update-billpay-reference');
-        Route::get('query-billpay-details/{billPayNumber}', [\App\Http\Controllers\Admin\PaymentController::class, 'queryBillPayNumberDetails'])->name('query-billpay-details');
-        Route::put('update-billpay-status', [\App\Http\Controllers\Admin\PaymentController::class, 'updateBillPayNumberStatus'])->name('update-billpay-status');
+        Route::get('query-billpay-details/{billPayNumber}', [\App\Http\Controllers\Admin\PaymentController::class, 'queryBillPayDetails'])->name('query-billpay-details');
         Route::post('generate-checkout-link', [\App\Http\Controllers\Admin\PaymentController::class, 'generateCheckoutLink'])->name('generate-checkout-link');
         Route::post('generate-payout-link', [\App\Http\Controllers\Admin\PaymentController::class, 'generatePayoutLink'])->name('generate-payout-link');
-        Route::get('retrieve-account-balance', [\App\Http\Controllers\Admin\PaymentController::class, 'retrieveAccountBalance'])->name('retrieve-account-balance');
-        Route::get('retrieve-account-statement', [\App\Http\Controllers\Admin\PaymentController::class, 'retrieveAccountStatement'])->name('retrieve-account-statement');
-        Route::get('retrieve-exchange-rates', [\App\Http\Controllers\Admin\PaymentController::class, 'retrieveExchangeRates'])->name('retrieve-exchange-rates');
+        Route::get('account-balance', [\App\Http\Controllers\Admin\PaymentController::class, 'getAccountBalance'])->name('account-balance');
+        Route::get('account-statement', [\App\Http\Controllers\Admin\PaymentController::class, 'getAccountStatement'])->name('account-statement');
+        Route::get('exchange-rates', [\App\Http\Controllers\Admin\PaymentController::class, 'getExchangeRates'])->name('exchange-rates');
         Route::get('recent-ussd-pushes', [\App\Http\Controllers\Admin\PaymentController::class, 'getRecentUssdPushes'])->name('recent-ussd-pushes');
         
         // Additional helper routes
@@ -467,6 +468,31 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('monthly-deposits/{year}/{month}', [\App\Http\Controllers\Admin\MonthlyDepositController::class, 'show'])->name('monthly-deposits.show');
     Route::get('monthly-deposits/record/{monthlyDeposit}', [\App\Http\Controllers\Admin\MonthlyDepositController::class, 'record'])->name('monthly-deposits.record');
     Route::delete('monthly-deposits/{year}/{month}', [\App\Http\Controllers\Admin\MonthlyDepositController::class, 'destroy'])->name('monthly-deposits.destroy');
+
+    // FIA Payment Records
+    Route::prefix('fia-payment-records')->name('fia-payment-records.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\FiaPaymentRecordController::class, 'index'])->name('index');
+        Route::get('records', [\App\Http\Controllers\Admin\FiaPaymentRecordController::class, 'records'])->name('records');
+        Route::get('upload', [\App\Http\Controllers\Admin\FiaPaymentRecordController::class, 'upload'])->name('upload');
+        Route::post('upload', [\App\Http\Controllers\Admin\FiaPaymentRecordController::class, 'processUpload'])->name('process-upload');
+        Route::get('records-data', [\App\Http\Controllers\Admin\FiaPaymentRecordController::class, 'getRecords'])->name('records-data');
+        Route::get('member-payments', [\App\Http\Controllers\Admin\FiaPaymentRecordController::class, 'getMemberPayments'])->name('member-payments');
+        Route::get('export', [\App\Http\Controllers\Admin\FiaPaymentRecordController::class, 'exportRecords'])->name('export');
+        Route::get('statistics', [\App\Http\Controllers\Admin\FiaPaymentRecordController::class, 'getStatistics'])->name('statistics');
+        Route::delete('{id}', [\App\Http\Controllers\Admin\FiaPaymentRecordController::class, 'destroy'])->name('destroy');
+    });
+
+    // FIA Payment Confirmations
+    Route::prefix('fia-payments')->name('fia-payments.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\FiaPaymentController::class, 'index'])->name('index');
+        Route::get('confirmations', [\App\Http\Controllers\Admin\FiaPaymentController::class, 'confirmations'])->name('confirmations');
+        Route::get('confirmations-data', [\App\Http\Controllers\Admin\FiaPaymentController::class, 'getConfirmations'])->name('confirmations-data');
+        Route::post('verify-confirmation', [\App\Http\Controllers\Admin\FiaPaymentController::class, 'verifyConfirmation'])->name('verify-confirmation');
+        Route::post('bulk-verify', [\App\Http\Controllers\Admin\FiaPaymentController::class, 'bulkVerify'])->name('bulk-verify');
+        Route::get('export', [\App\Http\Controllers\Admin\FiaPaymentController::class, 'exportConfirmations'])->name('export');
+        Route::get('statistics', [\App\Http\Controllers\Admin\FiaPaymentController::class, 'getStatistics'])->name('statistics');
+        Route::delete('{id}', [\App\Http\Controllers\Admin\FiaPaymentController::class, 'destroy'])->name('destroy');
+    });
 
     // Advanced System Settings Routes
     Route::prefix('system-settings')->name('system-settings.')->group(function () {

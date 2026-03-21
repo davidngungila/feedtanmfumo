@@ -70,9 +70,49 @@ return [
     ],
     
     'endpoints' => [
+        // Authentication
         'generate_token' => '/auth/token',
+        
+        // Payments
         'preview_ussd_push' => '/third-parties/payments/preview-ussd-push-request',
         'initiate_ussd_push' => '/third-parties/payments/initiate-ussd-push-request',
+        'preview_card_payment' => '/third-parties/payments/preview-card-payment',
+        'initiate_card_payment' => '/third-parties/payments/initiate-card-payment',
+        'query_payment_status' => '/third-parties/payments/{orderReference}',
+        'query_all_payments' => '/third-parties/payments/all',
+        
+        // Payouts
+        'preview_mobile_money_payout' => '/third-parties/payouts/preview-mobile-money-payout',
+        'create_mobile_money_payout' => '/third-parties/payouts/create-mobile-money-payout',
+        'preview_bank_payout' => '/third-parties/payouts/preview-bank-payout',
+        'create_bank_payout' => '/third-parties/payouts/create-bank-payout',
+        'query_payout_status' => '/third-parties/payouts/{orderReference}',
+        'query_all_payouts' => '/third-parties/payouts/all',
+        
+        // BillPay
+        'create_order_control_number' => '/third-parties/billpay/create-order-control-number',
+        'create_customer_control_number' => '/third-parties/billpay/create-customer-control-number',
+        'bulk_create_order_control_numbers' => '/third-parties/billpay/bulk-create-order-control-numbers',
+        'bulk_create_customer_control_numbers' => '/third-parties/billpay/bulk-create-customer-control-numbers',
+        'query_billpay_details' => '/third-parties/billpay/{billPayNumber}',
+        'update_billpay_reference' => '/third-parties/billpay/{billPayNumber}',
+        'update_billpay_status' => '/third-parties/billpay/update-status',
+        
+        // Checkout & Payout Links
+        'generate_checkout_link' => '/third-parties/checkout-link/generate-checkout-url',
+        'generate_payout_link' => '/third-parties/payout-link/generate-payout-url',
+        
+        // Account
+        'account_balance' => '/third-parties/account/balance',
+        'account_statement' => '/third-parties/account/statement',
+        
+        // Exchange Rates
+        'exchange_rates' => '/third-parties/exchange-rates/all',
+        
+        // Utilities
+        'banks_list' => '/third-parties/list/banks',
+        
+        // Legacy endpoints (for backward compatibility)
         'process_card_payment' => '/third-parties/payments/process-card-payment',
         'process_payout' => '/third-parties/payments/process-payout',
         'get_transaction' => '/third-parties/payments/transaction/{id}',
