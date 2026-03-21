@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Thibitisho ya Malipo ya FIA - Feedtan CMG</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -318,6 +319,21 @@
                                 <textarea id="notes" name="notes" rows="3"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 nunito"
                                     placeholder="Maelezo yoyote ya ziada au maagizo maalum..."></textarea>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="mt-6">
+                                <button type="button" onclick="submitConfirmation()" 
+                                    class="w-full bg-green-600 text-white py-4 px-6 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-200 font-bold text-lg nunito">
+                                    <i class="fas fa-check-circle mr-2"></i>
+                                    Thibitisha Malipo
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Loading Overlay -->
@@ -596,71 +612,88 @@
 
         // Submit confirmation
         async function submitConfirmation() {
-            const savingsAmount = Number(document.getElementById('savings-amount').value) || 0;
-            const investmentAmount = Number(document.getElementById('investment-amount').value) || 0;
-            const cashAmount = totalAmount - savingsAmount - investmentAmount;
-            
-            if (cashAmount < 0) {
-                alert('Mgawanyo wako umepita kiasi kilichopo. Tafadhali punguza akiba au uwekezaji.');
-                return;
-            }
-            
-            if (!selectedPaymentMethod) {
-                alert('Tafadhali chagua njia ya malipo.');
-                return;
-            }
-            
-            // Validate payment method details
-            if (selectedPaymentMethod === 'mobile') {
-                if (!document.getElementById('mobile-network').value || !document.getElementById('mobile-number').value) {
-                    alert('Tafadhali jaza maelezo yote ya simu ya mkononi.');
+            try {
+                // Check if totalAmount is set
+                if (totalAmount === 0) {
+                    alert('Tafadhali tafuta mwanachama kwanza.');
                     return;
                 }
-            }
-            
-            // Prepare form data
-            const formData = {
-                member_id: document.getElementById('member-id').value,
-                amount_to_pay: totalAmount,
-                savings_amount: savingsAmount,
-                investment_amount: investmentAmount,
-                cash_amount: cashAmount,
-                payment_method: selectedPaymentMethod,
-                email: document.getElementById('email').value,
-                phone: document.getElementById('phone').value,
-                notes: document.getElementById('notes').value,
-                fia_type: document.getElementById('fia-type').value,
-                swf_amount: document.getElementById('swf-amount').value,
-                loan_repayment_amount: document.getElementById('loan-repayment-amount').value
-            };
-            
-            // Add payment method specific details
-            if (selectedPaymentMethod === 'mobile') {
-                formData.mobile_network = document.getElementById('mobile-network').value;
-                formData.mobile_number = document.getElementById('mobile-number').value;
-            }
-            
-            // Show loading with splash progress
-            document.getElementById('loading-overlay').classList.remove('hidden');
-            document.getElementById('loading-overlay').classList.add('flex');
-            
-            // Start splash progress from 0-100
-            let progress = 0;
-            const progressBar = document.getElementById('progress-bar');
-            const progressText = document.getElementById('progress-text');
-            
-            const progressInterval = setInterval(() => {
-                progress += Math.random() * 15; // Random increment for realistic effect
-                if (progress >= 100) {
-                    progress = 100;
-                    clearInterval(progressInterval);
+
+                const savingsAmount = Number(document.getElementById('savings-amount').value) || 0;
+                const investmentAmount = Number(document.getElementById('investment-amount').value) || 0;
+                const swfAmount = Number(document.getElementById('swf-amount').value) || 0;
+                const loanRepaymentAmount = Number(document.getElementById('loan-repayment-amount').value) || 0;
+                
+                const totalDeductions = savingsAmount + investmentAmount + swfAmount + loanRepaymentAmount;
+                const cashAmount = totalAmount - totalDeductions;
+                
+                if (cashAmount < 0) {
+                    alert('Mgawanyo wako umepita kiasi kilichopo. Tafadhali punguza akiba au uwekezaji.');
+                    return;
                 }
                 
-                progressBar.style.width = progress + '%';
-                progressText.textContent = Math.round(progress) + '%';
-            }, 200);
-            
-            try {
+                if (!selectedPaymentMethod) {
+                    alert('Tafadhali chagua njia ya malipo.');
+                    return;
+                }
+                
+                // Validate payment method details
+                if (selectedPaymentMethod === 'mobile') {
+                    if (!document.getElementById('mobile-network').value || !document.getElementById('mobile-number').value) {
+                        alert('Tafadhali jaza maelezo yote ya simu ya mkononi.');
+                        return;
+                    }
+                }
+                
+                // Validate email
+                const email = document.getElementById('email').value;
+                if (!email) {
+                    alert('Tafadhali weka barua pepe.');
+                    return;
+                }
+                
+                // Prepare form data
+                const formData = {
+                    member_id: document.getElementById('member-id').value,
+                    amount_to_pay: totalAmount,
+                    savings_amount: savingsAmount,
+                    investment_amount: investmentAmount,
+                    cash_amount: cashAmount,
+                    payment_method: selectedPaymentMethod,
+                    email: document.getElementById('email').value,
+                    phone: '', // Phone field removed
+                    notes: document.getElementById('notes').value,
+                    fia_type: document.getElementById('fia-type').value,
+                    swf_amount: document.getElementById('swf-amount').value,
+                    loan_repayment_amount: document.getElementById('loan-repayment-amount').value
+                };
+                
+                // Add payment method specific details
+                if (selectedPaymentMethod === 'mobile') {
+                    formData.mobile_network = document.getElementById('mobile-network').value;
+                    formData.mobile_number = document.getElementById('mobile-number').value;
+                }
+                
+                // Show loading with splash progress
+                document.getElementById('loading-overlay').classList.remove('hidden');
+                document.getElementById('loading-overlay').classList.add('flex');
+                
+                // Start splash progress from 0-100
+                let progress = 0;
+                const progressBar = document.getElementById('progress-bar');
+                const progressText = document.getElementById('progress-text');
+                
+                const progressInterval = setInterval(() => {
+                    progress += Math.random() * 15; // Random increment for realistic effect
+                    if (progress >= 100) {
+                        progress = 100;
+                        clearInterval(progressInterval);
+                    }
+                    
+                    progressBar.style.width = progress + '%';
+                    progressText.textContent = Math.round(progress) + '%';
+                }, 200);
+                
                 const response = await fetch('/fia/submit', {
                     method: 'POST',
                     headers: {
@@ -692,13 +725,8 @@
                 }, 500);
 
             } catch (error) {
-                clearInterval(progressInterval);
-                document.getElementById('loading-overlay').classList.add('hidden');
-                document.getElementById('loading-overlay').classList.remove('flex');
+                console.error('Submit error:', error);
                 alert('Hitilafu wakati wa kutuma: ' + error.message);
-            } finally {
-                document.getElementById('loading-overlay').classList.add('hidden');
-                document.getElementById('loading-overlay').classList.remove('flex');
             }
         }
 

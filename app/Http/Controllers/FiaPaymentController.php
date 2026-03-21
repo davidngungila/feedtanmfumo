@@ -29,7 +29,7 @@ class FiaPaymentController extends Controller
      */
     public function index()
     {
-        return view('fia.index');
+        return view('fia.swahili');
     }
 
     /**
