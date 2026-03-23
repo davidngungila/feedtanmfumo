@@ -1166,75 +1166,7 @@ public function exportRecords(Request $request)
         ], 500);
     }
 }
-                'has_existing_confirmation' => $existingConfirmation ? true : false,
-                'existing_confirmation' => $existingConfirmation,
-            ],
-        ]);
-    }
-
-    /**
-     * Export payment records to Excel
-     */
-    public function exportRecords(Request $request)
-    {
-        $query = DB::table('payment_confirmations')->where('fia_investment', '>', 0);
-        
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('member_id', 'like', "%{$search}%")
-                  ->orWhere('member_name', 'like', "%{$search}%");
-            });
-        }
-
-        $records = $query->orderBy('created_at', 'desc')->get();
-        
-        // Create CSV content
-        $filename = 'payment_confirmations_' . date('Y-m-d_H-i-s') . '.csv';
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
-
-        $callback = function() use ($records) {
-            $file = fopen('php://output', 'w');
-            
-            // CSV Header
-            fputcsv($file, [
-                'S/N', 'Member ID', 'Name', 'Gawio la FIA', 'FIA iliyokomaa', 
-                'Jumla', 'Malipo ya vipande yailiyakuwa Yamepelea', 'LOAN', 'Kiasi baki'
-            ]);
-            
-            // CSV Data
-            foreach ($records as $index => $record) {
-                fputcsv($file, [
-                    $index + 1,
-                    $record->member_id,
-                    $record->member_name,
-                    $record->fia_investment,
-                    $record->capital_contribution,
-                    $record->amount_to_pay,
-                    $record->re_deposit,
-                    $record->loan_repayment,
-                    $record->loan_repayment
-                ]);
-            }
-            
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
-    }
-
-    /**
-     * Get payment records statistics
-     */
-    public function getStatistics()
-    {
-        $stats = [
-            'total_records' => DB::table('payment_confirmations')->where('fia_investment', '>', 0)->count(),
-            'total_gawio' => DB::table('payment_confirmations')->where('fia_investment', '>', 0)->sum('fia_investment'),
-            'total_fia_komaa' => DB::table('payment_confirmations')->where('fia_investment', '>', 0)->sum('capital_contribution'),
+}
             'total_jumla' => DB::table('payment_confirmations')->where('fia_investment', '>', 0)->sum('amount_to_pay'),
             'total_loan_balance' => DB::table('payment_confirmations')->where('fia_investment', '>', 0)->sum('loan_repayment'),
             'recent_records' => DB::table('payment_confirmations')
