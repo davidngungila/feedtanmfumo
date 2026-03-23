@@ -446,6 +446,8 @@ class FiaPaymentRecordController extends Controller
                 
                 foreach ($columnMapping as $field => $colIndex) {
                     if ($colIndex !== null && $colIndex !== '') {
+                        // Convert colIndex to integer to avoid string + int error
+                        $colIndex = (int)$colIndex;
                         $cellValue = $worksheet->getCell([$colIndex + 1, $row])->getValue();
                         $recordData[$field] = trim($cellValue);
                     } else {
@@ -503,6 +505,8 @@ class FiaPaymentRecordController extends Controller
                     
                     foreach ($columnMapping as $field => $colIndex) {
                         if ($colIndex !== null && $colIndex !== '' && isset($data[$colIndex])) {
+                            // Convert colIndex to integer to avoid array access issues
+                            $colIndex = (int)$colIndex;
                             $recordData[$field] = trim($data[$colIndex]);
                         } else {
                             $recordData[$field] = $field === 'member_id' || $field === 'member_name' ? '' : 0;
