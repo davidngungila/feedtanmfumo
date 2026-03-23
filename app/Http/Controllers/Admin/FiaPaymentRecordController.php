@@ -126,14 +126,15 @@ class FiaPaymentRecordController extends Controller
             // Check if we can auto-map columns
             $autoMapping = $this->tryAutoMapping($columnAnalysis['headers']);
             
-            // Always show mapping interface for now to debug the issue
-            \Log::info('Forcing column mapping interface for debugging', [
+            // ALWAYS show mapping interface to debug the issue
+            \Log::info('ALWAYS forcing column mapping interface for debugging', [
                 'headers' => $columnAnalysis['headers'],
                 'auto_mapping' => $autoMapping,
-                'all_mapped' => $autoMapping['all_mapped']
+                'all_mapped' => $autoMapping['all_mapped'],
+                'filename' => $filename
             ]);
             
-            // Temporarily disable auto-mapping to force manual mapping
+            // Force mapping interface to always show
             $autoMapping['all_mapped'] = false;
             
             if ($autoMapping['all_mapped']) {
