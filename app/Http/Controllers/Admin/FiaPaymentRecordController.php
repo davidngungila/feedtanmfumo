@@ -135,12 +135,23 @@ class FiaPaymentRecordController extends Controller
                 $result = $this->processFileWithMapping($file, $autoMapping['mapping']);
                 
                 if ($result['success']) {
+                    $message = "Successfully imported {$result['imported']} payment records. {$result['skipped']} rows were skipped.";
+                
+                    // Add skip reasons to message if any
+                    if (!empty($result['skip_reasons'])) {
+                        $message .= "\n\nSkip Reasons:\n" . implode("\n", array_slice($result['skip_reasons'], 0, 10));
+                        if (count($result['skip_reasons']) > 10) {
+                            $message .= "\n... and " . (count($result['skip_reasons']) - 10) . " more";
+                        }
+                    }
+                
                     return response()->json([
                         'success' => true,
-                        'message' => "Successfully imported {$result['imported']} payment records. {$result['skipped']} rows were skipped.",
+                        'message' => $message,
                         'filename' => $filename,
                         'imported' => $result['imported'],
-                        'skipped' => $result['skipped']
+                        'skipped' => $result['skipped'],
+                        'skip_reasons' => $result['skip_reasons'] ?? []
                     ]);
                 } else {
                     return response()->json([
@@ -377,11 +388,23 @@ class FiaPaymentRecordController extends Controller
             $result = $this->processFileWithMapping($file, $columnMapping);
 
             if ($result['success']) {
+                $message = "Successfully imported {$result['imported']} payment records. {$result['skipped']} rows were skipped.";
+                
+                // Add skip reasons to message if any
+                if (!empty($result['skip_reasons'])) {
+                    $message .= "\n\nSkip Reasons:\n" . implode("\n", array_slice($result['skip_reasons'], 0, 10));
+                    if (count($result['skip_reasons']) > 10) {
+                        $message .= "\n... and " . (count($result['skip_reasons']) - 10) . " more";
+                    }
+                }
+                
                 return response()->json([
                     'success' => true,
-                    'message' => "Successfully imported {$result['imported']} payment records. {$result['skipped']} rows were skipped.",
+                    'message' => $message,
+                    'filename' => $filename,
                     'imported' => $result['imported'],
-                    'skipped' => $result['skipped']
+                    'skipped' => $result['skipped'],
+                    'skip_reasons' => $result['skip_reasons'] ?? []
                 ]);
             } else {
                 return response()->json([
@@ -444,6 +467,7 @@ class FiaPaymentRecordController extends Controller
             $highestRow = $worksheet->getHighestRow();
 
             // Process data rows
+            $skipReasons = [];
             for ($row = 2; $row <= $highestRow; $row++) {
                 $recordData = [];
                 
@@ -459,7 +483,8 @@ class FiaPaymentRecordController extends Controller
                     }
                 }
 
-                $result = $this->savePaymentRecord([
+                // Track skip reasons
+                $originalData = [
                     'member_id' => $recordData['member_id'],
                     'member_name' => $recordData['member_name'],
                     'gawio_la_fia' => $this->parseAmount($recordData['gawio_la_fia']),
@@ -468,19 +493,32 @@ class FiaPaymentRecordController extends Controller
                     'malipo_ya_vipande_yaliyokuwa_yamepelea' => $this->parseAmount($recordData['malipo_ya_vipande_yaliyokuwa_yamepelea']),
                     'loan' => $this->parseAmount($recordData['loan']),
                     'kiasi_baki' => $this->parseAmount($recordData['kiasi_baki']),
-                ]);
+                ];
+
+                $result = $this->savePaymentRecord($originalData);
 
                 if ($result) {
                     $imported++;
                 } else {
                     $skipped++;
+                    // Collect skip reason
+                    if (empty($recordData['member_id']) && empty($recordData['member_name'])) {
+                        $skipReasons[] = "Row $row: Missing both Member ID and Name";
+                    } elseif (empty($recordData['member_id'])) {
+                        $skipReasons[] = "Row $row: Missing Member ID (Name: '{$recordData['member_name']}')";
+                    } elseif (empty($recordData['member_name'])) {
+                        $skipReasons[] = "Row $row: Missing Member Name (ID: '{$recordData['member_id']}')";
+                    } else {
+                        $skipReasons[] = "Row $row: Database error (ID: '{$recordData['member_id']}', Name: '{$recordData['member_name']}')";
+                    }
                 }
             }
 
             return [
                 'success' => true,
                 'imported' => $imported,
-                'skipped' => $skipped
+                'skipped' => $skipped,
+                'skip_reasons' => $skipReasons
             ];
 
         } catch (\Exception $e) {
@@ -855,9 +893,15 @@ class FiaPaymentRecordController extends Controller
             
             // Validate required fields
             if (empty($data['member_id']) || empty($data['member_name'])) {
+                $reason = [];
+                if (empty($data['member_id'])) $reason[] = 'member_id is empty';
+                if (empty($data['member_name'])) $reason[] = 'member_name is empty';
+                
                 \Log::warning('Skipping record - missing required fields:', [
                     'member_id' => $data['member_id'] ?? 'empty',
-                    'member_name' => $data['member_name'] ?? 'empty'
+                    'member_name' => $data['member_name'] ?? 'empty',
+                    'reason' => implode(', ', $reason),
+                    'full_data' => $data
                 ]);
                 return false;
             }

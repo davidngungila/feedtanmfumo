@@ -327,6 +327,19 @@ function showUploadResult(data) {
         // Generate column mapping interface
         generateColumnMapping(data);
     } else if (data.success) {
+        let skipReasonsHtml = '';
+        if (data.skip_reasons && data.skip_reasons.length > 0) {
+            skipReasonsHtml = `
+                <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <h6 class="font-medium text-yellow-800 mb-2">Why records were skipped:</h6>
+                    <div class="text-sm text-yellow-700">
+                        ${data.skip_reasons.slice(0, 10).map(reason => `<div class="py-1">• ${reason}</div>`).join('')}
+                        ${data.skip_reasons.length > 10 ? `<div class="py-1 text-yellow-600">... and ${data.skip_reasons.length - 10} more</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+        
         resultContent.innerHTML = `
             <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
                 <div class="flex items-center">
@@ -334,11 +347,12 @@ function showUploadResult(data) {
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                     <div>
-                        <h4 class="text-green-800 font-medium">Upload Successful!</h4>
+                        <h4 class="text-green-800 font-medium">Upload Complete!</h4>
                         <p class="text-green-700 text-sm mt-1">${data.message}</p>
                         <p class="text-green-600 text-xs mt-2">File saved as: ${data.filename}</p>
                     </div>
                 </div>
+                ${skipReasonsHtml}
                 <div class="mt-4 flex space-x-3">
                     <a href="{{ route('admin.fia-payment-records.records') }}" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">
                         View Records
