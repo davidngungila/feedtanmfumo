@@ -376,6 +376,23 @@ class FiaPaymentRecordController extends Controller
             $filename = $request->input('filename');
             $columnMapping = $request->input('column_mapping');
             
+            // Decode JSON column mapping if it's a string
+            if (is_string($columnMapping)) {
+                $columnMapping = json_decode($columnMapping, true);
+                if ($columnMapping === null) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Invalid column mapping data'
+                    ], 400);
+                }
+            }
+            
+            \Log::info('Processing with column mapping:', [
+                'filename' => $filename,
+                'column_mapping' => $columnMapping,
+                'mapping_type' => gettype($columnMapping)
+            ]);
+            
             // Get the uploaded file
             $filePath = storage_path('app/public/payment_confirmations/' . $filename);
             if (!file_exists($filePath)) {
@@ -411,7 +428,6 @@ class FiaPaymentRecordController extends Controller
                 return response()->json([
                     'success' => true,
                     'message' => $message,
-                    'filename' => $filename,
                     'imported' => $result['imported'],
                     'skipped' => $result['skipped'],
                     'skip_reasons' => $result['skip_reasons'] ?? []
