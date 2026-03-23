@@ -86,6 +86,11 @@ class FiaPaymentRecordController extends Controller
             ] : 'No file'
         ]);
 
+        // If this is a column mapping request, process the mapping
+        if ($request->has('column_mapping')) {
+            return $this->processUploadWithMapping($request);
+        }
+
         $validator = Validator::make($request->all(), [
             'excel_file' => 'required|mimes:xlsx,xls,csv|max:10240'
         ]);
@@ -106,28 +111,56 @@ class FiaPaymentRecordController extends Controller
             $filename = time() . '_' . $file->getClientOriginalName();
             $file->storeAs('payment_confirmations', $filename, 'public');
 
-            \Log::info('File saved, starting processing', ['filename' => $filename]);
+            \Log::info('File saved, analyzing columns', ['filename' => $filename]);
 
-            // Process the file
-            $result = $this->processFile($file);
+            // Analyze the file to get column headers
+            $columnAnalysis = $this->analyzeFileColumns($file);
 
-            \Log::info('File processing completed', [
-                'result' => $result
-            ]);
-
-            if ($result['success']) {
-                return response()->json([
-                    'success' => true,
-                    'message' => "Successfully imported {$result['imported']} payment records. {$result['skipped']} rows were skipped.",
-                    'filename' => $filename,
-                    'imported' => $result['imported'],
-                    'skipped' => $result['skipped']
-                ]);
-            } else {
+            if (!$columnAnalysis['success']) {
                 return response()->json([
                     'success' => false,
-                    'message' => $result['message']
+                    'message' => $columnAnalysis['message']
                 ], 500);
+            }
+
+            // Check if we can auto-map columns
+            $autoMapping = $this->tryAutoMapping($columnAnalysis['headers']);
+            
+            if ($autoMapping['all_mapped']) {
+                // All columns mapped automatically, process directly
+                \Log::info('All columns auto-mapped, processing directly');
+                $result = $this->processFileWithMapping($file, $autoMapping['mapping']);
+                
+                if ($result['success']) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => "Successfully imported {$result['imported']} payment records. {$result['skipped']} rows were skipped.",
+                        'filename' => $filename,
+                        'imported' => $result['imported'],
+                        'skipped' => $result['skipped']
+                    ]);
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $result['message']
+                    ], 500);
+                }
+            } else {
+                // Need user to map columns
+                \Log::info('Column mapping required', [
+                    'headers' => $columnAnalysis['headers'],
+                    'auto_mapping' => $autoMapping
+                ]);
+                
+                return response()->json([
+                    'success' => true,
+                    'requires_mapping' => true,
+                    'message' => 'Please map your Excel columns to the database fields',
+                    'headers' => $columnAnalysis['headers'],
+                    'sample_data' => $columnAnalysis['sample_data'],
+                    'auto_mapping' => $autoMapping['mapping'],
+                    'filename' => $filename
+                ]);
             }
 
         } catch (\Exception $e) {
@@ -143,8 +176,373 @@ class FiaPaymentRecordController extends Controller
     }
 
     /**
-     * Process uploaded file (CSV/XLSX)
+     * Analyze file columns and return headers with sample data
      */
+    private function analyzeFileColumns($file)
+    {
+        try {
+            $filePath = $file->getRealPath();
+            $extension = strtolower($file->getClientOriginalExtension());
+
+            if ($extension === 'csv') {
+                return $this->analyzeCsvColumns($filePath);
+            } elseif (in_array($extension, ['xlsx', 'xls'])) {
+                return $this->analyzeExcelColumns($filePath);
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Unsupported file format'
+                ];
+            }
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error analyzing file: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Analyze Excel file columns
+     */
+    private function analyzeExcelColumns($filePath)
+    {
+        try {
+            $spreadsheet = IOFactory::load($filePath);
+            $worksheet = $spreadsheet->getActiveSheet();
+            $highestRow = $worksheet->getHighestRow();
+            $highestColumn = $worksheet->getHighestColumn();
+
+            // Get headers
+            $headers = [];
+            for ($col = 'A'; $col <= $highestColumn; $col++) {
+                $headerValue = trim($worksheet->getCell($col . '1')->getValue());
+                if ($headerValue) {
+                    $headers[$col] = $headerValue;
+                }
+            }
+
+            // Get sample data from first few rows
+            $sampleData = [];
+            for ($row = 2; $row <= min(4, $highestRow); $row++) {
+                $rowData = [];
+                foreach ($headers as $col => $header) {
+                    $cellValue = trim($worksheet->getCell($col . $row)->getValue());
+                    $rowData[$col] = $cellValue;
+                }
+                $sampleData[] = $rowData;
+            }
+
+            return [
+                'success' => true,
+                'headers' => $headers,
+                'sample_data' => $sampleData,
+                'total_rows' => $highestRow - 1 // Subtract header row
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error analyzing Excel file: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Analyze CSV file columns
+     */
+    private function analyzeCsvColumns($filePath)
+    {
+        try {
+            if (($handle = fopen($filePath, 'r')) !== FALSE) {
+                $headers = fgetcsv($handle, 1000, ',');
+                $sampleData = [];
+                $rowCount = 0;
+                
+                while (($data = fgetcsv($handle, 1000, ',')) !== FALSE && $rowCount < 3) {
+                    $rowData = [];
+                    foreach ($headers as $index => $header) {
+                        $rowData[$index] = isset($data[$index]) ? trim($data[$index]) : '';
+                    }
+                    $sampleData[] = $rowData;
+                    $rowCount++;
+                }
+                
+                fclose($handle);
+                
+                // Convert indexed headers to associative
+                $headerMap = [];
+                foreach ($headers as $index => $header) {
+                    if (trim($header)) {
+                        $headerMap[$index] = trim($header);
+                    }
+                }
+                
+                return [
+                    'success' => true,
+                    'headers' => $headerMap,
+                    'sample_data' => $sampleData,
+                    'total_rows' => $rowCount
+                ];
+            }
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error analyzing CSV file: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Try to auto-map columns based on common names
+     */
+    private function tryAutoMapping($headers)
+    {
+        $requiredFields = [
+            'member_id' => ['id', 'member id', 'member_id', 'memberid', 'member-number', 'member number'],
+            'member_name' => ['name', 'member name', 'member_name', 'membername', 'full name', 'fullname'],
+            'gawio_la_fia' => ['gawio la fia', 'gawio', 'fia gawio', 'gawio_fia', 'gawio-lafia'],
+            'fia_iliyokomaa' => ['fia iliyokomaa', 'fia komaa', 'fia_komaa', 'fia-iliyokomaa', 'fia komaa'],
+            'jumla' => ['jumla', 'total', 'sum', 'amount', 'jumla/kiasi', 'jumla kiasi'],
+            'malipo_ya_vipande_yaliyokuwa_yamepelea' => [
+                'malipo ya vipande yailiyakuwa yamepelea', 
+                'malipo ya vipande', 
+                'vipande malipo', 
+                'malipo_vipande', 
+                'installments paid',
+                'paid installments'
+            ],
+            'loan' => ['loan', 'loan amount', 'kopo', 'kopo kiasi', 'loan_amount'],
+            'kiasi_baki' => ['kiasi baki', 'balance', 'remaining', 'baki', 'kiasi_baki', 'amount remaining']
+        ];
+
+        $mapping = [];
+        $allMapped = true;
+
+        foreach ($requiredFields as $field => $possibleNames) {
+            $found = false;
+            foreach ($headers as $index => $header) {
+                $cleanHeader = strtolower(trim($header));
+                if (in_array($cleanHeader, array_map('strtolower', $possibleNames))) {
+                    $mapping[$field] = $index;
+                    $found = true;
+                    break;
+                }
+            }
+            
+            if (!$found) {
+                $mapping[$field] = null;
+                if (in_array($field, ['member_id', 'member_name'])) {
+                    $allMapped = false; // Required fields not found
+                }
+            }
+        }
+
+        return [
+            'all_mapped' => $allMapped,
+            'mapping' => $mapping
+        ];
+    }
+
+    /**
+     * Process upload with user-defined column mapping
+     */
+    private function processUploadWithMapping(Request $request)
+    {
+        try {
+            $filename = $request->input('filename');
+            $columnMapping = $request->input('column_mapping');
+            
+            // Get the uploaded file
+            $filePath = storage_path('app/public/payment_confirmations/' . $filename);
+            if (!file_exists($filePath)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Uploaded file not found'
+                ], 404);
+            }
+
+            // Create a temporary file object
+            $file = new \Illuminate\Http\UploadedFile(
+                $filePath,
+                $filename,
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                null,
+                true
+            );
+
+            // Process with mapping
+            $result = $this->processFileWithMapping($file, $columnMapping);
+
+            if ($result['success']) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Successfully imported {$result['imported']} payment records. {$result['skipped']} rows were skipped.",
+                    'imported' => $result['imported'],
+                    'skipped' => $result['skipped']
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => $result['message']
+                ], 500);
+            }
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error processing mapped upload: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Process file with explicit column mapping
+     */
+    private function processFileWithMapping($file, $columnMapping)
+    {
+        $imported = 0;
+        $skipped = 0;
+
+        try {
+            $filePath = $file->getRealPath();
+            $extension = strtolower($file->getClientOriginalExtension());
+
+            if ($extension === 'csv') {
+                $result = $this->processCsvFileWithMapping($filePath, $columnMapping);
+            } elseif (in_array($extension, ['xlsx', 'xls'])) {
+                $result = $this->processExcelFileWithMapping($filePath, $columnMapping);
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Unsupported file format'
+                ];
+            }
+
+            return $result;
+
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error processing file: ' . $e->getMessage()
+            ];
+        }
+    }
+    /**
+     * Process Excel file with explicit column mapping
+     */
+    private function processExcelFileWithMapping($filePath, $columnMapping)
+    {
+        $imported = 0;
+        $skipped = 0;
+
+        try {
+            $spreadsheet = IOFactory::load($filePath);
+            $worksheet = $spreadsheet->getActiveSheet();
+            $highestRow = $worksheet->getHighestRow();
+
+            // Process data rows
+            for ($row = 2; $row <= $highestRow; $row++) {
+                $recordData = [];
+                
+                foreach ($columnMapping as $field => $colIndex) {
+                    if ($colIndex !== null && $colIndex !== '') {
+                        $cellValue = $worksheet->getCell([$colIndex + 1, $row])->getValue();
+                        $recordData[$field] = trim($cellValue);
+                    } else {
+                        $recordData[$field] = $field === 'member_id' || $field === 'member_name' ? '' : 0;
+                    }
+                }
+
+                $result = $this->savePaymentRecord([
+                    'member_id' => $recordData['member_id'],
+                    'member_name' => $recordData['member_name'],
+                    'gawio_la_fia' => $this->parseAmount($recordData['gawio_la_fia']),
+                    'fia_iliyokomaa' => $this->parseAmount($recordData['fia_iliyokomaa']),
+                    'jumla' => $this->parseAmount($recordData['jumla']),
+                    'malipo_ya_vipande_yaliyokuwa_yamepelea' => $this->parseAmount($recordData['malipo_ya_vipande_yaliyokuwa_yamepelea']),
+                    'loan' => $this->parseAmount($recordData['loan']),
+                    'kiasi_baki' => $this->parseAmount($recordData['kiasi_baki']),
+                ]);
+
+                if ($result) {
+                    $imported++;
+                } else {
+                    $skipped++;
+                }
+            }
+
+            return [
+                'success' => true,
+                'imported' => $imported,
+                'skipped' => $skipped
+            ];
+
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error processing Excel file: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Process CSV file with explicit column mapping
+     */
+    private function processCsvFileWithMapping($filePath, $columnMapping)
+    {
+        $imported = 0;
+        $skipped = 0;
+
+        try {
+            if (($handle = fopen($filePath, 'r')) !== FALSE) {
+                // Skip header row
+                fgetcsv($handle, 1000, ',');
+                
+                while (($data = fgetcsv($handle, 1000, ',')) !== FALSE) {
+                    $recordData = [];
+                    
+                    foreach ($columnMapping as $field => $colIndex) {
+                        if ($colIndex !== null && $colIndex !== '' && isset($data[$colIndex])) {
+                            $recordData[$field] = trim($data[$colIndex]);
+                        } else {
+                            $recordData[$field] = $field === 'member_id' || $field === 'member_name' ? '' : 0;
+                        }
+                    }
+
+                    $result = $this->savePaymentRecord([
+                        'member_id' => $recordData['member_id'],
+                        'member_name' => $recordData['member_name'],
+                        'gawio_la_fia' => $this->parseAmount($recordData['gawio_la_fia']),
+                        'fia_iliyokomaa' => $this->parseAmount($recordData['fia_iliyokomaa']),
+                        'jumla' => $this->parseAmount($recordData['jumla']),
+                        'malipo_ya_vipande_yaliyokuwa_yamepelea' => $this->parseAmount($recordData['malipo_ya_vipande_yaliyokuwa_yamepelea']),
+                        'loan' => $this->parseAmount($recordData['loan']),
+                        'kiasi_baki' => $this->parseAmount($recordData['kiasi_baki']),
+                    ]);
+
+                    if ($result) {
+                        $imported++;
+                    } else {
+                        $skipped++;
+                    }
+                }
+                fclose($handle);
+            }
+
+            return [
+                'success' => true,
+                'imported' => $imported,
+                'skipped' => $skipped
+            ];
+
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Error processing CSV file: ' . $e->getMessage()
+            ];
+        }
+    }
+
     private function processFile($file)
     {
         $imported = 0;
