@@ -301,6 +301,4 @@ class FiaPaymentController extends Controller
             ], 500);
         }
     }
-
-    
-    }
+}
