@@ -76,11 +76,24 @@ class FiaPaymentRecordController extends Controller
      */
     public function processUpload(Request $request)
     {
+        \Log::info('Upload process started', [
+            'request_data' => $request->all(),
+            'has_file' => $request->hasFile('excel_file'),
+            'file_info' => $request->hasFile('excel_file') ? [
+                'name' => $request->file('excel_file')->getClientOriginalName(),
+                'size' => $request->file('excel_file')->getSize(),
+                'type' => $request->file('excel_file')->getMimeType()
+            ] : 'No file'
+        ]);
+
         $validator = Validator::make($request->all(), [
             'excel_file' => 'required|mimes:xlsx,xls,csv|max:10240'
         ]);
 
         if ($validator->fails()) {
+            \Log::error('Upload validation failed', [
+                'errors' => $validator->errors()->toArray()
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Validation failed',
@@ -93,8 +106,14 @@ class FiaPaymentRecordController extends Controller
             $filename = time() . '_' . $file->getClientOriginalName();
             $file->storeAs('payment_confirmations', $filename, 'public');
 
+            \Log::info('File saved, starting processing', ['filename' => $filename]);
+
             // Process the file
             $result = $this->processFile($file);
+
+            \Log::info('File processing completed', [
+                'result' => $result
+            ]);
 
             if ($result['success']) {
                 return response()->json([
@@ -112,6 +131,10 @@ class FiaPaymentRecordController extends Controller
             }
 
         } catch (\Exception $e) {
+            \Log::error('Upload process exception', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Error processing file: ' . $e->getMessage()
