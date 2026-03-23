@@ -17,19 +17,26 @@ class FiaPaymentRecordController extends Controller
      */
     public function index()
     {
-        $totalRecords = DB::table('fia_payment_records')->count();
-        $totalFiaGawio = DB::table('fia_payment_records')->sum('gawio_la_fia');
-        $totalFiaIlivyoKoma = DB::table('fia_payment_records')->sum('fia_iliyokomaa');
-        $totalJumla = DB::table('fia_payment_records')->sum('jumla');
-        $totalLoanBalance = DB::table('fia_payment_records')->sum('kiasi_baki');
+        // Use payment_confirmations table instead of fia_payment_records
+        $totalRecords = DB::table('payment_confirmations')->where('fia_investment', '>', 0)->count();
+        $totalFiaGawio = DB::table('payment_confirmations')->where('fia_investment', '>', 0)->sum('fia_investment');
+        $totalFiaIlivyoKoma = DB::table('payment_confirmations')->where('fia_investment', '>', 0)->sum('capital_contribution');
+        $totalJumla = DB::table('payment_confirmations')->where('fia_investment', '>', 0)->sum('amount_to_pay');
+        $totalLoanBalance = DB::table('payment_confirmations')->where('fia_investment', '>', 0)->sum('loan_repayment');
         
         // Get recent records
-        $recentRecords = DB::table('fia_payment_records')
+        $recentRecords = DB::table('payment_confirmations')
+            ->where('fia_investment', '>', 0)
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get()
             ->map(function ($record) {
                 $record->created_at = \Carbon\Carbon::parse($record->created_at);
+                // Map fields to match expected view structure
+                $record->gawio_la_fia = $record->fia_investment;
+                $record->fia_iliyokomaa = $record->capital_contribution;
+                $record->jumla = $record->amount_to_pay;
+                $record->kiasi_baki = $record->loan_repayment;
                 return $record;
             });
         
@@ -48,7 +55,8 @@ class FiaPaymentRecordController extends Controller
      */
     public function records()
     {
-        $records = DB::table('fia_payment_records')
+        $records = DB::table('payment_confirmations')
+            ->where('fia_investment', '>', 0)
             ->orderBy('created_at', 'desc')
             ->paginate(20);
             
@@ -83,7 +91,7 @@ class FiaPaymentRecordController extends Controller
         try {
             $file = $request->file('excel_file');
             $filename = time() . '_' . $file->getClientOriginalName();
-            $file->storeAs('fia_payment_records', $filename, 'public');
+            $file->storeAs('payment_confirmations', $filename, 'public');
 
             // Process the file
             $result = $this->processFile($file);
@@ -387,35 +395,31 @@ class FiaPaymentRecordController extends Controller
             }
 
             // Check if record already exists
-            $existing = DB::table('fia_payment_records')
+            $existing = DB::table('payment_confirmations')
                 ->where('member_id', $data['member_id'])
                 ->first();
 
             if ($existing) {
-                // Update existing record
-                DB::table('fia_payment_records')
+                // Update existing record - map fields to payment_confirmations table structure
+                DB::table('payment_confirmations')
                     ->where('member_id', $data['member_id'])
                     ->update([
                         'member_name' => $data['member_name'],
-                        'gawio_la_fia' => $data['gawio_la_fia'],
-                        'fia_iliyokomaa' => $data['fia_iliyokomaa'],
-                        'jumla' => $data['jumla'],
-                        'malipo_ya_vipande_yaliyokuwa_yamepelea' => $data['malipo_ya_vipande_yaliyokuwa_yamepelea'],
-                        'loan' => $data['loan'],
-                        'kiasi_baki' => $data['kiasi_baki'],
+                        'fia_investment' => $data['gawio_la_fia'],
+                        'capital_contribution' => $data['fia_iliyokomaa'],
+                        'amount_to_pay' => $data['jumla'],
+                        'loan_repayment' => $data['loan'],
                         'updated_at' => now(),
                     ]);
             } else {
-                // Insert new record
-                DB::table('fia_payment_records')->insert([
+                // Insert new record - map fields to payment_confirmations table structure
+                DB::table('payment_confirmations')->insert([
                     'member_id' => $data['member_id'],
                     'member_name' => $data['member_name'],
-                    'gawio_la_fia' => $data['gawio_la_fia'],
-                    'fia_iliyokomaa' => $data['fia_iliyokomaa'],
-                    'jumla' => $data['jumla'],
-                    'malipo_ya_vipande_yaliyokuwa_yamepelea' => $data['malipo_ya_vipande_yaliyokuwa_yamepelea'],
-                    'loan' => $data['loan'],
-                    'kiasi_baki' => $data['kiasi_baki'],
+                    'fia_investment' => $data['gawio_la_fia'],
+                    'capital_contribution' => $data['fia_iliyokomaa'],
+                    'amount_to_pay' => $data['jumla'],
+                    'loan_repayment' => $data['loan'],
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -471,7 +475,7 @@ class FiaPaymentRecordController extends Controller
 
         $memberId = trim($request->input('member_id'));
         
-        $record = DB::table('fia_payment_records')
+        $record = DB::table('payment_confirmations')
             ->where('member_id', $memberId)
             ->first();
 
@@ -493,12 +497,12 @@ class FiaPaymentRecordController extends Controller
                 'id' => $record->id,
                 'member_id' => $record->member_id,
                 'name' => $record->member_name,
-                'gawio_la_fia' => $record->gawio_la_fia,
-                'fia_iliyokomaa' => $record->fia_iliyokomaa,
-                'jumla' => $record->jumla,
-                'malipo_ya_vipande' => $record->malipo_ya_vipande_yaliyokuwa_yamepelea,
-                'loan' => $record->loan,
-                'kiasi_baki' => $record->kiasi_baki,
+                'gawio_la_fia' => $record->fia_investment,
+                'fia_iliyokomaa' => $record->capital_contribution,
+                'jumla' => $record->amount_to_pay,
+                'malipo_ya_vipande' => $record->re_deposit,
+                'loan' => $record->loan_repayment,
+                'kiasi_baki' => $record->loan_repayment,
                 'has_existing_confirmation' => $existingConfirmation ? true : false,
                 'existing_confirmation' => $existingConfirmation,
             ],
@@ -523,7 +527,7 @@ class FiaPaymentRecordController extends Controller
         $records = $query->orderBy('created_at', 'desc')->get();
         
         // Create CSV content
-        $filename = 'fia_payment_records_' . date('Y-m-d_H-i-s') . '.csv';
+        $filename = 'payment_confirmations_' . date('Y-m-d_H-i-s') . '.csv';
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
@@ -565,12 +569,13 @@ class FiaPaymentRecordController extends Controller
     public function getStatistics()
     {
         $stats = [
-            'total_records' => DB::table('fia_payment_records')->count(),
-            'total_gawio' => DB::table('fia_payment_records')->sum('gawio_la_fia'),
-            'total_fia_komaa' => DB::table('fia_payment_records')->sum('fia_iliyokomaa'),
-            'total_jumla' => DB::table('fia_payment_records')->sum('jumla'),
-            'total_loan_balance' => DB::table('fia_payment_records')->sum('kiasi_baki'),
-            'recent_records' => DB::table('fia_payment_records')
+            'total_records' => DB::table('payment_confirmations')->where('fia_investment', '>', 0)->count(),
+            'total_gawio' => DB::table('payment_confirmations')->where('fia_investment', '>', 0)->sum('fia_investment'),
+            'total_fia_komaa' => DB::table('payment_confirmations')->where('fia_investment', '>', 0)->sum('capital_contribution'),
+            'total_jumla' => DB::table('payment_confirmations')->where('fia_investment', '>', 0)->sum('amount_to_pay'),
+            'total_loan_balance' => DB::table('payment_confirmations')->where('fia_investment', '>', 0)->sum('loan_repayment'),
+            'recent_records' => DB::table('payment_confirmations')
+                ->where('fia_investment', '>', 0)
                 ->orderBy('created_at', 'desc')
                 ->limit(5)
                 ->get()
@@ -588,7 +593,7 @@ class FiaPaymentRecordController extends Controller
     public function destroy($id)
     {
         try {
-            $deleted = DB::table('fia_payment_records')->where('id', $id)->delete();
+            $deleted = DB::table('payment_confirmations')->where('id', $id)->delete();
             
             if ($deleted) {
                 return response()->json([
