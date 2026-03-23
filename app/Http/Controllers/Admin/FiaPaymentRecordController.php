@@ -55,10 +55,9 @@ class FiaPaymentRecordController extends Controller
      */
     public function records()
     {
-        $records = DB::table('payment_confirmations')
-            ->where('fia_investment', '>', 0)
+        $records = DB::table('fia_payment_records')
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->paginate(10);
             
         return view('admin.fia-payment-records.records', compact('records'));
     }
@@ -964,7 +963,7 @@ class FiaPaymentRecordController extends Controller
     {
         try {
             // Log the incoming data for debugging
-            \Log::info('Attempting to save payment record:', $data);
+            \Log::info('Attempting to save payment record to fia_payment_records table:', $data);
             
             // Validate required fields
             if (empty($data['member_id']) || empty($data['member_name'])) {
@@ -981,23 +980,25 @@ class FiaPaymentRecordController extends Controller
                 return false;
             }
 
-            // Check if record already exists
-            $existing = DB::table('payment_confirmations')
+            // Check if record already exists in the new table
+            $existing = DB::table('fia_payment_records')
                 ->where('member_id', $data['member_id'])
                 ->first();
 
             if ($existing) {
-                \Log::info('Updating existing record for member: ' . $data['member_id']);
-                // Update existing record - map fields to payment_confirmations table structure
+                \Log::info('Updating existing record in fia_payment_records for member: ' . $data['member_id']);
+                // Update existing record
                 try {
-                    $updated = DB::table('payment_confirmations')
+                    $updated = DB::table('fia_payment_records')
                         ->where('member_id', $data['member_id'])
                         ->update([
                             'member_name' => $data['member_name'],
-                            'fia_investment' => $data['gawio_la_fia'],
-                            'capital_contribution' => $data['fia_iliyokomaa'],
-                            'amount_to_pay' => $data['jumla'],
-                            'loan_repayment' => $data['loan'],
+                            'gawio_la_fia' => $data['gawio_la_fia'],
+                            'fia_iliyokomaa' => $data['fia_iliyokomaa'],
+                            'jumla' => $data['jumla'],
+                            'malipo_ya_vipande_yaliyokuwa_yamepelea' => $data['malipo_ya_vipande_yaliyokuwa_yamepelea'],
+                            'loan' => $data['loan'],
+                            'kiasi_baki' => $data['kiasi_baki'],
                             'updated_at' => now(),
                         ]);
                     
@@ -1007,22 +1008,25 @@ class FiaPaymentRecordController extends Controller
                     throw $e;
                 }
             } else {
-                \Log::info('Inserting new record for member: ' . $data['member_id']);
-                // Insert new record - map fields to payment_confirmations table structure
+                \Log::info('Inserting new record in fia_payment_records for member: ' . $data['member_id']);
+                // Insert new record
                 try {
                     $insertData = [
                         'member_id' => $data['member_id'],
                         'member_name' => $data['member_name'],
-                        'fia_investment' => $data['gawio_la_fia'],
-                        'capital_contribution' => $data['fia_iliyokomaa'],
-                        'amount_to_pay' => $data['jumla'],
-                        'loan_repayment' => $data['loan'],
+                        'gawio_la_fia' => $data['gawio_la_fia'],
+                        'fia_iliyokomaa' => $data['fia_iliyokomaa'],
+                        'jumla' => $data['jumla'],
+                        'malipo_ya_vipande_yaliyokuwa_yamepelea' => $data['malipo_ya_vipande_yaliyokuwa_yamepelea'],
+                        'loan' => $data['loan'],
+                        'kiasi_baki' => $data['kiasi_baki'],
+                        'uploaded_file' => $data['uploaded_file'] ?? null,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
                     \Log::info('Insert data: ', $insertData);
                     
-                    $inserted = DB::table('payment_confirmations')->insert($insertData);
+                    $inserted = DB::table('fia_payment_records')->insert($insertData);
                     
                     \Log::info('Insert result: ' . ($inserted ? 'success' : 'failed'));
                 } catch (\Exception $e) {
@@ -1043,77 +1047,125 @@ class FiaPaymentRecordController extends Controller
         }
     }
 
-    /**
-     * Get payment records data for AJAX
-     */
-    public function getRecords(Request $request)
-    {
-        $query = DB::table('payment_confirmations')->where('fia_investment', '>', 0);
+/**
+ * Get payment records data for AJAX
+ */
+public function getRecords(Request $request)
+{
+    try {
+        $query = DB::table('fia_payment_records');
         
-        // Search by ID or name
-        if ($request->has('search') && $request->search != '') {
+        // Search functionality
+        if ($request->has('search') && !empty($request->search)) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('member_id', 'like', "%{$search}%")
                   ->orWhere('member_name', 'like', "%{$search}%");
             });
         }
-        
+
+        // Get total count for pagination
+        $total = $query->count();
+
+        // Pagination
+        $perPage = $request->get('per_page', 10);
+        $page = $request->get('page', 1);
+        $offset = ($page - 1) * $perPage;
+
+        // Get records
         $records = $query->orderBy('created_at', 'desc')
-            ->paginate($request->input('per_page', 20));
+                        ->offset($offset)
+                        ->limit($perPage)
+                        ->get();
 
         return response()->json([
             'success' => true,
-            'data' => $records
+            'data' => $records,
+            'total' => $total,
+            'per_page' => $perPage,
+            'current_page' => $page,
+            'last_page' => ceil($total / $perPage)
         ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Error getting records: ' . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Error retrieving records: ' . $e->getMessage()
+        ], 500);
     }
+}
 
-    /**
-     * Get member payment details for public confirmation
-     */
-    public function getMemberPayments(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'member_id' => 'required|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Member ID is required',
-            ], 422);
-        }
-
-        $memberId = trim($request->input('member_id'));
+/**
+ * Export payment records to CSV
+ */
+public function exportRecords(Request $request)
+{
+    try {
+        $query = DB::table('fia_payment_records');
         
-        $record = DB::table('payment_confirmations')
-            ->where('member_id', $memberId)
-            ->first();
-
-        if (!$record) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Member not found. Please check your member ID or contact the administrator.',
-            ], 404);
+        // Apply search filter if provided
+        if ($request->has('search') && !empty($request->search)) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('member_id', 'like', "%{$search}%")
+                  ->orWhere('member_name', 'like', "%{$search}%");
+            });
         }
 
-        // Check if member has already submitted confirmation
-        $existingConfirmation = DB::table('payment_confirmations')
-            ->where('member_id', $memberId)
-            ->first();
+        $records = $query->orderBy('created_at', 'desc')->get();
 
+        $filename = 'fia_payment_records_' . date('Y-m-d_H-i-s') . '.csv';
+        
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function() use ($records) {
+            $file = fopen('php://output', 'w');
+            
+            // Add CSV headers
+            fputcsv($file, [
+                'Member ID',
+                'Member Name', 
+                'Gawio la FIA',
+                'FIA iliyokomaa',
+                'Jumla',
+                'Malipo ya vipande',
+                'Loan',
+                'Kiasi baki',
+                'Upload Date'
+            ]);
+            
+            // Add data rows
+            foreach ($records as $record) {
+                fputcsv($file, [
+                    $record->member_id,
+                    $record->member_name,
+                    $record->gawio_la_fia,
+                    $record->fia_iliyokomaa,
+                    $record->jumla,
+                    $record->malipo_ya_vipande_yaliyokuwa_yamepelea,
+                    $record->loan,
+                    $record->kiasi_baki,
+                    $record->created_at
+                ]);
+            }
+            
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+
+    } catch (\Exception $e) {
+        \Log::error('Error exporting records: ' . $e->getMessage());
         return response()->json([
-            'success' => true,
-            'member' => [
-                'id' => $record->id,
-                'member_id' => $record->member_id,
-                'name' => $record->member_name,
-                'gawio_la_fia' => $record->fia_investment,
-                'fia_iliyokomaa' => $record->capital_contribution,
-                'jumla' => $record->amount_to_pay,
-                'malipo_ya_vipande' => $record->re_deposit,
-                'loan' => $record->loan_repayment,
-                'kiasi_baki' => $record->loan_repayment,
+            'success' => false,
+            'message' => 'Error exporting records: ' . $e->getMessage()
+        ], 500);
+    }
+}
                 'has_existing_confirmation' => $existingConfirmation ? true : false,
                 'existing_confirmation' => $existingConfirmation,
             ],
@@ -1217,7 +1269,7 @@ class FiaPaymentRecordController extends Controller
         }
 
         try {
-            $deleted = DB::table('payment_confirmations')
+            $deleted = DB::table('fia_payment_records')
                 ->whereIn('id', $request->ids)
                 ->delete();
 
