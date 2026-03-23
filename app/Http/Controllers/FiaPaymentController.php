@@ -278,24 +278,39 @@ class FiaPaymentController extends Controller
                     'confirmation_date' => now()->format('d M Y, H:i'),
                 ];
 
-                Mail::send('fia.payment-confirmation-email', $emailData, function($message) use ($validated, $pdfPath, $pdfFileName) {
-                    $message->to($validated['email'])
-                            ->subject('Thibitisho la Malipo la FIA - FEEDTAN CMG')
-                            ->attach($pdfPath, [
-                                'as' => $pdfFileName,
-                                'mime' => 'application/pdf',
-                            ]);
-                });
+                try {
+                    Mail::send('fia.payment-confirmation-email', $emailData, function($message) use ($validated, $pdfPath, $pdfFileName) {
+                        $message->to($validated['email'])
+                                ->subject('Uthibitisho wa Malipo la FIA - FEEDTAN DIGITAL')
+                                ->attach($pdfPath, [
+                                    'as' => $pdfFileName,
+                                    'mime' => 'application/pdf',
+                                ]);
+                    });
 
-                Log::info('PDF confirmation generated and sent successfully to: ' . $validated['email']);
+                    Log::info('PDF confirmation generated and sent successfully to: ' . $validated['email']);
 
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Payment confirmation submitted successfully! PDF document has been generated and sent to your email.',
-                    'confirmation_id' => $confirmationId,
-                    'pdf_generated' => true,
-                    'email_sent' => true
-                ]);
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'Payment confirmation submitted successfully! PDF document has been generated and sent to your email.',
+                        'confirmation_id' => $confirmationId,
+                        'pdf_generated' => true,
+                        'email_sent' => true
+                    ]);
+
+                } catch (\Exception $emailError) {
+                    Log::error('Email sending failed: ' . $emailError->getMessage());
+                    
+                    // Still return success but indicate email failed
+                    return response()->json([
+                        'status' => 'success',
+                        'message' => 'Payment confirmation submitted successfully! PDF generated but email failed to send. Please check your email configuration.',
+                        'confirmation_id' => $confirmationId,
+                        'pdf_generated' => true,
+                        'email_sent' => false,
+                        'email_error' => $emailError->getMessage()
+                    ]);
+                }
 
             } catch (\Exception $pdfError) {
                 Log::error('Error generating PDF or sending email: ' . $pdfError->getMessage());

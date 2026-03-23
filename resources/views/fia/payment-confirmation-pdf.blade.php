@@ -132,7 +132,7 @@
             <td>Barua Pepe (Email)</td>
             <td>{{ $confirmation->member_email }}</td>
         </tr>
-        @if($confirmation->member_phone)
+        @if($confirmation->member_phone && $confirmation->member_phone != '')
         <tr>
             <td>Namba ya Simu</td>
             <td>{{ $confirmation->member_phone }}</td>
