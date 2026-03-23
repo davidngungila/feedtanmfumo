@@ -62,17 +62,26 @@ class FiaPaymentController extends Controller
     public function lookupMembership($membershipCode)
     {
         try {
-            // Find member in FIA payment records
-            $member = DB::table('fia_payment_records')
+            // Find member in payment_confirmations table (FIA payments only)
+            $member = DB::table('payment_confirmations')
                 ->where('member_id', $membershipCode)
+                ->where('fia_investment', '>', 0) // Only FIA payments
                 ->first();
 
             if (!$member) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Membership code not found in FIA payment records'
+                    'message' => 'Nambari ya uanachama haipatikani kwenye rekodi za FIA'
                 ], 404);
             }
+
+            // Map fields to match expected structure in frontend
+            $member->gawio_la_fia = $member->fia_investment;
+            $member->fia_iliyokomaa = $member->capital_contribution;
+            $member->jumla = $member->amount_to_pay;
+            $member->malipo_ya_vipande_yaliyokuwa_yamepelea = $member->re_deposit;
+            $member->loan = $member->loan_repayment;
+            $member->kiasi_baki = $member->loan_repayment;
 
             return response()->json([
                 'success' => true,
