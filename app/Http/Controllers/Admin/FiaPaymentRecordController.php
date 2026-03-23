@@ -126,6 +126,16 @@ class FiaPaymentRecordController extends Controller
             // Check if we can auto-map columns
             $autoMapping = $this->tryAutoMapping($columnAnalysis['headers']);
             
+            // Always show mapping interface for now to debug the issue
+            \Log::info('Forcing column mapping interface for debugging', [
+                'headers' => $columnAnalysis['headers'],
+                'auto_mapping' => $autoMapping,
+                'all_mapped' => $autoMapping['all_mapped']
+            ]);
+            
+            // Temporarily disable auto-mapping to force manual mapping
+            $autoMapping['all_mapped'] = false;
+            
             if ($autoMapping['all_mapped']) {
                 // All columns mapped automatically, process directly
                 \Log::info('All columns auto-mapped, processing directly', [
@@ -914,33 +924,47 @@ class FiaPaymentRecordController extends Controller
             if ($existing) {
                 \Log::info('Updating existing record for member: ' . $data['member_id']);
                 // Update existing record - map fields to payment_confirmations table structure
-                $updated = DB::table('payment_confirmations')
-                    ->where('member_id', $data['member_id'])
-                    ->update([
+                try {
+                    $updated = DB::table('payment_confirmations')
+                        ->where('member_id', $data['member_id'])
+                        ->update([
+                            'member_name' => $data['member_name'],
+                            'fia_investment' => $data['gawio_la_fia'],
+                            'capital_contribution' => $data['fia_iliyokomaa'],
+                            'amount_to_pay' => $data['jumla'],
+                            'loan_repayment' => $data['loan'],
+                            'updated_at' => now(),
+                        ]);
+                    
+                    \Log::info('Update result: ' . ($updated ? 'success' : 'failed'));
+                } catch (\Exception $e) {
+                    \Log::error('Update query failed: ' . $e->getMessage());
+                    throw $e;
+                }
+            } else {
+                \Log::info('Inserting new record for member: ' . $data['member_id']);
+                // Insert new record - map fields to payment_confirmations table structure
+                try {
+                    $insertData = [
+                        'member_id' => $data['member_id'],
                         'member_name' => $data['member_name'],
                         'fia_investment' => $data['gawio_la_fia'],
                         'capital_contribution' => $data['fia_iliyokomaa'],
                         'amount_to_pay' => $data['jumla'],
                         'loan_repayment' => $data['loan'],
+                        'created_at' => now(),
                         'updated_at' => now(),
-                    ]);
-                
-                \Log::info('Update result: ' . ($updated ? 'success' : 'failed'));
-            } else {
-                \Log::info('Inserting new record for member: ' . $data['member_id']);
-                // Insert new record - map fields to payment_confirmations table structure
-                $inserted = DB::table('payment_confirmations')->insert([
-                    'member_id' => $data['member_id'],
-                    'member_name' => $data['member_name'],
-                    'fia_investment' => $data['gawio_la_fia'],
-                    'capital_contribution' => $data['fia_iliyokomaa'],
-                    'amount_to_pay' => $data['jumla'],
-                    'loan_repayment' => $data['loan'],
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-                
-                \Log::info('Insert result: ' . ($inserted ? 'success' : 'failed'));
+                    ];
+                    \Log::info('Insert data: ', $insertData);
+                    
+                    $inserted = DB::table('payment_confirmations')->insert($insertData);
+                    
+                    \Log::info('Insert result: ' . ($inserted ? 'success' : 'failed'));
+                } catch (\Exception $e) {
+                    \Log::error('Insert query failed: ' . $e->getMessage());
+                    \Log::error('Insert data that failed: ', $insertData ?? []);
+                    throw $e;
+                }
             }
 
             return true;
