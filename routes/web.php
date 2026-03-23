@@ -479,6 +479,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('member-payments', [\App\Http\Controllers\Admin\FiaPaymentRecordController::class, 'getMemberPayments'])->name('member-payments');
         Route::get('export', [\App\Http\Controllers\Admin\FiaPaymentRecordController::class, 'exportRecords'])->name('export');
         Route::get('statistics', [\App\Http\Controllers\Admin\FiaPaymentRecordController::class, 'getStatistics'])->name('statistics');
+        Route::delete('bulk-delete', [\App\Http\Controllers\Admin\FiaPaymentRecordController::class, 'bulkDestroy'])->name('bulk-destroy');
         Route::delete('{id}', [\App\Http\Controllers\Admin\FiaPaymentRecordController::class, 'destroy'])->name('destroy');
     });
 

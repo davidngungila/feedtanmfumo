@@ -588,6 +588,49 @@ class FiaPaymentRecordController extends Controller
     }
 
     /**
+     * Bulk delete payment records
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'ids' => 'required|array',
+            'ids.*' => 'integer'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid input data',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $deleted = DB::table('payment_confirmations')
+                ->whereIn('id', $request->ids)
+                ->delete();
+
+            if ($deleted > 0) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Successfully deleted {$deleted} payment record(s)"
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'No records found to delete'
+            ], 404);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting records: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Delete a payment record
      */
     public function destroy($id)

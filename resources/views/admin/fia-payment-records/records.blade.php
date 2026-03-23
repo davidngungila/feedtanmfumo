@@ -12,6 +12,9 @@
                 <p class="text-gray-600 mt-1">View and manage all FIA payment records</p>
             </div>
             <div class="flex space-x-3">
+                <button onclick="bulkDelete()" id="bulkDeleteBtn" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed" style="display: none;">
+                    Delete Selected (<span id="selectedCount">0</span>)
+                </button>
                 <button onclick="exportRecords()" class="px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">
                     Export to Excel
                 </button>
@@ -47,6 +50,9 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
+                        <th class="px-6 py-3 text-left">
+                            <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" class="rounded border-gray-300 text-[#015425] focus:ring-[#015425]">
+                        </th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">S/N</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
@@ -59,9 +65,12 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="bg-white divide-y divide-gray-200" id="records-table-body">
                     @forelse($records as $record)
                         <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 text-sm">
+                                <input type="checkbox" class="record-checkbox rounded border-gray-300 text-[#015425] focus:ring-[#015425]" value="{{ $record->id }}" onchange="updateSelectedCount()">
+                            </td>
                             <td class="px-6 py-4 text-sm text-gray-900">{{ $records->firstItem() + $loop->index }}</td>
                             <td class="px-6 py-4 text-sm text-gray-900">{{ $record->member_id }}</td>
                             <td class="px-6 py-4 text-sm text-gray-900">{{ $record->member_name }}</td>
@@ -77,7 +86,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="10" class="px-6 py-12 text-center">
+                            <td colspan="11" class="px-6 py-12 text-center">
                                 <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                 </svg>
@@ -107,6 +116,86 @@ let currentPage = 1;
 document.addEventListener('DOMContentLoaded', function() {
     loadRecords();
 });
+
+function toggleSelectAll() {
+    const selectAll = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.record-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAll.checked;
+    });
+    
+    updateSelectedCount();
+}
+
+function updateSelectedCount() {
+    const checkedBoxes = document.querySelectorAll('.record-checkbox:checked');
+    const count = checkedBoxes.length;
+    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    const selectedCountSpan = document.getElementById('selectedCount');
+    
+    selectedCountSpan.textContent = count;
+    
+    if (count > 0) {
+        bulkDeleteBtn.style.display = 'inline-block';
+    } else {
+        bulkDeleteBtn.style.display = 'none';
+    }
+    
+    // Update select all checkbox state
+    const selectAll = document.getElementById('selectAll');
+    const allCheckboxes = document.querySelectorAll('.record-checkbox');
+    if (count === 0) {
+        selectAll.checked = false;
+        selectAll.indeterminate = false;
+    } else if (count === allCheckboxes.length) {
+        selectAll.checked = true;
+        selectAll.indeterminate = false;
+    } else {
+        selectAll.checked = false;
+        selectAll.indeterminate = true;
+    }
+}
+
+function bulkDelete() {
+    const checkedBoxes = document.querySelectorAll('.record-checkbox:checked');
+    
+    if (checkedBoxes.length === 0) {
+        alert('Please select at least one record to delete.');
+        return;
+    }
+    
+    const ids = Array.from(checkedBoxes).map(cb => cb.value);
+    
+    if (confirm(`Are you sure you want to delete ${ids.length} record(s)? This action cannot be undone.`)) {
+        fetch('/admin/fia-payment-records/bulk-delete', {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ids: ids
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification(data.message, 'success');
+                loadRecords(currentPage); // Reload current page
+                // Reset checkboxes
+                document.getElementById('selectAll').checked = false;
+                updateSelectedCount();
+            } else {
+                showNotification('Error: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error deleting records', 'error');
+        });
+    }
+}
 
 function loadRecords(page = 1) {
     currentPage = page;
@@ -140,7 +229,7 @@ function renderRecordsTable(records) {
     if (records.data.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="10" class="px-6 py-12 text-center">
+                <td colspan="11" class="px-6 py-12 text-center">
                     <svg class="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
@@ -148,6 +237,7 @@ function renderRecordsTable(records) {
                 </td>
             </tr>
         `;
+        updateSelectedCount();
         return;
     }
 
@@ -156,6 +246,9 @@ function renderRecordsTable(records) {
         
         return `
             <tr class="hover:bg-gray-50">
+                <td class="px-6 py-4 text-sm">
+                    <input type="checkbox" class="record-checkbox rounded border-gray-300 text-[#015425] focus:ring-[#015425]" value="${record.id}" onchange="updateSelectedCount()">
+                </td>
                 <td class="px-6 py-4 text-sm text-gray-900">${serialNumber}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">${record.member_id}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">${record.member_name || 'N/A'}</td>
@@ -174,6 +267,10 @@ function renderRecordsTable(records) {
             </tr>
         `;
     }).join('');
+    
+    // Reset select all checkbox when new data is loaded
+    document.getElementById('selectAll').checked = false;
+    updateSelectedCount();
 }
 
 function updatePagination(records) {
