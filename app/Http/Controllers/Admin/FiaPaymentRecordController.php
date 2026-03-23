@@ -456,6 +456,13 @@ class FiaPaymentRecordController extends Controller
         $skipped = 0;
 
         try {
+            \Log::info('processFileWithMapping called', [
+                'column_mapping' => $columnMapping,
+                'column_mapping_type' => gettype($columnMapping),
+                'is_array' => is_array($columnMapping),
+                'file_type' => get_class($file)
+            ]);
+
             $filePath = $file->getRealPath();
             $extension = strtolower($file->getClientOriginalExtension());
 
@@ -473,6 +480,14 @@ class FiaPaymentRecordController extends Controller
             return $result;
 
         } catch (\Exception $e) {
+            \Log::error('processFileWithMapping exception', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+                'column_mapping' => $columnMapping,
+                'column_mapping_type' => gettype($columnMapping)
+            ]);
             return [
                 'success' => false,
                 'message' => 'Error processing file: ' . $e->getMessage()
@@ -488,6 +503,22 @@ class FiaPaymentRecordController extends Controller
         $skipped = 0;
 
         try {
+            \Log::info('processExcelFileWithMapping called', [
+                'column_mapping' => $columnMapping,
+                'column_mapping_type' => gettype($columnMapping),
+                'is_array' => is_array($columnMapping)
+            ]);
+
+            // Ensure columnMapping is an array
+            if (!is_array($columnMapping)) {
+                if (is_string($columnMapping)) {
+                    $columnMapping = json_decode($columnMapping, true);
+                }
+                if (!is_array($columnMapping)) {
+                    throw new \Exception('Column mapping must be an array, got: ' . gettype($columnMapping));
+                }
+            }
+
             $spreadsheet = IOFactory::load($filePath);
             $worksheet = $spreadsheet->getActiveSheet();
             $highestRow = $worksheet->getHighestRow();
@@ -564,6 +595,22 @@ class FiaPaymentRecordController extends Controller
         $skipped = 0;
 
         try {
+            \Log::info('processCsvFileWithMapping called', [
+                'column_mapping' => $columnMapping,
+                'column_mapping_type' => gettype($columnMapping),
+                'is_array' => is_array($columnMapping)
+            ]);
+
+            // Ensure columnMapping is an array
+            if (!is_array($columnMapping)) {
+                if (is_string($columnMapping)) {
+                    $columnMapping = json_decode($columnMapping, true);
+                }
+                if (!is_array($columnMapping)) {
+                    throw new \Exception('Column mapping must be an array, got: ' . gettype($columnMapping));
+                }
+            }
+
             if (($handle = fopen($filePath, 'r')) !== FALSE) {
                 // Skip header row
                 fgetcsv($handle, 1000, ',');
