@@ -108,13 +108,15 @@ class FiaPaymentRecordController extends Controller
         try {
             $file = $request->file('excel_file');
             $filename = time() . '_' . $file->getClientOriginalName();
-            $file->storeAs('payment_confirmations', $filename, 'public');
-
+            
+            // Save file
+            $file->move(storage_path('app/public/payment_confirmations'), $filename);
+            
             \Log::info('File saved, analyzing columns', ['filename' => $filename]);
 
-            // Analyze the file to get column headers
+            // Analyze file columns
             $columnAnalysis = $this->analyzeFileColumns($file);
-
+            
             if (!$columnAnalysis['success']) {
                 return response()->json([
                     'success' => false,
@@ -125,15 +127,16 @@ class FiaPaymentRecordController extends Controller
             // Check if we can auto-map columns
             $autoMapping = $this->tryAutoMapping($columnAnalysis['headers']);
             
-            // ALWAYS show mapping interface to debug the issue
-            \Log::info('ALWAYS forcing column mapping interface for debugging', [
+            // ALWAYS show mapping interface to ensure correct mapping
+            \Log::info('ALWAYS forcing column mapping interface - VERSION 2.0', [
                 'headers' => $columnAnalysis['headers'],
                 'auto_mapping' => $autoMapping,
                 'all_mapped' => $autoMapping['all_mapped'],
-                'filename' => $filename
+                'filename' => $filename,
+                'version' => '2.0 - NEW TABLE'
             ]);
             
-            // Force mapping interface to always show
+            // Force mapping interface to always show - NEVER auto-process
             $autoMapping['all_mapped'] = false;
             
             if ($autoMapping['all_mapped']) {
@@ -551,6 +554,7 @@ class FiaPaymentRecordController extends Controller
                     'malipo_ya_vipande_yaliyokuwa_yamepelea' => $this->parseAmount($recordData['malipo_ya_vipande_yaliyokuwa_yamepelea']),
                     'loan' => $this->parseAmount($recordData['loan']),
                     'kiasi_baki' => $this->parseAmount($recordData['kiasi_baki']),
+                    'uploaded_file' => basename($filePath),
                 ];
 
                 $result = $this->savePaymentRecord($originalData);
