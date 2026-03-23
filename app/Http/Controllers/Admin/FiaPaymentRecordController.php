@@ -494,7 +494,7 @@ class FiaPaymentRecordController extends Controller
      */
     public function getRecords(Request $request)
     {
-        $query = DB::table('fia_payment_records');
+        $query = DB::table('payment_confirmations')->where('fia_investment', '>', 0);
         
         // Search by ID or name
         if ($request->has('search') && $request->search != '') {
@@ -571,7 +571,7 @@ class FiaPaymentRecordController extends Controller
      */
     public function exportRecords(Request $request)
     {
-        $query = DB::table('fia_payment_records');
+        $query = DB::table('payment_confirmations')->where('fia_investment', '>', 0);
         
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
@@ -605,12 +605,12 @@ class FiaPaymentRecordController extends Controller
                     $index + 1,
                     $record->member_id,
                     $record->member_name,
-                    $record->gawio_la_fia,
-                    $record->fia_iliyokomaa,
-                    $record->jumla,
-                    $record->malipo_ya_vipande_yaliyokuwa_yamepelea,
-                    $record->loan,
-                    $record->kiasi_baki
+                    $record->fia_investment,
+                    $record->capital_contribution,
+                    $record->amount_to_pay,
+                    $record->re_deposit,
+                    $record->loan_repayment,
+                    $record->loan_repayment
                 ]);
             }
             
