@@ -305,11 +305,23 @@ class FiaPaymentRecordController extends Controller
                 }
             }
 
+            // Log detected columns for debugging
+            \Log::info('Excel processing - Detected columns:', [
+                'headers' => $header,
+                'headerMap' => $headerMap,
+                'columnIndices' => $columnIndices
+            ]);
+
             // Check if we found at least member_id and member_name
             if ($columnIndices['member_id'] === null || $columnIndices['member_name'] === null) {
+                \Log::error('Required columns not found:', [
+                    'member_id_found' => $columnIndices['member_id'] !== null,
+                    'member_name_found' => $columnIndices['member_name'] !== null,
+                    'available_headers' => array_keys($headerMap)
+                ]);
                 return [
                     'success' => false,
-                    'message' => 'Could not find Member ID or Member Name columns. Please ensure your file has columns with names like: ID, Member ID, Name, Member Name, etc.'
+                    'message' => 'Could not find Member ID or Member Name columns. Please ensure your file has columns with names like: ID, Member ID, Name, Member Name, etc. Found headers: ' . implode(', ', $header)
                 ];
             }
 
@@ -323,6 +335,11 @@ class FiaPaymentRecordController extends Controller
                     } else {
                         $recordData[$field] = 0; // Default for numeric fields
                     }
+                }
+
+                // Log first few rows for debugging
+                if ($row <= 3) {
+                    \Log::info("Processing row $row:", $recordData);
                 }
 
                 $result = $this->savePaymentRecord([
@@ -389,8 +406,15 @@ class FiaPaymentRecordController extends Controller
     private function savePaymentRecord($data)
     {
         try {
+            // Log the incoming data for debugging
+            \Log::info('Attempting to save payment record:', $data);
+            
             // Validate required fields
             if (empty($data['member_id']) || empty($data['member_name'])) {
+                \Log::warning('Skipping record - missing required fields:', [
+                    'member_id' => $data['member_id'] ?? 'empty',
+                    'member_name' => $data['member_name'] ?? 'empty'
+                ]);
                 return false;
             }
 
@@ -400,8 +424,9 @@ class FiaPaymentRecordController extends Controller
                 ->first();
 
             if ($existing) {
+                \Log::info('Updating existing record for member: ' . $data['member_id']);
                 // Update existing record - map fields to payment_confirmations table structure
-                DB::table('payment_confirmations')
+                $updated = DB::table('payment_confirmations')
                     ->where('member_id', $data['member_id'])
                     ->update([
                         'member_name' => $data['member_name'],
@@ -411,9 +436,12 @@ class FiaPaymentRecordController extends Controller
                         'loan_repayment' => $data['loan'],
                         'updated_at' => now(),
                     ]);
+                
+                \Log::info('Update result: ' . ($updated ? 'success' : 'failed'));
             } else {
+                \Log::info('Inserting new record for member: ' . $data['member_id']);
                 // Insert new record - map fields to payment_confirmations table structure
-                DB::table('payment_confirmations')->insert([
+                $inserted = DB::table('payment_confirmations')->insert([
                     'member_id' => $data['member_id'],
                     'member_name' => $data['member_name'],
                     'fia_investment' => $data['gawio_la_fia'],
@@ -423,11 +451,17 @@ class FiaPaymentRecordController extends Controller
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
+                
+                \Log::info('Insert result: ' . ($inserted ? 'success' : 'failed'));
             }
 
             return true;
         } catch (\Exception $e) {
             \Log::error('Error saving payment record: ' . $e->getMessage());
+            \Log::error('Exception details:', [
+                'data' => $data,
+                'trace' => $e->getTraceAsString()
+            ]);
             return false;
         }
     }
