@@ -65,12 +65,12 @@
                             <td class="px-6 py-4 text-sm text-gray-900">{{ $records->firstItem() + $loop->index }}</td>
                             <td class="px-6 py-4 text-sm text-gray-900">{{ $record->member_id }}</td>
                             <td class="px-6 py-4 text-sm text-gray-900">{{ $record->member_name }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900">{{ number_format($record->gawio_la_fia, 0) }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900">{{ number_format($record->fia_iliyokomaa, 0) }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900">{{ number_format($record->jumla, 0) }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900">{{ number_format($record->malipo_ya_vipande_yaliyokuwa_yamepelea, 0) }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900">{{ number_format($record->loan, 0) }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900">{{ number_format($record->kiasi_baki, 0) }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900">{{ number_format($record->fia_investment, 0) }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900">{{ number_format($record->capital_contribution, 0) }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900">{{ number_format($record->amount_to_pay, 0) }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900">{{ number_format($record->re_deposit, 0) }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900">{{ number_format($record->loan_repayment, 0) }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900">{{ number_format($record->loan_repayment, 0) }}</td>
                             <td class="px-6 py-4 text-sm text-gray-900">
                                 <button onclick="deleteRecord({{ $record->id }})" class="text-red-600 hover:text-red-900 text-sm">Delete</button>
                             </td>
@@ -159,12 +159,12 @@ function renderRecordsTable(records) {
                 <td class="px-6 py-4 text-sm text-gray-900">${serialNumber}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">${record.member_id}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">${record.member_name || 'N/A'}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${number_format(record.gawio_la_fia, 0)}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${number_format(record.fia_iliyokomaa, 0)}</td>
-                <td class="px-6 py-4 text-sm font-medium text-gray-900">${number_format(record.jumla, 0)}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${number_format(record.malipo_ya_vipande_yaliyokuwa_yamepelea, 0)}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${number_format(record.loan, 0)}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${number_format(record.kiasi_baki, 0)}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">${number_format(record.fia_investment, 0)}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">${number_format(record.capital_contribution, 0)}</td>
+                <td class="px-6 py-4 text-sm font-medium text-gray-900">${number_format(record.amount_to_pay, 0)}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">${number_format(record.re_deposit, 0)}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">${number_format(record.loan_repayment, 0)}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">${number_format(record.loan_repayment, 0)}</td>
                 <td class="px-6 py-4 text-sm">
                     <button onclick="deleteRecord(${record.id})" 
                             class="text-red-600 hover:text-red-900">

@@ -114,7 +114,7 @@
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="font-medium text-gray-900">{{ number_format($record->jumla, 0) }}</p>
+                            <p class="font-medium text-gray-900">{{ number_format($record->amount_to_pay, 0) }}</p>
                             <p class="text-sm text-gray-500">{{ $record->created_at->diffForHumans() }}</p>
                         </div>
                     </div>
@@ -177,10 +177,10 @@ function loadRecentActivity() {
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="font-medium text-gray-900">${number_format(record.jumla, 0)}</p>
+                            <p class="font-medium text-gray-900">${number_format(record.amount_to_pay, 0)}</p>
                             <div class="text-xs text-gray-500">
-                                <span>Gawio: ${number_format(record.gawio_la_fia, 0)}</span> | 
-                                <span>Komaa: ${number_format(record.fia_iliyokomaa, 0)}</span>
+                                <span>Gawio: ${number_format(record.fia_investment, 0)}</span> | 
+                                <span>Komaa: ${number_format(record.capital_contribution, 0)}</span>
                             </div>
                         </div>
                     </div>
