@@ -183,7 +183,8 @@ class FiaPaymentRecordController extends Controller
                     'headers' => $columnAnalysis['headers'],
                     'sample_data' => $columnAnalysis['sample_data'],
                     'auto_mapping' => $autoMapping['mapping'],
-                    'filename' => $filename
+                    'filename' => $filename,
+                    'total_rows' => $columnAnalysis['total_rows'] ?? 0
                 ]);
             }
 

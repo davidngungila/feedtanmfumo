@@ -407,6 +407,12 @@ function generateColumnMapping(data) {
         <div class="bg-white rounded-lg border border-gray-200">
             <div class="p-4">
                 <h5 class="font-medium text-gray-900 mb-4">Map your Excel columns to database fields:</h5>
+                <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p class="text-sm text-blue-800">
+                        <strong>Important:</strong> Make sure to map different columns for Member ID and Member Name.
+                        Based on your template, Member ID should be "ID" column and Member Name should be "NAME" column.
+                    </p>
+                </div>
                 <div class="space-y-3">
     `;
     
@@ -424,13 +430,13 @@ function generateColumnMapping(data) {
         
         Object.entries(headers).forEach(([index, header]) => {
             const selected = autoMapping[field] == index ? 'selected' : '';
-            mappingHtml += `<option value="${index}" ${selected}>${header}</option>`;
+            mappingHtml += `<option value="${index}" ${selected}>${header} (Column ${index})</option>`;
         });
         
         mappingHtml += `
                     </select>
                 </div>
-                <div class="w-32">
+                <div class="w-48">
                     <div class="text-xs text-gray-500">
                         ${sampleData[0] && autoMapping[field] !== null && sampleData[0][autoMapping[field]] ? 'Sample: ' + sampleData[0][autoMapping[field]] : ''}
                     </div>
@@ -480,7 +486,7 @@ function generateColumnMapping(data) {
                     <button onclick="resetForm()" class="px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition">
                         Cancel
                     </button>
-                    <button onclick="processWithMapping()" class="px-4 py-2 bg-[#015425] text-white rounded-md hover:bg-[#013019] transition">
+                    <button onclick="validateAndProcessMapping()" class="px-4 py-2 bg-[#015425] text-white rounded-md hover:bg-[#013019] transition">
                         Process Upload
                     </button>
                 </div>
@@ -494,7 +500,7 @@ function generateColumnMapping(data) {
     window.uploadData = data;
 }
 
-function processWithMapping() {
+function validateAndProcessMapping() {
     const mapping = {};
     const selects = document.querySelectorAll('.column-mapping-select');
     
@@ -507,6 +513,12 @@ function processWithMapping() {
     // Validate required fields
     if (!mapping.member_id || !mapping.member_name) {
         showNotification('Please map both Member ID and Member Name fields', 'error');
+        return;
+    }
+    
+    // Check if Member ID and Member Name are mapped to the same column
+    if (mapping.member_id === mapping.member_name) {
+        showNotification('Member ID and Member Name cannot be mapped to the same column. Please select different columns.', 'error');
         return;
     }
     
