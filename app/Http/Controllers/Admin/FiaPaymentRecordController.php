@@ -109,12 +109,13 @@ class FiaPaymentRecordController extends Controller
             $file = $request->file('excel_file');
             $filename = time() . '_' . $file->getClientOriginalName();
             
-            // Save file
-            $file->move(storage_path('app/public/payment_confirmations'), $filename);
-            
-            \Log::info('File saved, analyzing columns', ['filename' => $filename]);
+            \Log::info('File received, analyzing BEFORE moving', [
+                'original_name' => $file->getClientOriginalName(),
+                'temp_path' => $file->getRealPath(),
+                'file_exists' => file_exists($file->getRealPath())
+            ]);
 
-            // Analyze file columns
+            // Analyze file columns BEFORE moving it
             $columnAnalysis = $this->analyzeFileColumns($file);
             
             if (!$columnAnalysis['success']) {
@@ -123,6 +124,11 @@ class FiaPaymentRecordController extends Controller
                     'message' => $columnAnalysis['message']
                 ], 500);
             }
+            
+            // Now save the file after analysis
+            $file->move(storage_path('app/public/payment_confirmations'), $filename);
+            
+            \Log::info('File saved after analysis', ['filename' => $filename]);
 
             // Check if we can auto-map columns
             $autoMapping = $this->tryAutoMapping($columnAnalysis['headers']);
@@ -209,13 +215,20 @@ class FiaPaymentRecordController extends Controller
     private function analyzeFileColumns($file)
     {
         try {
-            $filePath = $file->getRealPath();
+            // Use the uploaded file directly, not a temporary path
             $extension = strtolower($file->getClientOriginalExtension());
+            
+            \Log::info('Analyzing file columns', [
+                'original_name' => $file->getClientOriginalName(),
+                'extension' => $extension,
+                'temp_path' => $file->getRealPath(),
+                'file_exists' => file_exists($file->getRealPath())
+            ]);
 
             if ($extension === 'csv') {
-                return $this->analyzeCsvColumns($filePath);
+                return $this->analyzeCsvColumns($file->getRealPath());
             } elseif (in_array($extension, ['xlsx', 'xls'])) {
-                return $this->analyzeExcelColumns($filePath);
+                return $this->analyzeExcelColumns($file->getRealPath());
             } else {
                 return [
                     'success' => false,
@@ -223,6 +236,11 @@ class FiaPaymentRecordController extends Controller
                 ];
             }
         } catch (\Exception $e) {
+            \Log::error('Error analyzing file', [
+                'message' => $e->getMessage(),
+                'file_path' => $file->getRealPath() ?? 'unknown',
+                'file_exists' => file_exists($file->getRealPath() ?? '')
+            ]);
             return [
                 'success' => false,
                 'message' => 'Error analyzing file: ' . $e->getMessage()
