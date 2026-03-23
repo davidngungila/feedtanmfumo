@@ -1167,3 +1167,77 @@ public function exportRecords(Request $request)
     }
 }
 }
+        ]);
+    }
+
+    /**
+     * Bulk delete payment records
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'ids' => 'required|array',
+            'ids.*' => 'integer'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid input data',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $deleted = DB::table('fia_payment_records')
+                ->whereIn('id', $request->ids)
+                ->delete();
+
+            if ($deleted > 0) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Successfully deleted {$deleted} payment record(s)"
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'No records found to delete'
+            ], 404);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting records: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete a payment record
+     */
+    public function destroy($id)
+    {
+        try {
+            $deleted = DB::table('payment_confirmations')->where('id', $id)->delete();
+            
+            if ($deleted) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Payment record deleted successfully'
+                ]);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment record not found'
+            ], 404);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+}
