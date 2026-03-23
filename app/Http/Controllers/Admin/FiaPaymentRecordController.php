@@ -348,6 +348,21 @@ class FiaPaymentRecordController extends Controller
                 ];
             }
 
+            // Log the first few rows to see what data looks like
+            \Log::info('Sample data from first few rows:');
+            for ($row = 2; $row <= min(4, $highestRow); $row++) {
+                $rowData = [];
+                foreach ($columnIndices as $field => $index) {
+                    if ($index !== null) {
+                        $cellValue = $worksheet->getCell([$index + 1, $row])->getValue();
+                        $rowData[$field] = trim($cellValue);
+                    } else {
+                        $rowData[$field] = 'NOT_FOUND';
+                    }
+                }
+                \Log::info("Row $row data:", $rowData);
+            }
+
             // Process data rows
             for ($row = 2; $row <= $highestRow; $row++) {
                 $recordData = [];
