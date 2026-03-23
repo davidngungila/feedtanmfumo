@@ -52,41 +52,6 @@ class FiaPaymentController extends Controller
     }
 
     /**
-     * Get confirmations data for AJAX
-     */
-    public function getConfirmations(Request $request)
-    {
-        $query = DB::table('payment_confirmations')
-            ->where('fia_investment', '>', 0) // Only FIA payments
-            ->select('*');
-        
-        // Search by member ID or name
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('member_id', 'like', "%{$search}%")
-                  ->orWhere('member_name', 'like', "%{$search}%");
-            });
-        }
-        
-        // Date range filter
-        if ($request->has('date_from') && $request->date_from != '') {
-            $query->whereDate('created_at', '>=', $request->date_from);
-        }
-        if ($request->has('date_to') && $request->date_to != '') {
-            $query->whereDate('created_at', '<=', $request->date_to);
-        }
-
-        $confirmations = $query->orderBy('created_at', 'desc')
-            ->paginate($request->input('per_page', 20));
-
-        return response()->json([
-            'success' => true,
-            'data' => $confirmations
-        ]);
-    }
-
-    /**
      * Verify a payment confirmation
      */
     public function verifyConfirmation(Request $request)
