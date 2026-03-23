@@ -128,7 +128,10 @@ class FiaPaymentRecordController extends Controller
             
             if ($autoMapping['all_mapped']) {
                 // All columns mapped automatically, process directly
-                \Log::info('All columns auto-mapped, processing directly');
+                \Log::info('All columns auto-mapped, processing directly', [
+                    'mapping' => $autoMapping['mapping'],
+                    'mapping_types' => array_map('gettype', $autoMapping['mapping'])
+                ]);
                 $result = $this->processFileWithMapping($file, $autoMapping['mapping']);
                 
                 if ($result['success']) {
@@ -446,6 +449,7 @@ class FiaPaymentRecordController extends Controller
                 
                 foreach ($columnMapping as $field => $colIndex) {
                     if ($colIndex !== null && $colIndex !== '') {
+                        \Log::info("Processing field: $field, colIndex: $colIndex, type: " . gettype($colIndex));
                         // Convert colIndex to integer to avoid string + int error
                         $colIndex = (int)$colIndex;
                         $cellValue = $worksheet->getCell([$colIndex + 1, $row])->getValue();
