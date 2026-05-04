@@ -237,14 +237,11 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                     </svg>
                                 </a>
-                                <form action="{{ route('admin.users.reset-password', $user) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to reset password for this user and send to their email?')">
-                                    @csrf
-                                    <button type="submit" class="text-orange-600 hover:text-orange-800" title="Reset Password">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                                        </svg>
-                                    </button>
-                                </form>
+                                <button type="button" class="text-orange-600 hover:text-orange-800" title="Reset Password" onclick="confirmPasswordReset('{{ route('admin.users.reset-password', $user) }}', '{{ $user->name }}', '{{ $user->email }}')">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                    </svg>
+                                </button>
                                 @if(!$user->isAdmin() && !$user->hasRole('admin'))
                                 <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this user?')">
                                     @csrf
@@ -279,3 +276,65 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function confirmPasswordReset(url, userName, userEmail) {
+    Swal.fire({
+        title: 'Reset Password',
+        html: `
+            <p>Are you sure you want to reset the password for this user?</p>
+            <div style="text-align: left; margin: 20px 0;">
+                <strong>Name:</strong> ${userName}<br>
+                <strong>Email:</strong> ${userEmail}
+            </div>
+            <p style="color: #666; font-size: 14px;">A new password will be generated and sent to their email address.</p>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d97706',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, Reset Password',
+        cancelButtonText: 'Cancel',
+        showLoaderOnConfirm: true,
+        preConfirm: () => {
+            return fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    throw new Error(data.message || 'Password reset failed')
+                }
+                return data
+            })
+            .catch(error => {
+                Swal.showValidationMessage(error.message)
+            })
+        },
+        allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Success!',
+                html: `
+                    <p>Password has been reset successfully!</p>
+                    <p style="color: #666; font-size: 14px;">The new password has been sent to <strong>${userEmail}</strong></p>
+                `,
+                icon: 'success',
+                confirmButtonColor: '#015425',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                // Reload the page to show any flash messages
+                window.location.reload()
+            })
+        }
+    })
+}
+</script>
+@endpush

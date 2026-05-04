@@ -7,6 +7,7 @@ use App\Models\Role;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Symfony\Component\Uid\Ulid;
 
 class AdminUserSeeder extends Seeder
 {
@@ -19,6 +20,7 @@ class AdminUserSeeder extends Seeder
         $admin = User::firstOrCreate(
             ['email' => 'admin@feedtan.com'],
             [
+                'ulid' => (string) new Ulid(),
                 'name' => 'Admin User',
                 'password' => Hash::make('password'),
                 'role' => 'admin',

@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use App\Traits\HasUlidRouteKey;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class SmsProvider extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUlidRouteKey;
 
     protected $fillable = [
+        'ulid',
         'name',
         'username',
         'password',

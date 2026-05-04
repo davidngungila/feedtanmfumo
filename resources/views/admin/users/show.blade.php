@@ -20,12 +20,9 @@
                 </div>
             </div>
             <div class="mt-4 md:mt-0 md:ml-auto flex flex-wrap gap-3 justify-end">
-                <form action="{{ route('admin.users.reset-password', $user) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to reset password for this user and send to their email?')">
-                    @csrf
-                    <button type="submit" class="inline-flex items-center px-6 py-3 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition font-medium shadow-md">
-                        Reset Password
-                    </button>
-                </form>
+                <button type="button" class="inline-flex items-center px-6 py-3 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition font-medium shadow-md" onclick="confirmPasswordReset('{{ route('admin.users.reset-password', $user) }}', '{{ $user->name }}', '{{ $user->email }}')">
+                    Reset Password
+                </button>
                 <a href="{{ route('admin.users.edit', $user) }}" class="inline-flex items-center px-6 py-3 bg-white text-[#015425] rounded-md hover:bg-gray-100 transition font-medium shadow-md">
                     Edit User
                 </a>
@@ -835,3 +832,65 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function confirmPasswordReset(url, userName, userEmail) {
+    Swal.fire({
+        title: 'Reset Password',
+        html: `
+            <p>Are you sure you want to reset the password for this user?</p>
+            <div style="text-align: left; margin: 20px 0;">
+                <strong>Name:</strong> ${userName}<br>
+                <strong>Email:</strong> ${userEmail}
+            </div>
+            <p style="color: #666; font-size: 14px;">A new password will be generated and sent to their email address.</p>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d97706',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, Reset Password',
+        cancelButtonText: 'Cancel',
+        showLoaderOnConfirm: true,
+        preConfirm: () => {
+            return fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    throw new Error(data.message || 'Password reset failed')
+                }
+                return data
+            })
+            .catch(error => {
+                Swal.showValidationMessage(error.message)
+            })
+        },
+        allowOutsideClick: () => !Swal.isLoading()
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Success!',
+                html: `
+                    <p>Password has been reset successfully!</p>
+                    <p style="color: #666; font-size: 14px;">The new password has been sent to <strong>${userEmail}</strong></p>
+                `,
+                icon: 'success',
+                confirmButtonColor: '#015425',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                // Reload the page to show any flash messages
+                window.location.reload()
+            })
+        }
+    })
+}
+</script>
+@endpush

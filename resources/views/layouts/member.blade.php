@@ -110,46 +110,8 @@
                     @endif
                 </div>
 
-                <div class="dropdown-container" data-menu="investments">
-                    <button {{ !$isApproved ? 'disabled' : '' }} class="dropdown-toggle flex items-center justify-between w-full px-4 py-3 rounded-md hover:bg-[#013019] transition {{ $isActiveInvestments ? 'bg-[#013019]' : '' }} {{ !$isApproved ? 'opacity-50 cursor-not-allowed' : '' }}" {{ !$isApproved ? 'title="Membership must be approved to access Investments"' : '' }}>
-                        <div class="flex items-center">
-                            <span class="text-lg mr-3">📈</span>
-                            <span>Investments</span>
-                        </div>
-                        <svg class="w-4 h-4 dropdown-arrow transition-transform {{ $isActiveInvestments ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </button>
-                    @if($isApproved)
-                    <div class="dropdown-menu pl-4 mt-1 space-y-1 {{ $isActiveInvestments ? '' : 'hidden' }}">
-                        <a href="{{ route('member.investments.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">All Investments</a>
-                        <a href="{{ route('member.investments.create') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">Start Investment</a>
-                    </div>
-                    @endif
-                </div>
 
-                <a href="{{ $isApproved ? route('member.welfare.index') : '#' }}" class="flex items-center w-full px-4 py-3 rounded-md hover:bg-[#013019] transition {{ $isActiveWelfare ? 'bg-[#013019]' : '' }} {{ !$isApproved ? 'opacity-50 cursor-not-allowed' : '' }}" {{ !$isApproved ? 'title="Membership must be approved to access Welfare"' : '' }}>
-                    <span class="text-lg mr-3">🫶</span>
-                    <span>Welfare</span>
-                </a>
 
-                <div class="dropdown-container" data-menu="issues">
-                    <button {{ !$isApproved ? 'disabled' : '' }} class="dropdown-toggle flex items-center justify-between w-full px-4 py-3 rounded-md hover:bg-[#013019] transition {{ $isActiveIssues ? 'bg-[#013019]' : '' }} {{ !$isApproved ? 'opacity-50 cursor-not-allowed' : '' }}" {{ !$isApproved ? 'title="Membership must be approved to access Issues"' : '' }}>
-                        <div class="flex items-center">
-                            <span class="text-lg mr-3">⚙️</span>
-                            <span>Issues</span>
-                        </div>
-                        <svg class="w-4 h-4 dropdown-arrow transition-transform {{ $isActiveIssues ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                        </svg>
-                    </button>
-                    @if($isApproved)
-                    <div class="dropdown-menu pl-4 mt-1 space-y-1 {{ $isActiveIssues ? '' : 'hidden' }}">
-                        <a href="{{ route('member.issues.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">All Issues</a>
-                        <a href="{{ route('member.issues.create') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">Report Issue</a>
-                    </div>
-                    @endif
-                </div>
 
                 <a href="{{ $isApproved ? route('member.payment-confirmations.index') : '#' }}" class="flex items-center w-full px-4 py-3 rounded-md hover:bg-[#013019] transition {{ $isActivePaymentConfirmations ? 'bg-[#013019]' : '' }} {{ !$isApproved ? 'opacity-50 cursor-not-allowed' : '' }}" {{ !$isApproved ? 'title="Membership must be approved to access Payment Verification"' : '' }}>
                     <span class="text-lg mr-3">✅</span>

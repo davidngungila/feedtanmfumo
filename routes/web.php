@@ -371,6 +371,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('reports/financial/pdf', [ReportController::class, 'exportFinancialPdf'])->name('reports.financial.pdf');
     Route::get('reports/loans', [ReportController::class, 'loans'])->name('reports.loans');
     Route::get('reports/loans/pdf', [ReportController::class, 'exportLoansPdf'])->name('reports.loans.pdf');
+    
+    // Specific Loan Reports
+    Route::get('reports/loans/portfolio', [ReportController::class, 'loanPortfolio'])->name('reports.loans.portfolio');
+    Route::get('reports/loans/portfolio/pdf', [ReportController::class, 'exportLoanPortfolioPdf'])->name('reports.loans.portfolio.pdf');
+    Route::get('reports/loans/performance', [ReportController::class, 'loanPerformance'])->name('reports.loans.performance');
+    Route::get('reports/loans/performance/pdf', [ReportController::class, 'exportLoanPerformancePdf'])->name('reports.loans.performance.pdf');
+    Route::get('reports/loans/repayment', [ReportController::class, 'loanRepayment'])->name('reports.loans.repayment');
+    Route::get('reports/loans/repayment/pdf', [ReportController::class, 'exportLoanRepaymentPdf'])->name('reports.loans.repayment.pdf');
+    Route::get('reports/loans/defaults', [ReportController::class, 'loanDefaults'])->name('reports.loans.defaults');
+    Route::get('reports/loans/defaults/pdf', [ReportController::class, 'exportLoanDefaultsPdf'])->name('reports.loans.defaults.pdf');
     Route::get('reports/savings', [ReportController::class, 'savings'])->name('reports.savings');
     Route::get('reports/savings/pdf', [ReportController::class, 'exportSavingsPdf'])->name('reports.savings.pdf');
     Route::get('reports/investments', [ReportController::class, 'investments'])->name('reports.investments');
@@ -384,8 +394,18 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('settings/security', [SettingsController::class, 'updateSecurity'])->name('settings.security.update');
     Route::get('settings/sms-templates', [SettingsController::class, 'smsTemplates'])->name('settings.sms-templates');
     Route::put('settings/sms-templates', [SettingsController::class, 'updateSmsTemplates'])->name('settings.sms-templates.update');
+    Route::get('settings/sms-templates/create', [SettingsController::class, 'createSmsTemplate'])->name('settings.sms-templates.create');
+    Route::post('settings/sms-templates', [SettingsController::class, 'storeSmsTemplate'])->name('settings.sms-templates.store');
+    Route::get('settings/sms-templates/view/{templateType}', [SettingsController::class, 'viewSmsTemplate'])->name('settings.sms-templates.view');
+    Route::get('settings/sms-templates/edit/{templateType}', [SettingsController::class, 'editSmsTemplate'])->name('settings.sms-templates.edit');
+    Route::get('settings/sms-templates/test/{templateType}', [SettingsController::class, 'testSmsTemplate'])->name('settings.sms-templates.test');
+    Route::post('settings/sms-templates/send/{templateType}', [SettingsController::class, 'sendSmsTemplate'])->name('settings.sms-templates.send');
     Route::get('settings/email-templates', [SettingsController::class, 'emailSettings'])->name('settings.email-templates');
     Route::put('settings/email-templates', [SettingsController::class, 'updateEmailSettings'])->name('settings.email-templates.update');
+    Route::get('settings/email-templates/view/{templateType}', [SettingsController::class, 'viewEmailTemplate'])->name('settings.email-templates.view');
+    Route::get('settings/email-templates/edit/{templateType}', [SettingsController::class, 'editEmailTemplate'])->name('settings.email-templates.edit');
+    Route::get('settings/email-templates/test/{templateType}', [SettingsController::class, 'testEmailTemplate'])->name('settings.email-templates.test');
+    Route::post('settings/email-templates/send/{templateType}', [SettingsController::class, 'sendEmailTemplate'])->name('settings.email-templates.send');
     Route::get('settings/notification-preferences', [SettingsController::class, 'notificationPreferences'])->name('settings.notification-preferences');
     Route::put('settings/notification-preferences', [SettingsController::class, 'updateNotificationPreferences'])->name('settings.notification-preferences.update');
 
@@ -432,13 +452,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('sms/logs/sync', [\App\Http\Controllers\Admin\SmsLogsController::class, 'syncFromApi'])->name('sms.logs.sync');
     Route::get('sms/logs/{smsLog}', [\App\Http\Controllers\Admin\SmsLogsController::class, 'show'])->name('sms.logs.show');
     Route::get('sms/logs/export/pdf', [\App\Http\Controllers\Admin\SmsLogsController::class, 'exportPdf'])->name('sms.logs.export.pdf');
-
-    // Transaction Receipts
-    Route::get('transactions/{transaction}/receipt', [\App\Http\Controllers\Admin\TransactionReceiptController::class, 'show'])->name('transactions.receipt');
+    Route::get('sms/logs/export/excel', [\App\Http\Controllers\Admin\SmsLogsController::class, 'exportExcel'])->name('sms.logs.export.excel');
+    Route::delete('sms/logs/bulk-delete', [\App\Http\Controllers\Admin\SmsLogsController::class, 'bulkDelete'])->name('sms.logs.bulk-delete');
 
     // Welfare PDF Export
     Route::get('welfare/{welfare}/pdf', [\App\Http\Controllers\Admin\SocialWelfareController::class, 'exportPdf'])->name('welfare.pdf');
-    Route::get('sms/logs/export/excel', [\App\Http\Controllers\Admin\SmsLogsController::class, 'exportExcel'])->name('sms.logs.export.excel');
 
     // Email Provider Management
     Route::get('email-provider/create', [\App\Http\Controllers\Admin\EmailProviderController::class, 'create'])->name('email-provider.create');

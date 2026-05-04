@@ -315,4 +315,288 @@ class ReportController extends Controller
             'documentSubtitle' => 'Investment Portfolio and Performance',
         ], 'investments-report-'.date('Y-m-d-His').'.pdf');
     }
+
+    /**
+     * Loan Portfolio Report
+     */
+    public function loanPortfolio()
+    {
+        $loans = Loan::with('user')->latest()->paginate(50);
+        
+        $portfolioStats = [
+            'total_loans' => Loan::count(),
+            'total_principal' => Loan::sum('principal_amount'),
+            'total_remaining' => Loan::sum('remaining_amount'),
+            'active_loans' => Loan::where('status', 'active')->count(),
+            'completed_loans' => Loan::where('status', 'completed')->count(),
+            'overdue_loans' => Loan::where('status', 'active')->where('maturity_date', '<', now())->count(),
+            'portfolio_value' => Loan::sum('principal_amount'),
+            'risk_exposure' => Loan::where('status', 'active')->sum('remaining_amount'),
+        ];
+
+        $loansByRisk = Loan::select('status', DB::raw('count(*) as count'), DB::raw('sum(remaining_amount) as total'))
+            ->where('status', 'active')
+            ->groupBy('status')
+            ->get();
+
+        return view('admin.reports.loans.portfolio', compact('loans', 'portfolioStats', 'loansByRisk'));
+    }
+
+    /**
+     * Loan Performance Report
+     */
+    public function loanPerformance()
+    {
+        $loans = Loan::with('user')->latest()->paginate(50);
+        
+        $performanceStats = [
+            'total_loans' => Loan::count(),
+            'paid_loans' => Loan::where('status', 'completed')->count(),
+            'active_loans' => Loan::where('status', 'active')->count(),
+            'default_rate' => Loan::count() > 0 ? (Loan::where('status', 'active')->where('maturity_date', '<', now())->count() / Loan::count()) * 100 : 0,
+            'recovery_rate' => Loan::sum('principal_amount') > 0 ? (Loan::sum('paid_amount') / Loan::sum('principal_amount')) * 100 : 0,
+            'avg_loan_size' => Loan::avg('principal_amount'),
+            'total_revenue' => Transaction::where('transaction_type', 'loan_payment')->sum('amount'),
+        ];
+
+        $monthlyPerformance = Loan::select(
+                DB::raw('MONTH(created_at) as month'), 
+                DB::raw('YEAR(created_at) as year'), 
+                DB::raw('count(*) as total_loans'),
+                DB::raw('sum(principal_amount) as total_amount'),
+                DB::raw('sum(paid_amount) as paid_amount')
+            )
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+        return view('admin.reports.loans.performance', compact('loans', 'performanceStats', 'monthlyPerformance'));
+    }
+
+    /**
+     * Loan Repayment Report
+     */
+    public function loanRepayment()
+    {
+        $repayments = Transaction::where('transaction_type', 'loan_payment')
+            ->with(['loan.user'])
+            ->latest()
+            ->paginate(50);
+
+        $repaymentStats = [
+            'total_repayments' => Transaction::where('transaction_type', 'loan_payment')->count(),
+            'total_amount_paid' => Transaction::where('transaction_type', 'loan_payment')->sum('amount'),
+            'avg_repayment_amount' => Transaction::where('transaction_type', 'loan_payment')->avg('amount'),
+            'loans_with_repayments' => Transaction::where('transaction_type', 'loan_payment')->distinct('loan_id')->count('loan_id'),
+            'on_time_repayments' => 0, // Would need due date logic
+            'late_repayments' => 0, // Would need due date logic
+        ];
+
+        $monthlyRepayments = Transaction::where('transaction_type', 'loan_payment')
+            ->select(
+                DB::raw('MONTH(created_at) as month'), 
+                DB::raw('YEAR(created_at) as year'), 
+                DB::raw('count(*) as count'),
+                DB::raw('sum(amount) as total')
+            )
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+        return view('admin.reports.loans.repayment', compact('repayments', 'repaymentStats', 'monthlyRepayments'));
+    }
+
+    /**
+     * Loan Defaults Report
+     */
+    public function loanDefaults()
+    {
+        $overdueLoans = Loan::with('user')
+            ->where('status', 'active')
+            ->where('maturity_date', '<', now())
+            ->latest()
+            ->paginate(50);
+
+        $defaultStats = [
+            'total_overdue_loans' => Loan::where('status', 'active')->where('maturity_date', '<', now())->count(),
+            'total_overdue_amount' => Loan::where('status', 'active')->where('maturity_date', '<', now())->sum('remaining_amount'),
+            'avg_overdue_days' => 0, // Would need calculation logic
+            'worst_performers' => 0, // Would need additional logic
+            'recovery_potential' => Loan::where('status', 'active')->where('maturity_date', '<', now())->sum('remaining_amount'),
+        ];
+
+        $overdueByMonth = Loan::where('status', 'active')
+            ->where('maturity_date', '<', now())
+            ->select(
+                DB::raw('MONTH(maturity_date) as month'), 
+                DB::raw('YEAR(maturity_date) as year'), 
+                DB::raw('count(*) as count'),
+                DB::raw('sum(remaining_amount) as total')
+            )
+            ->whereYear('maturity_date', date('Y'))
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+        return view('admin.reports.loans.defaults', compact('overdueLoans', 'defaultStats', 'overdueByMonth'));
+    }
+
+    /**
+     * Export Loan Portfolio Report to PDF
+     */
+    public function exportLoanPortfolioPdf()
+    {
+        $loans = Loan::with('user')->latest()->get();
+        
+        $portfolioStats = [
+            'total_loans' => Loan::count(),
+            'total_principal' => Loan::sum('principal_amount'),
+            'total_remaining' => Loan::sum('remaining_amount'),
+            'active_loans' => Loan::where('status', 'active')->count(),
+            'completed_loans' => Loan::where('status', 'completed')->count(),
+            'overdue_loans' => Loan::where('status', 'active')->where('maturity_date', '<', now())->count(),
+            'portfolio_value' => Loan::sum('principal_amount'),
+            'risk_exposure' => Loan::where('status', 'active')->sum('remaining_amount'),
+        ];
+
+        $loansByRisk = Loan::select('status', DB::raw('count(*) as count'), DB::raw('sum(remaining_amount) as total'))
+            ->where('status', 'active')
+            ->groupBy('status')
+            ->get();
+
+        return PdfHelper::downloadPdf('admin.reports.pdf.loan-portfolio', [
+            'loans' => $loans,
+            'portfolioStats' => $portfolioStats,
+            'loansByRisk' => $loansByRisk,
+            'documentTitle' => 'Loan Portfolio Report',
+            'documentSubtitle' => 'Comprehensive analysis of loan portfolio composition and risk exposure',
+        ], 'loan-portfolio-report-'.date('Y-m-d-His').'.pdf');
+    }
+
+    /**
+     * Export Loan Performance Report to PDF
+     */
+    public function exportLoanPerformancePdf()
+    {
+        $loans = Loan::with('user')->latest()->get();
+        
+        $performanceStats = [
+            'total_loans' => Loan::count(),
+            'paid_loans' => Loan::where('status', 'completed')->count(),
+            'active_loans' => Loan::where('status', 'active')->count(),
+            'default_rate' => Loan::count() > 0 ? (Loan::where('status', 'active')->where('maturity_date', '<', now())->count() / Loan::count()) * 100 : 0,
+            'recovery_rate' => Loan::sum('principal_amount') > 0 ? (Loan::sum('paid_amount') / Loan::sum('principal_amount')) * 100 : 0,
+            'avg_loan_size' => Loan::avg('principal_amount'),
+            'total_revenue' => Transaction::where('transaction_type', 'loan_payment')->sum('amount'),
+        ];
+
+        $monthlyPerformance = Loan::select(
+                DB::raw('MONTH(created_at) as month'), 
+                DB::raw('YEAR(created_at) as year'), 
+                DB::raw('count(*) as total_loans'),
+                DB::raw('sum(principal_amount) as total_amount'),
+                DB::raw('sum(paid_amount) as paid_amount')
+            )
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+        return PdfHelper::downloadPdf('admin.reports.pdf.loan-performance', [
+            'loans' => $loans,
+            'performanceStats' => $performanceStats,
+            'monthlyPerformance' => $monthlyPerformance,
+            'documentTitle' => 'Loan Performance Report',
+            'documentSubtitle' => 'Analysis of loan repayment patterns, default rates, and overall portfolio performance',
+        ], 'loan-performance-report-'.date('Y-m-d-His').'.pdf');
+    }
+
+    /**
+     * Export Loan Repayment Report to PDF
+     */
+    public function exportLoanRepaymentPdf()
+    {
+        $repayments = Transaction::where('transaction_type', 'loan_payment')
+            ->with(['loan.user'])
+            ->latest()
+            ->get();
+
+        $repaymentStats = [
+            'total_repayments' => Transaction::where('transaction_type', 'loan_payment')->count(),
+            'total_amount_paid' => Transaction::where('transaction_type', 'loan_payment')->sum('amount'),
+            'avg_repayment_amount' => Transaction::where('transaction_type', 'loan_payment')->avg('amount'),
+            'loans_with_repayments' => Transaction::where('transaction_type', 'loan_payment')->distinct('loan_id')->count('loan_id'),
+            'on_time_repayments' => 0, // Would need due date logic
+            'late_repayments' => 0, // Would need due date logic
+        ];
+
+        $monthlyRepayments = Transaction::where('transaction_type', 'loan_payment')
+            ->select(
+                DB::raw('MONTH(created_at) as month'), 
+                DB::raw('YEAR(created_at) as year'), 
+                DB::raw('count(*) as count'),
+                DB::raw('sum(amount) as total')
+            )
+            ->whereYear('created_at', date('Y'))
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+        return PdfHelper::downloadPdf('admin.reports.pdf.loan-repayment', [
+            'repayments' => $repayments,
+            'repaymentStats' => $repaymentStats,
+            'monthlyRepayments' => $monthlyRepayments,
+            'documentTitle' => 'Loan Repayment Report',
+            'documentSubtitle' => 'Detailed analysis of loan repayment patterns, schedules, and collection efficiency',
+        ], 'loan-repayment-report-'.date('Y-m-d-His').'.pdf');
+    }
+
+    /**
+     * Export Loan Defaults Report to PDF
+     */
+    public function exportLoanDefaultsPdf()
+    {
+        $overdueLoans = Loan::with('user')
+            ->where('status', 'active')
+            ->where('maturity_date', '<', now())
+            ->latest()
+            ->get();
+
+        $defaultStats = [
+            'total_overdue_loans' => Loan::where('status', 'active')->where('maturity_date', '<', now())->count(),
+            'total_overdue_amount' => Loan::where('status', 'active')->where('maturity_date', '<', now())->sum('remaining_amount'),
+            'avg_overdue_days' => 0, // Would need calculation logic
+            'worst_performers' => 0, // Would need additional logic
+            'recovery_potential' => Loan::where('status', 'active')->where('maturity_date', '<', now())->sum('remaining_amount'),
+        ];
+
+        $overdueByMonth = Loan::where('status', 'active')
+            ->where('maturity_date', '<', now())
+            ->select(
+                DB::raw('MONTH(maturity_date) as month'), 
+                DB::raw('YEAR(maturity_date) as year'), 
+                DB::raw('count(*) as count'),
+                DB::raw('sum(remaining_amount) as total')
+            )
+            ->whereYear('maturity_date', date('Y'))
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+        return PdfHelper::downloadPdf('admin.reports.pdf.loan-defaults', [
+            'overdueLoans' => $overdueLoans,
+            'defaultStats' => $defaultStats,
+            'overdueByMonth' => $overdueByMonth,
+            'documentTitle' => 'Loan Defaults Report',
+            'documentSubtitle' => 'Analysis of overdue loans, default rates, and collection strategies',
+        ], 'loan-defaults-report-'.date('Y-m-d-His').'.pdf');
+    }
 }

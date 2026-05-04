@@ -83,7 +83,25 @@ class LoginController extends Controller
             return redirect()->route('login')->with('error', 'Please login first.');
         }
         
-        return view('auth.otp-verify');
+        // Bypass OTP verification and redirect directly to dashboard
+        $userId = session('otp_user_id');
+        $user = User::find($userId);
+        
+        if ($user) {
+            // Login the user automatically
+            Auth::login($user);
+            session()->forget('otp_user_id');
+            session()->regenerate();
+            
+            // Redirect based on user role
+            if ($user->hasAnyRole(['loan_officer', 'deposit_officer', 'investment_officer', 'chairperson', 'secretary', 'accountant'])) {
+                return redirect()->intended('/admin/role-dashboard')->with('success', 'Login successful!');
+            }
+            
+            return redirect()->intended('/admin/dashboard')->with('success', 'Login successful!');
+        }
+        
+        return redirect()->route('login')->with('error', 'User not found.');
     }
 
     /**

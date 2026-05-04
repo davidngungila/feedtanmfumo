@@ -9,7 +9,7 @@
         <div class="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
                 <h1 class="text-2xl sm:text-3xl font-bold mb-2">Product Configuration</h1>
-                <p class="text-white text-opacity-90 text-sm sm:text-base">Configure loan products, savings accounts, and investment plans</p>
+                <p class="text-white text-opacity-90 text-sm sm:text-base">Configure loan products and lending parameters</p>
             </div>
             <div class="mt-4 md:mt-0">
                 <a href="{{ route('admin.settings.index') }}" class="inline-flex items-center px-6 py-3 bg-white text-[#015425] rounded-md hover:bg-gray-100 transition font-medium shadow-md">
@@ -55,54 +55,6 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">Default Term (Months)</label>
                     <input type="number" name="loan_default_term_months" value="{{ isset($settings['loan_default_term_months']) ? $settings['loan_default_term_months']->value : '12' }}" min="1" max="120" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425]">
                     <p class="text-xs text-gray-500 mt-1">Default loan term in months</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Savings Products Configuration -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 class="text-xl font-bold text-[#015425] mb-6 flex items-center">
-                <svg class="w-6 h-6 mr-2 text-[#015425]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                </svg>
-                Savings Products Configuration
-            </h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Balance (TZS)</label>
-                    <input type="number" name="savings_minimum_balance" value="{{ isset($settings['savings_minimum_balance']) ? $settings['savings_minimum_balance']->value : '10000' }}" min="0" step="1000" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425]">
-                    <p class="text-xs text-gray-500 mt-1">Minimum balance required for savings accounts</p>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Default Interest Rate (%)</label>
-                    <input type="number" name="savings_default_interest_rate" value="{{ isset($settings['savings_default_interest_rate']) ? $settings['savings_default_interest_rate']->value : '5' }}" min="0" max="100" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425]">
-                    <p class="text-xs text-gray-500 mt-1">Default annual interest rate for savings accounts</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Investment Products Configuration -->
-        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 class="text-xl font-bold text-[#015425] mb-6 flex items-center">
-                <svg class="w-6 h-6 mr-2 text-[#015425]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                </svg>
-                Investment Products Configuration
-            </h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Minimum Investment Amount (TZS)</label>
-                    <input type="number" name="investment_min_amount" value="{{ isset($settings['investment_min_amount']) ? $settings['investment_min_amount']->value : '500000' }}" min="0" step="10000" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425]">
-                    <p class="text-xs text-gray-500 mt-1">Minimum amount required to start an investment</p>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Default Term (Months)</label>
-                    <input type="number" name="investment_default_term_months" value="{{ isset($settings['investment_default_term_months']) ? $settings['investment_default_term_months']->value : '12' }}" min="1" max="120" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#015425] focus:border-[#015425]">
-                    <p class="text-xs text-gray-500 mt-1">Default investment term in months</p>
                 </div>
             </div>
         </div>

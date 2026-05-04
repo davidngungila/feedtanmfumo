@@ -415,4 +415,25 @@ class SmsLogsController extends Controller
 
         return $response;
     }
+
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'selected_logs' => 'required|array',
+            'selected_logs.*' => 'integer|exists:sms_logs,id'
+        ]);
+
+        try {
+            $deletedCount = SmsLog::whereIn('id', $request->selected_logs)->delete();
+            
+            return back()->with('success', "Successfully deleted {$deletedCount} SMS log(s).");
+        } catch (\Exception $e) {
+            Log::error('Failed to bulk delete SMS logs', [
+                'error' => $e->getMessage(),
+                'selected_logs' => $request->selected_logs
+            ]);
+
+            return back()->with('error', 'Failed to delete SMS logs: ' . $e->getMessage());
+        }
+    }
 }

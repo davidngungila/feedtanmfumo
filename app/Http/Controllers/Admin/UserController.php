@@ -1004,12 +1004,34 @@ class UserController extends Controller
             $sent = $emailService->sendBulkPasswordNotification($user, $newPassword);
 
             if ($sent) {
+                // Check if request expects JSON (AJAX)
+                if (request()->expectsJson()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => "Password for {$user->name} has been reset and sent to their email."
+                    ]);
+                }
                 return back()->with('success', "Password for {$user->name} has been reset and sent to their email.");
             } else {
+                // Check if request expects JSON (AJAX)
+                if (request()->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Password reset but failed to send email to {$user->email}. New password: {$newPassword}"
+                    ]);
+                }
                 return back()->with('error', "Password reset but failed to send email to {$user->email}. New password: {$newPassword}");
             }
         } catch (\Exception $e) {
             Log::error("Failed to reset password for user {$user->id}: " . $e->getMessage());
+            
+            // Check if request expects JSON (AJAX)
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "An error occurred while resetting the password."
+                ]);
+            }
             return back()->with('error', "An error occurred while resetting the password.");
         }
     }

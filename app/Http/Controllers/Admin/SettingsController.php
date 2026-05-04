@@ -348,7 +348,111 @@ Best regards,
     public function smsTemplates()
     {
         $settings = Setting::getByGroup('sms_templates');
-        return view('admin.settings.sms-templates', compact('settings'));
+        
+        // Define predefined templates with their metadata
+        $predefinedTemplates = [
+            'sms_loan_approval' => [
+                'name' => 'Loan Approval',
+                'description' => 'Sent when loan is approved',
+                'color' => 'green',
+                'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'
+            ],
+            'sms_loan_disbursement' => [
+                'name' => 'Loan Disbursement',
+                'description' => 'Sent when loan is disbursed',
+                'color' => 'blue',
+                'icon' => 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z'
+            ],
+            'sms_payment_reminder' => [
+                'name' => 'Payment Reminder',
+                'description' => 'Sent for payment reminders',
+                'color' => 'yellow',
+                'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'
+            ],
+            'sms_payment_confirmation' => [
+                'name' => 'Payment Confirmation',
+                'description' => 'Sent when payment is received',
+                'color' => 'purple',
+                'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'
+            ],
+            'sms_password_reset' => [
+                'name' => 'Password Reset',
+                'description' => 'Sent for password reset requests',
+                'color' => 'red',
+                'icon' => 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'
+            ],
+            'sms_welcome_message' => [
+                'name' => 'Welcome Message',
+                'description' => 'Sent to new members',
+                'color' => 'indigo',
+                'icon' => 'M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+            ]
+        ];
+        
+        // Collect all templates (predefined + custom)
+        $allTemplates = [];
+        
+        // Add predefined templates
+        foreach ($predefinedTemplates as $key => $template) {
+            if (isset($settings[$key])) {
+                $allTemplates[$key] = array_merge($template, [
+                    'content' => $settings[$key]->value,
+                    'type' => 'predefined'
+                ]);
+            } else {
+                // Add default content for predefined templates that don't exist in database
+                $defaultContent = '';
+                switch ($key) {
+                    case 'sms_loan_approval':
+                        $defaultContent = 'Dear {member_name}, your loan application of {loan_amount} TZS has been approved. Please visit our office to complete the process. - FeedTan CMG';
+                        break;
+                    case 'sms_loan_disbursement':
+                        $defaultContent = 'Dear {member_name}, your loan of {loan_amount} TZS has been disbursed to your account. - FeedTan CMG';
+                        break;
+                    case 'sms_payment_reminder':
+                        $defaultContent = 'Dear {member_name}, this is a reminder that your payment of {loan_amount} TZS is due on {due_date}. Please make payment to avoid penalties. - FeedTan CMG';
+                        break;
+                    case 'sms_payment_confirmation':
+                        $defaultContent = 'Dear {member_name}, we have received your payment of {loan_amount} TZS. Your current balance is {balance} TZS. Thank you! - FeedTan CMG';
+                        break;
+                    case 'sms_password_reset':
+                        $defaultContent = 'Dear {member_name}, your password reset code is {code}. Use this code to reset your password. Do not share this code with anyone. - FeedTan CMG';
+                        break;
+                    case 'sms_welcome_message':
+                        $defaultContent = 'Welcome {member_name} to FeedTan CMG! Your account {account_number} has been created successfully. We are here to support your financial growth. - FeedTan CMG';
+                        break;
+                }
+                $allTemplates[$key] = array_merge($template, [
+                    'content' => $defaultContent,
+                    'type' => 'predefined'
+                ]);
+            }
+        }
+        
+        // Add custom templates (those that don't end with '_description' and aren't predefined)
+        foreach ($settings as $key => $setting) {
+            if (!isset($predefinedTemplates[$key]) && !str_ends_with($key, '_description')) {
+                $templateName = ucfirst(str_replace('_', ' ', str_replace('sms_', '', $key)));
+                $description = '';
+                
+                // Check if there's a description for this template
+                $descriptionKey = $key . '_description';
+                if (isset($settings[$descriptionKey])) {
+                    $description = $settings[$descriptionKey]->value;
+                }
+                
+                $allTemplates[$key] = [
+                    'name' => $templateName,
+                    'description' => $description ?: 'Custom SMS template',
+                    'content' => $setting->value,
+                    'color' => 'gray',
+                    'icon' => 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
+                    'type' => 'custom'
+                ];
+            }
+        }
+        
+        return view('admin.settings.sms-templates', compact('allTemplates'));
     }
 
     public function updateSmsTemplates(Request $request)
@@ -369,10 +473,347 @@ Best regards,
         return redirect()->route('admin.settings.sms-templates')->with('success', 'SMS templates updated successfully.');
     }
 
+    public function createSmsTemplate()
+    {
+        return view('admin.settings.sms-templates-create');
+    }
+
+    public function storeSmsTemplate(Request $request)
+    {
+        $validated = $request->validate([
+            'template_name' => 'required|string|max:255|unique:settings,key',
+            'template_description' => 'nullable|string|max:255',
+            'template_content' => 'required|string|max:500',
+        ]);
+
+        // Convert template name to a valid key format
+        $key = 'sms_' . str_replace(' ', '_', strtolower($validated['template_name']));
+        
+        // Store the template
+        Setting::set($key, $validated['template_content'], 'sms_templates', 'text');
+        
+        // Store description as metadata if provided
+        if (!empty($validated['template_description'])) {
+            Setting::set($key . '_description', $validated['template_description'], 'sms_templates', 'text');
+        }
+
+        return redirect()->route('admin.settings.sms-templates')->with('success', 'New SMS template created successfully.');
+    }
+
+    public function viewSmsTemplate($templateType)
+    {
+        $settings = Setting::getByGroup('sms_templates');
+        
+        // Map template types to their field names and default values
+        $templateMap = [
+            'sms_loan_approval' => [
+                'name' => 'Loan Approval',
+                'default' => 'Dear {member_name}, your loan application of {loan_amount} TZS has been approved. Please visit our office to complete the process. - FeedTan CMG'
+            ],
+            'sms_loan_disbursement' => [
+                'name' => 'Loan Disbursement',
+                'default' => 'Dear {member_name}, your loan of {loan_amount} TZS has been disbursed to your account. - FeedTan CMG'
+            ],
+            'sms_payment_reminder' => [
+                'name' => 'Payment Reminder',
+                'default' => 'Dear {member_name}, this is a reminder that your payment of {loan_amount} TZS is due on {due_date}. Please make payment to avoid penalties. - FeedTan CMG'
+            ],
+            'sms_payment_confirmation' => [
+                'name' => 'Payment Confirmation',
+                'default' => 'Dear {member_name}, we have received your payment of {loan_amount} TZS. Your current balance is {balance} TZS. Thank you! - FeedTan CMG'
+            ],
+            'sms_password_reset' => [
+                'name' => 'Password Reset',
+                'default' => 'Dear {member_name}, your password reset code is {code}. Use this code to reset your password. Do not share this code with anyone. - FeedTan CMG'
+            ],
+            'sms_welcome_message' => [
+                'name' => 'Welcome Message',
+                'default' => 'Welcome {member_name} to FeedTan CMG! Your account {account_number} has been created successfully. We are here to support your financial growth. - FeedTan CMG'
+            ]
+        ];
+
+        // Check if this is a predefined template or custom template
+        if (isset($templateMap[$templateType])) {
+            // Predefined template
+            $templateContent = isset($settings[$templateType]) ? $settings[$templateType]->value : $templateMap[$templateType]['default'];
+            $templateName = $templateMap[$templateType]['name'];
+            $fieldName = $templateType;
+        } else {
+            // Custom template
+            if (!isset($settings[$templateType])) {
+                abort(404);
+            }
+            $templateContent = $settings[$templateType]->value;
+            $templateName = ucfirst(str_replace('_', ' ', str_replace('sms_', '', $templateType)));
+            $fieldName = $templateType;
+        }
+
+        return view('admin.settings.sms-templates-view', compact('templateType', 'templateContent', 'fieldName', 'templateName'));
+    }
+
+    public function editSmsTemplate($templateType)
+    {
+        $settings = Setting::getByGroup('sms_templates');
+        
+        // Map template types to their field names and default values
+        $templateMap = [
+            'sms_loan_approval' => [
+                'name' => 'Loan Approval',
+                'default' => 'Dear {member_name}, your loan application of {loan_amount} TZS has been approved. Please visit our office to complete the process. - FeedTan CMG'
+            ],
+            'sms_loan_disbursement' => [
+                'name' => 'Loan Disbursement',
+                'default' => 'Dear {member_name}, your loan of {loan_amount} TZS has been disbursed to your account. - FeedTan CMG'
+            ],
+            'sms_payment_reminder' => [
+                'name' => 'Payment Reminder',
+                'default' => 'Dear {member_name}, this is a reminder that your payment of {loan_amount} TZS is due on {due_date}. Please make payment to avoid penalties. - FeedTan CMG'
+            ],
+            'sms_payment_confirmation' => [
+                'name' => 'Payment Confirmation',
+                'default' => 'Dear {member_name}, we have received your payment of {loan_amount} TZS. Your current balance is {balance} TZS. Thank you! - FeedTan CMG'
+            ],
+            'sms_password_reset' => [
+                'name' => 'Password Reset',
+                'default' => 'Dear {member_name}, your password reset code is {code}. Use this code to reset your password. Do not share this code with anyone. - FeedTan CMG'
+            ],
+            'sms_welcome_message' => [
+                'name' => 'Welcome Message',
+                'default' => 'Welcome {member_name} to FeedTan CMG! Your account {account_number} has been created successfully. We are here to support your financial growth. - FeedTan CMG'
+            ]
+        ];
+
+        // Check if this is a predefined template or custom template
+        if (isset($templateMap[$templateType])) {
+            // Predefined template
+            $templateContent = isset($settings[$templateType]) ? $settings[$templateType]->value : $templateMap[$templateType]['default'];
+            $templateName = $templateMap[$templateType]['name'];
+            $fieldName = $templateType;
+        } else {
+            // Custom template
+            if (!isset($settings[$templateType])) {
+                abort(404);
+            }
+            $templateContent = $settings[$templateType]->value;
+            $templateName = ucfirst(str_replace('_', ' ', str_replace('sms_', '', $templateType)));
+            $fieldName = $templateType;
+        }
+
+        return view('admin.settings.sms-templates-edit', compact('templateType', 'templateContent', 'fieldName', 'templateName'));
+    }
+
+    public function testSmsTemplate($templateType)
+    {
+        $settings = Setting::getByGroup('sms_templates');
+        
+        // Get template content similar to viewSmsTemplate method
+        $templateMap = [
+            'sms_loan_approval' => [
+                'name' => 'Loan Approval',
+                'default' => 'Dear {member_name}, your loan application of {loan_amount} TZS has been approved. Please visit our office to complete the process. - FeedTan CMG'
+            ],
+            'sms_loan_disbursement' => [
+                'name' => 'Loan Disbursement',
+                'default' => 'Dear {member_name}, your loan of {loan_amount} TZS has been disbursed to your account. - FeedTan CMG'
+            ],
+            'sms_payment_reminder' => [
+                'name' => 'Payment Reminder',
+                'default' => 'Dear {member_name}, this is a reminder that your payment of {loan_amount} TZS is due on {due_date}. Please make payment to avoid penalties. - FeedTan CMG'
+            ],
+            'sms_payment_confirmation' => [
+                'name' => 'Payment Confirmation',
+                'default' => 'Dear {member_name}, we have received your payment of {loan_amount} TZS. Your current balance is {balance} TZS. Thank you! - FeedTan CMG'
+            ],
+            'sms_password_reset' => [
+                'name' => 'Password Reset',
+                'default' => 'Dear {member_name}, your password reset code is {code}. Use this code to reset your password. Do not share this code with anyone. - FeedTan CMG'
+            ],
+            'sms_welcome_message' => [
+                'name' => 'Welcome Message',
+                'default' => 'Welcome {member_name} to FeedTan CMG! Your account {account_number} has been created successfully. We are here to support your financial growth. - FeedTan CMG'
+            ]
+        ];
+
+        // Check if this is a predefined template or custom template
+        if (isset($templateMap[$templateType])) {
+            $templateContent = isset($settings[$templateType]) ? $settings[$templateType]->value : $templateMap[$templateType]['default'];
+            $templateName = $templateMap[$templateType]['name'];
+        } else {
+            // Custom template
+            if (!isset($settings[$templateType])) {
+                abort(404);
+            }
+            $templateContent = $settings[$templateType]->value;
+            $templateName = ucfirst(str_replace('_', ' ', str_replace('sms_', '', $templateType)));
+        }
+
+        return view('admin.settings.sms-templates-test', compact('templateType', 'templateName', 'templateContent'));
+    }
+
+    public function sendSmsTemplate(Request $request, $templateType)
+    {
+        $request->validate([
+            'phone_number' => 'required|string|max:20',
+            'member_name' => 'required|string|max:255',
+            'test_variables' => 'nullable|array'
+        ]);
+
+        $settings = Setting::getByGroup('sms_templates');
+        
+        // Get template content
+        $templateMap = [
+            'sms_loan_approval' => ['default' => 'Dear {member_name}, your loan application of {loan_amount} TZS has been approved. Please visit our office to complete the process. - FeedTan CMG'],
+            'sms_loan_disbursement' => ['default' => 'Dear {member_name}, your loan of {loan_amount} TZS has been disbursed to your account. - FeedTan CMG'],
+            'sms_payment_reminder' => ['default' => 'Dear {member_name}, this is a reminder that your payment of {loan_amount} TZS is due on {due_date}. Please make payment to avoid penalties. - FeedTan CMG'],
+            'sms_payment_confirmation' => ['default' => 'Dear {member_name}, we have received your payment of {loan_amount} TZS. Your current balance is {balance} TZS. Thank you! - FeedTan CMG'],
+            'sms_password_reset' => ['default' => 'Dear {member_name}, your password reset code is {code}. Use this code to reset your password. Do not share this code with anyone. - FeedTan CMG'],
+            'sms_welcome_message' => ['default' => 'Welcome {member_name} to FeedTan CMG! Your account {account_number} has been created successfully. We are here to support your financial growth. - FeedTan CMG']
+        ];
+
+        if (isset($templateMap[$templateType])) {
+            $templateContent = isset($settings[$templateType]) ? $settings[$templateType]->value : $templateMap[$templateType]['default'];
+        } else {
+            if (!isset($settings[$templateType])) {
+                return redirect()->back()->with('error', 'Template not found.');
+            }
+            $templateContent = $settings[$templateType]->value;
+        }
+
+        // Replace variables with test data
+        $testVariables = $request->input('test_variables', []);
+        $message = $templateContent;
+        
+        // Common variables
+        $message = str_replace('{member_name}', $request->input('member_name'), $message);
+        
+        // Template-specific variables
+        if (isset($testVariables['loan_amount'])) {
+            $message = str_replace('{loan_amount}', $testVariables['loan_amount'], $message);
+        }
+        if (isset($testVariables['due_date'])) {
+            $message = str_replace('{due_date}', $testVariables['due_date'], $message);
+        }
+        if (isset($testVariables['balance'])) {
+            $message = str_replace('{balance}', $testVariables['balance'], $message);
+        }
+        if (isset($testVariables['account_number'])) {
+            $message = str_replace('{account_number}', $testVariables['account_number'], $message);
+        }
+        if (isset($testVariables['code'])) {
+            $message = str_replace('{code}', $testVariables['code'], $message);
+        }
+
+        // Use the actual SMS service to send the message
+        try {
+            $phoneNumber = $request->input('phone_number');
+            
+            // Import and use the SMS service
+            $smsService = app(\App\Services\SmsNotificationService::class);
+            $result = $smsService->sendSms($phoneNumber, $message);
+            
+            if ($result['success']) {
+                return redirect()->back()->with('success', "Test SMS sent successfully to {$phoneNumber}. Message: {$message}");
+            } else {
+                return redirect()->back()->with('error', 'Failed to send SMS: ' . ($result['error'] ?? 'Unknown error'));
+            }
+        } catch (\Exception $e) {
+            \Log::error('SMS test sending failed: ' . $e->getMessage(), [
+                'phone' => $request->input('phone_number'),
+                'template' => $templateType,
+                'message' => $message
+            ]);
+            return redirect()->back()->with('error', 'Failed to send SMS: ' . $e->getMessage());
+        }
+    }
+
     public function emailSettings()
     {
         $settings = Setting::getByGroup('email');
-        return view('admin.settings.email-settings', compact('settings'));
+        
+        // Define predefined email templates with their metadata
+        $emailTemplates = [
+            'email_loan_approval' => [
+                'name' => 'Loan Approval Email',
+                'description' => 'Sent when loan is approved',
+                'color' => 'green',
+                'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+                'subject_field' => 'email_loan_approval_subject',
+                'body_field' => 'email_loan_approval_body',
+                'default_subject' => 'Loan Application Approved - FeedTan CMG',
+                'default_body' => 'Dear {member_name},
+
+We are pleased to inform you that your loan application of {loan_amount} TZS has been approved.
+
+Please visit our office within 7 days to complete the loan processing and disbursement.
+
+If you have any questions, please contact us.
+
+Best regards,
+{organization_name}'
+            ],
+            'email_payment_reminder' => [
+                'name' => 'Payment Reminder Email',
+                'description' => 'Sent for payment reminders',
+                'color' => 'yellow',
+                'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+                'subject_field' => 'email_payment_reminder_subject',
+                'body_field' => 'email_payment_reminder_body',
+                'default_subject' => 'Payment Reminder - {due_date}',
+                'default_body' => 'Dear {member_name},
+
+This is a friendly reminder that your payment of {loan_amount} TZS is due on {due_date}.
+
+Your current balance is {balance} TZS.
+
+Please make payment before the due date to avoid penalties and maintain your good standing with us.
+
+Thank you for your prompt attention to this matter.
+
+Best regards,
+{organization_name}'
+            ],
+            'email_welcome' => [
+                'name' => 'Welcome Email',
+                'description' => 'Sent to new members',
+                'color' => 'blue',
+                'icon' => 'M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+                'subject_field' => 'email_welcome_subject',
+                'body_field' => 'email_welcome_body',
+                'default_subject' => 'Welcome to {organization_name}',
+                'default_body' => 'Dear {member_name},
+
+Welcome to {organization_name}!
+
+Your account has been successfully created with account number: {account_number}
+
+We are delighted to have you as a member of our community. Our mission is to support your financial growth and prosperity.
+
+You can now access your account online and manage your savings, loans, and investments.
+
+If you have any questions or need assistance, please do not hesitate to contact us.
+
+Welcome aboard!
+
+Best regards,
+{organization_name}'
+            ]
+        ];
+
+        // Collect all email templates with their content
+        $allEmailTemplates = [];
+        
+        foreach ($emailTemplates as $key => $template) {
+            $subject = isset($settings[$template['subject_field']]) ? $settings[$template['subject_field']]->value : $template['default_subject'];
+            $body = isset($settings[$template['body_field']]) ? $settings[$template['body_field']]->value : $template['default_body'];
+            
+            $allEmailTemplates[$key] = array_merge($template, [
+                'subject' => $subject,
+                'body' => $body,
+                'type' => 'predefined'
+            ]);
+        }
+
+        return view('admin.settings.email-settings', compact('allEmailTemplates'));
     }
 
     public function updateEmailSettings(Request $request)
@@ -391,6 +832,367 @@ Best regards,
         }
 
         return redirect()->route('admin.settings.email-templates')->with('success', 'Email templates updated successfully.');
+    }
+
+    public function viewEmailTemplate($templateType)
+    {
+        $settings = Setting::getByGroup('email');
+        
+        // Map template types to their field names and default values
+        $templateMap = [
+            'email_loan_approval' => [
+                'name' => 'Loan Approval Email',
+                'subject_field' => 'email_loan_approval_subject',
+                'body_field' => 'email_loan_approval_body',
+                'default_subject' => 'Loan Application Approved - FeedTan CMG',
+                'default_body' => 'Dear {member_name},
+
+We are pleased to inform you that your loan application of {loan_amount} TZS has been approved.
+
+Please visit our office within 7 days to complete the loan processing and disbursement.
+
+If you have any questions, please contact us.
+
+Best regards,
+{organization_name}'
+            ],
+            'email_payment_reminder' => [
+                'name' => 'Payment Reminder Email',
+                'subject_field' => 'email_payment_reminder_subject',
+                'body_field' => 'email_payment_reminder_body',
+                'default_subject' => 'Payment Reminder - {due_date}',
+                'default_body' => 'Dear {member_name},
+
+This is a friendly reminder that your payment of {loan_amount} TZS is due on {due_date}.
+
+Your current balance is {balance} TZS.
+
+Please make payment before the due date to avoid penalties and maintain your good standing with us.
+
+Thank you for your prompt attention to this matter.
+
+Best regards,
+{organization_name}'
+            ],
+            'email_welcome' => [
+                'name' => 'Welcome Email',
+                'subject_field' => 'email_welcome_subject',
+                'body_field' => 'email_welcome_body',
+                'default_subject' => 'Welcome to {organization_name}',
+                'default_body' => 'Dear {member_name},
+
+Welcome to {organization_name}!
+
+Your account has been successfully created with account number: {account_number}
+
+We are delighted to have you as a member of our community. Our mission is to support your financial growth and prosperity.
+
+You can now access your account online and manage your savings, loans, and investments.
+
+If you have any questions or need assistance, please do not hesitate to contact us.
+
+Welcome aboard!
+
+Best regards,
+{organization_name}'
+            ]
+        ];
+
+        if (!isset($templateMap[$templateType])) {
+            abort(404);
+        }
+
+        $template = $templateMap[$templateType];
+        $subject = isset($settings[$template['subject_field']]) ? $settings[$template['subject_field']]->value : $template['default_subject'];
+        $body = isset($settings[$template['body_field']]) ? $settings[$template['body_field']]->value : $template['default_body'];
+        $templateName = $template['name'];
+
+        return view('admin.settings.email-templates-view', compact('templateType', 'templateName', 'subject', 'body'));
+    }
+
+    public function editEmailTemplate($templateType)
+    {
+        $settings = Setting::getByGroup('email');
+        
+        // Map template types to their field names and default values
+        $templateMap = [
+            'email_loan_approval' => [
+                'name' => 'Loan Approval Email',
+                'subject_field' => 'email_loan_approval_subject',
+                'body_field' => 'email_loan_approval_body',
+                'default_subject' => 'Loan Application Approved - FeedTan CMG',
+                'default_body' => 'Dear {member_name},
+
+We are pleased to inform you that your loan application of {loan_amount} TZS has been approved.
+
+Please visit our office within 7 days to complete the loan processing and disbursement.
+
+If you have any questions, please contact us.
+
+Best regards,
+{organization_name}'
+            ],
+            'email_payment_reminder' => [
+                'name' => 'Payment Reminder Email',
+                'subject_field' => 'email_payment_reminder_subject',
+                'body_field' => 'email_payment_reminder_body',
+                'default_subject' => 'Payment Reminder - {due_date}',
+                'default_body' => 'Dear {member_name},
+
+This is a friendly reminder that your payment of {loan_amount} TZS is due on {due_date}.
+
+Your current balance is {balance} TZS.
+
+Please make payment before the due date to avoid penalties and maintain your good standing with us.
+
+Thank you for your prompt attention to this matter.
+
+Best regards,
+{organization_name}'
+            ],
+            'email_welcome' => [
+                'name' => 'Welcome Email',
+                'subject_field' => 'email_welcome_subject',
+                'body_field' => 'email_welcome_body',
+                'default_subject' => 'Welcome to {organization_name}',
+                'default_body' => 'Dear {member_name},
+
+Welcome to {organization_name}!
+
+Your account has been successfully created with account number: {account_number}
+
+We are delighted to have you as a member of our community. Our mission is to support your financial growth and prosperity.
+
+You can now access your account online and manage your savings, loans, and investments.
+
+If you have any questions or need assistance, please do not hesitate to contact us.
+
+Welcome aboard!
+
+Best regards,
+{organization_name}'
+            ]
+        ];
+
+        if (!isset($templateMap[$templateType])) {
+            abort(404);
+        }
+
+        $template = $templateMap[$templateType];
+        $subject = isset($settings[$template['subject_field']]) ? $settings[$template['subject_field']]->value : $template['default_subject'];
+        $body = isset($settings[$template['body_field']]) ? $settings[$template['body_field']]->value : $template['default_body'];
+        $templateName = $template['name'];
+        $subjectFieldName = $template['subject_field'];
+        $bodyFieldName = $template['body_field'];
+
+        return view('admin.settings.email-templates-edit', compact('templateType', 'templateName', 'subject', 'body', 'subjectFieldName', 'bodyFieldName'));
+    }
+
+    public function testEmailTemplate($templateType)
+    {
+        $settings = Setting::getByGroup('email');
+        
+        // Get template content similar to viewEmailTemplate method
+        $templateMap = [
+            'email_loan_approval' => [
+                'name' => 'Loan Approval Email',
+                'subject_field' => 'email_loan_approval_subject',
+                'body_field' => 'email_loan_approval_body',
+                'default_subject' => 'Loan Application Approved - FeedTan CMG',
+                'default_body' => 'Dear {member_name},
+
+We are pleased to inform you that your loan application of {loan_amount} TZS has been approved.
+
+Please visit our office within 7 days to complete the loan processing and disbursement.
+
+If you have any questions, please contact us.
+
+Best regards,
+{organization_name}'
+            ],
+            'email_payment_reminder' => [
+                'name' => 'Payment Reminder Email',
+                'subject_field' => 'email_payment_reminder_subject',
+                'body_field' => 'email_payment_reminder_body',
+                'default_subject' => 'Payment Reminder - {due_date}',
+                'default_body' => 'Dear {member_name},
+
+This is a friendly reminder that your payment of {loan_amount} TZS is due on {due_date}.
+
+Your current balance is {balance} TZS.
+
+Please make payment before the due date to avoid penalties and maintain your good standing with us.
+
+Thank you for your prompt attention to this matter.
+
+Best regards,
+{organization_name}'
+            ],
+            'email_welcome' => [
+                'name' => 'Welcome Email',
+                'subject_field' => 'email_welcome_subject',
+                'body_field' => 'email_welcome_body',
+                'default_subject' => 'Welcome to {organization_name}',
+                'default_body' => 'Dear {member_name},
+
+Welcome to {organization_name}!
+
+Your account has been successfully created with account number: {account_number}
+
+We are delighted to have you as a member of our community. Our mission is to support your financial growth and prosperity.
+
+You can now access your account online and manage your savings, loans, and investments.
+
+If you have any questions or need assistance, please do not hesitate to contact us.
+
+Welcome aboard!
+
+Best regards,
+{organization_name}'
+            ]
+        ];
+
+        if (!isset($templateMap[$templateType])) {
+            abort(404);
+        }
+
+        $template = $templateMap[$templateType];
+        $subject = isset($settings[$template['subject_field']]) ? $settings[$template['subject_field']]->value : $template['default_subject'];
+        $body = isset($settings[$template['body_field']]) ? $settings[$template['body_field']]->value : $template['default_body'];
+        $templateName = $template['name'];
+
+        return view('admin.settings.email-templates-test', compact('templateType', 'templateName', 'subject', 'body'));
+    }
+
+    public function sendEmailTemplate(Request $request, $templateType)
+    {
+        $request->validate([
+            'email_address' => 'required|email',
+            'member_name' => 'required|string|max:255',
+            'test_variables' => 'nullable|array'
+        ]);
+
+        $settings = Setting::getByGroup('email');
+        
+        // Get template content
+        $templateMap = [
+            'email_loan_approval' => [
+                'subject_field' => 'email_loan_approval_subject',
+                'body_field' => 'email_loan_approval_body',
+                'default_subject' => 'Loan Application Approved - FeedTan CMG',
+                'default_body' => 'Dear {member_name},
+
+We are pleased to inform you that your loan application of {loan_amount} TZS has been approved.
+
+Please visit our office within 7 days to complete the loan processing and disbursement.
+
+If you have any questions, please contact us.
+
+Best regards,
+{organization_name}'
+            ],
+            'email_payment_reminder' => [
+                'subject_field' => 'email_payment_reminder_subject',
+                'body_field' => 'email_payment_reminder_body',
+                'default_subject' => 'Payment Reminder - {due_date}',
+                'default_body' => 'Dear {member_name},
+
+This is a friendly reminder that your payment of {loan_amount} TZS is due on {due_date}.
+
+Your current balance is {balance} TZS.
+
+Please make payment before the due date to avoid penalties and maintain your good standing with us.
+
+Thank you for your prompt attention to this matter.
+
+Best regards,
+{organization_name}'
+            ],
+            'email_welcome' => [
+                'subject_field' => 'email_welcome_subject',
+                'body_field' => 'email_welcome_body',
+                'default_subject' => 'Welcome to {organization_name}',
+                'default_body' => 'Dear {member_name},
+
+Welcome to {organization_name}!
+
+Your account has been successfully created with account number: {account_number}
+
+We are delighted to have you as a member of our community. Our mission is to support your financial growth and prosperity.
+
+You can now access your account online and manage your savings, loans, and investments.
+
+If you have any questions or need assistance, please do not hesitate to contact us.
+
+Welcome aboard!
+
+Best regards,
+{organization_name}'
+            ]
+        ];
+
+        if (!isset($templateMap[$templateType])) {
+            return redirect()->back()->with('error', 'Template not found.');
+        }
+
+        $template = $templateMap[$templateType];
+        $subject = isset($settings[$template['subject_field']]) ? $settings[$template['subject_field']]->value : $template['default_subject'];
+        $body = isset($settings[$template['body_field']]) ? $settings[$template['body_field']]->value : $template['default_body'];
+
+        // Replace variables with test data
+        $testVariables = $request->input('test_variables', []);
+        
+        // Common variables
+        $finalSubject = str_replace('{member_name}', $request->input('member_name'), $subject);
+        $finalBody = str_replace('{member_name}', $request->input('member_name'), $body);
+        
+        // Template-specific variables
+        if (isset($testVariables['loan_amount'])) {
+            $finalSubject = str_replace('{loan_amount}', $testVariables['loan_amount'], $finalSubject);
+            $finalBody = str_replace('{loan_amount}', $testVariables['loan_amount'], $finalBody);
+        }
+        if (isset($testVariables['due_date'])) {
+            $finalSubject = str_replace('{due_date}', $testVariables['due_date'], $finalSubject);
+            $finalBody = str_replace('{due_date}', $testVariables['due_date'], $finalBody);
+        }
+        if (isset($testVariables['balance'])) {
+            $finalBody = str_replace('{balance}', $testVariables['balance'], $finalBody);
+        }
+        if (isset($testVariables['account_number'])) {
+            $finalBody = str_replace('{account_number}', $testVariables['account_number'], $finalBody);
+        }
+        if (isset($testVariables['organization_name'])) {
+            $finalSubject = str_replace('{organization_name}', $testVariables['organization_name'], $finalSubject);
+            $finalBody = str_replace('{organization_name}', $testVariables['organization_name'], $finalBody);
+        }
+
+        // Use the actual email service to send the message
+        try {
+            $emailAddress = $request->input('email_address');
+            $memberName = $request->input('member_name');
+            
+            // Import and use the Email service
+            $emailService = app(\App\Services\EmailNotificationService::class);
+            
+            // Get organization info for email configuration
+            $orgInfo = $emailService->getOrganizationInfo();
+            
+            // Send the email using Laravel Mail with the service's configuration
+            \Illuminate\Support\Facades\Mail::raw($finalBody, function ($mail) use ($emailAddress, $memberName, $finalSubject, $orgInfo) {
+                $mail->to($emailAddress, $memberName)
+                    ->subject($finalSubject)
+                    ->from($orgInfo['from_email'], $orgInfo['from_name']);
+            });
+            
+            return redirect()->back()->with('success', "Test email sent successfully to {$emailAddress}. Subject: {$finalSubject}");
+        } catch (\Exception $e) {
+            \Log::error('Email test sending failed: ' . $e->getMessage(), [
+                'email' => $request->input('email_address'),
+                'template' => $templateType,
+                'subject' => $finalSubject
+            ]);
+            return redirect()->back()->with('error', 'Failed to send email: ' . $e->getMessage());
+        }
     }
 
     public function notificationPreferences()

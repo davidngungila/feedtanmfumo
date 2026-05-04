@@ -317,13 +317,26 @@
         <!-- Enhanced Logs Table -->
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-                <h3 class="text-lg font-semibold text-gray-800">SMS Logs</h3>
-                <span class="text-sm text-gray-500">Showing {{ $logs->firstItem() ?? 0 }}-{{ $logs->lastItem() ?? 0 }} of {{ $logs->total() }}</span>
+                <div class="flex items-center space-x-4">
+                    <h3 class="text-lg font-semibold text-gray-800">SMS Logs</h3>
+                    <span class="text-sm text-gray-500">Showing {{ $logs->firstItem() ?? 0 }}-{{ $logs->lastItem() ?? 0 }} of {{ $logs->total() }}</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button type="button" id="bulkDeleteBtn" class="hidden px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                        <svg class="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Delete Selected (<span id="selectedCount">0</span>)
+                    </button>
+                </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-[#015425]">
                         <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                                <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-[#015425] focus:ring-[#015425]">
+                            </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Message ID</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">From</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">To / Recipient</th>
@@ -339,6 +352,9 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         @forelse($logs as $log)
                         <tr class="hover:bg-gray-50 transition">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <input type="checkbox" name="selected_logs[]" value="{{ $log->id }}" class="log-checkbox rounded border-gray-300 text-[#015425] focus:ring-[#015425]">
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-mono text-gray-600">
                                     {{ Str::limit($log->message_id ?? 'N/A', 12) }}
@@ -436,7 +452,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="10" class="px-6 py-8 text-center">
+                            <td colspan="11" class="px-6 py-8 text-center">
                                 <div class="text-gray-400">
                                     <svg class="mx-auto h-12 w-12 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
@@ -466,4 +482,96 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const logCheckboxes = document.querySelectorAll('.log-checkbox');
+    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    const selectedCountSpan = document.getElementById('selectedCount');
+    
+    // Update selected count and button visibility
+    function updateSelectedCount() {
+        const selected = document.querySelectorAll('.log-checkbox:checked');
+        const count = selected.length;
+        selectedCountSpan.textContent = count;
+        
+        if (count > 0) {
+            bulkDeleteBtn.classList.remove('hidden');
+            bulkDeleteBtn.disabled = false;
+        } else {
+            bulkDeleteBtn.classList.add('hidden');
+            bulkDeleteBtn.disabled = true;
+        }
+    }
+    
+    // Handle select all checkbox
+    selectAllCheckbox.addEventListener('change', function() {
+        logCheckboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+        updateSelectedCount();
+    });
+    
+    // Handle individual checkboxes
+    logCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            // Update select all checkbox state
+            const allChecked = Array.from(logCheckboxes).every(cb => cb.checked);
+            const someChecked = Array.from(logCheckboxes).some(cb => cb.checked);
+            
+            selectAllCheckbox.checked = allChecked;
+            selectAllCheckbox.indeterminate = someChecked && !allChecked;
+            
+            updateSelectedCount();
+        });
+    });
+    
+    // Handle bulk delete
+    bulkDeleteBtn.addEventListener('click', function() {
+        const selected = document.querySelectorAll('.log-checkbox:checked');
+        const count = selected.length;
+        
+        if (count === 0) {
+            return;
+        }
+        
+        if (confirm(`Are you sure you want to delete ${count} SMS log(s)? This action cannot be undone.`)) {
+            // Create form and submit
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ route("admin.sms.logs.bulk-delete") }}';
+            
+            // Add CSRF token
+            const csrfToken = document.createElement('input');
+            csrfToken.type = 'hidden';
+            csrfToken.name = '_token';
+            csrfToken.value = '{{ csrf_token() }}';
+            form.appendChild(csrfToken);
+            
+            // Add selected log IDs
+            selected.forEach(checkbox => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'selected_logs[]';
+                input.value = checkbox.value;
+                form.appendChild(input);
+            });
+            
+            // Add method override for DELETE
+            const methodInput = document.createElement('input');
+            methodInput.type = 'hidden';
+            methodInput.name = '_method';
+            methodInput.value = 'DELETE';
+            form.appendChild(methodInput);
+            
+            document.body.appendChild(form);
+            form.submit();
+        }
+    });
+    
+    // Initialize
+    updateSelectedCount();
+});
+</script>
 @endsection
