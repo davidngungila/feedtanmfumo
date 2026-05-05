@@ -26,4 +26,30 @@ class ResetPasswordController extends Controller
      * @var string
      */
     protected $redirectTo = '/dashboard';
+
+    /**
+     * Display the password reset form for a given token.
+     *
+     * @param  string  $token
+     * @return \Illuminate\View\View
+     */
+    public function showResetForm($token = null)
+    {
+        // Validate and sanitize token
+        if ($token === null || $token === '') {
+            return redirect()->route('password.request')
+                ->with('error', 'Invalid or expired password reset link.');
+        }
+        
+        // Check if token contains invalid characters
+        if (strpos($token, "'") !== false) {
+            return redirect()->route('password.request')
+                ->with('error', 'Invalid password reset link format.');
+        }
+        
+        return view('auth.passwords.reset', [
+            'token' => $token,
+            'email' => request('email', ''),
+        ]);
+    }
 }

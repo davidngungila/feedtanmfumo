@@ -342,3 +342,5 @@ class SampleMembersAndLoansSeeder extends Seeder
         $this->command->info("Created payment confirmation for loan {$loan->loan_number}");
     }
 }
+
+

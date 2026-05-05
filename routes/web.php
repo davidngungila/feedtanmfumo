@@ -136,6 +136,9 @@ Route::middleware('auth')->group(function () {
         Route::put('profile/password', [MemberProfileController::class, 'updatePassword'])->name('profile.password.update');
         Route::get('profile/settings', [MemberProfileController::class, 'settings'])->name('profile.settings');
         Route::put('profile/settings', [MemberProfileController::class, 'updateSettings'])->name('profile.settings.update');
+        
+        // Simple member profile route
+        Route::get('/member/profile', [MemberProfileController::class, 'index'])->name('member.profile.simple');
 
         // Membership Application - Individual Steps
         Route::get('membership/step/1', [MembershipController::class, 'showStep1'])->name('membership.step1');
@@ -460,6 +463,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('locations/{id}', [LocationController::class, 'destroy'])->name('locations.destroy');
     Route::get('locations/search', [LocationController::class, 'search'])->name('locations.search');
     Route::get('locations/export', [LocationController::class, 'export'])->name('locations.export');
+    Route::get('locations/import', [LocationController::class, 'importPage'])->name('locations.import.page');
+    Route::post('locations/import', [LocationController::class, 'import'])->name('locations.import');
+    Route::post('locations/bulk-delete', [LocationController::class, 'bulkDelete'])->name('locations.bulk-delete');
 
     // SMS Sending
     Route::get('sms/send', [\App\Http\Controllers\Admin\SmsSendController::class, 'index'])->name('sms.send');

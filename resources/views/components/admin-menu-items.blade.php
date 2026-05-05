@@ -322,10 +322,10 @@
                 <a href="{{ route('admin.formulas.metrics.portfolio-quality') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-xs">Portfolio Quality</a>
             </div>
         </div>
-        <!-- Commission & Incentives -->
+        <!-- Commission -->
         <div class="nested-dropdown-container">
             <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">
-                <span>Commission & Incentives</span>
+                <span>Commission</span>
                 <svg class="w-3 h-3 nested-dropdown-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                 </svg>

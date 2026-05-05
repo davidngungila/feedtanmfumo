@@ -283,14 +283,12 @@
 function confirmPasswordReset(url, userName, userEmail) {
     Swal.fire({
         title: 'Reset Password',
-        html: `
-            <p>Are you sure you want to reset the password for this user?</p>
-            <div style="text-align: left; margin: 20px 0;">
-                <strong>Name:</strong> ${userName}<br>
-                <strong>Email:</strong> ${userEmail}
-            </div>
-            <p style="color: #666; font-size: 14px;">A new password will be generated and sent to their email address.</p>
-        `,
+        html: '<p>Are you sure you want to reset the password for this user?</p>' +
+            '<div style="text-align: left; margin: 20px 0;">' +
+                '<strong>Name:</strong> ' + userName + '<br>' +
+                '<strong>Email:</strong> ' + userEmail +
+            '</div>' +
+            '<p style="color: #666; font-size: 14px;">A new password will be generated and sent to their email address.</p>',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d97706',
@@ -323,10 +321,8 @@ function confirmPasswordReset(url, userName, userEmail) {
         if (result.isConfirmed) {
             Swal.fire({
                 title: 'Success!',
-                html: `
-                    <p>Password has been reset successfully!</p>
-                    <p style="color: #666; font-size: 14px;">The new password has been sent to <strong>${userEmail}</strong></p>
-                `,
+                html: '<p>Password has been reset successfully!</p>' +
+                    '<p style="color: #666; font-size: 14px;">The new password has been sent to <strong>' + userEmail + '</strong></p>',
                 icon: 'success',
                 confirmButtonColor: '#015425',
                 confirmButtonText: 'OK'

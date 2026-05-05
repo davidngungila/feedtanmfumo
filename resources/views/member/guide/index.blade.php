@@ -240,17 +240,6 @@
                 <ul class="text-sm text-gray-600 space-y-1">
                     <li>• Loan List</li>
                     <li>• Loan Details</li>
-                    <li>• Repayment Schedule</li>
-                    <li>• Pay Installment</li>
-                </ul>
-            </div>
-
-            <div class="bg-purple-50 p-4 rounded-lg">
-                <h3 class="font-semibold text-gray-800 mb-2">💳 Savings</h3>
-                <ul class="text-sm text-gray-600 space-y-1">
-                    <li>• Account List</li>
-                    <li>• Deposit/Withdraw</li>
-                    <li>• Statements</li>
                 </ul>
             </div>
 
