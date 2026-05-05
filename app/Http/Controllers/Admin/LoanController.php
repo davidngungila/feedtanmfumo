@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Loan;
 use App\Models\User;
+use App\Models\LoanRegistration;
 use App\Helpers\NotificationHelper;
 use App\Services\EmailNotificationService;
 use Illuminate\Http\Request;
@@ -74,6 +75,29 @@ class LoanController extends Controller
 
     public function store(Request $request)
     {
+        // Check if this is a multi-step form submission
+        $registrationToken = $request->input('registration_token');
+        $allData = [];
+
+        if ($registrationToken) {
+            $registration = LoanRegistration::where('registration_token', $registrationToken)->first();
+            if ($registration && !$registration->isExpired()) {
+                // Merge data from all steps
+                $stepData = $registration->step_data ?? [];
+                foreach ($stepData as $stepKey => $data) {
+                    $allData = array_merge($allData, $data);
+                }
+                
+                // Mark registration as completed
+                $registration->completed = true;
+                $registration->save();
+            }
+        }
+
+        // Merge current request data with saved data
+        $requestData = $request->all();
+        $mergedData = array_merge($allData, $requestData);
+
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
             'principal_amount' => 'required|numeric|min:0',
@@ -666,5 +690,109 @@ class LoanController extends Controller
         ];
         
         return view('admin.loans.disbursement', compact('loans', 'stats'));
+    }
+
+    /**
+     * Save step data for multi-step loan application
+     */
+    public function saveStep(Request $request)
+    {
+        try {
+            $step = $request->input('step');
+            $data = $request->input('data');
+            $token = $request->input('token');
+
+            // Find or create registration
+            $registration = null;
+            if ($token) {
+                $registration = LoanRegistration::where('registration_token', $token)->first();
+            }
+
+            if (!$registration) {
+                $registration = LoanRegistration::create([
+                    'current_step' => $step,
+                    'user_id' => $data['user_id'] ?? null,
+                    'principal_amount' => $data['principal_amount'] ?? null,
+                    'loan_type' => $data['loan_type'] ?? null,
+                ]);
+                $token = $registration->registration_token;
+            } else {
+                // Check if registration is expired
+                if ($registration->isExpired()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Loan application session expired. Please start again.'
+                    ]);
+                }
+            }
+
+            // Save step data
+            $registration->setStepData($step, $data);
+            
+            // Update current step
+            if ($step > $registration->current_step) {
+                $registration->current_step = $step;
+                $registration->save();
+            }
+
+            return response()->json([
+                'success' => true,
+                'token' => $registration->registration_token,
+                'message' => 'Step saved successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error saving loan step: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error saving step data'
+            ], 500);
+        }
+    }
+
+    /**
+     * Load loan application data for multi-step form
+     */
+    public function loadRegistration(Request $request)
+    {
+        try {
+            $token = $request->query('token');
+            
+            if (!$token) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No loan application token provided'
+                ]);
+            }
+
+            $registration = LoanRegistration::where('registration_token', $token)->first();
+
+            if (!$registration) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Loan application not found'
+                ]);
+            }
+
+            if ($registration->isExpired()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Loan application session expired. Please start again.'
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $registration->step_data,
+                'current_step' => $registration->current_step
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error loading loan registration: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error loading loan application data'
+            ], 500);
+        }
     }
 }

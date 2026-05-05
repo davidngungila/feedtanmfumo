@@ -4,28 +4,39 @@
     <meta charset="UTF-8">
     <title>{{ $documentTitle ?? 'Loan Repayment Report' }}</title>
     <style>
+        @page {
+            margin: 10mm 12mm;
+            size: A4;
+        }
         body { 
             font-family: Arial, sans-serif; 
-            font-size: 12px; 
+            font-size: 10px; 
             line-height: 1.4;
-            margin: 20px;
+            margin: 0;
             color: #333;
         }
         .header { 
             text-align: center; 
-            margin-bottom: 30px; 
-            border-bottom: 2px solid #015425;
-            padding-bottom: 20px;
+            margin-bottom: 20px; 
+            border-bottom: 3px solid #015425;
+            padding-bottom: 15px;
+            position: relative;
+        }
+        .header img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
         }
         .header h1 { 
             color: #015425; 
-            margin: 0; 
-            font-size: 24px;
+            margin: 10px 0 5px 0; 
+            font-size: 18px;
+            font-weight: bold;
         }
         .header h2 { 
             color: #666; 
-            margin: 5px 0 0 0; 
-            font-size: 14px;
+            margin: 0 0 10px 0; 
+            font-size: 12px;
             font-weight: normal;
         }
         .header .meta {
@@ -153,6 +164,7 @@
 </head>
 <body>
     <div class="header">
+        <img src="{{ asset('header-mfumo.png') }}" alt="FeedTan CMG Header" style="max-width: 100%; height: auto;">
         <h1>{{ $documentTitle ?? 'Loan Repayment Report' }}</h1>
         <h2>{{ $documentSubtitle ?? 'Detailed analysis of loan repayment patterns, schedules, and collection efficiency' }}</h2>
         <div class="meta">

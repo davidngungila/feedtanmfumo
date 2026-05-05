@@ -13,6 +13,7 @@
             font-size: 9pt;
             line-height: 1.4;
             color: #333;
+            margin: 0;
         }
         .header {
             border-bottom: 3px solid #015425;
@@ -20,6 +21,12 @@
             margin-bottom: 15px;
             text-align: center;
             width: 100%;
+            position: relative;
+        }
+        .header img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
         }
         .logo-box {
             display: inline-block;
@@ -145,11 +152,7 @@
 <body>
     <div class="header">
         <div style="text-align: center; margin-bottom: 15px;">
-            @if(isset($headerBase64) && $headerBase64)
-            <img src="{{ $headerBase64 }}" alt="FeedTan Header" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0 auto;">
-            @else
-            <div class="logo-box" style="margin: 0 auto 10px auto;">FD</div>
-            @endif
+            <img src="{{ asset('header-mfumo.png') }}" alt="FeedTan CMG Header" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0 auto;">
         </div>
         @if(isset($documentTitle))
         <div class="title">{{ $documentTitle }}</div>

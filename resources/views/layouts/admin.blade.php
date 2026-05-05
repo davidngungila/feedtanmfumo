@@ -47,7 +47,7 @@
 <body class="h-full bg-[#fafafa] text-[#41546b] overflow-hidden">
     <div class="h-full flex flex-col lg:flex-row">
         <!-- Mobile Menu Overlay -->
-        <div id="mobile-menu-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden"></div>
+        <div id="mobile-menu-overlay" class="fixed inset-0 backdrop-blur-sm bg-white/30 z-40 lg:hidden hidden"></div>
 
         <!-- Sidebar -->
         <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#015425] text-white transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col h-full">
@@ -112,14 +112,15 @@
                         <!-- User Profile Dropdown -->
                         <div id="user-menu-container" class="relative user-profile-dropdown">
                             <button id="user-menu-button" class="flex items-center space-x-3 p-1 rounded-full hover:bg-gray-100 transition focus:outline-none focus:ring-2 focus:ring-[#015425] focus:ring-offset-2">
-                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#015425] to-[#027a3a] flex items-center justify-center text-white font-semibold text-sm">
-                                    {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
+                                <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-gray-200">
+                                    <img src="{{ Auth::user()->profile_image_url }}" alt="{{ Auth::user()->name }}'s profile picture" 
+                                         class="w-full h-full object-cover">
                                 </div>
                                 <div class="hidden md:block text-left">
-                                    <p class="text-sm font-medium text-gray-900">{{ Auth::user()->name }}</p>
-                                    <p class="text-xs text-gray-500">{{ Auth::user()->email }}</p>
+                                    <p class="text-sm font-medium text-gray-700 truncate">{{ Auth::user()->name }}</p>
+                                    <p class="text-sm text-gray-500 truncate">{{ Auth::user()->email }}</p>
                                 </div>
-                                <svg class="w-4 h-4 text-gray-500 hidden md:block user-menu-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                                 </svg>
                             </button>

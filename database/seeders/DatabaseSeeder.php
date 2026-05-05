@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             RoleSeeder::class,
             MembershipTypeSeeder::class,
+            SampleMembersAndLoansSeeder::class,
         ]);
 
         // User::factory(10)->create();

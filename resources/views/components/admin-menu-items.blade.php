@@ -47,7 +47,7 @@
     </button>
     <div class="dropdown-menu pl-4 mt-1 space-y-1 {{ $isActiveUsers ? '' : 'hidden' }}">
         <a href="{{ route('admin.users.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">All Members</a>
-        <a href="{{ route('admin.memberships.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">Memberships</a>
+        <a href="{{ route('admin.memberships.index') }}" class="block px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">Memberships Request</a>
         <!-- Members -->
         <div class="nested-dropdown-container">
             <button class="nested-dropdown-toggle flex items-center justify-between w-full px-4 py-2 rounded-md hover:bg-[#013019] transition text-sm">

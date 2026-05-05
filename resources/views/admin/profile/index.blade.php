@@ -13,8 +13,9 @@
     <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-8 text-white">
         <div class="flex flex-col md:flex-row items-center md:items-start">
             <div class="flex items-center space-x-6 mb-4 md:mb-0 flex-1">
-                <div class="w-24 h-24 rounded-full bg-white bg-opacity-20 backdrop-blur-sm flex items-center justify-center text-4xl font-bold border-4 border-white border-opacity-30">
-                    {{ strtoupper(substr($user->name, 0, 2)) }}
+                <div class="w-24 h-24 rounded-full border-4 border-white border-opacity-30 overflow-hidden">
+                    <img src="{{ $user->profile_image_url }}" alt="{{ $user->name }}'s profile picture" 
+                         class="w-full h-full object-cover">
                 </div>
                 <div>
                     <h1 class="text-3xl font-bold mb-2">{{ $user->name }}</h1>

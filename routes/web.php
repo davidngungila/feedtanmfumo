@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\RoleDashboardController;
 use App\Http\Controllers\Admin\SavingsAccountController;
+use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\ShareController;
 use App\Http\Controllers\Admin\SocialWelfareController;
@@ -322,6 +323,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('welfare', SocialWelfareController::class);
 
     // Users - Place specific routes before resource route
+    // Store route must be first to avoid conflicts
+    Route::post('users', [UserController::class, 'store'])->name('users.store');
+    
+    // Test route to verify routing works
+    Route::post('users/test', function() {
+        return response()->json(['message' => 'POST route works', 'method' => 'POST']);
+    });
+    
     Route::get('users/roles', [UserController::class, 'roles'])->name('users.roles');
     Route::put('users/roles/{role}', [UserController::class, 'updateRolePermissions'])->name('users.roles.update');
     Route::post('users/bulk-password-reset', [UserController::class, 'bulkPasswordReset'])->name('users.bulk-password-reset');
@@ -337,6 +346,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('users/preview-excel', [UserController::class, 'previewExcel'])->name('users.preview-excel');
     Route::get('users/download-sample', [UserController::class, 'downloadSample'])->name('users.download-sample');
     Route::get('users/history', [UserController::class, 'history'])->name('users.history');
+    
+    // Multi-step registration
+    Route::post('users/save-step', [UserController::class, 'saveStep'])->name('users.save-step');
+    Route::get('users/load-registration', [UserController::class, 'loadRegistration'])->name('users.load-registration');
+
+    // Multi-step loan application
+    Route::post('loans/save-step', [LoanController::class, 'saveStep'])->name('loans.save-step');
+    Route::get('loans/load-registration', [LoanController::class, 'loadRegistration'])->name('loans.load-registration');
 
     // Officials & Staff
     Route::get('users/officials/create', [UserController::class, 'createOfficial'])->name('users.officials.create');
@@ -356,7 +373,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('users/login-history', [UserController::class, 'loginHistory'])->name('users.login-history');
     Route::get('users/activity-logs', [UserController::class, 'activityLogs'])->name('users.activity-logs');
 
-    Route::resource('users', UserController::class);
+    // Explicit routes for users to avoid resource route conflicts
+    Route::get('users', [UserController::class, 'index'])->name('users.index');
+    Route::get('users/create', [UserController::class, 'create'])->name('users.create');
+    Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
+    Route::get('users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::patch('users/{user}', [UserController::class, 'update']);
+    Route::delete('users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
     // Issues - Place specific routes before resource route
     Route::get('issues/tracking', [IssueController::class, 'tracking'])->name('issues.tracking');
@@ -426,6 +450,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('settings/communication', [SettingsController::class, 'updateCommunication'])->name('settings.communication.update');
     Route::post('settings/communication/test-email', [SettingsController::class, 'sendTestEmail'])->name('settings.communication.test-email');
     Route::post('settings/communication/test-sms', [SettingsController::class, 'sendTestSms'])->name('settings.communication.test-sms');
+
+    // Location Management
+    Route::get('locations', [LocationController::class, 'index'])->name('locations.index');
+    Route::get('locations/create', [LocationController::class, 'create'])->name('locations.create');
+    Route::post('locations', [LocationController::class, 'store'])->name('locations.store');
+    Route::get('locations/{id}/edit', [LocationController::class, 'edit'])->name('locations.edit');
+    Route::put('locations/{id}', [LocationController::class, 'update'])->name('locations.update');
+    Route::delete('locations/{id}', [LocationController::class, 'destroy'])->name('locations.destroy');
+    Route::get('locations/search', [LocationController::class, 'search'])->name('locations.search');
+    Route::get('locations/export', [LocationController::class, 'export'])->name('locations.export');
 
     // SMS Sending
     Route::get('sms/send', [\App\Http\Controllers\Admin\SmsSendController::class, 'index'])->name('sms.send');

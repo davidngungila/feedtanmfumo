@@ -12,11 +12,29 @@
     <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
         <h2 class="text-xl sm:text-2xl font-bold text-[#015425] mb-6">Edit Profile</h2>
         
-        <form action="{{ route('member.profile.update') }}" method="POST">
+        <form action="{{ route('member.profile.update') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
             
             <div class="space-y-6">
+                <div>
+                    <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-4">Profile Image</h3>
+                    <div class="flex items-center space-x-6">
+                        <div class="shrink-0">
+                            <img class="h-20 w-20 object-cover rounded-full border-4 border-gray-200" 
+                                 src="{{ $user->profile_image_url }}" 
+                                 alt="{{ $user->name }}'s profile picture">
+                        </div>
+                        <div class="flex-1">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Upload New Profile Image</label>
+                            <input type="file" name="profile_image" accept="image/*" 
+                                   class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#015425] file:text-white hover:file:bg-[#013019] cursor-pointer">
+                            <p class="mt-1 text-xs text-gray-500">Allowed formats: JPEG, PNG, JPG, GIF. Maximum size: 2MB</p>
+                            @error('profile_image')<p class="mt-1 text-xs sm:text-sm text-red-600">{{ $message }}</p>@enderror
+                        </div>
+                    </div>
+                </div>
+
                 <div>
                     <h3 class="text-base sm:text-lg font-semibold text-gray-800 mb-4">Personal Information</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">

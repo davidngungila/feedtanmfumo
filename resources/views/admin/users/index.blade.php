@@ -92,7 +92,7 @@
                 <svg class="w-8 h-8 text-[#015425] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                <span class="text-sm font-medium text-gray-700 text-center">Memberships</span>
+                <span class="text-sm font-medium text-gray-700 text-center">Memberships Request</span>
             </a>
             <a href="{{ route('admin.users.directory') }}" class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
                 <svg class="w-8 h-8 text-[#015425] mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,8 +173,9 @@
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
-                                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-[#015425] flex items-center justify-center text-white font-bold">
-                                    {{ strtoupper(substr($user->name, 0, 1)) }}
+                                <div class="flex-shrink-0 h-10 w-10 rounded-full overflow-hidden border-2 border-gray-200">
+                                    <img src="{{ $user->profile_image_url }}" alt="{{ $user->name }}'s profile picture" 
+                                         class="w-full h-full object-cover">
                                 </div>
                                 <div class="ml-4">
                                     <div class="text-sm font-medium text-gray-900">{{ $user->name }}</div>

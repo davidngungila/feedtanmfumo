@@ -1,25 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>Savings Report - FeedTan CMG</title>
+    <meta charset="UTF-8">
+    <title>{{ $documentTitle ?? 'Savings Report' }}</title>
     <style>
         @page {
             margin: 10mm 12mm;
             size: A4;
         }
-        body {
-            font-family: Arial, sans-serif;
-            font-size: 9pt;
+        body { 
+            font-family: Arial, sans-serif; 
+            font-size: 10px; 
             line-height: 1.4;
+            margin: 0;
             color: #333;
         }
-        .header {
+        .header { 
+            text-align: center; 
+            margin-bottom: 20px; 
             border-bottom: 3px solid #015425;
             padding-bottom: 15px;
-            margin-bottom: 15px;
-            text-align: center;
-            width: 100%;
+            position: relative;
+        }
+        .header img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        .header h1 { 
+            color: #015425; 
+            margin: 10px 0 5px 0; 
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .header h2 { 
+            color: #666; 
+            margin: 0 0 10px 0; 
+            font-size: 12px;
+            font-weight: normal;
         }
         .logo-box {
             display: inline-block;
@@ -145,11 +163,7 @@
 <body>
     <div class="header">
         <div style="text-align: center; margin-bottom: 15px;">
-            @if(isset($headerBase64) && $headerBase64)
-            <img src="{{ $headerBase64 }}" alt="FeedTan Header" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0 auto;">
-            @else
-            <div class="logo-box" style="margin: 0 auto 10px auto;">FD</div>
-            @endif
+            <img src="{{ asset('header-mfumo.png') }}" alt="FeedTan CMG Header" style="width: 100%; max-width: 100%; height: auto; display: block; margin: 0 auto;">
         </div>
         @if(isset($documentTitle))
         <div class="title">{{ $documentTitle }}</div>

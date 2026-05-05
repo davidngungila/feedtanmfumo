@@ -110,7 +110,7 @@
                                     Verify
                                 </button>
                             </div>
-                            <p class="text-xs text-gray-500 mt-1">Enter the membership code (e.g., SCH-000002) from admin memberships page</p>
+                            <p class="text-xs text-gray-500 mt-1">Enter the membership code (e.g., SCH-000002) from admin memberships request page</p>
                         </div>
 
                         <!-- Member Verification Result -->
@@ -481,7 +481,7 @@
                                 <i class="fas fa-exclamation-circle text-red-500 mr-3"></i>
                                 <div>
                                     <p class="font-semibold text-red-800">Verification Failed</p>
-                                    <p class="text-red-600 text-sm">${result.message || 'Member code not found. Please check the member code from admin memberships.'}</p>
+                                    <p class="text-red-600 text-sm">${result.message || 'Member code not found. Please check the member code from admin memberships request.'}</p>
                                 </div>
                             </div>
                         </div>

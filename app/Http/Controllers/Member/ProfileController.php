@@ -48,7 +48,26 @@ class ProfileController extends Controller
             'phone' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string', 'max:500'],
             'bio' => ['nullable', 'string', 'max:1000'],
+            'profile_image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'], // 2MB max
         ]);
+
+        // Handle profile image upload
+        if ($request->hasFile('profile_image')) {
+            $image = $request->file('profile_image');
+            
+            // Delete old profile image if exists
+            if ($user->profile_image) {
+                $oldImagePath = storage_path('app/public/' . $user->profile_image);
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+            }
+            
+            // Store new image
+            $imageName = time() . '_' . $user->id . '.' . $image->getClientOriginalExtension();
+            $imagePath = $image->storeAs('profile_images', $imageName, 'public');
+            $validated['profile_image'] = $imagePath;
+        }
 
         $user->update($validated);
 

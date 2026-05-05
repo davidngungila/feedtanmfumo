@@ -54,8 +54,11 @@
                     </button>
                 </div>
             </div>
+            <!-- Mobile Menu Backdrop -->
+            <div id="mobile-menu-backdrop" class="fixed inset-0 backdrop-blur-sm bg-white/30 z-40 md:hidden hidden"></div>
+            
             <!-- Mobile menu -->
-            <div id="mobile-menu" class="hidden md:hidden pb-4 border-t border-gray-200">
+            <div id="mobile-menu" class="hidden md:hidden pb-4 border-t border-gray-200 relative z-50">
                 <div class="px-2 pt-2 space-y-1">
                     <a href="{{ url('/') }}" class="block px-3 py-2 text-[#015425] hover:bg-green-50 rounded-md transition font-medium">
                         Home
@@ -454,7 +457,19 @@
     // Mobile menu toggle
     document.getElementById('mobile-menu-button')?.addEventListener('click', function() {
         const menu = document.getElementById('mobile-menu');
+        const backdrop = document.getElementById('mobile-menu-backdrop');
+        
         menu.classList.toggle('hidden');
+        backdrop.classList.toggle('hidden');
+    });
+
+    // Close mobile menu when clicking backdrop
+    document.getElementById('mobile-menu-backdrop')?.addEventListener('click', function() {
+        const menu = document.getElementById('mobile-menu');
+        const backdrop = document.getElementById('mobile-menu-backdrop');
+        
+        menu.classList.add('hidden');
+        backdrop.classList.add('hidden');
     });
 
     // Monthly Trends Chart

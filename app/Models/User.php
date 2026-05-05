@@ -28,6 +28,7 @@ class User extends Authenticatable
         'phone',
         'address',
         'bio',
+        'profile_image',
         'preferences',
         'member_number',
         'status',
@@ -340,6 +341,25 @@ class User extends Authenticatable
         }
 
         return $this->membershipType->hasAccessTo($service);
+    }
+
+    /**
+     * Get the profile image URL
+     */
+    public function getProfileImageUrlAttribute(): string
+    {
+        if ($this->profile_image) {
+            return asset('storage/' . $this->profile_image);
+        }
+        
+        // Return default avatar based on name
+        $name = $this->name ?? 'User';
+        $initials = collect(explode(' ', $name))
+            ->map(fn($word) => strtoupper(substr($word, 0, 1)))
+            ->take(2)
+            ->join('');
+            
+        return "https://ui-avatars.com/api/?name={$initials}&color=7F9CF5&background=EBF4FF&size=200&bold=true";
     }
 
     /**

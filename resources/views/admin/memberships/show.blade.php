@@ -1,6 +1,6 @@
 ﻿@extends('layouts.admin')
 
-@section('page-title', 'Membership Application Details')
+@section('page-title', 'Membership Request Application Details')
 
 @section('content')
 <div class="space-y-6">
@@ -8,7 +8,7 @@
     <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-6 text-white">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
-                <h1 class="text-2xl sm:text-3xl font-bold mb-2">Membership Application Details</h1>
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2">Membership Request Application Details</h1>
                 <p class="text-white text-opacity-90 text-sm sm:text-base">{{ $user->name }}</p>
             </div>
             <div class="mt-4 md:mt-0 flex flex-wrap gap-3">
@@ -19,7 +19,7 @@
                     Export PDF
                 </a>
                 <a href="{{ route('admin.memberships.index') }}" class="inline-flex items-center px-6 py-3 bg-white text-[#015425] rounded-md hover:bg-gray-100 transition font-medium shadow-md">
-                    Back to Applications
+                    Back to Request Applications
                 </a>
             </div>
         </div>
@@ -98,7 +98,7 @@
 
     <!-- Membership Information -->
     <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-bold text-[#015425] mb-6">Membership Information</h2>
+        <h2 class="text-xl font-bold text-[#015425] mb-6">Membership Request Information</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Membership Type</label>
@@ -386,12 +386,12 @@
 
     @if($user->membership_status === 'pending')
     <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-bold text-[#015425] mb-6">Membership Actions</h2>
+        <h2 class="text-xl font-bold text-[#015425] mb-6">Membership Request Actions</h2>
         
         <!-- Approve Form -->
         <form method="POST" action="{{ route('admin.memberships.approve', $user) }}" class="mb-6 border-b border-gray-200 pb-6">
             @csrf
-            <h3 class="text-lg font-semibold text-green-700 mb-4">Approve Membership</h3>
+            <h3 class="text-lg font-semibold text-green-700 mb-4">Approve Membership Request</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Membership Code</label>
@@ -419,7 +419,7 @@
                 <textarea name="notes" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]">{{ $user->notes }}</textarea>
             </div>
             <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">
-                Approve Membership
+                Approve Membership Request
             </button>
         </form>
 
@@ -472,7 +472,7 @@
         <!-- Reject Form -->
         <form method="POST" action="{{ route('admin.memberships.reject', $user) }}">
             @csrf
-            <h3 class="text-lg font-semibold text-red-700 mb-4">Reject Membership</h3>
+            <h3 class="text-lg font-semibold text-red-700 mb-4">Reject Membership Request</h3>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Rejection Reason *</label>
                 <textarea name="rejection_reason" rows="3" required 
@@ -494,7 +494,7 @@
                           class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-[#015425] focus:border-[#015425]"></textarea>
             </div>
             <button type="submit" class="px-6 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 transition">
-                Suspend Membership
+                Suspend Membership Request
             </button>
         </form>
     </div>
@@ -504,7 +504,7 @@
         <form method="POST" action="{{ route('admin.memberships.reactivate', $user) }}">
             @csrf
             <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition">
-                Reactivate Membership
+                Reactivate Membership Request
             </button>
         </form>
     </div>

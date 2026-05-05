@@ -8,8 +8,9 @@
     <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-6 text-white">
         <div class="flex flex-col md:flex-row md:items-center">
             <div class="flex items-center flex-1">
-                <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4">
-                    <span class="text-2xl font-bold">{{ substr($user->name, 0, 1) }}</span>
+                <div class="w-16 h-16 rounded-full overflow-hidden border-4 border-white border-opacity-30 mr-4">
+                    <img src="{{ $user->profile_image_url }}" alt="{{ $user->name }}'s profile picture" 
+                         class="w-full h-full object-cover">
                 </div>
                 <div>
                     <h1 class="text-2xl sm:text-3xl font-bold mb-1">{{ $user->name }}</h1>
@@ -93,14 +94,14 @@
     @if($user->membership_type_id)
     <!-- Membership Management Actions -->
     <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-xl font-bold text-[#015425] mb-6">Membership Actions</h2>
+        <h2 class="text-xl font-bold text-[#015425] mb-6">Membership Request Actions</h2>
         
         @if($user->membership_status === 'pending')
             <div class="space-y-8">
                 <!-- Approve Form -->
                 <form method="POST" action="{{ route('admin.memberships.approve', $user) }}" class="p-4 border border-green-200 rounded-lg bg-green-50">
                     @csrf
-                    <h3 class="text-lg font-semibold text-green-700 mb-4">Approve Membership</h3>
+                    <h3 class="text-lg font-semibold text-green-700 mb-4">Approve Membership Request</h3>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Membership Code</label>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Permission;
+use App\Models\UserRegistration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
@@ -72,7 +73,65 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        // Test response to verify route is working
+        if ($request->has('test')) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Store route is working!',
+                'method' => $request->method(),
+                'data' => $request->all()
+            ]);
+        }
+
+        try {
+            \Log::info('User store method called', [
+                'request_data' => $request->all(),
+                'registration_token' => $request->input('registration_token')
+            ]);
+
+            // Check if this is a multi-step form submission
+            $registrationToken = $request->input('registration_token');
+            $allData = [];
+
+            if ($registrationToken) {
+                \Log::info('Processing registration token', ['token' => $registrationToken]);
+                $registration = UserRegistration::where('registration_token', $registrationToken)->first();
+                
+                if ($registration) {
+                    \Log::info('Registration found', [
+                        'id' => $registration->id,
+                        'expired' => $registration->isExpired(),
+                        'step_data_count' => count($registration->step_data ?? [])
+                    ]);
+                    
+                    if (!$registration->isExpired()) {
+                        // Merge data from all steps
+                        $stepData = $registration->step_data ?? [];
+                        foreach ($stepData as $stepKey => $data) {
+                            $allData = array_merge($allData, $data);
+                        }
+                        
+                        \Log::info('Merged step data', ['merged_keys' => array_keys($allData)]);
+                        
+                        // Mark registration as completed
+                        $registration->completed = true;
+                        $registration->save();
+                    }
+                } else {
+                    \Log::warning('Registration not found for token', ['token' => $registrationToken]);
+                }
+            } else {
+                \Log::info('No registration token provided');
+            }
+
+            // Merge current request data with saved data
+            $requestData = $request->all();
+            $mergedData = array_merge($allData, $requestData);
+            
+            \Log::info('Final merged data', ['merged_keys' => array_keys($mergedData)]);
+
+            // Use merged data for validation
+            $validated = validator($mergedData, [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
@@ -117,12 +176,12 @@ class UserController extends Controller
             'application_letter' => 'nullable|file|mimes:pdf,doc,docx|max:2048',
             'payment_slips' => 'nullable|array',
             'payment_slips.*' => 'file|mimes:pdf,jpg,jpeg,png|max:2048',
-        ]);
+        ])->validate();
 
         // Generate member number if not provided
-        $memberNumber = $request->member_number;
-        if (!$memberNumber && $request->membership_type_id) {
-            $membershipType = \App\Models\MembershipType::find($request->membership_type_id);
+        $memberNumber = $validated['member_number'] ?? null;
+        if (!$memberNumber && $validated['membership_type_id'] ?? null) {
+            $membershipType = \App\Models\MembershipType::find($validated['membership_type_id']);
             if ($membershipType) {
                 $prefix = strtoupper(substr($membershipType->slug, 0, 3));
                 $memberNumber = $prefix . '-' . strtoupper(Str::random(8));
@@ -133,9 +192,9 @@ class UserController extends Controller
         }
 
         // Generate membership code if membership type is selected
-        $membershipCode = $request->membership_code;
-        if (!$membershipCode && $request->membership_type_id) {
-            $membershipType = \App\Models\MembershipType::find($request->membership_type_id);
+        $membershipCode = $validated['membership_code'] ?? null;
+        if (!$membershipCode && $validated['membership_type_id'] ?? null) {
+            $membershipType = \App\Models\MembershipType::find($validated['membership_type_id']);
             if ($membershipType) {
                 $prefix = strtoupper(substr($membershipType->slug, 0, 3));
                 $membershipCode = $prefix . '-' . str_pad(User::whereNotNull('membership_type_id')->count() + 1, 6, '0', STR_PAD_LEFT);
@@ -209,7 +268,42 @@ class UserController extends Controller
             $user->update(['capital_outstanding' => $userData['capital_contribution']]);
         }
 
+        // Check if this is an AJAX request
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Member registered successfully!',
+                'user_id' => $user->id
+            ]);
+        }
+        
         return redirect()->route('admin.users.show', $user)->with('success', 'Member registered successfully!');
+        
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Return validation errors as JSON for AJAX requests
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            
+            // For regular requests, let Laravel handle the validation exception
+            throw $e;
+            
+        } catch (\Exception $e) {
+            // Return general error as JSON for AJAX requests
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error creating user: ' . $e->getMessage()
+                ], 500);
+            }
+            
+            // For regular requests, redirect back with error
+            return redirect()->back()->with('error', 'Error creating user: ' . $e->getMessage());
+        }
     }
 
     public function show(User $user)
@@ -1231,5 +1325,109 @@ class UserController extends Controller
 
         return redirect()->route('admin.users.show', $user)
             ->with('success', 'Edit request cleared.');
+    }
+
+    /**
+     * Save step data for multi-step registration
+     */
+    public function saveStep(Request $request)
+    {
+        try {
+            $step = $request->input('step');
+            $data = $request->input('data');
+            $token = $request->input('token');
+
+            // Find or create registration
+            $registration = null;
+            if ($token) {
+                $registration = UserRegistration::where('registration_token', $token)->first();
+            }
+
+            if (!$registration) {
+                $registration = UserRegistration::create([
+                    'current_step' => $step,
+                    'email' => $data['email'] ?? null,
+                    'phone' => $data['phone'] ?? null,
+                    'name' => $data['name'] ?? null,
+                ]);
+                $token = $registration->registration_token;
+            } else {
+                // Check if registration is expired
+                if ($registration->isExpired()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Registration session expired. Please start again.'
+                    ]);
+                }
+            }
+
+            // Save step data
+            $registration->setStepData($step, $data);
+            
+            // Update current step
+            if ($step > $registration->current_step) {
+                $registration->current_step = $step;
+                $registration->save();
+            }
+
+            return response()->json([
+                'success' => true,
+                'token' => $registration->registration_token,
+                'message' => 'Step saved successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error saving step: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error saving step data'
+            ], 500);
+        }
+    }
+
+    /**
+     * Load registration data for multi-step form
+     */
+    public function loadRegistration(Request $request)
+    {
+        try {
+            $token = $request->query('token');
+            
+            if (!$token) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No registration token provided'
+                ]);
+            }
+
+            $registration = UserRegistration::where('registration_token', $token)->first();
+
+            if (!$registration) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Registration not found'
+                ]);
+            }
+
+            if ($registration->isExpired()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Registration session expired. Please start again.'
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $registration->step_data,
+                'current_step' => $registration->current_step
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error loading registration: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error loading registration data'
+            ], 500);
+        }
     }
 }

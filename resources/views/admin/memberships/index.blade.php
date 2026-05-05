@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('page-title', 'Membership Applications')
+@section('page-title', 'Membership Request Applications')
 
 @section('content')
 <div class="space-y-6">
@@ -8,8 +8,8 @@
     <div class="bg-gradient-to-r from-[#015425] to-[#027a3a] rounded-lg shadow-lg p-6 text-white">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
-                <h1 class="text-2xl sm:text-3xl font-bold mb-2">Membership Applications</h1>
-                <p class="text-white text-opacity-90 text-sm sm:text-base">Review and manage membership applications</p>
+                <h1 class="text-2xl sm:text-3xl font-bold mb-2">Membership Request Applications</h1>
+                <p class="text-white text-opacity-90 text-sm sm:text-base">Review and manage membership request applications</p>
             </div>
         </div>
     </div>

@@ -12,11 +12,8 @@
         <div class="relative z-10 flex flex-col md:flex-row items-center gap-10">
             <div class="relative">
                 <div class="w-32 h-32 md:w-40 md:h-40 rounded-[2.5rem] bg-white/10 backdrop-blur-xl border-4 border-white/20 flex items-center justify-center text-4xl md:text-5xl font-black shadow-2xl overflow-hidden group">
-                    @if($user->avatar)
-                        <img src="{{ asset('storage/' . $user->avatar) }}" class="w-full h-full object-cover">
-                    @else
-                        {{ strtoupper(substr($user->name, 0, 2)) }}
-                    @endif
+                    <img src="{{ $user->profile_image_url }}" alt="{{ $user->name }}'s profile picture" 
+                         class="w-full h-full object-cover">
                     <div class="absolute inset-0 bg-[#015425]/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4"></path></svg>
                     </div>

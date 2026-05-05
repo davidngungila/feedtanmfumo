@@ -202,6 +202,26 @@
             </div>
         </a>
 
+        <!-- Location Management -->
+        <a href="{{ route('admin.locations.index') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition cursor-pointer group">
+            <div class="flex items-center mb-4">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center group-hover:bg-green-200 transition">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 ml-4">Location Management</h3>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">Manage Tanzania regions, districts, wards, and locations</p>
+            <div class="flex items-center text-[#015425] font-medium group-hover:underline">
+                <span>Manage</span>
+                <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </div>
+        </a>
+
         <!-- Notification Preferences -->
         <a href="{{ route('admin.settings.notification-preferences') }}" class="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition cursor-pointer group">
             <div class="flex items-center mb-4">
