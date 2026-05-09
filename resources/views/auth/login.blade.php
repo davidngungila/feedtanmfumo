@@ -16,9 +16,7 @@
 
     /* ===== Container & Layout ===== */
     .login-container {
-        background: linear-gradient(135deg, #013019 0%, #015425 25%, #027a3a 50%, #015425 75%, #013019 100%);
-        background-size: 400% 400%;
-        animation: gradientShift 15s ease infinite;
+        background: #ffffff;
         position: relative;
         overflow: hidden;
         min-height: 100vh;
@@ -26,12 +24,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-    }
-
-    @keyframes gradientShift {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
     }
 
     .login-wrapper {
@@ -65,8 +57,8 @@
         width: 100%;
         padding: 0.875rem 2.75rem 0.875rem 0.75rem;
         font-size: 14px;
-        background: white;
-        border: 2px solid var(--gray-200);
+        background: #f8f9fa;
+        border: 2px solid #e5e7eb;
         border-radius: 0.75rem;
         transition: all 0.3s ease;
     }
@@ -75,6 +67,7 @@
         outline: none;
         border-color: var(--primary-color);
         box-shadow: 0 0 0 3px rgba(1, 84, 37, 0.1);
+        background: #ffffff;
     }
 
     .input-label {
@@ -84,7 +77,7 @@
         transform: translateY(-50%);
         pointer-events: none;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        color: var(--gray-600);
+        color: #6b7280;
         font-size: 13px;
         z-index: 1;
         display: flex;
@@ -97,7 +90,7 @@
     .input-group input.has-value + .input-label {
         transform: translateY(-24px) scale(0.85);
         color: var(--primary-color);
-        background: white;
+        background: #ffffff;
         padding: 0 4px;
         left: 8px;
         font-weight: 600;

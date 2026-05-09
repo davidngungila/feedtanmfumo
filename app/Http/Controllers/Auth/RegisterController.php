@@ -32,33 +32,29 @@ class RegisterController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'phone' => 'required|string|max:20',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'terms' => 'required|accepted',
         ]);
 
-        // Store plain password before hashing for notifications
-        $plainPassword = $request->password;
+        // Extract name from email before @ symbol if no name provided
+        $emailParts = explode('@', $request->email);
+        $name = ucfirst($emailParts[0]);
 
         $user = User::create([
-            'name' => $request->name,
+            'name' => $name,
             'email' => $request->email,
-            'phone' => $request->phone,
             'password' => Hash::make($request->password),
             'role' => 'user',
             'membership_status' => 'pending',
+            'email_verified_at' => null, // Ensure email is not verified initially
         ]);
 
-        // Send welcome email with credentials
-        $this->emailService->sendWelcomeEmail($user, $plainPassword);
+        // Send email verification
+        $user->sendEmailVerificationNotification();
 
-        // Send welcome SMS with credentials
-        $this->smsService->sendWelcomeSms($user, $plainPassword);
-
-        Auth::login($user);
-
-        // Redirect to membership application form
-        return redirect()->route('member.membership.application');
+        // Redirect to email verification notice
+        return redirect()->route('verification.notice')
+            ->with('success', 'Registration successful! Please check your email to verify your account.');
     }
 }

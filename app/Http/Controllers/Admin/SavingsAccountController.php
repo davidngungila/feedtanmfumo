@@ -7,6 +7,7 @@ use App\Models\SavingsAccount;
 use App\Models\User;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
@@ -172,18 +173,121 @@ class SavingsAccountController extends Controller
     {
         $accounts = SavingsAccount::with('user')->where('status', 'active')->get();
         
-        // Note: Transfer transactions would need a different approach as there's no 'transfer' type in the enum
-        // Transfers are typically tracked as two transactions (withdrawal from source + deposit to destination)
-        // For now, returning empty result set - you may want to add a transfer type or track differently
-        $transfers = Transaction::whereRaw('1 = 0')->paginate(20);
+        // Get transfer transactions (withdrawals with bank_transfer payment method)
+        $transfers = Transaction::with(['user', 'related'])
+            ->where('payment_method', 'bank_transfer')
+            ->where('transaction_type', 'savings_withdrawal')
+            ->where('related_type', 'App\Models\SavingsAccount')
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+        
+        // Calculate stats
+        $today = now()->startOfDay();
+        $thisMonth = now()->startOfMonth();
+        
+        $transfersToday = Transaction::where('payment_method', 'bank_transfer')
+            ->where('transaction_type', 'savings_withdrawal')
+            ->where('related_type', 'App\Models\SavingsAccount')
+            ->where('created_at', '>=', $today)
+            ->count();
+            
+        $transfersMonth = Transaction::where('payment_method', 'bank_transfer')
+            ->where('transaction_type', 'savings_withdrawal')
+            ->where('related_type', 'App\Models\SavingsAccount')
+            ->where('created_at', '>=', $thisMonth)
+            ->count();
+            
+        $totalAmountTransferred = Transaction::where('payment_method', 'bank_transfer')
+            ->where('transaction_type', 'savings_withdrawal')
+            ->where('related_type', 'App\Models\SavingsAccount')
+            ->where('created_at', '>=', $thisMonth)
+            ->sum('amount');
         
         $stats = [
-            'total_transfers_today' => 0,
-            'total_transfers_month' => 0,
-            'total_amount_transferred' => 0,
+            'total_transfers_today' => $transfersToday,
+            'total_transfers_month' => $transfersMonth,
+            'total_amount_transferred' => $totalAmountTransferred,
         ];
         
         return view('admin.savings.transfers', compact('accounts', 'transfers', 'stats'));
+    }
+
+    public function processTransfer(Request $request)
+    {
+        $request->validate([
+            'from_account_id' => 'required|exists:savings_accounts,id',
+            'to_account_id' => 'required|exists:savings_accounts,id|different:from_account_id',
+            'amount' => 'required|numeric|min:100',
+            'transfer_date' => 'required|date',
+            'description' => 'nullable|string|max:255',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $fromAccount = SavingsAccount::findOrFail($request->from_account_id);
+            $toAccount = SavingsAccount::findOrFail($request->to_account_id);
+            $amount = $request->amount;
+
+            // Check sufficient balance
+            if ($fromAccount->balance < $amount) {
+                return redirect()->back()
+                    ->with('error', 'Insufficient balance in source account.')
+                    ->withInput();
+            }
+
+            // Generate transaction numbers
+            $withdrawalNumber = 'TRN-W-' . date('YmdHis') . '-' . rand(1000, 9999);
+            $depositNumber = 'TRN-D-' . date('YmdHis') . '-' . rand(1000, 9999);
+
+            // Create withdrawal transaction
+            $withdrawal = Transaction::create([
+                'user_id' => $fromAccount->user_id,
+                'transaction_number' => $withdrawalNumber,
+                'transaction_type' => 'savings_withdrawal',
+                'related_type' => 'App\Models\SavingsAccount',
+                'related_id' => $fromAccount->id,
+                'amount' => $amount,
+                'payment_method' => 'bank_transfer',
+                'reference_number' => $depositNumber,
+                'transaction_date' => $request->transfer_date,
+                'description' => 'Transfer to account ' . $toAccount->account_number . ($request->description ? ' - ' . $request->description : ''),
+                'status' => 'completed',
+                'processed_by' => auth()->id(),
+            ]);
+
+            // Create deposit transaction
+            $deposit = Transaction::create([
+                'user_id' => $toAccount->user_id,
+                'transaction_number' => $depositNumber,
+                'transaction_type' => 'savings_deposit',
+                'related_type' => 'App\Models\SavingsAccount',
+                'related_id' => $toAccount->id,
+                'amount' => $amount,
+                'payment_method' => 'bank_transfer',
+                'reference_number' => $withdrawalNumber,
+                'transaction_date' => $request->transfer_date,
+                'description' => 'Transfer from account ' . $fromAccount->account_number . ($request->description ? ' - ' . $request->description : ''),
+                'status' => 'completed',
+                'processed_by' => auth()->id(),
+            ]);
+
+            // Update account balances
+            $fromAccount->decrement('balance', $amount);
+            $toAccount->increment('balance', $amount);
+
+            DB::commit();
+
+            return redirect()->route('admin.savings.transfers')
+                ->with('success', 'Transfer of ' . number_format($amount, 0) . ' TZS processed successfully.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return redirect()->back()
+                ->with('error', 'Transfer failed: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     public function interestPosting(Request $request)

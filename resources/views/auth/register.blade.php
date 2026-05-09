@@ -330,31 +330,8 @@
             <form id="registerForm" action="{{ route('register') }}" method="POST" class="space-y-3">
                 @csrf
                 
-                <!-- Name Field -->
-                <div class="input-group slide-up" style="animation-delay: 0.1s">
-                    <input 
-                        id="name" 
-                        name="name" 
-                        type="text" 
-                        autocomplete="name" 
-                        required 
-                        placeholder=" "
-                        value="{{ old('name') }}"
-                        class="input-field @error('name') border-red-400 @enderror"
-                    >
-                    <label for="name" class="input-label">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
-                        Full Name
-                    </label>
-                    @error('name')
-                        <p class="error-message">{{ $message }}</p>
-                    @enderror
-                </div>
-
                 <!-- Email Field -->
-                <div class="input-group slide-up" style="animation-delay: 0.2s">
+                <div class="input-group slide-up" style="animation-delay: 0.1s">
                     <input 
                         id="email" 
                         name="email" 
@@ -376,31 +353,8 @@
                     @enderror
                 </div>
 
-                <!-- Phone Field -->
-                <div class="input-group slide-up" style="animation-delay: 0.25s">
-                    <input 
-                        id="phone" 
-                        name="phone" 
-                        type="tel" 
-                        autocomplete="tel" 
-                        required 
-                        placeholder=" "
-                        value="{{ old('phone') }}"
-                        class="input-field @error('phone') border-red-400 @enderror"
-                    >
-                    <label for="phone" class="input-label">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                        </svg>
-                        Phone Number
-                    </label>
-                    @error('phone')
-                        <p class="error-message">{{ $message }}</p>
-                    @enderror
-                </div>
-
                 <!-- Password Field -->
-                <div class="input-group slide-up" style="animation-delay: 0.3s">
+                <div class="input-group slide-up" style="animation-delay: 0.2s">
                     <input 
                         id="password" 
                         name="password" 
@@ -463,7 +417,7 @@
                 </div>
 
                 <!-- Confirm Password Field -->
-                <div class="input-group slide-up" style="animation-delay: 0.35s">
+                <div class="input-group slide-up" style="animation-delay: 0.25s">
                     <input 
                         id="password_confirmation" 
                         name="password_confirmation" 
@@ -497,7 +451,7 @@
                 </div>
 
                 <!-- Terms & Conditions -->
-                <div class="flex items-start gap-2 text-xs slide-up" style="animation-delay: 0.4s">
+                <div class="flex items-start gap-2 text-xs slide-up" style="animation-delay: 0.3s">
                     <input 
                         id="terms" 
                         name="terms" 
@@ -514,7 +468,7 @@
                 </div>
 
                 <!-- Submit Button -->
-                <div class="pt-2 slide-up" style="animation-delay: 0.5s">
+                <div class="pt-2 slide-up" style="animation-delay: 0.4s">
                     <button 
                         type="submit" 
                         id="submitBtn"
@@ -526,7 +480,7 @@
                 </div>
 
                 <!-- Login Link -->
-                <div class="text-center pt-2 border-t border-gray-200 slide-up" style="animation-delay: 0.6s">
+                <div class="text-center pt-2 border-t border-gray-200 slide-up" style="animation-delay: 0.5s">
                     <p class="text-xs text-gray-600 mb-1">Already have an account?</p>
                     <a href="{{ route('login') }}" class="text-xs font-medium text-[#015425] hover:underline">
                         Sign in →
@@ -545,9 +499,7 @@
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const nameField = document.getElementById('name');
         const emailField = document.getElementById('email');
-        const phoneField = document.getElementById('phone');
         const passwordInput = document.getElementById('password');
         const passwordConfirmation = document.getElementById('password_confirmation');
         const togglePassword = document.getElementById('togglePassword');
@@ -566,7 +518,7 @@
 
         // Initialize label positions
         function initializeLabels() {
-            [nameField, emailField, phoneField, passwordInput, passwordConfirmation].forEach(field => {
+            [emailField, passwordInput, passwordConfirmation].forEach(field => {
                 if (field && field.value && field.value.trim() !== '') {
                     field.classList.add('has-value');
                 }
@@ -675,7 +627,7 @@
         });
 
         // Other input handlers
-        [nameField, emailField, phoneField].forEach(field => {
+        [emailField].forEach(field => {
             if (field) {
                 field.addEventListener('input', function() {
                     if (this.value && this.value.trim() !== '') {
@@ -703,8 +655,8 @@
         });
 
         // Auto-focus
-        if (!nameField.value || nameField.value.trim() === '') {
-            setTimeout(() => nameField.focus(), 100);
+        if (!emailField.value || emailField.value.trim() === '') {
+            setTimeout(() => emailField.focus(), 100);
         }
 
         // Auto-hide notifications

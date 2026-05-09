@@ -88,6 +88,11 @@ Route::post('/otp/resend', [LoginController::class, 'resendOtp'])->name('otp.res
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register']);
 
+// Email Verification Routes
+Route::get('/email/verify', [App\Http\Controllers\Auth\EmailVerificationController::class, 'show'])->name('verification.notice')->middleware('auth');
+Route::get('/email/verify/{id}/{hash}', [App\Http\Controllers\Auth\EmailVerificationController::class, 'verify'])->name('verification.verify');
+Route::post('/email/verification-notification', [App\Http\Controllers\Auth\EmailVerificationController::class, 'resend'])->name('verification.resend')->middleware('auth');
+
 // Password Reset Routes
 Route::get('password/reset', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
 Route::post('password/email', [App\Http\Controllers\Auth\ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
@@ -125,6 +130,8 @@ Route::middleware('auth')->group(function () {
         // Monthly Deposit Statements
         Route::get('statements', [\App\Http\Controllers\Member\MonthlyDepositController::class, 'index'])->name('monthly-deposits.index');
         Route::get('statements/{monthlyDeposit}', [\App\Http\Controllers\Member\MonthlyDepositController::class, 'show'])->name('monthly-deposits.show');
+        Route::get('statements/create', [\App\Http\Controllers\Member\MonthlyDepositController::class, 'create'])->name('monthly-deposits.create');
+        Route::post('statements', [\App\Http\Controllers\Member\MonthlyDepositController::class, 'store'])->name('monthly-deposits.store');
 
         // Issues - available to all members
         Route::resource('issues', MemberIssueController::class)->only(['index', 'show', 'create', 'store']);
@@ -238,6 +245,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('savings/deposits', [SavingsAccountController::class, 'deposits'])->name('savings.deposits');
     Route::get('savings/withdrawals', [SavingsAccountController::class, 'withdrawals'])->name('savings.withdrawals');
     Route::get('savings/transfers', [SavingsAccountController::class, 'transfers'])->name('savings.transfers');
+    Route::post('savings/transfers', [SavingsAccountController::class, 'processTransfer'])->name('savings.transfers.process');
     Route::get('savings/interest-posting', [SavingsAccountController::class, 'interestPosting'])->name('savings.interest-posting');
     Route::get('savings/statements', [SavingsAccountController::class, 'statements'])->name('savings.statements');
     Route::get('savings/close-account', [SavingsAccountController::class, 'closeAccount'])->name('savings.close-account');

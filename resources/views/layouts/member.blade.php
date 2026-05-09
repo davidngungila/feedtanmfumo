@@ -110,10 +110,12 @@
                     @endif
                 </div>
 
+                <a href="{{ $isApproved ? route('member.monthly-deposits.create') : '#' }}" class="flex items-center w-full px-4 py-3 rounded-md hover:bg-[#013019] transition {{ request()->routeIs('member.monthly-deposits.*') ? 'bg-[#013019]' : '' }} {{ !$isApproved ? 'opacity-50 cursor-not-allowed' : '' }}" {{ !$isApproved ? 'title="Membership must be approved to access Deposits"' : '' }}">
+                    <span class="text-lg mr-3">💵</span>
+                    <span>Deposit</span>
+                </a>
 
-
-
-                <a href="{{ $isApproved ? route('member.payment-confirmations.index') : '#' }}" class="flex items-center w-full px-4 py-3 rounded-md hover:bg-[#013019] transition {{ $isActivePaymentConfirmations ? 'bg-[#013019]' : '' }} {{ !$isApproved ? 'opacity-50 cursor-not-allowed' : '' }}" {{ !$isApproved ? 'title="Membership must be approved to access Payment Verification"' : '' }}>
+                <a href="{{ $isApproved ? route('member.payment-confirmations.index') : '#' }}" class="flex items-center w-full px-4 py-3 rounded-md hover:bg-[#013019] transition {{ $isActivePaymentConfirmations ? 'bg-[#013019]' : '' }} {{ !$isApproved ? 'opacity-50 cursor-not-allowed' : '' }}" {{ !$isApproved ? 'title="Membership must be approved to access Payment Verification"' : '' }}">
                     <span class="text-lg mr-3">✅</span>
                     <span>Payment Verification</span>
                 </a>
